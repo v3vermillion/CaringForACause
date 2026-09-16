@@ -1,0 +1,40 @@
+# Keeps packages and GitHub Actions current. Every Dependabot pull request must
+# pass the required CI check before it can merge (see docs/WORKFLOW.md).
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: monthly
+    # Wait before adopting new releases, so a compromised or broken release is
+    # usually caught by others first. Security updates are never delayed.
+    cooldown:
+      default-days: 7
+      semver-major-days: 30
+    groups:
+      # One pull request for all minor and patch updates.
+      npm-minor-and-patch:
+        applies-to: version-updates
+        update-types: [minor, patch]
+      # One pull request for security fixes.
+      npm-security:
+        applies-to: security-updates
+        patterns: ["*"]
+    # Major updates arrive as separate pull requests, since they can break things.
+    open-pull-requests-limit: 5
+    labels: [dependencies]
+    commit-message:
+      prefix: "chore(deps)"
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly
+    cooldown:
+      default-days: 7
+    groups:
+      github-actions:
+        patterns: ["*"]
+    labels: [dependencies]
+    commit-message:
+      prefix: "chore(ci)"
