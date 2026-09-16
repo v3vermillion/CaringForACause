@@ -66,7 +66,8 @@ test.describe("device compatibility", () => {
       for (const el of await page.locator(selector).all()) {
         if (!(await el.isVisible())) continue;
         const box = await el.boundingBox();
-        expect(box!.height, `${selector} is ${box!.height}px tall`).toBeGreaterThanOrEqual(44);
+        // Allow half a pixel: Firefox reports sub-pixel heights such as 43.9998.
+        expect(box!.height, `${selector} is ${box!.height}px tall`).toBeGreaterThanOrEqual(43.5);
       }
     }
   });
