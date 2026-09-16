@@ -22,3 +22,9 @@ npm-debug.log*
 # Cloudflare Wrangler local state
 .wrangler/
 .dev.vars*
+
+# Playwright
+test-results/
+playwright-report/
+lhci-report/
+.lighthouseci/

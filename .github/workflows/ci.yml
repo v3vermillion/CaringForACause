@@ -14,8 +14,9 @@ concurrency:
 
 jobs:
   verify:
+    name: Format, types, build, and browser tests
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v7
@@ -26,3 +27,39 @@ jobs:
       - run: npm run format:check
       - run: npm run check
       - run: npm run build
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test
+      - name: Upload test report on failure
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: playwright-report
+          path: |
+            playwright-report/
+            test-results/
+          retention-days: 7
+
+  lighthouse:
+    name: Lighthouse budgets
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      # Build with indexing on so the SEO audit measures the launch configuration.
+      # This build is only measured, never deployed.
+      - run: npm run build
+        env:
+          PUBLIC_ALLOW_INDEXING: "true"
+      - run: npx --yes @lhci/cli@0.15.1 autorun
+      - name: Upload Lighthouse report
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: lighthouse-report
+          path: lhci-report/
+          retention-days: 14

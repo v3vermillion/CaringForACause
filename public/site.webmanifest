@@ -1,0 +1,12 @@
+{
+  "name": "Caring for a Cause Supportive Services",
+  "short_name": "Caring for a Cause",
+  "start_url": "/",
+  "display": "browser",
+  "background_color": "#faf7fd",
+  "theme_color": "#1b0f2e",
+  "icons": [
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "/apple-touch-icon.png", "sizes": "180x180", "type": "image/png" }
+  ]
+}

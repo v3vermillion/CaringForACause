@@ -62,6 +62,18 @@ Short records of the technical choices behind this site, so anyone taking it ove
 
 ## 10. Quality gates
 
-**Decision:** `npm run verify` (formatting, type checks, build) runs locally and in GitHub Actions on every push and pull request.
+**Decision:** GitHub Actions runs two jobs on every push and pull request. The first checks formatting, types, the build, and 56 Playwright browser tests (including an axe WCAG 2.2 AA scan) on phone and desktop. The second enforces Lighthouse budgets.
 
-**Why:** The site will be handed off. Automated checks keep future edits, including AI-assisted ones, from breaking the build.
+**Why:** The site will be handed off. Automated checks keep future edits, including AI-assisted ones, from quietly breaking layout, accessibility, or speed.
+
+## 11. Inline CSS and preloaded fonts
+
+**Decision:** All CSS is inlined into the page, and the two above-the-fold font files are preloaded.
+
+**Why:** Lighthouse showed the two stylesheet requests delayed first paint by about 0.8 seconds on mobile, and the headline (the largest element on screen) waited on its font. Inlining about 16 KB of CSS is the better trade for a one-page site. Mobile performance went from 97 to 99.
+
+## 12. Structured data and sharing image
+
+**Decision:** The page includes schema.org `NGO` data (legal name, EIN, 501(c)(3) status, founder, service area) and a 1200×630 sharing image.
+
+**Why:** Search engines can show her as a registered nonprofit, and links shared by text or on Facebook show a proper preview instead of a small icon.

@@ -1,5 +1,5 @@
 ---
-import { Image } from "astro:assets";
+import { Picture } from "astro:assets";
 import logo from "../assets/brand/logo-full.png";
 import { hero, org } from "../data/site";
 
@@ -19,12 +19,13 @@ const { doors } = hero;
 <section class="hero" aria-labelledby="hero-title">
   <div class="wrap grid">
     <div class:list={["logo", { plate: logoPlate }]}>
-      <Image
+      <Picture
         src={logo}
+        formats={["avif", "webp"]}
         alt={`${org.legalName} logo`}
-        width={560}
-        widths={[280, 420, 560]}
-        sizes="(min-width: 56rem) 420px, 280px"
+        width={700}
+        widths={[240, 360, 480, 700]}
+        sizes="(min-width: 56rem) 348px, 232px"
         loading="eager"
         fetchpriority="high"
       />

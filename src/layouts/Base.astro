@@ -3,7 +3,9 @@ import "@fontsource-variable/bricolage-grotesque/wght.css";
 import "@fontsource/atkinson-hyperlegible-next/400.css";
 import "@fontsource/atkinson-hyperlegible-next/700.css";
 import "../styles/global.css";
-import { org } from "../data/site";
+import displayFont from "@fontsource-variable/bricolage-grotesque/files/bricolage-grotesque-latin-wght-normal.woff2?url";
+import bodyFont from "@fontsource/atkinson-hyperlegible-next/files/atkinson-hyperlegible-next-latin-400-normal.woff2?url";
+import { contact, org } from "../data/site";
 
 type Props = {
   title?: string;
@@ -18,7 +20,32 @@ const {
 // Search engines are blocked unless PUBLIC_ALLOW_INDEXING is exactly "true".
 const allowIndexing = import.meta.env.PUBLIC_ALLOW_INDEXING === "true";
 const canonical = new URL(Astro.url.pathname, Astro.site);
-const ogImage = new URL("/icon-512.png", Astro.site);
+const ogImage = new URL("/og-image.jpg", Astro.site);
+
+// Structured data so search engines recognize a registered nonprofit.
+const structuredData = {
+  "@context": "https://schema.org",
+  "@type": "NGO",
+  name: org.legalName,
+  alternateName: org.shortName,
+  url: Astro.site?.href,
+  logo: new URL("/icon-512.png", Astro.site).href,
+  description: org.mission,
+  foundingDate: String(org.founded),
+  founder: { "@type": "Person", name: org.founder },
+  taxID: org.ein,
+  nonprofitStatus: "Nonprofit501c3",
+  areaServed: org.serviceArea,
+  address: {
+    "@type": "PostalAddress",
+    addressLocality: "Noblesville",
+    addressRegion: "IN",
+    addressCountry: "US",
+  },
+  telephone: contact.phoneHref.replace("tel:", ""),
+  email: contact.email,
+  sameAs: [contact.facebook],
+};
 ---
 
 <!doctype html>
@@ -29,18 +56,26 @@ const ogImage = new URL("/icon-512.png", Astro.site);
     <title>{title}</title>
     <meta name="description" content={description} />
     <meta name="robots" content={allowIndexing ? "index, follow" : "noindex, nofollow"} />
+    <link rel="preload" href={displayFont} as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href={bodyFont} as="font" type="font/woff2" crossorigin />
     <link rel="canonical" href={canonical} />
     <meta name="theme-color" content="#1b0f2e" />
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
     <link rel="icon" type="image/png" sizes="48x48" href="/favicon-48.png" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content={org.name} />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:url" content={canonical} />
     <meta property="og:image" content={ogImage} />
-    <meta name="twitter:card" content="summary" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content={`${org.name} logo and tagline`} />
+    <meta property="og:locale" content="en_US" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <script type="application/ld+json" set:html={JSON.stringify(structuredData)}></script>
   </head>
   <body>
     <a class="skip-link" href="#main">

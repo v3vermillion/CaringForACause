@@ -8,6 +8,8 @@ export default defineConfig({
   output: "static",
   trailingSlash: "ignore",
   build: {
-    inlineStylesheets: "auto",
+    // The site is one page with ~16 KB of CSS; inlining it removes
+    // render-blocking requests and speeds up first paint.
+    inlineStylesheets: "always",
   },
 });

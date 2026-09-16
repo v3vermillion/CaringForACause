@@ -15,7 +15,7 @@ const donateHref = links.donate ?? "/#donate";
 <header class="site-header">
   <div class="wrap bar">
     <a class="brand" href="/">
-      <Image src={mark} alt="" width={40} height={40} loading="eager" />
+      <Image src={mark} alt="" width={40} height={40} densities={[1, 2, 3]} loading="eager" />
       <span>{org.shortName}</span>
     </a>
     <nav aria-label="Main">

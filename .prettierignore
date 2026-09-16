@@ -3,3 +3,7 @@ dist/
 node_modules/
 package-lock.json
 public/
+lhci-report/
+.lighthouseci/
+test-results/
+playwright-report/

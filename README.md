@@ -12,7 +12,7 @@ Website for [Caring for a Cause Supportive Services Inc.](https://caring4acauses
 - [Astro 7](https://astro.build), static output, TypeScript (strict)
 - Self-hosted fonts: Bricolage Grotesque and Atkinson Hyperlegible Next
 - Hosted on Cloudflare Workers static assets (`wrangler.jsonc`, `public/_headers`)
-- GitHub Actions runs formatting, type checks, and a build on every push
+- GitHub Actions runs formatting, type checks, a build, 56 browser tests, and Lighthouse budgets on every push
 
 Requires Node.js 22.12 or later (see `.nvmrc`).
 
@@ -49,6 +49,17 @@ Run `npm run verify` after editing. It catches missing fields and typos in field
 
 **Links set to `null`** are not set up yet. Their buttons automatically email Tamara instead.
 
+## Quality checks
+
+Every push and pull request must pass:
+
+- **Browser tests** (`tests/site.spec.ts`, Playwright, phone and desktop): WCAG 2.2 AA accessibility scan with axe, no sideways scrolling from 320 to 1440 px, keyboard-accessible tabs, the no-JavaScript fallback, video embeds, in-page links, search blocking, metadata, structured data, and the 404 page.
+- **Lighthouse budgets** (`lighthouserc.json`, three runs): performance at least 95, accessibility 100, best practices and SEO at least 95, layout shift under 0.05. Reports are saved as a build artifact, not published.
+
+Measured at setup (Lighthouse, local build): mobile performance 99, desktop 100, accessibility 100, best practices 100, SEO 100 with indexing enabled.
+
+To run the browser tests locally the first time: `npx playwright install chromium`.
+
 ## Project structure
 
 ```
@@ -62,7 +73,8 @@ src/
   styles/global.css     Design tokens and shared styles
   assets/brand/         Logo and icon (optimized at build time)
   assets/gallery/       Event photos
-public/                 Favicons, sharing image, _headers (security and cache rules)
+public/                 Icons, sharing image, web manifest, _headers (security and cache rules)
+tests/                  Browser tests
 docs/                   Plan and decisions
 ```
 
