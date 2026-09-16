@@ -24,9 +24,9 @@ working after handoff without a developer, and is it true?
    live site, the docs, the build output. "It probably works" is not done.
    Verify on the engines people actually use (every iPhone browser is WebKit).
 4. **Gates live where they can't be skipped.** `npm run build` type-checks,
-   builds, and validates, so a bad build publishes nothing. The deploy job runs
-   only after browser tests and Lighthouse budgets pass. A check that only
-   reports is not a gate; say which is which.
+   builds, and validates, so a bad build publishes nothing. The `main` ruleset
+   requires the browser-test check before anything merges. A check that only
+   reports (Lighthouse, the live check) is not a gate; say which is which.
 5. **Tests prove the guard, not just the happy path.** Each gate has tests that
    break a copy on purpose and confirm it is caught.
 6. **Protect the people in the photos and the data.** Strip photo metadata,
@@ -43,12 +43,14 @@ working after handoff without a developer, and is it true?
 
 ## How changes flow
 
-1. Branch from `main` and open a pull request.
+1. Branch from a freshly updated `main` and open a pull request.
 2. CI runs formatting, the gated build, gate and fact tests, the browser suite on
    10 devices across three engines, and Lighthouse budgets.
-3. Merge only when everything is green. The deploy job then publishes and
-   confirms the live site serves that commit.
-4. The weekly live check re-tests the deployed site and posts to an issue.
+3. Check the changed-files list matches the intent, then squash-merge once the
+   required check is green, and delete the branch.
+4. Cloudflare publishes `main`. The live check waits for the merged commit to
+   be live, re-tests the deployed site, and posts to an issue. It also runs
+   weekly. See `docs/WORKFLOW.md`.
 
 ## Before calling something done
 
