@@ -8,6 +8,10 @@ pass() { echo "- ✅ $1"; }
 bad() { echo "- ❌ $1"; fail=1; }
 
 status() { curl -s -o /dev/null -w "%{http_code}" "$base$1"; }
+# Download once and check the saved text. Piping curl straight into `grep -q`
+# can cut the download short and, with pipefail, report a false failure.
+html=$(curl -s "$base/")
+robots=$(curl -s "$base/robots.txt")
 header() { curl -sI --compressed "$base$1" | tr -d '\r' | grep -i "^$2:" | head -1 | cut -d' ' -f2-; }
 
 echo "#### Status codes"
@@ -19,8 +23,8 @@ code=$(status /_headers); [ "$code" != 200 ] && pass "/_headers is not served ($
 [ "$(status /og-image.jpg)" = 200 ] && pass "/og-image.jpg returns 200" || bad "/og-image.jpg missing"
 
 echo; echo "#### Search blocking (preview)"
-curl -s "$base/robots.txt" | grep -q "Disallow: /" && pass "robots.txt disallows crawling" || bad "robots.txt allows crawling"
-curl -s "$base/" | grep -q 'content="noindex, nofollow"' && pass "page has noindex meta tag" || bad "noindex meta tag missing"
+grep -q "Disallow: /" <<<"$robots" && pass "robots.txt disallows crawling" || bad "robots.txt allows crawling"
+grep -q 'content="noindex, nofollow"' <<<"$html" && pass "page has noindex meta tag" || bad "noindex meta tag missing"
 
 echo; echo "#### Security headers on /"
 for h in content-security-policy x-content-type-options x-frame-options referrer-policy permissions-policy strict-transport-security; do
@@ -31,7 +35,7 @@ for h in content-security-policy x-content-type-options x-frame-options referrer
 done
 
 echo; echo "#### Caching and compression"
-asset=$(curl -s "$base/" | grep -oE '/_astro/[^"]+\.(woff2|avif|webp)' | head -1)
+asset=$(grep -oE '/_astro/[^"]+\.(woff2|avif|webp)' <<<"$html" | head -1)
 if [ -n "$asset" ]; then
   cc=$(header "$asset" cache-control)
   echo "$cc" | grep -q immutable && pass "hashed asset \`$asset\` cached: \`$cc\`" || bad "hashed asset cache-control is \`$cc\`"
