@@ -49,25 +49,31 @@ jobs:
           PLAYWRIGHT_BASE_URL: ${{ env.SITE_URL }}
         run: npm run test
 
-      - name: Lighthouse (mobile and desktop)
+      - name: Lighthouse (mobile and desktop, median of 3 runs)
         id: lighthouse
         continue-on-error: true
         run: |
-          npx --yes lighthouse@12 "$SITE_URL" --quiet --chrome-flags="--headless=new" \
-            --output=json --output-path=lh-mobile.json
-          npx --yes lighthouse@12 "$SITE_URL" --quiet --chrome-flags="--headless=new" \
-            --preset=desktop --output=json --output-path=lh-desktop.json
+          for preset in mobile desktop; do
+            flag=""; [ "$preset" = desktop ] && flag="--preset=desktop"
+            for run in 1 2 3; do
+              npx --yes lighthouse@12 "$SITE_URL" --quiet --chrome-flags="--headless=new" \
+                $flag --output=json --output-path="lh-$preset-$run.json"
+            done
+          done
           node -e '
             const fs = require("fs");
+            const pct = (x) => Math.round(x * 100);
             const rows = ["mobile", "desktop"].map((k) => {
-              const r = JSON.parse(fs.readFileSync(`lh-${k}.json`, "utf8"));
+              const runs = [1, 2, 3].map((n) => JSON.parse(fs.readFileSync(`lh-${k}-${n}.json`, "utf8")));
+              runs.sort((a, b) => a.categories.performance.score - b.categories.performance.score);
+              const r = runs[1];
               const c = r.categories, a = r.audits;
-              const s = (x) => Math.round(x.score * 100);
-              return `| ${k} | ${s(c.performance)} | ${s(c.accessibility)} | ${s(c["best-practices"])} | ${s(c.seo)} | ${a["largest-contentful-paint"].displayValue} | ${a["cumulative-layout-shift"].displayValue} | ${a["total-byte-weight"].displayValue} |`;
+              const perfs = runs.map((x) => pct(x.categories.performance.score)).join(", ");
+              return `| ${k} | ${pct(c.performance.score)} (runs: ${perfs}) | ${pct(c.accessibility.score)} | ${pct(c["best-practices"].score)} | ${pct(c.seo.score)} | ${a["largest-contentful-paint"].displayValue} | ${a["total-blocking-time"].displayValue} | ${a["cumulative-layout-shift"].displayValue} | ${a["total-byte-weight"].displayValue} |`;
             });
             fs.writeFileSync("lighthouse.md", [
-              "| | Performance | Accessibility | Best practices | SEO* | LCP | CLS | Weight |",
-              "|---|---|---|---|---|---|---|---|", ...rows, "",
+              "| | Performance (median) | Accessibility | Best practices | SEO* | LCP | TBT | CLS | Weight |",
+              "|---|---|---|---|---|---|---|---|---|", ...rows, "",
               "*SEO is expected to be lower while search blocking is on for the preview.",
             ].join("\n"));
           '

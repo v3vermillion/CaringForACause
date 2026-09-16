@@ -12,6 +12,11 @@ export type YouTubeVideo = {
   /** The ID from the YouTube URL, e.g. youtube.com/watch?v=THIS_PART */
   id: string;
   title: string;
+  /**
+   * Optional thumbnail file in src/assets/photos/. Self-hosting it means the
+   * page makes no request to YouTube until someone presses play.
+   */
+  poster?: string;
 };
 
 export type Photo = {
@@ -323,6 +328,7 @@ export const about = {
   video: {
     id: "7smWzJwY9kA",
     title: "Do More: Tamara Long-Ajimati provides supportive services to families in need",
+    poster: "video-do-more-poster.jpg",
   } satisfies YouTubeVideo,
 };
 

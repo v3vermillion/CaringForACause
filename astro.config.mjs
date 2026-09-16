@@ -13,7 +13,7 @@ const targets = browserslistToTargets(browserslist());
 // deploys can set PUBLIC_SITE_URL to their own address so the canonical URL and
 // the sharing image point at the host that is actually serving the page.
 export default defineConfig({
-  site: process.env.PUBLIC_SITE_URL ?? "https://caring4acausesupportiveservices.com",
+  site: process.env.PUBLIC_SITE_URL || "https://caring4acausesupportiveservices.com",
   output: "static",
   trailingSlash: "ignore",
   build: {
