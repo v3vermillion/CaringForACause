@@ -8,12 +8,17 @@ import { browserslistToTargets } from "lightningcss";
 // iOS Safari) and lowers newer syntax for those browsers.
 const targets = browserslistToTargets(browserslist());
 
-// Static site. The production domain is set here so canonical URLs and
-// absolute links are correct once her domain points at the new site. Preview
-// deploys can set PUBLIC_SITE_URL to their own address so the canonical URL and
-// the sharing image point at the host that is actually serving the page.
+// Absolute site address, used for the canonical URL and the link-preview image.
+// Link previews (iMessage, Facebook, X) only work if that image URL is live, so
+// Cloudflare builds (WORKERS_CI=1) use the workers.dev preview address until her
+// domain is connected. At launch, set PUBLIC_SITE_URL to the production domain
+// in the Worker's build variables (see README "Launch checklist").
+const PRODUCTION_URL = "https://caring4acausesupportiveservices.com";
+const PREVIEW_URL = "https://caring-for-a-cause.forgetraining.workers.dev";
+const site = process.env.PUBLIC_SITE_URL || (process.env.WORKERS_CI ? PREVIEW_URL : PRODUCTION_URL);
+
 export default defineConfig({
-  site: process.env.PUBLIC_SITE_URL || "https://caring4acausesupportiveservices.com",
+  site,
   output: "static",
   trailingSlash: "ignore",
   build: {

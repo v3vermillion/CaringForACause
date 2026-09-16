@@ -99,7 +99,7 @@ The site is served as static files by Cloudflare Workers. Static requests are fr
    - Deploy command: `npx wrangler deploy`
    - Root directory: `/`
 4. Leave `PUBLIC_ALLOW_INDEXING` unset. The site stays hidden from search engines.
-5. Set `PUBLIC_SITE_URL` to the preview address (`https://caring-for-a-cause.<your-subdomain>.workers.dev`) so link previews load the logo from the host serving the page. Remove it once the real domain is connected.
+5. Nothing else to set: Cloudflare builds automatically use the workers.dev preview address for the canonical URL and link-preview image (see `astro.config.mjs`).
 6. Deploy. The preview address is `caring-for-a-cause.<your-subdomain>.workers.dev`. Share it privately.
 
 Every push to `main` redeploys automatically. Configuration lives in `wrangler.jsonc`; response headers live in `public/_headers`.
@@ -114,7 +114,7 @@ Complete only after Tamara approves the site.
 - [ ] Add hero and gallery photos she provides
 - [ ] Add `@astrojs/sitemap` and reference it in `src/pages/robots.txt.ts`
 - [ ] Add `caring4acausesupportiveservices.com` to Cloudflare and point it at the Worker (with her GoDaddy login)
-- [ ] Set the build variable `PUBLIC_ALLOW_INDEXING=true` and remove `PUBLIC_SITE_URL` in the Worker's build settings, then redeploy
+- [ ] In the Worker's build variables, set `PUBLIC_ALLOW_INDEXING=true` and `PUBLIC_SITE_URL=https://caring4acausesupportiveservices.com`, then redeploy
 - [ ] Check the live site on a phone: every button, tab, video, and link
 - [ ] Take down or redirect the old `caringforacauseindy.netlify.app` site
 

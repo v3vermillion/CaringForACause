@@ -26,6 +26,16 @@ echo; echo "#### Search blocking (preview)"
 grep -q "Disallow: /" <<<"$robots" && pass "robots.txt disallows crawling" || bad "robots.txt allows crawling"
 grep -q 'content="noindex, nofollow"' <<<"$html" && pass "page has noindex meta tag" || bad "noindex meta tag missing"
 
+echo; echo "#### Link preview"
+og=$(grep -oE '<meta property="og:image" content="[^"]+"' <<<"$html" | sed -E 's/.*content="([^"]+)"/\1/')
+if [ -z "$og" ]; then bad "og:image tag missing"
+else
+  [ "${og%%/og-image*}" = "$base" ] && pass "og:image points at this host: \`$og\`" || bad "og:image points elsewhere: \`$og\`"
+  ogtype=$(curl -sI "$og" | tr -d '\r' | grep -i '^content-type:' | cut -d' ' -f2-)
+  [ "$(curl -s -o /dev/null -w '%{http_code}' "$og")" = 200 ] && pass "preview image loads (\`$ogtype\`)" || bad "preview image does not load"
+fi
+grep -q "User-agent: facebookexternalhit" <<<"$robots" && pass "link-preview bots allowed in robots.txt" || bad "link-preview bots blocked by robots.txt"
+
 echo; echo "#### Security headers on /"
 for h in content-security-policy x-content-type-options x-frame-options referrer-policy permissions-policy strict-transport-security; do
   v=$(header / "$h")

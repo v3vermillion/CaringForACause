@@ -1,6 +1,12 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test } from "@playwright/test";
 
+// The site address the build should report: the deployed URL when testing a
+// live site, otherwise the production domain used by local and CI builds.
+const expectedSite = process.env.PLAYWRIGHT_BASE_URL
+  ? new URL("/", process.env.PLAYWRIGHT_BASE_URL).href
+  : "https://caring4acausesupportiveservices.com/";
+
 // YouTube thumbnails are external; stub them so tests are fast and offline-safe.
 test.beforeEach(async ({ page }) => {
   await page.route("https://i.ytimg.com/**", (route) =>
@@ -258,8 +264,11 @@ test.describe("search and sharing", () => {
       "content",
       "noindex, nofollow",
     );
-    const robots = await request.get("/robots.txt");
-    expect(await robots.text()).toContain("Disallow: /");
+    const robots = await (await request.get("/robots.txt")).text();
+    expect(robots).toMatch(/User-agent: \*\nDisallow: \//);
+    // Link-preview bots stay allowed so shared links show the logo.
+    expect(robots).toContain("User-agent: facebookexternalhit");
+    expect(robots).toContain("User-agent: Twitterbot");
   });
 
   test("page has a title, description, canonical URL, and sharing image", async ({
@@ -269,13 +278,13 @@ test.describe("search and sharing", () => {
     await page.goto("/");
     await expect(page).toHaveTitle(/Caring for a Cause/);
     await expect(page.locator('meta[name="description"]')).toHaveAttribute("content", /.{50,}/);
-    await expect(page.locator('link[rel="canonical"]')).toHaveAttribute(
-      "href",
-      "https://caring4acausesupportiveservices.com/",
-    );
+    await expect(page.locator('link[rel="canonical"]')).toHaveAttribute("href", expectedSite);
     const og = await page.locator('meta[property="og:image"]').getAttribute("content");
-    const ogPath = new URL(og!).pathname;
-    expect((await request.get(ogPath)).status()).toBe(200);
+    expect(new URL(og!).origin).toBe(new URL(expectedSite).origin);
+    const image = await request.get(new URL(og!).pathname);
+    expect(image.status()).toBe(200);
+    expect(image.headers()["content-type"]).toContain("image/jpeg");
+    await expect(page.locator('meta[name="twitter:image"]')).toHaveAttribute("content", og!);
   });
 
   test("structured data describes the registered nonprofit", async ({ page }) => {
@@ -285,7 +294,7 @@ test.describe("search and sharing", () => {
     expect(data["@type"]).toBe("NGO");
     expect(data.taxID).toBe("47-4917287");
     expect(data.nonprofitStatus).toBe("Nonprofit501c3");
-    expect(data.url).toBe("https://caring4acausesupportiveservices.com/");
+    expect(data.url).toBe(expectedSite);
   });
 
   test("web manifest and icons load", async ({ request }) => {
