@@ -27,9 +27,10 @@ test.describe("accessibility", () => {
     expect(results.violations.map((v) => v.id)).toEqual([]);
   });
 
-  test("skip link moves focus to main content", async ({ page }) => {
+  test("skip link is the first thing keyboard users reach", async ({ page, browserName }) => {
     await page.goto("/");
-    await page.keyboard.press("Tab");
+    // Safari only tabs to links with Option+Tab unless the user changes a setting.
+    await page.keyboard.press(browserName === "webkit" ? "Alt+Tab" : "Tab");
     await expect(page.getByRole("link", { name: "Skip to content" })).toBeFocused();
   });
 
@@ -37,6 +38,83 @@ test.describe("accessibility", () => {
     await page.goto("/");
     const missing = await page.locator("img:not([alt])").count();
     expect(missing).toBe(0);
+  });
+});
+
+test.describe("device compatibility", () => {
+  test("no horizontal scrolling at the device's own screen size", async ({ page }) => {
+    await page.goto("/");
+    const overflow = await page.evaluate(
+      () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
+    );
+    expect(overflow).toBe(0);
+  });
+
+  test("buttons, tabs, and menu links are at least 44px tall", async ({ page }) => {
+    await page.goto("/");
+    const selectors = [
+      ".brand",
+      ".site-header nav a",
+      ".button",
+      "[role=tab]",
+      ".checklist summary",
+      ".site-footer li a",
+      ".door",
+    ];
+    for (const selector of selectors) {
+      for (const el of await page.locator(selector).all()) {
+        if (!(await el.isVisible())) continue;
+        const box = await el.boundingBox();
+        expect(box!.height, `${selector} is ${box!.height}px tall`).toBeGreaterThanOrEqual(44);
+      }
+    }
+  });
+
+  test("iOS will not turn plain numbers into phone links", async ({ page }) => {
+    await page.goto("/");
+    await expect(page.locator('meta[name="format-detection"]')).toHaveAttribute(
+      "content",
+      /telephone=no/,
+    );
+  });
+
+  test("web fonts load", async ({ page }) => {
+    await page.goto("/");
+    await page.evaluate(() => document.fonts.ready);
+    const loaded = await page.evaluate(() => ({
+      display: document.fonts.check('800 1em "Bricolage Grotesque Variable"'),
+      body: document.fonts.check('400 1em "Atkinson Hyperlegible Next"'),
+    }));
+    expect(loaded).toEqual({ display: true, body: true });
+  });
+
+  test("the hero logo and header icon load in a supported format", async ({ page }) => {
+    await page.goto("/");
+    for (const selector of [".hero .logo img", ".brand img"]) {
+      const img = page.locator(selector);
+      await img.scrollIntoViewIfNeeded();
+      await expect
+        .poll(() => img.evaluate((el: HTMLImageElement) => el.complete && el.naturalWidth > 0))
+        .toBe(true);
+    }
+  });
+
+  test("the page loads without console errors", async ({ page }) => {
+    const errors: string[] = [];
+    page.on("console", (msg) => {
+      if (msg.type() === "error") errors.push(msg.text());
+    });
+    page.on("pageerror", (err) => errors.push(err.message));
+    await page.goto("/");
+    await page.waitForLoadState("networkidle");
+    expect(errors).toEqual([]);
+  });
+
+  test("the sticky header stays visible after scrolling", async ({ page }) => {
+    await page.goto("/");
+    await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight / 2));
+    const top = await page.locator(".site-header").evaluate((el) => el.getBoundingClientRect().top);
+    expect(top).toBe(0);
   });
 });
 

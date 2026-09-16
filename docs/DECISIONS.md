@@ -62,7 +62,7 @@ Short records of the technical choices behind this site, so anyone taking it ove
 
 ## 10. Quality gates
 
-**Decision:** GitHub Actions runs two jobs on every push and pull request. The first checks formatting, types, the build, and 56 Playwright browser tests (including an axe WCAG 2.2 AA scan) on phone and desktop. The second enforces Lighthouse budgets.
+**Decision:** GitHub Actions runs two jobs on every push and pull request. The first checks formatting, types, the build, and 350 Playwright browser tests (35 checks on 10 devices across Chromium, WebKit, and Firefox, including an axe WCAG 2.2 AA scan). The second enforces Lighthouse budgets.
 
 **Why:** The site will be handed off. Automated checks keep future edits, including AI-assisted ones, from quietly breaking layout, accessibility, or speed.
 
@@ -77,3 +77,9 @@ Short records of the technical choices behind this site, so anyone taking it ove
 **Decision:** The page includes schema.org `NGO` data (legal name, EIN, 501(c)(3) status, founder, service area) and a 1200×630 sharing image.
 
 **Why:** Search engines can show her as a registered nonprofit, and links shared by text or on Facebook show a proper preview instead of a small icon.
+
+## 13. Browser support and iPhone safeguards
+
+**Decision:** Support iOS and Safari 15+ and current Chrome, Firefox, Edge, and Samsung Internet, declared in `browserslist`. Lightning CSS prefixes and lowers CSS for those targets. The page disables iOS automatic phone-number detection, keeps a light color scheme, and gives every button, tab, and menu link a 44px tap target.
+
+**Why:** Every iPhone browser uses Safari's engine, and older iOS versions need `-webkit-` prefixes (for example, the header's blur). iOS otherwise turns numbers such as the EIN into phone links, and Apple recommends 44-point tap targets.

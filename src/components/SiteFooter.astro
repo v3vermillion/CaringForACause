@@ -73,7 +73,13 @@ const year = new Date().getFullYear();
     list-style: none;
     padding: 0;
     display: grid;
-    gap: 0.35rem;
+  }
+
+  /* 44px tall tap targets (Apple's minimum). */
+  li a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
   }
 
   a {

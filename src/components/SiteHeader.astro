@@ -55,6 +55,7 @@ const donateHref = links.donate ?? "/#donate";
 
   .brand {
     display: inline-flex;
+    min-height: 44px;
     align-items: center;
     gap: 0.6rem;
     color: var(--ink);
@@ -80,15 +81,22 @@ const donateHref = links.donate ?? "/#donate";
   nav ul {
     display: flex;
     gap: 1.1rem;
-    padding: 0.4rem 0 0.1rem;
+    padding: 0.1rem 0 0;
     list-style: none;
     overflow-x: auto;
     scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
   }
 
+  nav ul::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* 44px tall tap targets (Apple's minimum). */
   nav a {
-    display: inline-block;
-    padding-block: 0.25rem;
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
     color: var(--ink);
     font-size: 1rem;
     font-weight: 700;

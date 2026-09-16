@@ -14,9 +14,9 @@ concurrency:
 
 jobs:
   verify:
-    name: Format, types, build, and browser tests
+    name: Format, types, build, and browser tests (10 devices, 3 engines)
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 25
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v7
@@ -27,7 +27,7 @@ jobs:
       - run: npm run format:check
       - run: npm run check
       - run: npm run build
-      - run: npx playwright install --with-deps chromium
+      - run: npx playwright install --with-deps chromium webkit firefox
       - run: npm run test
       - name: Upload test report on failure
         if: failure()

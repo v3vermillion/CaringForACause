@@ -12,7 +12,7 @@ Website for [Caring for a Cause Supportive Services Inc.](https://caring4acauses
 - [Astro 7](https://astro.build), static output, TypeScript (strict)
 - Self-hosted fonts: Bricolage Grotesque and Atkinson Hyperlegible Next
 - Hosted on Cloudflare Workers static assets (`wrangler.jsonc`, `public/_headers`)
-- GitHub Actions runs formatting, type checks, a build, 56 browser tests, and Lighthouse budgets on every push
+- GitHub Actions runs formatting, type checks, a build, 350 browser tests across 10 devices, and Lighthouse budgets on every push
 
 Requires Node.js 22.12 or later (see `.nvmrc`).
 
@@ -53,12 +53,14 @@ Run `npm run verify` after editing. It catches missing fields and typos in field
 
 Every push and pull request must pass:
 
-- **Browser tests** (`tests/site.spec.ts`, Playwright, phone and desktop): WCAG 2.2 AA accessibility scan with axe, no sideways scrolling from 320 to 1440 px, keyboard-accessible tabs, the no-JavaScript fallback, video embeds, in-page links, search blocking, metadata, structured data, and the 404 page.
+- **Browser tests** (`tests/site.spec.ts`, Playwright): 35 checks on 10 devices across all three browser engines: iPhone SE, 12 mini, 17, and 17 Pro Max, iPad mini, Galaxy S24, Pixel 7, and desktop Safari, Firefox, and Chrome. Every iPhone browser uses WebKit, so the WebKit runs cover iOS. Checks include a WCAG 2.2 AA accessibility scan with axe, 44px tap targets, font and image loading, no console errors, no sideways scrolling from 320 to 1440 px, keyboard-accessible tabs, the no-JavaScript fallback, video embeds, in-page links, search blocking, metadata, structured data, and the 404 page.
 - **Lighthouse budgets** (`lighthouserc.json`, three runs): performance at least 95, accessibility 100, best practices and SEO at least 95, layout shift under 0.05. Reports are saved as a build artifact, not published.
 
 Measured at setup (Lighthouse, local build): mobile performance 99, desktop 100, accessibility 100, best practices 100, SEO 100 with indexing enabled.
 
-To run the browser tests locally the first time: `npx playwright install chromium`.
+To run the browser tests locally the first time: `npx playwright install chromium webkit firefox`. To run one engine: `PW_ENGINES=chromium npm run test`.
+
+**Supported browsers** are listed in the `browserslist` field of `package.json` (iOS and Safari 15+, plus current Chrome, Firefox, Edge, and Samsung Internet). Lightning CSS adds vendor prefixes for them at build time. Automated WebKit runs approximate Safari; check the live preview on a real iPhone before sending it.
 
 ## Project structure
 

@@ -29,9 +29,20 @@
     "@axe-core/playwright": "^4.13.0",
     "@playwright/test": "^1.63.0",
     "@types/node": "^24.13.5",
+    "browserslist": "^4.29.0",
+    "lightningcss": "^1.33.0",
     "prettier": "^3.9.7",
     "prettier-plugin-astro": "^1.0.0",
     "typescript": "^6.0.3",
     "wrangler": "^4.132.0"
-  }
+  },
+  "browserslist": [
+    "defaults",
+    "iOS >= 15",
+    "Safari >= 15",
+    "Chrome >= 100",
+    "Firefox >= 100",
+    "Samsung >= 20",
+    "not dead"
+  ]
 }

@@ -53,6 +53,10 @@ const structuredData = {
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <!-- Stop iOS from turning numbers like the EIN into phone links; real phone links use tel:. -->
+    <meta name="format-detection" content="telephone=no, date=no, email=no, address=no" />
+    <!-- The design is light-only; keep browsers from auto-darkening it. -->
+    <meta name="color-scheme" content="light only" />
     <title>{title}</title>
     <meta name="description" content={description} />
     <meta name="robots" content={allowIndexing ? "index, follow" : "noindex, nofollow"} />
@@ -75,7 +79,7 @@ const structuredData = {
     <meta property="og:image:alt" content={`${org.name} logo and tagline`} />
     <meta property="og:locale" content="en_US" />
     <meta name="twitter:card" content="summary_large_image" />
-    <script type="application/ld+json" set:html={JSON.stringify(structuredData)}></script>
+    <script is:inline type="application/ld+json" set:html={JSON.stringify(structuredData)}></script>
   </head>
   <body>
     <a class="skip-link" href="#main">
