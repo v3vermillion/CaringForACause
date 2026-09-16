@@ -112,6 +112,8 @@ All text pairings pass WCAG AA; most pass AAA.
 
 ## Open questions for Tamara
 
+Contact details, location, and photo permission are tracked as pending facts in `src/data/site.ts`; that list is the source of truth, and every build log prints it. The rest are planning questions.
+
 Ask these in the follow-up after she sees the preview. Every one has a safe default in place.
 
 1. Which phone number is current? The site uses (317) 886-0724; Idealist lists (317) 358-6450.

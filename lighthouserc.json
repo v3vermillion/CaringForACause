@@ -28,12 +28,6 @@
             "minScore": 0.95
           }
         ],
-        "categories:seo": [
-          "error",
-          {
-            "minScore": 0.95
-          }
-        ],
         "cumulative-layout-shift": [
           "error",
           {
@@ -51,7 +45,17 @@
           {
             "maxNumericValue": 200
           }
-        ]
+        ],
+        "document-title": "error",
+        "meta-description": "error",
+        "http-status-code": "error",
+        "link-text": "error",
+        "crawlable-anchors": "error",
+        "image-alt": "error",
+        "canonical": "error",
+        "hreflang": "error",
+        "robots-txt": "error",
+        "is-crawlable": "off"
       }
     },
     "upload": {

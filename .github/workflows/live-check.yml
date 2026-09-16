@@ -8,6 +8,9 @@ on:
       url:
         description: Site URL to check
         required: false
+      expect_version:
+        description: Commit the site should be serving (optional)
+        required: false
   schedule:
     - cron: "0 13 * * 1" # Mondays 13:00 UTC
 
@@ -40,7 +43,7 @@ jobs:
         continue-on-error: true
         run: |
           set -o pipefail
-          scripts/check-live-headers.sh "$SITE_URL" | tee headers.md
+          EXPECTED_VERSION="${{ inputs.expect_version }}" scripts/check-live-headers.sh "$SITE_URL" | tee headers.md
 
       - name: Browser tests against the live site
         id: browser

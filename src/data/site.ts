@@ -6,7 +6,13 @@
  *
  * Values marked `null` are not set up yet. The site hides or falls back
  * gracefully until they are filled in (see README "Launch checklist").
+ *
+ * Factual claims live in `facts` with their source and status (see facts.ts).
+ * When Tamara confirms a detail, change `needsConfirmation(...)` to
+ * `orgPublished(...)` or `publicRecord(...)` and update its source.
  */
+
+import { claim, type Fact, needsConfirmation, orgPublished, publicRecord } from "./facts.ts";
 
 export type YouTubeVideo = {
   /** The ID from the YouTube URL, e.g. youtube.com/watch?v=THIS_PART */
@@ -58,28 +64,70 @@ export type InvolvementTab = {
   video?: YouTubeVideo;
 };
 
+/**
+ * Every factual claim the site makes, with where it came from.
+ * Last checked against public sources on September 16, 2026.
+ */
+export const facts = {
+  legalName: publicRecord(
+    "Caring for a Cause Supportive Services Inc.",
+    "IRS exempt organization records and GuideStar profile, EIN 47-4917287",
+  ),
+  ein: publicRecord("47-4917287", "GuideStar profile 47-4917287; Charity Navigator"),
+  taxExempt: publicRecord(
+    { section: "501(c)(3)", deductible: true },
+    "IRS exemption data (unconditional exemption, deductible since December 2015), via Gudsy",
+  ),
+  founded: publicRecord(
+    2015,
+    "IRS exemption ruling December 2015; her website says the organization was established in 2015",
+  ),
+  founder: orgPublished(
+    "Tamara Long-Ajimati",
+    "Her website embeds the Jiffy Lube 'Do More: Tamara Long-Ajimati Provides Supportive Services' video",
+  ),
+  serviceArea: orgPublished(
+    "Central Indiana",
+    "caring4acausesupportiveservices.com mission statement",
+  ),
+  toysForTotsPartner: orgPublished(
+    "Toys for Tots",
+    "caring4acausesupportiveservices.com, Holiday Assistance section (2025 site)",
+  ),
+  city: needsConfirmation(
+    "Noblesville, Indiana",
+    "GuideStar and directory listings; the 2021 site lists an Indianapolis office",
+    "Is the organization based in Noblesville, Indianapolis, or both?",
+  ),
+  phone: needsConfirmation(
+    { display: "(317) 886-0724", href: "tel:+13178860724" },
+    "caring4acausesupportiveservices.com; Idealist lists (317) 358-6450",
+    "Which phone number should families call?",
+  ),
+  email: needsConfirmation(
+    "Caringforacause2015@gmail.com",
+    "caring4acausesupportiveservices.com, which also lists Caring4acause2015@gmail.com",
+    "Which email address should be public?",
+  ),
+  facebook: needsConfirmation(
+    "https://www.facebook.com/caringforacausesupportiveservices",
+    "Current website's Join Us link; directories also list facebook.com/427844620960035",
+    "Which Facebook page is current?",
+  ),
+  photoPermission: needsConfirmation(
+    "Event photos from the organization's 2021 website, some showing children",
+    "caringforacauseindy.netlify.app gallery (originally posted on her Facebook page)",
+    "May the new site use these event photos, including the ones that show children?",
+  ),
+} as const satisfies Record<string, Fact<unknown>>;
+
+/** Names and wording that are the organization's own identity, not claims. */
 export const org = {
   name: "Caring for a Cause Supportive Services",
-  legalName: "Caring for a Cause Supportive Services Inc.",
   shortName: "Caring for a Cause",
-  founded: 2015,
-  founder: "Tamara Long-Ajimati",
-  city: "Noblesville, Indiana",
-  serviceArea: "Central Indiana",
-  ein: "47-4917287",
   mission:
     "We create and manage programs that support the physical and emotional well-being of families in Central Indiana who are facing financial hardship.",
   signOff: "Never give up.",
-  partners: ["Toys for Tots"],
-} as const;
-
-export const contact = {
-  // Confirm with Tamara: public listings also show 317-358-6450.
-  phoneDisplay: "(317) 886-0724",
-  phoneHref: "tel:+13178860724",
-  // Confirm with Tamara: the current site also lists Caring4acause2015@gmail.com.
-  email: "Caringforacause2015@gmail.com",
-  facebook: "https://www.facebook.com/caringforacausesupportiveservices",
 } as const;
 
 export const links = {
@@ -102,7 +150,7 @@ export const seasonalBanner = {
 
 export const hero = {
   headline: "Holiday meals, gifts, and diapers for Central Indiana families",
-  subhead: `A volunteer-run nonprofit in Noblesville, helping families since ${org.founded}.`,
+  subhead: `A volunteer-run nonprofit helping families in ${claim(facts.serviceArea)} since ${claim(facts.founded)}.`,
   doors: {
     getHelp: {
       title: "I need help",
@@ -269,7 +317,7 @@ export const getInvolved = {
       heading: "Donate money or items",
       body: [
         "Donations help provide diapers, holiday meals, gifts, and school supplies for local families.",
-        `${org.legalName} is a 501(c)(3) nonprofit (EIN ${org.ein}), so donations are tax-deductible.`,
+        `${claim(facts.legalName)} is a ${claim(facts.taxExempt).section} nonprofit (EIN ${claim(facts.ein)}), so donations are tax-deductible.`,
       ],
       action: { label: "Donate now", href: links.donate, fallbackLabel: "Email us to give" },
       photo: {
@@ -320,9 +368,9 @@ export const getInvolved = {
 };
 
 export const about = {
-  heading: `Meet ${org.founder}`,
+  heading: `Meet ${claim(facts.founder)}`,
   body: [
-    `${org.founder} founded ${org.shortName} in ${org.founded} to support families in ${org.serviceArea} who are facing financial hardship.`,
+    `${claim(facts.founder)} founded ${org.shortName} in ${claim(facts.founded)} to support families in ${claim(facts.serviceArea)} who are facing financial hardship.`,
     "Part-time volunteers help run every program, and the organization has grown thanks to the helping hands of this community.",
   ],
   video: {

@@ -1,12 +1,14 @@
 ---
-import { contact, getHelp, links, org, programs } from "../data/site";
+import { show } from "../data/facts.ts";
+import { facts, getHelp, links, org, programs } from "../data/site";
 import Photo from "./Photo.astro";
 import VideoLink from "./VideoLink.astro";
 import YouTubeLite from "./YouTubeLite.astro";
 
 const active = programs.filter((p) => p.active);
 const [featured, ...rest] = active;
-const applyEmail = `mailto:${contact.email}?subject=${encodeURIComponent("Application request")}`;
+const phone = show(facts.phone);
+const applyEmail = `mailto:${show(facts.email)}?subject=${encodeURIComponent("Application request")}`;
 ---
 
 <section id="programs" class="section" aria-labelledby="programs-title">
@@ -28,8 +30,8 @@ const applyEmail = `mailto:${contact.email}?subject=${encodeURIComponent("Applic
             Apply online
           </a>
         )}
-        <a class="button button--purple" href={contact.phoneHref}>
-          Call {contact.phoneDisplay}
+        <a class="button button--purple" href={phone.href}>
+          Call {phone.display}
         </a>
         <a class="button button--outline" href={applyEmail}>
           Email us

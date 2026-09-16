@@ -1,12 +1,13 @@
 ---
-import { contact, getInvolved } from "../data/site";
+import { show } from "../data/facts.ts";
+import { facts, getInvolved } from "../data/site";
 import Photo from "./Photo.astro";
 import VideoLink from "./VideoLink.astro";
 import YouTubeLite from "./YouTubeLite.astro";
 
 const { tabs } = getInvolved;
 const mailto = (subject: string) =>
-  `mailto:${contact.email}?subject=${encodeURIComponent(subject)}`;
+  `mailto:${show(facts.email)}?subject=${encodeURIComponent(subject)}`;
 ---
 
 <section id="get-involved" class="section section--lilac" aria-labelledby="involved-title">

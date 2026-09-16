@@ -14,7 +14,16 @@ html=$(curl -s "$base/")
 robots=$(curl -s "$base/robots.txt")
 header() { curl -sI --compressed "$base$1" | tr -d '\r' | grep -i "^$2:" | head -1 | cut -d' ' -f2-; }
 
-echo "#### Status codes"
+echo "#### Deployed version"
+live_version=$(grep -oE '<meta name="version" content="[^"]+"' <<<"$html" | sed -E 's/.*content="([^"]+)"/\1/')
+if [ -n "${EXPECTED_VERSION:-}" ]; then
+  [ "$live_version" = "${EXPECTED_VERSION:0:7}" ] && pass "serving commit \`$live_version\`" \
+    || bad "serving commit \`${live_version:-unknown}\`, expected \`${EXPECTED_VERSION:0:7}\`"
+else
+  pass "serving commit \`${live_version:-unknown}\`"
+fi
+
+echo; echo "#### Status codes"
 [ "$(status /)" = 200 ] && pass "/ returns 200" || bad "/ returns $(status /)"
 [ "$(status /robots.txt)" = 200 ] && pass "/robots.txt returns 200" || bad "/robots.txt returns $(status /robots.txt)"
 [ "$(status /this-page-does-not-exist)" = 404 ] && pass "unknown page returns 404" || bad "unknown page returns $(status /this-page-does-not-exist)"

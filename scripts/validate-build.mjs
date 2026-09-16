@@ -61,6 +61,9 @@ export function validateBuild(dist, { allowIndexing }) {
   const h1s = doc.querySelectorAll("h1").length;
   if (h1s !== 1) fail(`Home page must have exactly one <h1> (found ${h1s})`);
 
+  if (!/^([0-9a-f]{7}|local)$/.test(meta('meta[name="version"]')))
+    fail("Missing build version meta tag");
+
   // Canonical URL and link preview
   const canonical = doc.querySelector('link[rel="canonical"]')?.getAttribute("href") ?? "";
   let origin = "";
@@ -97,6 +100,11 @@ export function validateBuild(dist, { allowIndexing }) {
     if (!/User-agent: \*\nDisallow: \//.test(robotsTxt))
       fail("Indexing is off but robots.txt does not block crawlers");
   }
+
+  // Preview notice: required on the private preview, forbidden on the public site
+  const notice = doc.querySelector("[data-preview-notice]");
+  if (!allowIndexing && !notice) fail("Preview build is missing the preview notice");
+  if (allowIndexing && notice) fail("Public build still shows the preview notice");
 
   // Structured data
   const ld = doc.querySelector('script[type="application/ld+json"]');

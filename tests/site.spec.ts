@@ -132,9 +132,13 @@ test.describe("device compatibility", () => {
 
   test("the sticky header stays visible after scrolling", async ({ page }) => {
     await page.goto("/");
-    await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight / 2));
-    const top = await page.locator(".site-header").evaluate((el) => el.getBoundingClientRect().top);
-    expect(top).toBe(0);
+    // Scroll instantly: the page uses smooth scrolling, which would still be animating.
+    await page.evaluate(() =>
+      window.scrollTo({ top: document.body.scrollHeight / 2, behavior: "instant" }),
+    );
+    await expect
+      .poll(() => page.locator(".site-header").evaluate((el) => el.getBoundingClientRect().top))
+      .toBe(0);
   });
 });
 
@@ -254,6 +258,32 @@ test.describe("videos", () => {
     const iframe = page.locator("#about iframe");
     await expect(iframe).toHaveAttribute("src", /^https:\/\/www\.youtube-nocookie\.com\/embed\//);
     await expect(iframe).toHaveAttribute("title", /.+/);
+  });
+});
+
+test.describe("preview notice", () => {
+  const text =
+    "Preview: this site isn't public yet, and some contact details are still being confirmed.";
+
+  test("appears first, with exact wording, and cannot be dismissed", async ({ page }) => {
+    await page.goto("/");
+    const notice = page.locator("[data-preview-notice]");
+    await expect(notice).toHaveText(text);
+    await expect(notice).toHaveRole("complementary");
+    await expect(notice).toBeVisible();
+    await expect(notice.locator("button, a")).toHaveCount(0);
+    // Above the header and the claims it qualifies
+    const noticeBox = await notice.boundingBox();
+    const headerBox = await page.locator(".site-header").boundingBox();
+    expect(noticeBox!.y).toBeLessThan(headerBox!.y);
+  });
+
+  test.describe("without JavaScript", () => {
+    test.use({ javaScriptEnabled: false });
+    test("is still shown", async ({ page }) => {
+      await page.goto("/");
+      await expect(page.locator("[data-preview-notice]")).toHaveText(text);
+    });
   });
 });
 

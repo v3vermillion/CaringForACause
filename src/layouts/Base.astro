@@ -3,9 +3,11 @@ import "@fontsource-variable/bricolage-grotesque/wght.css";
 import "@fontsource/atkinson-hyperlegible-next/400.css";
 import "@fontsource/atkinson-hyperlegible-next/700.css";
 import "../styles/global.css";
+import PreviewNotice from "../components/PreviewNotice.astro";
 import displayFont from "@fontsource-variable/bricolage-grotesque/files/bricolage-grotesque-latin-wght-normal.woff2?url";
 import bodyFont from "@fontsource/atkinson-hyperlegible-next/files/atkinson-hyperlegible-next-latin-400-normal.woff2?url";
-import { contact, org } from "../data/site";
+import { assertLaunchReady, claim, pendingFacts, show } from "../data/facts.ts";
+import { facts, org } from "../data/site";
 
 type Props = {
   title?: string;
@@ -13,12 +15,28 @@ type Props = {
 };
 
 const {
-  title = `${org.name} | ${org.serviceArea}`,
-  description = `${org.shortName} helps families in ${org.serviceArea} with holiday meals and gifts, monthly diapers, and school supplies.`,
+  title = `${org.name} | ${claim(facts.serviceArea)}`,
+  description = `${org.shortName} helps families in ${claim(facts.serviceArea)} with holiday meals and gifts, monthly diapers, and school supplies.`,
 } = Astro.props;
 
 // Search engines are blocked unless PUBLIC_ALLOW_INDEXING is exactly "true".
 const allowIndexing = import.meta.env.PUBLIC_ALLOW_INDEXING === "true";
+
+// Launch check: a public (indexed) build fails while any fact is unconfirmed.
+assertLaunchReady(facts, allowIndexing);
+const pending = pendingFacts(facts);
+if (pending.length > 0 && Astro.url.pathname === "/") {
+  console.warn(
+    `[facts] ${pending.length} detail(s) still need confirmation: ${pending.map((p) => p.name).join(", ")}`,
+  );
+}
+const phone = show(facts.phone);
+
+// The commit this page was built from, so a live check can confirm what is deployed.
+const version = (process.env.GITHUB_SHA || process.env.WORKERS_CI_COMMIT_SHA || "local").slice(
+  0,
+  7,
+);
 const canonical = new URL(Astro.url.pathname, Astro.site);
 const ogImage = new URL("/og-image.jpg", Astro.site);
 
@@ -26,25 +44,25 @@ const ogImage = new URL("/og-image.jpg", Astro.site);
 const structuredData = {
   "@context": "https://schema.org",
   "@type": "NGO",
-  name: org.legalName,
+  name: claim(facts.legalName),
   alternateName: org.shortName,
   url: Astro.site?.href,
   logo: new URL("/icon-512.png", Astro.site).href,
   description: org.mission,
-  foundingDate: String(org.founded),
-  founder: { "@type": "Person", name: org.founder },
-  taxID: org.ein,
-  nonprofitStatus: "Nonprofit501c3",
-  areaServed: org.serviceArea,
+  foundingDate: String(claim(facts.founded)),
+  founder: { "@type": "Person", name: claim(facts.founder) },
+  taxID: claim(facts.ein),
+  nonprofitStatus: claim(facts.taxExempt).section === "501(c)(3)" ? "Nonprofit501c3" : undefined,
+  areaServed: claim(facts.serviceArea),
   address: {
     "@type": "PostalAddress",
-    addressLocality: "Noblesville",
+    addressLocality: show(facts.city).split(",")[0],
     addressRegion: "IN",
     addressCountry: "US",
   },
-  telephone: contact.phoneHref.replace("tel:", ""),
-  email: contact.email,
-  sameAs: [contact.facebook],
+  telephone: phone.href.replace("tel:", ""),
+  email: show(facts.email),
+  sameAs: [show(facts.facebook)],
 };
 ---
 
@@ -64,6 +82,7 @@ const structuredData = {
     <link rel="preload" href={bodyFont} as="font" type="font/woff2" crossorigin />
     <link rel="canonical" href={canonical} />
     <meta name="theme-color" content="#1b0f2e" />
+    <meta name="version" content={version} />
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
     <link rel="icon" type="image/png" sizes="48x48" href="/favicon-48.png" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
@@ -89,6 +108,7 @@ const structuredData = {
     <a class="skip-link" href="#main">
       Skip to content
     </a>
+    {!allowIndexing && <PreviewNotice />}
     <slot />
   </body>
 </html>

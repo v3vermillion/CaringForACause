@@ -1,7 +1,8 @@
 ---
 import { Picture } from "astro:assets";
 import logo from "../assets/brand/logo-full.png";
-import { hero, org } from "../data/site";
+import { claim } from "../data/facts.ts";
+import { facts, hero } from "../data/site";
 
 type Props = {
   /**
@@ -22,7 +23,7 @@ const { doors } = hero;
       <Picture
         src={logo}
         formats={["avif", "webp"]}
-        alt={`${org.legalName} logo`}
+        alt={`${claim(facts.legalName)} logo`}
         width={700}
         widths={[240, 360, 480, 700]}
         sizes="(min-width: 56rem) 348px, 232px"

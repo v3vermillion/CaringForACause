@@ -62,7 +62,7 @@ Short records of the technical choices behind this site, so anyone taking it ove
 
 ## 10. Quality gates
 
-**Decision:** GitHub Actions runs two jobs on every push and pull request. The first checks formatting, types, the build, and 350 Playwright browser tests (35 checks on 10 devices across Chromium, WebKit, and Firefox, including an axe WCAG 2.2 AA scan). The second enforces Lighthouse budgets.
+**Decision:** GitHub Actions runs two jobs on every push and pull request. The first checks formatting, types, the build, and the Playwright browser suite (every check on 10 devices across Chromium, WebKit, and Firefox, including an axe WCAG 2.2 AA scan). The second enforces Lighthouse budgets.
 
 **Why:** The site will be handed off. Automated checks keep future edits, including AI-assisted ones, from quietly breaking layout, accessibility, or speed.
 
@@ -92,4 +92,18 @@ Short records of the technical choices behind this site, so anyone taking it ove
 
 **What the gate checks:** type errors; required files; one `h1`; title and description; absolute canonical URL; link-preview image on the canonical host and present in the build; search indexing matching `PUBLIC_ALLOW_INDEXING`, with indexing allowed only on the production domain; valid `NGO` structured data; unique ids and working in-page links; alt text and existing files for every image; no placeholder text; required security headers; the 404 page.
 
-**Limit:** browser tests (layout, accessibility, the 10-device matrix) need real browsers, which Cloudflare's build does not provide, so they run in GitHub Actions only. To make them a precondition too, protect `main` on GitHub and require the CI check to pass before merging; changes then go through pull requests.
+**Limit:** browser tests (layout, accessibility, the 10-device matrix) need real browsers, which Cloudflare's build does not provide, so they run in GitHub Actions only. Decision 16 makes them a precondition by deploying from GitHub Actions after they pass.
+
+## 15. Facts carry a source and a status
+
+**Decision:** Factual claims live in a typed `facts` record (`src/data/facts.ts`, `src/data/site.ts`) as `publicRecord`, `orgPublished`, or `needsConfirmation`, each with a source. Statements of fact use `claim()`, which only accepts settled facts; contact details use `show()`. A launch build throws while anything is unconfirmed. Private previews show a non-dismissible notice, required by the build validator while indexing is off and forbidden once it is on.
+
+**Why:** Unconfirmed details were comments the compiler, tests, and visitors couldn't see, while the page presented them as fact. Several public sources conflict (phone, email, Facebook page, city), and photos of children need permission. `src/data/facts.typecheck.ts` and `scripts/facts.test.mjs` prove the guards work.
+
+## 16. Deploys are gated in GitHub Actions, and every page reports its version
+
+**Decision:** A `deploy` job runs only after browser tests and Lighthouse budgets pass, deploys with Wrangler, and confirms the live `<meta name="version">` matches the commit. Cloudflare Workers Builds remains the fallback path, still protected by the build gate.
+
+**Why:** GitHub branch protection and rulesets aren't available for private repositories on the free plan, and Cloudflare can't wait for GitHub checks. Deploying from the workflow makes the full suite a real precondition at no cost. The version tag lets anyone confirm what is live.
+
+**Trade-off:** The owner's GitHub repository needs one Cloudflare API token secret. Handoff instructions cover creating it.
