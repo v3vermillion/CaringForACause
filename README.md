@@ -11,7 +11,7 @@ Website for [Caring for a Cause Supportive Services Inc.](https://caring4acauses
 
 - [Astro 7](https://astro.build), static output, TypeScript (strict)
 - Self-hosted fonts: Bricolage Grotesque and Atkinson Hyperlegible Next
-- Hosted on Netlify (`netlify.toml`)
+- Hosted on Cloudflare Workers static assets (`wrangler.jsonc`, `public/_headers`)
 - GitHub Actions runs formatting, type checks, and a build on every push
 
 Requires Node.js 22.12 or later (see `.nvmrc`).
@@ -62,15 +62,26 @@ src/
   styles/global.css     Design tokens and shared styles
   assets/brand/         Logo and icon (optimized at build time)
   assets/gallery/       Event photos
-public/                 Favicons and sharing image
+public/                 Favicons, sharing image, _headers (security and cache rules)
 docs/                   Plan and decisions
 ```
 
-## Deploying (Netlify)
+## Deploying (Cloudflare)
 
-1. In Netlify, choose **Add new site → Import an existing project → GitHub** and select this repo. Build settings come from `netlify.toml`.
-2. Leave `PUBLIC_ALLOW_INDEXING` unset. The site stays hidden from search engines.
-3. Share the Netlify preview URL privately.
+The site is served as static files by Cloudflare Workers. Static requests are free and unlimited on the Free plan, so the site cannot be paused for traffic.
+
+**Connect the repo (one time):**
+
+1. In the Cloudflare dashboard, go to **Workers & Pages → Create → Import a repository**.
+2. Authorize the Cloudflare GitHub app for **only this repository**.
+3. Use these build settings:
+   - Build command: `npm run build`
+   - Deploy command: `npx wrangler deploy`
+   - Root directory: `/`
+4. Leave `PUBLIC_ALLOW_INDEXING` unset. The site stays hidden from search engines.
+5. Deploy. The preview address is `caring-for-a-cause.<your-subdomain>.workers.dev`. Share it privately.
+
+Every push to `main` redeploys automatically. Configuration lives in `wrangler.jsonc`; response headers live in `public/_headers`.
 
 ## Launch checklist
 
@@ -81,15 +92,15 @@ Complete only after Tamara approves the site.
 - [ ] Create the family application and sponsor sign-up forms in her name and set their links
 - [ ] Add hero and gallery photos she provides
 - [ ] Add `@astrojs/sitemap` and reference it in `src/pages/robots.txt.ts`
-- [ ] Connect `caring4acausesupportiveservices.com` from GoDaddy to Netlify (with her login)
-- [ ] Set `PUBLIC_ALLOW_INDEXING=true` in Netlify production settings and redeploy
+- [ ] Add `caring4acausesupportiveservices.com` to Cloudflare and point it at the Worker (with her GoDaddy login)
+- [ ] Set the build variable `PUBLIC_ALLOW_INDEXING=true` in the Worker's build settings and redeploy
 - [ ] Check the live site on a phone: every button, tab, video, and link
 - [ ] Take down or redirect the old `caringforacauseindy.netlify.app` site
 
 ## Handoff checklist
 
 - [ ] Transfer this repository to Tamara's GitHub account
-- [ ] Transfer the Netlify site to her Netlify account
+- [ ] Move the Worker and domain to her Cloudflare account
 - [ ] Confirm the domain, donation, and form accounts are all in her name
 - [ ] Revoke every personal access token used during the build
 - [ ] Walk her through editing `src/data/site.ts`

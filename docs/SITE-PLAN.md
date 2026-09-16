@@ -127,7 +127,7 @@ Ask these in the follow-up after she sees the preview. Every one has a safe defa
 
 1. **Setup (done):** repo, tooling, CI, content model, full homepage built from her existing content.
 2. **Polish:** hero photo, gallery photos, final copy pass, icon-only logo, a larger social sharing image.
-3. **Preview:** deploy to a private Netlify URL with indexing blocked; send her the preview email.
+3. **Preview:** deploy to the private Cloudflare `workers.dev` address with indexing blocked; send her the preview email.
 4. **Corrections:** apply her answers to the open questions.
-5. **Launch:** create the Zeffy donation page and forms in her name, connect her GoDaddy domain, enable indexing, add a sitemap, and retire the old Netlify site.
-6. **Handoff:** transfer the repo and Netlify site to her accounts and revoke all access tokens.
+5. **Launch:** create the Zeffy donation page and forms in her name, connect her GoDaddy domain through Cloudflare, enable indexing, add a sitemap, and retire her old 2021 Netlify site.
+6. **Handoff:** transfer the repo and the Cloudflare Worker and domain to her accounts, and revoke all access tokens.

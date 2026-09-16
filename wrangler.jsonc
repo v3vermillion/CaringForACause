@@ -1,0 +1,16 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  // Static site served by Cloudflare Workers static assets. No Worker code runs,
+  // so requests are free and unlimited on the Free plan.
+  "name": "caring-for-a-cause",
+  "compatibility_date": "2026-09-16",
+  "assets": {
+    "directory": "./dist",
+    // Unknown paths serve dist/404.html with a real 404 status.
+    "not_found_handling": "404-page",
+    "html_handling": "auto-trailing-slash",
+  },
+  // The workers.dev address is the private preview link until her domain is connected.
+  "workers_dev": true,
+  "preview_urls": false,
+}

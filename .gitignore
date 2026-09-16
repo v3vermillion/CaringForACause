@@ -19,5 +19,6 @@ npm-debug.log*
 !.vscode/extensions.json
 .idea/
 
-# Netlify local state
-.netlify/
+# Cloudflare Wrangler local state
+.wrangler/
+.dev.vars*

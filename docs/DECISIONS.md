@@ -16,15 +16,17 @@ Short records of the technical choices behind this site, so anyone taking it ove
 
 **Why:** Seasonal updates are the only routine changes. Keeping them in one typed file means they never touch layout code, and `npm run check` catches mistakes like a missing field before anything deploys.
 
-## 3. Netlify hosting
+## 3. Cloudflare Workers static assets for hosting
 
-**Decision:** Deploy on Netlify's free tier, configured in `netlify.toml`.
+**Decision:** Serve the built `dist/` folder with Cloudflare Workers static assets, configured in `wrangler.jsonc`, with headers in `public/_headers`. Deployed by Workers Builds on every push to `main`.
 
-**Why:** Free static hosting with preview URLs, simple custom domain setup for her GoDaddy domain, and security and cache headers set in one file. Tamara's old site already used Netlify, so the account type is familiar.
+**Why:** Requests to static assets are free and unlimited on Cloudflare's Free plan, so traffic can never pause the site. Netlify's Free plan (credit-based since September 2025) pauses every site on the account when credits run out, an unacceptable risk for a holiday-help site in December. Vercel's free plan is for personal, non-commercial use, and GitHub Pages requires a public repo on the free plan. Cloudflare now directs new static projects to Workers rather than Pages.
+
+**Revisit if:** the site ever needs server code. Workers supports it, but it is metered.
 
 ## 4. Search engines blocked by default
 
-**Decision:** `noindex` meta tag and a `Disallow: /` robots.txt unless `PUBLIC_ALLOW_INDEXING` is exactly `"true"`. Netlify preview and branch deploys force it off.
+**Decision:** `noindex` meta tag and a `Disallow: /` robots.txt unless `PUBLIC_ALLOW_INDEXING` is exactly `"true"`. It is set only in production build settings, at launch.
 
 **Why:** The site is a surprise gift built with her name and logo. It must not appear in search results until she approves it and the domain is connected.
 
