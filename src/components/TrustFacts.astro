@@ -1,17 +1,18 @@
 ---
-import { org } from "../data/site";
+import { claim } from "../data/facts.ts";
+import { facts } from "../data/site";
 
-const facts = [
-  `Serving ${org.serviceArea} since ${org.founded}`,
-  `501(c)(3) nonprofit, EIN ${org.ein}`,
-  ...org.partners.map((p) => `Partnered with ${p}`),
+const items = [
+  `Serving ${claim(facts.serviceArea)} since ${claim(facts.founded)}`,
+  `${claim(facts.taxExempt).section} nonprofit, EIN ${claim(facts.ein)}`,
+  `Partnered with ${claim(facts.toysForTotsPartner)}`,
 ];
 ---
 
 <section class="facts" aria-label="About our organization">
   <ul class="wrap">
-    {facts.map((fact) => (
-      <li>{fact}</li>
+    {items.map((item) => (
+      <li>{item}</li>
     ))}
   </ul>
 </section>

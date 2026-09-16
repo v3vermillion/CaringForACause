@@ -76,11 +76,10 @@ jobs:
           node-version-file: .nvmrc
           cache: npm
       - run: npm ci
-      # Build with indexing on so the SEO audit measures the launch configuration.
-      # This build is only measured, never deployed.
+      # Measures the preview build. Search blocking is intentional, so the budget
+      # checks each SEO audit except "is crawlable" (see lighthouserc.json). A
+      # launch build can't be measured until every fact is confirmed.
       - run: npm run build
-        env:
-          PUBLIC_ALLOW_INDEXING: "true"
       - run: npx --yes @lhci/cli@0.15.1 autorun
       - name: Upload Lighthouse report
         if: always()
@@ -89,3 +88,64 @@ jobs:
           name: lighthouse-report
           path: lhci-report/
           retention-days: 14
+
+  # Publishes only after every check above passes. Inactive until the
+  # CLOUDFLARE_API_TOKEN secret exists (see README "Deploying").
+  deploy:
+    name: Deploy to Cloudflare
+    needs: [verify, lighthouse]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    concurrency:
+      group: deploy-production
+      cancel-in-progress: false
+    environment:
+      name: preview
+      url: ${{ vars.SITE_URL }}
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
+      PUBLIC_SITE_URL: ${{ vars.PUBLIC_SITE_URL }}
+      PUBLIC_ALLOW_INDEXING: ${{ vars.PUBLIC_ALLOW_INDEXING }}
+      SITE_URL: ${{ vars.SITE_URL }}
+    steps:
+      - name: Check deploy settings
+        id: settings
+        run: |
+          if [ -z "$CLOUDFLARE_API_TOKEN" ] || [ -z "$CLOUDFLARE_ACCOUNT_ID" ]; then
+            echo "enabled=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::Deploy skipped: set the CLOUDFLARE_API_TOKEN secret and CLOUDFLARE_ACCOUNT_ID variable to enable gated deploys."
+            exit 0
+          fi
+          for name in PUBLIC_SITE_URL SITE_URL; do
+            if [ -z "${!name}" ]; then echo "::error::Repository variable $name is not set."; exit 1; fi
+          done
+          echo "enabled=true" >> "$GITHUB_OUTPUT"
+      - if: steps.settings.outputs.enabled == 'true'
+        uses: actions/checkout@v7
+      - if: steps.settings.outputs.enabled == 'true'
+        uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - if: steps.settings.outputs.enabled == 'true'
+        run: npm ci
+      - if: steps.settings.outputs.enabled == 'true'
+        run: npm run build
+      - if: steps.settings.outputs.enabled == 'true'
+        run: npx wrangler deploy
+      - name: Confirm the live site serves this commit
+        if: steps.settings.outputs.enabled == 'true'
+        env:
+          EXPECTED_VERSION: ${{ github.sha }}
+        run: |
+          for attempt in 1 2 3 4 5 6; do
+            if scripts/check-live-headers.sh "$SITE_URL" > smoke.md; then cat smoke.md; exit 0; fi
+            echo "Attempt $attempt failed; retrying in 10 seconds."
+            sleep 10
+          done
+          cat smoke.md
+          exit 1

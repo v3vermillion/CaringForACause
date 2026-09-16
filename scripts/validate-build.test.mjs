@@ -92,6 +92,13 @@ describe("publish gate", () => {
     expectError(dir, /missing Content-Security-Policy/);
   });
 
+  it("blocks a preview build without the preview notice", () => {
+    const dir = brokenBuild("index.html", (h) =>
+      h.replace(/<aside[^>]*data-preview-notice[^>]*>.*?<\/aside>/s, ""),
+    );
+    expectError(dir, /missing the preview notice/);
+  });
+
   it("blocks duplicate ids and a second h1", () => {
     const dir = brokenBuild("index.html", (h) =>
       h.replace("</main>", '<h1 id="about">Again</h1></main>'),

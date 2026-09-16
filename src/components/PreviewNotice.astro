@@ -1,0 +1,32 @@
+---
+/**
+ * Shown on every page while search indexing is off (the private preview).
+ * It cannot be dismissed, needs no JavaScript, and disappears automatically
+ * in the launch build, which the build validator enforces. The wording is
+ * checked by tests/site.spec.ts.
+ */
+export const PREVIEW_NOTICE =
+  "Preview: this site isn't public yet, and some contact details are still being confirmed.";
+---
+
+<aside class="preview-notice" aria-label="Preview notice" data-preview-notice>
+  <p>{PREVIEW_NOTICE}</p>
+</aside>
+
+<style>
+  .preview-notice {
+    padding: 0.5rem 1.25rem;
+    background: var(--lilac);
+    color: var(--ink);
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .preview-notice p {
+    margin: 0 auto;
+    max-width: none;
+    font-size: var(--step--1);
+    font-weight: 700;
+    line-height: 1.4;
+    text-align: center;
+  }
+</style>

@@ -1,5 +1,10 @@
 ---
-import { contact, org } from "../data/site";
+import { claim, show } from "../data/facts.ts";
+import { facts, org } from "../data/site";
+
+const phone = show(facts.phone);
+const email = show(facts.email);
+const taxExempt = claim(facts.taxExempt);
 
 const year = new Date().getFullYear();
 ---
@@ -12,13 +17,13 @@ const year = new Date().getFullYear();
       <h2 class="label">Contact</h2>
       <ul>
         <li>
-          <a href={contact.phoneHref}>{contact.phoneDisplay}</a>
+          <a href={phone.href}>{phone.display}</a>
         </li>
         <li>
-          <a href={`mailto:${contact.email}`}>{contact.email}</a>
+          <a href={`mailto:${email}`}>{email}</a>
         </li>
         <li>
-          <a href={contact.facebook} target="_blank" rel="noopener">
+          <a href={show(facts.facebook)} target="_blank" rel="noopener">
             Facebook<span class="visually-hidden"> (opens in a new tab)</span>
           </a>
         </li>
@@ -26,19 +31,19 @@ const year = new Date().getFullYear();
     </div>
 
     <div class="stack">
-      <h2 class="label">{org.legalName}</h2>
+      <h2 class="label">{claim(facts.legalName)}</h2>
       <p>
-        {org.city}. Serving {org.serviceArea}.
+        {show(facts.city)}. Serving {claim(facts.serviceArea)}.
       </p>
       <p>
-        A 501(c)(3) nonprofit, EIN {org.ein}. Donations are tax-deductible to the extent allowed by
-        law.
+        A {taxExempt.section} nonprofit, EIN {claim(facts.ein)}.
+        {taxExempt.deductible && " Donations are tax-deductible to the extent allowed by law."}
       </p>
     </div>
   </div>
   <div class="wrap legal">
     <p>
-      &copy; {year} {org.legalName}
+      &copy; {year} {claim(facts.legalName)}
     </p>
   </div>
 </footer>

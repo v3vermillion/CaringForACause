@@ -5,14 +5,16 @@ Website for [Caring for a Cause Supportive Services Inc.](https://caring4acauses
 **Status:** in development as a private preview. Search engines are blocked. Nothing on this site collects money or personal information yet.
 
 - [Site plan](docs/SITE-PLAN.md): audiences, page structure, design tokens, open questions
+- [Approach](docs/APPROACH.md): the principles every change follows
 - [Decisions](docs/DECISIONS.md): why the site is built this way
+- [Workflow](docs/WORKFLOW.md): how every change is checked and shipped
 
 ## Stack
 
 - [Astro 7](https://astro.build), static output, TypeScript (strict)
 - Self-hosted fonts: Bricolage Grotesque and Atkinson Hyperlegible Next
 - Hosted on Cloudflare Workers static assets (`wrangler.jsonc`, `public/_headers`)
-- GitHub Actions runs formatting, type checks, a build, 350 browser tests across 10 devices, and Lighthouse budgets on every push
+- GitHub Actions runs formatting, type checks, the gated build, browser tests on 10 devices, and Lighthouse budgets on every push
 
 Requires Node.js 22.12 or later (see `.nvmrc`).
 
@@ -49,14 +51,26 @@ Run `npm run verify` after editing. It catches missing fields and typos in field
 
 **Links set to `null`** are not set up yet. Their buttons automatically email Tamara instead.
 
+### Facts and confirmation
+
+Every factual claim (legal name, EIN, founding year, phone, email, and so on) is in the `facts` record in `src/data/site.ts`, with its source and a status:
+
+- `publicRecord(...)`: verified in an official source such as IRS data.
+- `orgPublished(...)`: stated on the organization's own current website.
+- `needsConfirmation(..., question)`: conflicting or outdated; ask Tamara.
+
+Statements of fact on the page only accept confirmed values, so an unconfirmed fact used as a claim is a type error. Contact details may show while unconfirmed, because the preview needs them, and every build log lists what's still pending. While search indexing is off, every page shows a preview notice. **A launch build (`PUBLIC_ALLOW_INDEXING=true`) fails until every fact is confirmed**, and lists the questions to ask.
+
+When Tamara confirms a detail, change it to `orgPublished(...)` with her confirmation as the source.
+
 ## Quality checks
 
 **What blocks publishing:** Cloudflare runs `npm run build`, which fails, and publishes nothing, if the type check or `scripts/validate-build.mjs` finds a problem: missing files, broken in-page links or images, missing alt text, placeholder text, a wrong or missing link-preview image, invalid structured data, missing security headers, or search indexing that doesn't match its setting (indexing is only ever allowed on the production domain). The last good deployment stays live.
 
 **What GitHub Actions checks** on every push and pull request (these report results; they don't stop Cloudflare unless `main` is protected, see below):
 
-- **Browser tests** (`tests/site.spec.ts`, Playwright): 35 checks on 10 devices across all three browser engines: iPhone SE, 12 mini, 17, and 17 Pro Max, iPad mini, Galaxy S24, Pixel 7, and desktop Safari, Firefox, and Chrome. Every iPhone browser uses WebKit, so the WebKit runs cover iOS. Checks include a WCAG 2.2 AA accessibility scan with axe, 44px tap targets, font and image loading, no console errors, no sideways scrolling from 320 to 1440 px, keyboard-accessible tabs, the no-JavaScript fallback, video embeds, in-page links, search blocking, metadata, structured data, and the 404 page.
-- **Lighthouse budgets** (`lighthouserc.json`, three runs): performance at least 95, accessibility 100, best practices and SEO at least 95, layout shift under 0.05. Reports are saved as a build artifact, not published.
+- **Browser tests** (`tests/site.spec.ts`, Playwright): 37 checks on each of 10 devices across all three browser engines: iPhone SE, 12 mini, 17, and 17 Pro Max, iPad mini, Galaxy S24, Pixel 7, and desktop Safari, Firefox, and Chrome. Every iPhone browser uses WebKit, so the WebKit runs cover iOS. Checks include a WCAG 2.2 AA accessibility scan with axe, 44px tap targets, font and image loading, no console errors, no sideways scrolling from 320 to 1440 px, keyboard-accessible tabs, the no-JavaScript fallback, video embeds, in-page links, search blocking, metadata, structured data, and the 404 page.
+- **Lighthouse budgets** (`lighthouserc.json`, three runs): performance at least 95, accessibility 100, best practices at least 95, every SEO audit except "is crawlable" (search blocking is intentional on the preview), layout shift under 0.05. Reports are saved as a build artifact, not published.
 
 Measured at setup (Lighthouse, local build): mobile performance 99, desktop 100, accessibility 100, best practices 100, SEO 100 with indexing enabled.
 
@@ -66,11 +80,11 @@ To run the browser tests locally the first time: `npx playwright install chromiu
 
 **Supported browsers** are listed in the `browserslist` field of `package.json` (iOS and Safari 15+, plus current Chrome, Firefox, Edge, and Samsung Internet). Lightning CSS adds vendor prefixes for them at build time. Automated WebKit runs approximate Safari; check the live preview on a real iPhone before sending it.
 
-**Optional: make browser tests a precondition too.** In GitHub → Settings → Branches, add a rule for `main` that requires the **Format, types, build, and browser tests** check to pass. Changes then go through pull requests, and Cloudflare only ever deploys code that passed all 350 browser tests.
+**Making browser tests a precondition:** GitHub branch protection needs a paid plan for private repositories, so the `deploy` job is the gate instead: it publishes only after these checks pass (see Deploying).
 
 ## Live site check
 
-`.github/workflows/live-check.yml` tests the deployed site every Monday and on demand (Actions → Live site check → Run workflow). It runs the full browser suite against the live URL, checks status codes, security headers, caching, and compression (`scripts/check-live-headers.sh`), and records Lighthouse scores. Results are posted to an open issue labeled `live-check`. To change the URL it checks, set a repository variable named `SITE_URL`.
+`.github/workflows/live-check.yml` runs after every merge to `main`, every Monday, and on demand (Actions → Live site check → Run workflow). After a merge, it first waits until the live page's `version` tag matches the merged commit, which confirms Cloudflare published it. It runs the full browser suite against the live URL, checks status codes, security headers, caching, and compression (`scripts/check-live-headers.sh`), and records Lighthouse scores. Results are posted to an open issue labeled `live-check`. To change the URL it checks, set a repository variable named `SITE_URL`.
 
 ## Project structure
 
@@ -92,33 +106,39 @@ docs/                   Plan and decisions
 
 ## Deploying (Cloudflare)
 
-The site is served as static files by Cloudflare Workers. Static requests are free and unlimited on the Free plan, so the site cannot be paused for traffic.
+The site is served as static files by Cloudflare Workers. Static requests are free and unlimited on the Free plan, so the site cannot be paused for traffic. Configuration lives in `wrangler.jsonc`; response headers live in `public/_headers`.
 
-**Connect the repo (one time):**
+### Gated deploys from GitHub (recommended)
 
-1. In the Cloudflare dashboard, go to **Workers & Pages → Create → Import a repository**.
-2. Authorize the Cloudflare GitHub app for **only this repository**.
-3. Use these build settings:
-   - Build command: `npm run build`
-   - Deploy command: `npx wrangler deploy`
-   - Root directory: `/`
-4. Leave `PUBLIC_ALLOW_INDEXING` unset. The site stays hidden from search engines.
-5. Nothing else to set: Cloudflare builds automatically use the workers.dev preview address for the canonical URL and link-preview image (see `astro.config.mjs`).
-6. Deploy. The preview address is `caring-for-a-cause.<your-subdomain>.workers.dev`. Share it privately.
+The `deploy` job in `.github/workflows/ci.yml` publishes only after the browser tests and Lighthouse budgets pass, then confirms the live site is serving that commit. GitHub's branch protection isn't available for private repositories on the free plan, so this job is the gate. To turn it on:
 
-Every push to `main` redeploys automatically, but only if `npm run build` passes its checks (see Quality checks). Configuration lives in `wrangler.jsonc`; response headers live in `public/_headers`.
+1. In Cloudflare, go to **My Profile → API Tokens → Create Token**, use the **Edit Cloudflare Workers** template, limit it to this account, and create it.
+2. In GitHub, go to **Settings → Secrets and variables → Actions** and add the secret `CLOUDFLARE_API_TOKEN` with that token.
+3. Add the variable `CLOUDFLARE_ACCOUNT_ID` (shown on the Cloudflare Workers overview page).
+4. The variables `PUBLIC_SITE_URL`, `SITE_URL`, and `PUBLIC_ALLOW_INDEXING` are already set for the preview.
+5. Push a commit and confirm the **Deploy to Cloudflare** job succeeds.
+6. Then, in Cloudflare, open the Worker's **Settings → Build** and disconnect the Git repository, so only the gated job deploys.
+
+Until the secret exists, the deploy job is skipped with a notice.
+
+### Cloudflare Workers Builds (current setup)
+
+Cloudflare builds and deploys every push to `main` itself, running `npm run build` with `npx wrangler deploy`. The build gate still applies: if `npm run build` fails, nothing is published. Browser tests don't gate this path. Cloudflare builds automatically use the workers.dev preview address for the canonical URL and link-preview image (see `astro.config.mjs`).
+
+Every page includes `<meta name="version">` with the commit it was built from, so a live check can confirm what's deployed.
 
 ## Launch checklist
 
 Complete only after Tamara approves the site.
 
-- [ ] Confirm the open questions in [docs/SITE-PLAN.md](docs/SITE-PLAN.md#open-questions-for-tamara) and update `src/data/site.ts`
+- [ ] Confirm every pending fact (listed in the build log) and update `src/data/site.ts`; the launch build refuses to run until this is done
 - [ ] Create her free donation page (e.g. Zeffy) in her name and set `links.donate`
 - [ ] Create the family application and sponsor sign-up forms in her name and set their links
 - [ ] Add hero and gallery photos she provides
 - [ ] Add `@astrojs/sitemap` and reference it in `src/pages/robots.txt.ts`
 - [ ] Add `caring4acausesupportiveservices.com` to Cloudflare and point it at the Worker (with her GoDaddy login)
-- [ ] In the Worker's build variables, set `PUBLIC_ALLOW_INDEXING=true` and `PUBLIC_SITE_URL=https://caring4acausesupportiveservices.com`, then redeploy
+- [ ] Set `PUBLIC_ALLOW_INDEXING=true` and `PUBLIC_SITE_URL`/`SITE_URL=https://caring4acausesupportiveservices.com` (GitHub variables for gated deploys, or the Worker's build variables for Workers Builds), then redeploy
+- [ ] Add a `Strict-Transport-Security` header in `public/_headers` once the site is served only from her HTTPS domain
 - [ ] Check the live site on a phone: every button, tab, video, and link
 - [ ] Take down or redirect the old `caringforacauseindy.netlify.app` site
 

@@ -2,7 +2,10 @@
 import SiteFooter from "../components/SiteFooter.astro";
 import SiteHeader from "../components/SiteHeader.astro";
 import Base from "../layouts/Base.astro";
-import { contact } from "../data/site";
+import { show } from "../data/facts.ts";
+import { facts } from "../data/site";
+
+const phone = show(facts.phone);
 ---
 
 <Base title="Page not found">
@@ -12,7 +15,7 @@ import { contact } from "../data/site";
       <h1>This page doesn't exist</h1>
       <p>
         The link may be out of date. Go to the <a href="/">home page</a>, or call us at
-        <a href={contact.phoneHref}>{contact.phoneDisplay}</a>.
+        <a href={phone.href}>{phone.display}</a>.
       </p>
     </div>
   </main>
