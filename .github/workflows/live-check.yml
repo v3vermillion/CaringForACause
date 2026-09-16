@@ -1,0 +1,110 @@
+# Checks the deployed site: browser tests, headers, and Lighthouse.
+# Runs on demand and weekly, and posts results to one issue labeled live-check.
+name: Live site check
+
+on:
+  workflow_dispatch:
+    inputs:
+      url:
+        description: Site URL to check
+        required: false
+  schedule:
+    - cron: "0 13 * * 1" # Mondays 13:00 UTC
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: live-check
+  cancel-in-progress: false
+
+env:
+  SITE_URL: ${{ inputs.url || vars.SITE_URL || 'https://caring-for-a-cause.forgetraining.workers.dev' }}
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium webkit firefox
+
+      - name: Headers, status codes, and compression
+        id: headers
+        continue-on-error: true
+        run: |
+          set -o pipefail
+          scripts/check-live-headers.sh "$SITE_URL" | tee headers.md
+
+      - name: Browser tests against the live site
+        id: browser
+        continue-on-error: true
+        env:
+          PLAYWRIGHT_BASE_URL: ${{ env.SITE_URL }}
+        run: npm run test
+
+      - name: Lighthouse (mobile and desktop)
+        id: lighthouse
+        continue-on-error: true
+        run: |
+          npx --yes lighthouse@12 "$SITE_URL" --quiet --chrome-flags="--headless=new" \
+            --output=json --output-path=lh-mobile.json
+          npx --yes lighthouse@12 "$SITE_URL" --quiet --chrome-flags="--headless=new" \
+            --preset=desktop --output=json --output-path=lh-desktop.json
+          node -e '
+            const fs = require("fs");
+            const rows = ["mobile", "desktop"].map((k) => {
+              const r = JSON.parse(fs.readFileSync(`lh-${k}.json`, "utf8"));
+              const c = r.categories, a = r.audits;
+              const s = (x) => Math.round(x.score * 100);
+              return `| ${k} | ${s(c.performance)} | ${s(c.accessibility)} | ${s(c["best-practices"])} | ${s(c.seo)} | ${a["largest-contentful-paint"].displayValue} | ${a["cumulative-layout-shift"].displayValue} | ${a["total-byte-weight"].displayValue} |`;
+            });
+            fs.writeFileSync("lighthouse.md", [
+              "| | Performance | Accessibility | Best practices | SEO* | LCP | CLS | Weight |",
+              "|---|---|---|---|---|---|---|---|", ...rows, "",
+              "*SEO is expected to be lower while search blocking is on for the preview.",
+            ].join("\n"));
+          '
+
+      - name: Post report
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          {
+            echo "## Live check: $SITE_URL"
+            echo "Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }} · Commit: ${{ github.sha }}"
+            echo
+            echo "**Headers:** ${{ steps.headers.outcome }} · **Browser tests:** ${{ steps.browser.outcome }} · **Lighthouse:** ${{ steps.lighthouse.outcome }}"
+            echo
+            echo "### Headers and status codes"
+            cat headers.md 2>/dev/null || echo "(not run)"
+            echo
+            echo "### Lighthouse"
+            cat lighthouse.md 2>/dev/null || echo "(not run)"
+            echo
+            echo "### Browser tests"
+            if [ -f playwright-report/results.json ]; then
+              node scripts/summarize-test-failures.mjs playwright-report/results.json
+            else
+              echo "(no report)"
+            fi
+          } > report.md
+          head -c 60000 report.md > report-comment.md
+          gh label create live-check --color 0E8A16 --description "Automated live site check" --force
+          number=$(gh issue list --state open --label live-check --json number --jq '.[0].number')
+          if [ -z "$number" ]; then
+            gh issue create --title "Live site check" --label live-check --body-file report-comment.md
+          else
+            gh issue comment "$number" --body-file report-comment.md
+          fi
+
+      - name: Fail if any check failed
+        if: steps.headers.outcome == 'failure' || steps.browser.outcome == 'failure' || steps.lighthouse.outcome == 'failure'
+        run: exit 1

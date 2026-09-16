@@ -6,12 +6,15 @@ import { defineConfig, devices } from "@playwright/test";
  * The matrix covers the three browser engines. Every iPhone and iPad
  * browser uses WebKit, so iOS coverage comes from the WebKit projects.
  *
+ * Set PLAYWRIGHT_BASE_URL to test a deployed site instead (no local server).
+ *
  * Local options:
  *   PW_ENGINES=chromium          only run engines you have installed
  *   PW_CHROMIUM_PATH=/path/chrome use an existing Chromium binary
  */
 const engines = (process.env.PW_ENGINES ?? "chromium,webkit,firefox").split(",");
 const chromiumPath = process.env.PW_CHROMIUM_PATH || undefined;
+const liveUrl = process.env.PLAYWRIGHT_BASE_URL;
 
 // [project name, Playwright device profile]
 const matrix: [name: string, device: keyof typeof devices][] = [
@@ -53,14 +56,16 @@ export default defineConfig({
     ? [["github"], ["list"], ["json", { outputFile: "playwright-report/results.json" }]]
     : "list",
   use: {
-    baseURL: "http://127.0.0.1:4321",
+    baseURL: liveUrl ?? "http://127.0.0.1:4321",
     trace: "retain-on-failure",
   },
   projects,
-  webServer: {
-    command: "npm run preview -- --host 127.0.0.1 --port 4321",
-    url: "http://127.0.0.1:4321",
-    reuseExistingServer: !process.env.CI,
-    timeout: 60_000,
-  },
+  webServer: liveUrl
+    ? undefined
+    : {
+        command: "npm run preview -- --host 127.0.0.1 --port 4321",
+        url: "http://127.0.0.1:4321",
+        reuseExistingServer: !process.env.CI,
+        timeout: 60_000,
+      },
 });

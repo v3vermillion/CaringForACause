@@ -64,6 +64,10 @@ To run the browser tests locally the first time: `npx playwright install chromiu
 
 **Supported browsers** are listed in the `browserslist` field of `package.json` (iOS and Safari 15+, plus current Chrome, Firefox, Edge, and Samsung Internet). Lightning CSS adds vendor prefixes for them at build time. Automated WebKit runs approximate Safari; check the live preview on a real iPhone before sending it.
 
+## Live site check
+
+`.github/workflows/live-check.yml` tests the deployed site every Monday and on demand (Actions → Live site check → Run workflow). It runs the full browser suite against the live URL, checks status codes, security headers, caching, and compression (`scripts/check-live-headers.sh`), and records Lighthouse scores. Results are posted to an open issue labeled `live-check`. To change the URL it checks, set a repository variable named `SITE_URL`.
+
 ## Project structure
 
 ```

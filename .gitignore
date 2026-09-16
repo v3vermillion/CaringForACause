@@ -30,3 +30,8 @@ lhci-report/
 .lighthouseci/
 failure-summary.md
 failure-comment.md
+headers.md
+lighthouse.md
+report.md
+report-comment.md
+lh-*.json
