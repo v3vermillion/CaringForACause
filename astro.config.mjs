@@ -9,9 +9,11 @@ import { browserslistToTargets } from "lightningcss";
 const targets = browserslistToTargets(browserslist());
 
 // Static site. The production domain is set here so canonical URLs and
-// absolute links are correct once her domain points at the new site.
+// absolute links are correct once her domain points at the new site. Preview
+// deploys can set PUBLIC_SITE_URL to their own address so the canonical URL and
+// the sharing image point at the host that is actually serving the page.
 export default defineConfig({
-  site: "https://caring4acausesupportiveservices.com",
+  site: process.env.PUBLIC_SITE_URL ?? "https://caring4acausesupportiveservices.com",
   output: "static",
   trailingSlash: "ignore",
   build: {
