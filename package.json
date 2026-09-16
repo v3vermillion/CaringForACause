@@ -9,15 +9,16 @@
   },
   "scripts": {
     "dev": "astro dev",
-    "build": "astro build",
+    "build": "astro check && astro build && node scripts/validate-build.mjs",
     "preview": "astro preview",
     "check": "astro check",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "verify": "npm run format:check && npm run check && npm run build && npm run test",
+    "verify": "npm run format:check && npm run build && npm run test:gate && npm run test",
     "deploy": "npm run build && wrangler deploy",
     "deploy:check": "npm run build && wrangler deploy --dry-run",
-    "test": "playwright test"
+    "test": "playwright test",
+    "test:gate": "node --test \"scripts/*.test.mjs\""
   },
   "dependencies": {
     "@fontsource-variable/bricolage-grotesque": "^5.3.0",
@@ -31,6 +32,7 @@
     "@types/node": "^24.13.5",
     "browserslist": "^4.29.0",
     "lightningcss": "^1.33.0",
+    "node-html-parser": "^9.0.4",
     "prettier": "^3.9.7",
     "prettier-plugin-astro": "^1.0.0",
     "typescript": "^6.0.3",

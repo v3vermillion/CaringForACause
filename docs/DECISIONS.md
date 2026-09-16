@@ -14,7 +14,7 @@ Short records of the technical choices behind this site, so anyone taking it ove
 
 **Decision:** All copy, links, dates, and contact details live in `src/data/site.ts`, typed with TypeScript.
 
-**Why:** Seasonal updates are the only routine changes. Keeping them in one typed file means they never touch layout code, and `npm run check` catches mistakes like a missing field before anything deploys.
+**Why:** Seasonal updates are the only routine changes. Keeping them in one typed file means they never touch layout code, and the type check inside `npm run build` stops a mistake like a missing field before anything deploys (see decision 14).
 
 ## 3. Cloudflare Workers static assets for hosting
 
@@ -83,3 +83,13 @@ Short records of the technical choices behind this site, so anyone taking it ove
 **Decision:** Support iOS and Safari 15+ and current Chrome, Firefox, Edge, and Samsung Internet, declared in `browserslist`. Lightning CSS prefixes and lowers CSS for those targets. The page disables iOS automatic phone-number detection, keeps a light color scheme, and gives every button, tab, and menu link a 44px tap target.
 
 **Why:** Every iPhone browser uses Safari's engine, and older iOS versions need `-webkit-` prefixes (for example, the header's blur). iOS otherwise turns numbers such as the EIN into phone links, and Apple recommends 44-point tap targets.
+
+## 14. The build is the publish gate
+
+**Decision:** `npm run build` runs `astro check`, then `astro build`, then `scripts/validate-build.mjs`. If any step fails, the build fails, Cloudflare publishes nothing, and the last good deployment stays live. `scripts/validate-build.test.mjs` proves the gate blocks 11 kinds of breakage.
+
+**Why:** Cloudflare Workers Builds deploys every push to `main` and cannot wait for GitHub Actions, so a failing CI run could not stop a deploy. Putting the gate inside the build command needs no dashboard changes, survives handoff, and cannot be skipped by pushing.
+
+**What the gate checks:** type errors; required files; one `h1`; title and description; absolute canonical URL; link-preview image on the canonical host and present in the build; search indexing matching `PUBLIC_ALLOW_INDEXING`, with indexing allowed only on the production domain; valid `NGO` structured data; unique ids and working in-page links; alt text and existing files for every image; no placeholder text; required security headers; the 404 page.
+
+**Limit:** browser tests (layout, accessibility, the 10-device matrix) need real browsers, which Cloudflare's build does not provide, so they run in GitHub Actions only. To make them a precondition too, protect `main` on GitHub and require the CI check to pass before merging; changes then go through pull requests.

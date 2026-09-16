@@ -28,8 +28,9 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run format:check
-      - run: npm run check
+      # The build type-checks and validates dist/ (the same gate Cloudflare runs).
       - run: npm run build
+      - run: npm run test:gate
       - run: npx playwright install --with-deps chromium webkit firefox
       - run: npm run test
       # Post failed or flaky tests to a single tracking issue, so problems can be

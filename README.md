@@ -51,7 +51,9 @@ Run `npm run verify` after editing. It catches missing fields and typos in field
 
 ## Quality checks
 
-Every push and pull request must pass:
+**What blocks publishing:** Cloudflare runs `npm run build`, which fails, and publishes nothing, if the type check or `scripts/validate-build.mjs` finds a problem: missing files, broken in-page links or images, missing alt text, placeholder text, a wrong or missing link-preview image, invalid structured data, missing security headers, or search indexing that doesn't match its setting (indexing is only ever allowed on the production domain). The last good deployment stays live.
+
+**What GitHub Actions checks** on every push and pull request (these report results; they don't stop Cloudflare unless `main` is protected, see below):
 
 - **Browser tests** (`tests/site.spec.ts`, Playwright): 35 checks on 10 devices across all three browser engines: iPhone SE, 12 mini, 17, and 17 Pro Max, iPad mini, Galaxy S24, Pixel 7, and desktop Safari, Firefox, and Chrome. Every iPhone browser uses WebKit, so the WebKit runs cover iOS. Checks include a WCAG 2.2 AA accessibility scan with axe, 44px tap targets, font and image loading, no console errors, no sideways scrolling from 320 to 1440 px, keyboard-accessible tabs, the no-JavaScript fallback, video embeds, in-page links, search blocking, metadata, structured data, and the 404 page.
 - **Lighthouse budgets** (`lighthouserc.json`, three runs): performance at least 95, accessibility 100, best practices and SEO at least 95, layout shift under 0.05. Reports are saved as a build artifact, not published.
@@ -63,6 +65,8 @@ When a browser test fails or only passes on retry, CI posts a summary to an open
 To run the browser tests locally the first time: `npx playwright install chromium webkit firefox`. To run one engine: `PW_ENGINES=chromium npm run test`.
 
 **Supported browsers** are listed in the `browserslist` field of `package.json` (iOS and Safari 15+, plus current Chrome, Firefox, Edge, and Samsung Internet). Lightning CSS adds vendor prefixes for them at build time. Automated WebKit runs approximate Safari; check the live preview on a real iPhone before sending it.
+
+**Optional: make browser tests a precondition too.** In GitHub → Settings → Branches, add a rule for `main` that requires the **Format, types, build, and browser tests** check to pass. Changes then go through pull requests, and Cloudflare only ever deploys code that passed all 350 browser tests.
 
 ## Live site check
 
@@ -102,7 +106,7 @@ The site is served as static files by Cloudflare Workers. Static requests are fr
 5. Nothing else to set: Cloudflare builds automatically use the workers.dev preview address for the canonical URL and link-preview image (see `astro.config.mjs`).
 6. Deploy. The preview address is `caring-for-a-cause.<your-subdomain>.workers.dev`. Share it privately.
 
-Every push to `main` redeploys automatically. Configuration lives in `wrangler.jsonc`; response headers live in `public/_headers`.
+Every push to `main` redeploys automatically, but only if `npm run build` passes its checks (see Quality checks). Configuration lives in `wrangler.jsonc`; response headers live in `public/_headers`.
 
 ## Launch checklist
 
