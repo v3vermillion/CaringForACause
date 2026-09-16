@@ -58,6 +58,8 @@ Every push and pull request must pass:
 
 Measured at setup (Lighthouse, local build): mobile performance 99, desktop 100, accessibility 100, best practices 100, SEO 100 with indexing enabled.
 
+When a browser test fails or only passes on retry, CI posts a summary to an open GitHub issue labeled `ci-failure` (created automatically). Close the issue once the fix passes.
+
 To run the browser tests locally the first time: `npx playwright install chromium webkit firefox`. To run one engine: `PW_ENGINES=chromium npm run test`.
 
 **Supported browsers** are listed in the `browserslist` field of `package.json` (iOS and Safari 15+, plus current Chrome, Firefox, Edge, and Samsung Internet). Lightning CSS adds vendor prefixes for them at build time. Automated WebKit runs approximate Safari; check the live preview on a real iPhone before sending it.
