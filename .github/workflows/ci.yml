@@ -36,7 +36,9 @@ jobs:
       # Post failed or flaky tests to a single tracking issue, so problems can be
       # diagnosed without downloading logs or artifacts.
       - name: Report failed or flaky browser tests
-        if: always() && hashFiles('playwright-report/results.json') != ''
+        # Dependabot pull requests get a read-only token, so they can't post to
+        # issues; their failures still show as a failed check on the pull request.
+        if: always() && github.actor != 'dependabot[bot]' && hashFiles('playwright-report/results.json') != ''
         env:
           GH_TOKEN: ${{ github.token }}
         run: |

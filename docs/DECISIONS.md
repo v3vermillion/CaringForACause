@@ -117,3 +117,9 @@ Short records of the technical choices behind this site, so anyone taking it ove
 **Relation to decision 16:** decision 16 was written when branch protection was unavailable. With the ruleset enforced, Cloudflare Workers Builds deploys only commits that passed the required check, so the workflow `deploy` job was removed to keep a single deploy path. Two paths would risk double deploys and conflicting settings.
 
 **Why:** The build gate cannot run browser tests, so the ruleset makes them a precondition. An empty bypass list matters because automated changes use the owner's token: any bypass the owner has, automation has too. Confirming the deployed commit closes the last gap, where a merge could silently fail to publish.
+
+## 18. Dependabot with cooldowns and grouping
+
+**Decision:** Dependabot proposes npm and GitHub Actions updates monthly, grouped (minor and patch together, majors separately), with a 7-day cooldown (30 days for major npm versions). Security updates are grouped and never delayed.
+
+**Why:** Outdated packages are the most common way a finished, rarely touched site becomes vulnerable. The `main` ruleset makes updates safe to accept, because each one must pass the full browser suite. Grouping and a monthly schedule keep the volume low for a solo maintainer, and the cooldown avoids adopting a release before problems with it surface.

@@ -22,6 +22,12 @@ See `docs/APPROACH.md` for how decisions are made and `CLAUDE.md` for the rules 
 8. Delete the branch right after merging (automatic branch deletion is intentionally off; deleting is part of this step).
 9. Confirm the `Live site check` run for the merge commit passes. Results are posted to the open `live-check` issue.
 
+## Dependency updates
+
+`.github/dependabot.yml` opens pull requests on a monthly schedule: one grouped pull request for minor and patch npm updates, one per major npm update, and one grouped pull request for GitHub Actions. New releases wait 7 days (30 for major npm versions) before Dependabot proposes them; security fixes are never delayed. Each pull request must pass the required check like any other change.
+
+To handle one: confirm the changed files are only `package.json`, `package-lock.json`, or workflow files, wait for the check, then squash-merge and delete the branch. For a major update, read the package's release notes first. If a Dependabot branch falls behind `main`, comment `@dependabot rebase` on the pull request.
+
 ## When something fails
 
 - **Required check fails:** the change cannot merge. Read the `ci-failure` issue, fix on the same branch, push.
