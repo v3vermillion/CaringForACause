@@ -16,6 +16,9 @@ jobs:
   verify:
     name: Format, types, build, and browser tests (10 devices, 3 engines)
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: write
     timeout-minutes: 25
     steps:
       - uses: actions/checkout@v7
@@ -29,6 +32,28 @@ jobs:
       - run: npm run build
       - run: npx playwright install --with-deps chromium webkit firefox
       - run: npm run test
+      # Post failed or flaky tests to a single tracking issue, so problems can be
+      # diagnosed without downloading logs or artifacts.
+      - name: Report failed or flaky browser tests
+        if: always() && hashFiles('playwright-report/results.json') != ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          {
+            echo "Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+            echo "Commit: ${{ github.sha }}"
+            echo
+            node scripts/summarize-test-failures.mjs playwright-report/results.json
+          } > failure-summary.md
+          grep -q '^### ' failure-summary.md || { echo "No failed or flaky tests."; exit 0; }
+          head -c 60000 failure-summary.md > failure-comment.md
+          number=$(gh issue list --state open --label ci-failure --json number --jq '.[0].number')
+          if [ -z "$number" ]; then
+            gh label create ci-failure --color B60205 --description "Automated CI failure report" --force
+            gh issue create --title "CI browser test report" --label ci-failure --body-file failure-comment.md
+          else
+            gh issue comment "$number" --body-file failure-comment.md
+          fi
       - name: Upload test report on failure
         if: failure()
         uses: actions/upload-artifact@v7
