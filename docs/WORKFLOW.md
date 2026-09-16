@@ -12,14 +12,15 @@ See `docs/APPROACH.md` for how decisions are made and `CLAUDE.md` for the rules 
 
 ## Steps for each change
 
-1. Create a branch from the latest `main`, named for the change (for example `content/holiday-dates`, `fix/tab-focus`, `chore/deps`).
+1. Switch to `main`, update it (`git switch main && git pull --ff-only`), confirm it matches `origin/main`, then create a branch named for the change (for example `content/holiday-dates`, `fix/tab-focus`, `chore/deps`). Never branch from whatever happens to be checked out.
 2. Make the change. Content edits go in `src/data/site.ts`; photos go in `src/assets/photos/` with metadata stripped.
 3. Run `npm run verify` locally when possible.
 4. Push the branch and open a pull request. Fill in the checklist in the template.
-5. Wait for the required check. If it fails, CI posts a summary to the open `ci-failure` issue; fix and push again.
-6. Squash-merge once the check passes.
-7. Delete the branch right after merging (automatic branch deletion is intentionally off; deleting is part of this step).
-8. Confirm the `Live site check` run for the merge commit passes. Results are posted to the open `live-check` issue.
+5. Before merging, confirm the pull request's list of changed files matches the intended change. Anything unexpected means the branch started from the wrong place; stop and fix that first.
+6. Wait for the required check. If it fails, CI posts a summary to the open `ci-failure` issue; fix and push again.
+7. Squash-merge once the check passes.
+8. Delete the branch right after merging (automatic branch deletion is intentionally off; deleting is part of this step).
+9. Confirm the `Live site check` run for the merge commit passes. Results are posted to the open `live-check` issue.
 
 ## When something fails
 

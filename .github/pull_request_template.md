@@ -4,7 +4,8 @@
 
 ## Checklist
 
-- [ ] Branch is based on the latest `main`
+- [ ] Branch was created from a freshly updated `main`
+- [ ] The changed-files list matches the intended change
 - [ ] `npm run verify` passes locally (or explain why it wasn't run)
 - [ ] Content changes are in `src/data/site.ts` and use only facts the owner has published or confirmed
 - [ ] New photos have metadata stripped, descriptive alt text, and no names without permission

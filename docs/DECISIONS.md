@@ -102,6 +102,8 @@ Short records of the technical choices behind this site, so anyone taking it ove
 
 ## 16. Deploys are gated in GitHub Actions, and every page reports its version
 
+**Status:** the `deploy` job is superseded by decision 17 and was removed. The version tag remains.
+
 **Decision:** A `deploy` job runs only after browser tests and Lighthouse budgets pass, deploys with Wrangler, and confirms the live `<meta name="version">` matches the commit. Cloudflare Workers Builds remains the fallback path, still protected by the build gate.
 
 **Why:** GitHub branch protection and rulesets aren't available for private repositories on the free plan, and Cloudflare can't wait for GitHub checks. Deploying from the workflow makes the full suite a real precondition at no cost. The version tag lets anyone confirm what is live.
@@ -112,6 +114,6 @@ Short records of the technical choices behind this site, so anyone taking it ove
 
 **Decision:** A GitHub ruleset (GitHub Pro) requires a pull request, squash merging, and the browser-test check before anything reaches `main`, with no bypass list. After every merge, the live check waits for the page's `version` meta tag (the short commit from Cloudflare's `WORKERS_CI_COMMIT_SHA`) to match the merged commit. Merged branches are deleted as a process step rather than automatically. See `docs/WORKFLOW.md`.
 
-**Relation to decision 16:** decision 16 was written when branch protection was unavailable. With the ruleset enforced, Cloudflare Workers Builds deploys only commits that passed the required check, so the workflow `deploy` job is not needed. It stays inactive without the `CLOUDFLARE_API_TOKEN` secret. If that secret is ever added, disconnect Workers Builds first so the site is not deployed by two paths.
+**Relation to decision 16:** decision 16 was written when branch protection was unavailable. With the ruleset enforced, Cloudflare Workers Builds deploys only commits that passed the required check, so the workflow `deploy` job was removed to keep a single deploy path. Two paths would risk double deploys and conflicting settings.
 
 **Why:** The build gate cannot run browser tests, so the ruleset makes them a precondition. An empty bypass list matters because automated changes use the owner's token: any bypass the owner has, automation has too. Confirming the deployed commit closes the last gap, where a merge could silently fail to publish.

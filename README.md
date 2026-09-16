@@ -67,7 +67,7 @@ When Tamara confirms a detail, change it to `orgPublished(...)` with her confirm
 
 **What blocks publishing:** Cloudflare runs `npm run build`, which fails, and publishes nothing, if the type check or `scripts/validate-build.mjs` finds a problem: missing files, broken in-page links or images, missing alt text, placeholder text, a wrong or missing link-preview image, invalid structured data, missing security headers, or search indexing that doesn't match its setting (indexing is only ever allowed on the production domain). The last good deployment stays live.
 
-**What GitHub Actions checks** on every push and pull request (these report results; they don't stop Cloudflare unless `main` is protected, see below):
+**What GitHub Actions checks** on every push and pull request. The browser-test check is required by the `main` ruleset, so nothing reaches `main` (and therefore Cloudflare) without passing it. Lighthouse reports results but is not required, because scores vary slightly between runs.
 
 - **Browser tests** (`tests/site.spec.ts`, Playwright): 37 checks on each of 10 devices across all three browser engines: iPhone SE, 12 mini, 17, and 17 Pro Max, iPad mini, Galaxy S24, Pixel 7, and desktop Safari, Firefox, and Chrome. Every iPhone browser uses WebKit, so the WebKit runs cover iOS. Checks include a WCAG 2.2 AA accessibility scan with axe, 44px tap targets, font and image loading, no console errors, no sideways scrolling from 320 to 1440 px, keyboard-accessible tabs, the no-JavaScript fallback, video embeds, in-page links, search blocking, metadata, structured data, and the 404 page.
 - **Lighthouse budgets** (`lighthouserc.json`, three runs): performance at least 95, accessibility 100, best practices at least 95, every SEO audit except "is crawlable" (search blocking is intentional on the preview), layout shift under 0.05. Reports are saved as a build artifact, not published.
@@ -80,7 +80,7 @@ To run the browser tests locally the first time: `npx playwright install chromiu
 
 **Supported browsers** are listed in the `browserslist` field of `package.json` (iOS and Safari 15+, plus current Chrome, Firefox, Edge, and Samsung Internet). Lightning CSS adds vendor prefixes for them at build time. Automated WebKit runs approximate Safari; check the live preview on a real iPhone before sending it.
 
-**Making browser tests a precondition:** GitHub branch protection needs a paid plan for private repositories, so the `deploy` job is the gate instead: it publishes only after these checks pass (see Deploying).
+**Branch rules:** a GitHub ruleset on `main` (requires GitHub Pro for this private repository) blocks direct and force pushes, allows only squash-merged pull requests, and requires the **Format, types, build, and browser tests (10 devices, 3 engines)** check with the branch up to date. The bypass list is empty. See `docs/WORKFLOW.md`.
 
 ## Live site check
 
@@ -108,24 +108,18 @@ docs/                   Plan and decisions
 
 The site is served as static files by Cloudflare Workers. Static requests are free and unlimited on the Free plan, so the site cannot be paused for traffic. Configuration lives in `wrangler.jsonc`; response headers live in `public/_headers`.
 
-### Gated deploys from GitHub (recommended)
+### How deploys work
 
-The `deploy` job in `.github/workflows/ci.yml` publishes only after the browser tests and Lighthouse budgets pass, then confirms the live site is serving that commit. GitHub's branch protection isn't available for private repositories on the free plan, so this job is the gate. To turn it on:
+Cloudflare Workers Builds deploys every commit on `main`, running `npm run build` and then `npx wrangler deploy`. Deploys are gated twice:
 
-1. In Cloudflare, go to **My Profile → API Tokens → Create Token**, use the **Edit Cloudflare Workers** template, limit it to this account, and create it.
-2. In GitHub, go to **Settings → Secrets and variables → Actions** and add the secret `CLOUDFLARE_API_TOKEN` with that token.
-3. Add the variable `CLOUDFLARE_ACCOUNT_ID` (shown on the Cloudflare Workers overview page).
-4. The variables `PUBLIC_SITE_URL`, `SITE_URL`, and `PUBLIC_ALLOW_INDEXING` are already set for the preview.
-5. Push a commit and confirm the **Deploy to Cloudflare** job succeeds.
-6. Then, in Cloudflare, open the Worker's **Settings → Build** and disconnect the Git repository, so only the gated job deploys.
+1. **Before `main`:** the ruleset only lets a pull request merge after the full browser-test check passes.
+2. **During the build:** `npm run build` type-checks and validates the site; if it fails, nothing is published and the last good version stays live.
 
-Until the secret exists, the deploy job is skipped with a notice.
+Other branches are not built. Cloudflare builds automatically use the workers.dev preview address for the canonical URL and link-preview image (see `astro.config.mjs`).
 
-### Cloudflare Workers Builds (current setup)
+Every page includes `<meta name="version">` with the commit it was built from. After each merge, the live site check waits for that tag to match, which confirms the deploy happened.
 
-Cloudflare builds and deploys every push to `main` itself, running `npm run build` with `npx wrangler deploy`. The build gate still applies: if `npm run build` fails, nothing is published. Browser tests don't gate this path. Cloudflare builds automatically use the workers.dev preview address for the canonical URL and link-preview image (see `astro.config.mjs`).
-
-Every page includes `<meta name="version">` with the commit it was built from, so a live check can confirm what's deployed.
+This is the only deploy path. Don't add a second one (for example, a GitHub Actions job with a Cloudflare API token) without disconnecting Workers Builds first.
 
 ## Launch checklist
 
@@ -137,7 +131,7 @@ Complete only after Tamara approves the site.
 - [ ] Add hero and gallery photos she provides
 - [ ] Add `@astrojs/sitemap` and reference it in `src/pages/robots.txt.ts`
 - [ ] Add `caring4acausesupportiveservices.com` to Cloudflare and point it at the Worker (with her GoDaddy login)
-- [ ] Set `PUBLIC_ALLOW_INDEXING=true` and `PUBLIC_SITE_URL`/`SITE_URL=https://caring4acausesupportiveservices.com` (GitHub variables for gated deploys, or the Worker's build variables for Workers Builds), then redeploy
+- [ ] In the Worker's build variables (Cloudflare → Settings → Build), set `PUBLIC_ALLOW_INDEXING=true` and `PUBLIC_SITE_URL=https://caring4acausesupportiveservices.com`; set the GitHub repository variable `SITE_URL` to the same address; then redeploy
 - [ ] Add a `Strict-Transport-Security` header in `public/_headers` once the site is served only from her HTTPS domain
 - [ ] Check the live site on a phone: every button, tab, video, and link
 - [ ] Take down or redirect the old `caringforacauseindy.netlify.app` site
