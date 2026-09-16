@@ -1,0 +1,201 @@
+---
+import { contact, getHelp, links, org, programs } from "../data/site";
+import YouTubeLite from "./YouTubeLite.astro";
+
+const active = programs.filter((p) => p.active);
+const [featured, ...rest] = active;
+const applyEmail = `mailto:${contact.email}?subject=${encodeURIComponent("Application request")}`;
+---
+
+<section id="programs" class="section" aria-labelledby="programs-title">
+  <div class="wrap">
+    <header class="intro stack">
+      <h2 id="programs-title">Our programs</h2>
+      <p>{org.mission}</p>
+    </header>
+
+    <div id="get-help" class="get-help">
+      <div class="stack">
+        <h3>{getHelp.heading}</h3>
+        <p>{getHelp.whoCanApply}</p>
+        <p>{getHelp.howToApply}</p>
+      </div>
+      <div class="button-row">
+        {links.familyApplication && (
+          <a class="button button--crimson" href={links.familyApplication}>
+            Apply online
+          </a>
+        )}
+        <a class="button button--purple" href={contact.phoneHref}>
+          Call {contact.phoneDisplay}
+        </a>
+        <a class="button button--outline" href={applyEmail}>
+          Email us
+        </a>
+      </div>
+    </div>
+
+    {featured && (
+      <article id={featured.slug} class="feature">
+        <div class="stack">
+          <h3>{featured.name}</h3>
+          <p class="summary">{featured.summary}</p>
+          <p class="for">
+            <strong>Who it's for:</strong> {featured.forWhom}
+          </p>
+          {featured.details && (
+            <ul class="details">
+              {featured.details.map((d) => (
+                <li>{d}</li>
+              ))}
+            </ul>
+          )}
+        </div>
+        {featured.video && <YouTubeLite video={featured.video} />}
+      </article>
+    )}
+
+    <div class="list">
+      {rest.map((program) => (
+        <article id={program.slug} class:list={["row", { "has-video": program.video }]}>
+          <div class="stack">
+            <h3>{program.name}</h3>
+            <p class="summary">{program.summary}</p>
+            <p class="for">
+              <strong>Who it's for:</strong> {program.forWhom}
+            </p>
+            {program.details && (
+              <ul class="details">
+                {program.details.map((d) => (
+                  <li>{d}</li>
+                ))}
+              </ul>
+            )}
+            {program.checklist && (
+              <details class="checklist">
+                <summary>{program.checklist.title}</summary>
+                <div class="groups">
+                  {program.checklist.groups.map((group) => (
+                    <div>
+                      <h4>{group.heading}</h4>
+                      <ul>
+                        {group.items.map((item) => (
+                          <li>{item}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  ))}
+                </div>
+              </details>
+            )}
+          </div>
+          {program.video && <YouTubeLite video={program.video} />}
+        </article>
+      ))}
+    </div>
+  </div>
+</section>
+
+<style>
+  .intro {
+    margin-bottom: var(--space-l);
+  }
+
+  .intro p {
+    font-size: var(--step-1);
+    line-height: 1.45;
+    color: var(--muted);
+  }
+
+  .get-help {
+    display: grid;
+    gap: var(--space-m);
+    padding: var(--space-m);
+    border: 2px solid var(--purple);
+    border-radius: 16px;
+    background: #fff;
+    margin-bottom: var(--space-xl);
+  }
+
+  .feature {
+    display: grid;
+    gap: var(--space-m);
+    align-items: center;
+    padding-bottom: var(--space-l);
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .feature h3 {
+    font-size: var(--step-3);
+    color: var(--crimson);
+  }
+
+  .summary {
+    font-size: var(--step-1);
+    line-height: 1.45;
+  }
+
+  .for {
+    color: var(--muted);
+  }
+
+  .details {
+    padding-left: 1.2rem;
+    display: grid;
+    gap: 0.35rem;
+  }
+
+  .row {
+    display: grid;
+    gap: var(--space-m);
+    padding-block: var(--space-l);
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .row h3 {
+    color: var(--purple);
+  }
+
+  .checklist summary {
+    cursor: pointer;
+    font-weight: 700;
+    color: var(--purple);
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+  }
+
+  .groups {
+    display: grid;
+    gap: var(--space-m);
+    padding-top: var(--space-xs);
+  }
+
+  h4 {
+    font-family: var(--font-display);
+    font-size: var(--step-1);
+    margin: 0 0 0.4rem;
+  }
+
+  .groups ul {
+    columns: 2;
+    column-gap: var(--space-m);
+    padding-left: 1.2rem;
+  }
+
+  @media (min-width: 56rem) {
+    .get-help {
+      grid-template-columns: 1fr auto;
+      align-items: end;
+      padding: var(--space-l);
+    }
+    .feature,
+    .row.has-video {
+      grid-template-columns: 1fr 1fr;
+      gap: var(--space-l);
+    }
+    .groups {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+</style>

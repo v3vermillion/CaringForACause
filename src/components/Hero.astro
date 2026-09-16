@@ -1,0 +1,166 @@
+---
+import { Image } from "astro:assets";
+import logo from "../assets/brand/logo-full.png";
+import { hero, org } from "../data/site";
+
+type Props = {
+  /**
+   * The logo's purple measures about 2.2:1 against the dark background,
+   * below the 3:1 minimum for graphics. The light plate keeps it legible.
+   * Set to false to place the logo directly on the dark background.
+   */
+  logoPlate?: boolean;
+};
+
+const { logoPlate = true } = Astro.props;
+const { doors } = hero;
+---
+
+<section class="hero" aria-labelledby="hero-title">
+  <div class="wrap grid">
+    <div class:list={["logo", { plate: logoPlate }]}>
+      <Image
+        src={logo}
+        alt={`${org.legalName} logo`}
+        width={560}
+        widths={[280, 420, 560]}
+        sizes="(min-width: 56rem) 420px, 280px"
+        loading="eager"
+        fetchpriority="high"
+      />
+    </div>
+
+    <div class="copy">
+      <h1 id="hero-title">{hero.headline}</h1>
+      <p class="subhead">{hero.subhead}</p>
+
+      <div class="doors">
+        <a class="door door--help" href={doors.getHelp.href}>
+          <span class="door-title">{doors.getHelp.title}</span>
+          <span class="door-body">{doors.getHelp.body}</span>
+        </a>
+        <a class="door door--give" href={doors.giveHelp.href}>
+          <span class="door-title">{doors.giveHelp.title}</span>
+          <span class="door-body">{doors.giveHelp.body}</span>
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .hero {
+    background: var(--night);
+    color: #fff;
+    padding-block: var(--space-l) var(--space-xl);
+  }
+
+  .grid {
+    display: grid;
+    gap: var(--space-l);
+    align-items: center;
+  }
+
+  .logo {
+    justify-self: center;
+    width: min(100%, 280px);
+  }
+
+  .logo.plate {
+    padding: 1.5rem;
+    background: #fff;
+    border-radius: 50%;
+    aspect-ratio: 1;
+    display: grid;
+    place-items: center;
+  }
+
+  .copy {
+    display: grid;
+    gap: var(--space-m);
+  }
+
+  h1 {
+    max-width: 16ch;
+  }
+
+  .subhead {
+    color: var(--night-soft);
+    font-size: var(--step-1);
+    line-height: 1.4;
+  }
+
+  /* The two doors are the page's signature element. */
+  .doors {
+    display: grid;
+    gap: var(--space-s);
+    margin-top: var(--space-xs);
+  }
+
+  .door {
+    display: grid;
+    gap: 0.35rem;
+    padding: 1.4rem 1.5rem;
+    border-radius: 24px;
+    text-decoration: none;
+    transition: transform 150ms ease;
+  }
+
+  .door:hover {
+    transform: translateY(-2px);
+  }
+
+  .door:hover .door-title {
+    text-decoration: underline;
+    text-underline-offset: 0.15em;
+  }
+
+  .door--help {
+    background: var(--crimson);
+    color: #fff;
+  }
+
+  .door--give {
+    background: #fff;
+    color: var(--ink);
+  }
+
+  .door--give .door-title {
+    color: var(--purple);
+  }
+
+  .door-title {
+    font-family: var(--font-display);
+    font-size: var(--step-2);
+    font-weight: 800;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+  }
+
+  .door-body {
+    font-size: var(--step-0);
+    line-height: 1.45;
+  }
+
+  @media (min-width: 40rem) {
+    .doors {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+
+  @media (min-width: 56rem) {
+    .hero {
+      padding-block: var(--space-xl);
+    }
+    .grid {
+      grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+      gap: var(--space-xl);
+    }
+    .logo {
+      width: min(100%, 420px);
+    }
+    .logo.plate {
+      padding: 2.25rem;
+    }
+  }
+</style>

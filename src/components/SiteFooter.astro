@@ -1,0 +1,95 @@
+---
+import { contact, org } from "../data/site";
+
+const year = new Date().getFullYear();
+---
+
+<footer class="site-footer">
+  <div class="wrap grid">
+    <p class="sign-off">{org.signOff}</p>
+
+    <div class="stack">
+      <h2 class="label">Contact</h2>
+      <ul>
+        <li>
+          <a href={contact.phoneHref}>{contact.phoneDisplay}</a>
+        </li>
+        <li>
+          <a href={`mailto:${contact.email}`}>{contact.email}</a>
+        </li>
+        <li>
+          <a href={contact.facebook} target="_blank" rel="noopener">
+            Facebook<span class="visually-hidden"> (opens in a new tab)</span>
+          </a>
+        </li>
+      </ul>
+    </div>
+
+    <div class="stack">
+      <h2 class="label">{org.legalName}</h2>
+      <p>
+        {org.city}. Serving {org.serviceArea}.
+      </p>
+      <p>
+        A 501(c)(3) nonprofit, EIN {org.ein}. Donations are tax-deductible to the extent allowed by
+        law.
+      </p>
+    </div>
+  </div>
+  <div class="wrap legal">
+    <p>
+      &copy; {year} {org.legalName}
+    </p>
+  </div>
+</footer>
+
+<style>
+  .site-footer {
+    background: var(--night);
+    color: var(--night-soft);
+    padding-block: var(--space-xl) var(--space-m);
+  }
+
+  .grid {
+    display: grid;
+    gap: var(--space-l);
+  }
+
+  .sign-off {
+    font-family: var(--font-display);
+    font-size: var(--step-4);
+    font-weight: 800;
+    line-height: 1;
+    letter-spacing: -0.03em;
+    color: #fff;
+  }
+
+  .label {
+    font-size: var(--step-1);
+    color: #fff;
+  }
+
+  ul {
+    list-style: none;
+    padding: 0;
+    display: grid;
+    gap: 0.35rem;
+  }
+
+  a {
+    color: #fff;
+  }
+
+  .legal {
+    margin-top: var(--space-l);
+    padding-top: var(--space-m);
+    border-top: 1px solid rgb(201 182 242 / 0.25);
+    font-size: var(--step--1);
+  }
+
+  @media (min-width: 56rem) {
+    .grid {
+      grid-template-columns: 6fr 3fr 4fr;
+    }
+  }
+</style>

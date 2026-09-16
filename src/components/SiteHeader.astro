@@ -1,0 +1,130 @@
+---
+import { Image } from "astro:assets";
+import mark from "../assets/brand/logo-mark.png";
+import { links, org } from "../data/site";
+
+const nav = [
+  { label: "Programs", href: "/#programs" },
+  { label: "Get help", href: "/#get-help" },
+  { label: "Get involved", href: "/#get-involved" },
+  { label: "About", href: "/#about" },
+];
+const donateHref = links.donate ?? "/#donate";
+---
+
+<header class="site-header">
+  <div class="wrap bar">
+    <a class="brand" href="/">
+      <Image src={mark} alt="" width={40} height={40} loading="eager" />
+      <span>{org.shortName}</span>
+    </a>
+    <nav aria-label="Main">
+      <ul>
+        {nav.map((item) => (
+          <li>
+            <a href={item.href}>{item.label}</a>
+          </li>
+        ))}
+      </ul>
+    </nav>
+    <a class="button button--crimson donate" href={donateHref}>
+      Donate
+    </a>
+  </div>
+</header>
+
+<style>
+  .site-header {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    background: rgb(250 247 253 / 0.96);
+    border-bottom: 1px solid var(--rule);
+    backdrop-filter: blur(8px);
+  }
+
+  /* Mobile: brand and Donate on row one, nav scrolls on row two. */
+  .bar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    column-gap: 0.75rem;
+    padding-block: 0.5rem;
+  }
+
+  .brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    color: var(--ink);
+    font-family: var(--font-display);
+    min-width: 0;
+    font-weight: 750;
+    font-size: clamp(1.05rem, 0.6rem + 2.4vw, 1.4rem);
+    letter-spacing: -0.02em;
+    text-decoration: none;
+  }
+
+  .donate {
+    min-height: 44px;
+    padding-inline: 1rem;
+  }
+
+  nav {
+    order: 3;
+    flex-basis: 100%;
+    min-width: 0;
+  }
+
+  nav ul {
+    display: flex;
+    gap: 1.1rem;
+    padding: 0.4rem 0 0.1rem;
+    list-style: none;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  nav a {
+    display: inline-block;
+    padding-block: 0.25rem;
+    color: var(--ink);
+    font-size: 1rem;
+    font-weight: 700;
+    white-space: nowrap;
+    text-decoration: none;
+  }
+
+  nav a:hover {
+    color: var(--purple);
+    text-decoration: underline;
+  }
+
+  /* Smallest phones (under 360px): tighten so Donate stays on the first row. */
+  @media (max-width: 22.4rem) {
+    .brand {
+      font-size: 0.95rem;
+    }
+    .donate {
+      padding-inline: 0.8rem;
+      font-size: 1rem;
+    }
+  }
+
+  /* Desktop: one row, brand | nav | Donate. */
+  @media (min-width: 56rem) {
+    nav {
+      order: 0;
+      flex-basis: auto;
+      margin-left: auto;
+    }
+    nav ul {
+      gap: var(--space-m);
+      padding: 0;
+    }
+    nav a {
+      font-size: var(--step-0);
+    }
+  }
+</style>

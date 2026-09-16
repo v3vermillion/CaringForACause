@@ -1,0 +1,26 @@
+---
+import About from "../components/About.astro";
+import Gallery from "../components/Gallery.astro";
+import GetInvolved from "../components/GetInvolved.astro";
+import Hero from "../components/Hero.astro";
+import Programs from "../components/Programs.astro";
+import SeasonalBanner from "../components/SeasonalBanner.astro";
+import SiteFooter from "../components/SiteFooter.astro";
+import SiteHeader from "../components/SiteHeader.astro";
+import TrustFacts from "../components/TrustFacts.astro";
+import Base from "../layouts/Base.astro";
+---
+
+<Base>
+  <SiteHeader />
+  <main id="main">
+    <Hero />
+    <SeasonalBanner />
+    <TrustFacts />
+    <Programs />
+    <GetInvolved />
+    <About />
+    <Gallery />
+  </main>
+  <SiteFooter />
+</Base>

@@ -1,0 +1,35 @@
+---
+import { about } from "../data/site";
+import YouTubeLite from "./YouTubeLite.astro";
+---
+
+<section id="about" class="section" aria-labelledby="about-title">
+  <div class="wrap grid">
+    <div class="stack">
+      <h2 id="about-title">{about.heading}</h2>
+      {about.body.map((line) => (
+        <p>{line}</p>
+      ))}
+    </div>
+    <YouTubeLite video={about.video} />
+  </div>
+</section>
+
+<style>
+  .grid {
+    display: grid;
+    gap: var(--space-l);
+    align-items: center;
+  }
+
+  p {
+    font-size: var(--step-1);
+    line-height: 1.5;
+  }
+
+  @media (min-width: 56rem) {
+    .grid {
+      grid-template-columns: 5fr 7fr;
+    }
+  }
+</style>

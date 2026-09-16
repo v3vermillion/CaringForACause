@@ -1,0 +1,88 @@
+---
+import type { YouTubeVideo } from "../data/site";
+
+type Props = { video: YouTubeVideo };
+const { video } = Astro.props;
+const watchUrl = `https://www.youtube.com/watch?v=${video.id}`;
+const thumb = `https://i.ytimg.com/vi/${video.id}/hqdefault.jpg`;
+---
+
+<!--
+  Loads only a thumbnail until tapped, so pages stay fast and YouTube
+  sets no cookies before a visitor chooses to play. Without JavaScript,
+  the link opens the video on YouTube.
+-->
+<div class="yt" data-yt-id={video.id} data-yt-title={video.title}>
+  <a href={watchUrl} class="yt-link">
+    <img src={thumb} alt="" width="480" height="360" loading="lazy" decoding="async" />
+    <span class="yt-play" aria-hidden="true"></span>
+    <span class="visually-hidden">Play video: {video.title}</span>
+  </a>
+</div>
+
+<script>
+  document.querySelectorAll<HTMLElement>(".yt").forEach((el) => {
+    const link = el.querySelector("a");
+    link?.addEventListener("click", (event) => {
+      event.preventDefault();
+      const iframe = document.createElement("iframe");
+      iframe.src = `https://www.youtube-nocookie.com/embed/${el.dataset.ytId}?autoplay=1&rel=0`;
+      iframe.title = el.dataset.ytTitle ?? "Video";
+      iframe.allow = "autoplay; encrypted-media; picture-in-picture; fullscreen";
+      iframe.allowFullscreen = true;
+      el.replaceChildren(iframe);
+      iframe.focus();
+    });
+  });
+</script>
+
+<style>
+  .yt {
+    position: relative;
+    aspect-ratio: 16 / 9;
+    overflow: hidden;
+    border-radius: 16px;
+    background: var(--night);
+  }
+
+  .yt-link,
+  .yt :global(iframe) {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    border: 0;
+  }
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .yt-play {
+    position: absolute;
+    inset: 0;
+    margin: auto;
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    background: var(--crimson);
+    box-shadow: 0 0 0 6px rgb(255 255 255 / 0.85);
+  }
+
+  .yt-play::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 54%;
+    transform: translate(-50%, -50%);
+    border-style: solid;
+    border-width: 13px 0 13px 22px;
+    border-color: transparent transparent transparent #fff;
+  }
+
+  .yt-link:hover .yt-play {
+    background: #950009;
+  }
+</style>

@@ -1,0 +1,209 @@
+---
+import { contact, getInvolved } from "../data/site";
+import YouTubeLite from "./YouTubeLite.astro";
+
+const { tabs } = getInvolved;
+const mailto = (subject: string) =>
+  `mailto:${contact.email}?subject=${encodeURIComponent(subject)}`;
+---
+
+<section id="get-involved" class="section section--lilac" aria-labelledby="involved-title">
+  <div class="wrap">
+    <header class="stack head">
+      <h2 id="involved-title">{getInvolved.heading}</h2>
+      <p>{getInvolved.intro}</p>
+    </header>
+
+    <!--
+      Tabs are built up by the script below. Without JavaScript, the tab
+      buttons stay hidden and every panel is shown in order.
+    -->
+    <div class="tabs" data-tabs>
+      <div class="tablist" role="tablist" aria-label={getInvolved.heading} hidden>
+        {tabs.map((tab, i) => (
+          <button
+            type="button"
+            role="tab"
+            id={`tab-${tab.id}`}
+            aria-controls={tab.id}
+            aria-selected={i === 0 ? "true" : "false"}
+            tabindex={i === 0 ? 0 : -1}
+          >
+            {tab.label}
+          </button>
+        ))}
+      </div>
+
+      {tabs.map((tab) => {
+        const href = tab.action.href ?? mailto(tab.heading);
+        const label = tab.action.href ? tab.action.label : tab.action.fallbackLabel;
+        const external = href.startsWith("http");
+        return (
+          <div class="panel" id={tab.id} data-panel>
+            <div class="stack">
+              <h3>{tab.heading}</h3>
+              {tab.body.map((line) => (
+                <p>{line}</p>
+              ))}
+              <p>
+                <a
+                  class="button button--purple"
+                  href={href}
+                  {...(external ? { target: "_blank", rel: "noopener" } : {})}
+                >
+                  {label}
+                  {external && <span class="visually-hidden"> (opens in a new tab)</span>}
+                </a>
+              </p>
+            </div>
+            {tab.video && <YouTubeLite video={tab.video} />}
+          </div>
+        );
+      })}
+    </div>
+  </div>
+</section>
+
+<script>
+  document.querySelectorAll<HTMLElement>("[data-tabs]").forEach((root) => {
+    const tablist = root.querySelector<HTMLElement>("[role=tablist]");
+    const tabs = Array.from(root.querySelectorAll<HTMLButtonElement>("[role=tab]"));
+    const panels = Array.from(root.querySelectorAll<HTMLElement>("[data-panel]"));
+    if (!tablist || tabs.length === 0) return;
+
+    panels.forEach((panel) => {
+      panel.setAttribute("role", "tabpanel");
+      panel.setAttribute("aria-labelledby", `tab-${panel.id}`);
+      panel.tabIndex = 0;
+    });
+    tablist.hidden = false;
+    root.classList.add("is-enhanced");
+
+    const select = (id: string, focus = false) => {
+      tabs.forEach((tab) => {
+        const on = tab.getAttribute("aria-controls") === id;
+        tab.setAttribute("aria-selected", String(on));
+        tab.tabIndex = on ? 0 : -1;
+        if (on && focus) tab.focus();
+      });
+      panels.forEach((panel) => {
+        panel.hidden = panel.id !== id;
+      });
+    };
+
+    tabs.forEach((tab, i) => {
+      tab.addEventListener("click", () => select(tab.getAttribute("aria-controls")!));
+      tab.addEventListener("keydown", (event) => {
+        const keys: Record<string, number> = {
+          ArrowRight: i + 1,
+          ArrowDown: i + 1,
+          ArrowLeft: i - 1,
+          ArrowUp: i - 1,
+          Home: 0,
+          End: tabs.length - 1,
+        };
+        if (!(event.key in keys)) return;
+        event.preventDefault();
+        const next = tabs[(keys[event.key]! + tabs.length) % tabs.length]!;
+        select(next.getAttribute("aria-controls")!, true);
+      });
+    });
+
+    // Links like /#donate open the matching tab and scroll to the section.
+    const fromHash = () => {
+      const id = decodeURIComponent(location.hash.slice(1));
+      if (panels.some((p) => p.id === id)) {
+        select(id);
+        root.closest("section")?.scrollIntoView();
+        return true;
+      }
+      return false;
+    };
+    if (!fromHash()) select(panels[0]!.id);
+    window.addEventListener("hashchange", fromHash);
+  });
+</script>
+
+<style>
+  .head {
+    margin-bottom: var(--space-l);
+  }
+
+  .head p {
+    font-size: var(--step-1);
+    color: var(--muted);
+  }
+
+  .tablist {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-xs);
+    margin-bottom: var(--space-m);
+  }
+
+  .tablist[hidden] {
+    display: none;
+  }
+
+  [role="tab"] {
+    min-height: 52px;
+    padding: 0.6rem 0.9rem;
+    border: 2px solid var(--purple);
+    border-radius: 12px;
+    background: #fff;
+    color: var(--purple);
+    font: inherit;
+    font-family: var(--font-display);
+    font-weight: 700;
+    cursor: pointer;
+  }
+
+  [role="tab"][aria-selected="true"] {
+    background: var(--purple);
+    color: #fff;
+  }
+
+  .panel {
+    display: grid;
+    gap: var(--space-m);
+    align-items: center;
+    padding: var(--space-m);
+    background: #fff;
+    border-radius: 16px;
+  }
+
+  /* Without JavaScript, panels stack with space between them. */
+  .panel + .panel {
+    margin-top: var(--space-m);
+  }
+
+  .is-enhanced .panel + .panel {
+    margin-top: 0;
+  }
+
+  .panel[hidden] {
+    display: none;
+  }
+
+  .panel h3 {
+    color: var(--ink);
+  }
+
+  @media (min-width: 40rem) {
+    .tablist {
+      display: flex;
+      flex-wrap: wrap;
+    }
+    [role="tab"] {
+      padding-inline: 1.25rem;
+    }
+  }
+
+  @media (min-width: 56rem) {
+    .panel {
+      grid-template-columns: 1fr 1fr;
+      gap: var(--space-l);
+      padding: var(--space-l);
+    }
+  }
+</style>
