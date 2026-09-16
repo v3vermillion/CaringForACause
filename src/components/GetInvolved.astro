@@ -1,5 +1,7 @@
 ---
 import { contact, getInvolved } from "../data/site";
+import Photo from "./Photo.astro";
+import VideoLink from "./VideoLink.astro";
 import YouTubeLite from "./YouTubeLite.astro";
 
 const { tabs } = getInvolved;
@@ -55,8 +57,13 @@ const mailto = (subject: string) =>
                   {external && <span class="visually-hidden"> (opens in a new tab)</span>}
                 </a>
               </p>
+              {tab.photo && tab.video && <VideoLink video={tab.video} />}
             </div>
-            {tab.video && <YouTubeLite video={tab.video} />}
+            {tab.photo ? (
+              <Photo photo={tab.photo} ratio="4 / 3" />
+            ) : (
+              tab.video && <YouTubeLite video={tab.video} />
+            )}
           </div>
         );
       })}

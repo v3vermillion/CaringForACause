@@ -14,6 +14,15 @@ export type YouTubeVideo = {
   title: string;
 };
 
+export type Photo = {
+  /** File name in src/assets/photos/ */
+  file: string;
+  /** Describes what the photo shows, for screen readers. Never name people without permission. */
+  alt: string;
+  /** Which part of the photo to keep when cropped, e.g. "center 30%". */
+  focus?: string;
+};
+
 export type Program = {
   /** Used for page anchors, e.g. /#holiday-assistance */
   slug: string;
@@ -25,6 +34,8 @@ export type Program = {
   details?: string[];
   /** Optional grouped checklist, shown in a collapsible section. */
   checklist?: { title: string; groups: { heading: string; items: string[] }[] };
+  /** Shown beside the text. When a photo is set, a video becomes a text link. */
+  photo?: Photo;
   video?: YouTubeVideo;
   /** Set to false to hide a program without deleting it. */
   active: boolean;
@@ -38,6 +49,7 @@ export type InvolvementTab = {
   body: string[];
   /** When `href` is null, the button emails us and shows `fallbackLabel`. */
   action: { label: string; href: string | null; fallbackLabel: string };
+  photo?: Photo;
   video?: YouTubeVideo;
 };
 
@@ -120,7 +132,11 @@ export const programs: Program[] = [
       "Sponsors choose a family and help fill its holiday needs.",
       "We partner with Toys for Tots.",
     ],
-    video: { id: "02gc0dPLET0", title: "Holiday sponsors and volunteers needed" },
+    photo: {
+      file: "holiday-gift-bags.jpg",
+      alt: "Children holding holiday gift bags beside a volunteer in a Santa hat",
+      focus: "center 62%",
+    },
     active: true,
   },
   {
@@ -128,6 +144,11 @@ export const programs: Program[] = [
     name: "Diaper Drive",
     summary: "A reliable monthly supply of diapers, plus referrals to partner resources.",
     forWhom: "Families with babies and toddlers who need help with diapers.",
+    photo: {
+      file: "diaper-drive.jpg",
+      alt: "A volunteer hands a large pack of diapers to a family with a young child",
+      focus: "center 40%",
+    },
     active: true,
   },
   {
@@ -135,6 +156,11 @@ export const programs: Program[] = [
     name: "Back-to-School Care Packages",
     summary: "Hygiene items and school supplies for girls and boys in our community.",
     forWhom: "Students from families who need help getting ready for school.",
+    photo: {
+      file: "care-basket.jpg",
+      alt: "A woman carries a basket filled with care package items",
+      focus: "center 50%",
+    },
     checklist: {
       title: "See what we're collecting",
       groups: [
@@ -191,6 +217,11 @@ export const programs: Program[] = [
     summary:
       "Volunteer barbers, stylists, makeup artists, and face painters give free cuts and styles.",
     forWhom: "People experiencing homelessness and low-income families.",
+    photo: {
+      file: "haircut-boy.jpg",
+      alt: "A boy gets a free haircut from a volunteer stylist",
+      focus: "center 30%",
+    },
     video: { id: "Z5USx1xFF58", title: "Free haircut and styles outreach program" },
     active: true,
   },
@@ -220,6 +251,11 @@ export const getInvolved = {
         href: links.sponsorSignup,
         fallbackLabel: "Email us to sponsor",
       },
+      photo: {
+        file: "holiday-shopping.jpg",
+        alt: "Children holding shopping bags during a holiday shopping trip",
+        focus: "center 60%",
+      },
       video: { id: "02gc0dPLET0", title: "Holiday sponsors and volunteers needed" },
     },
     {
@@ -231,6 +267,11 @@ export const getInvolved = {
         `${org.legalName} is a 501(c)(3) nonprofit (EIN ${org.ein}), so donations are tax-deductible.`,
       ],
       action: { label: "Donate now", href: links.donate, fallbackLabel: "Email us to give" },
+      photo: {
+        file: "families-banner.jpg",
+        alt: "Families and children in front of a Caring for a Cause banner",
+        focus: "center 55%",
+      },
       video: { id: "xUVUOB-w94Q", title: "Donations and volunteers needed" },
     },
     {
@@ -245,6 +286,11 @@ export const getInvolved = {
         href: links.volunteerForm,
         fallbackLabel: "Email us to volunteer",
       },
+      photo: {
+        file: "volunteer-face-painting.jpg",
+        alt: "A volunteer paints a girl's face at a community event",
+        focus: "center 40%",
+      },
     },
     {
       id: "partner",
@@ -258,6 +304,11 @@ export const getInvolved = {
         label: "Contact us about partnering",
         href: null,
         fallbackLabel: "Email us about partnering",
+      },
+      photo: {
+        file: "stylist-haircut.jpg",
+        alt: "A volunteer stylist cuts a man's hair at a free haircut event",
+        focus: "center 40%",
       },
     },
   ] satisfies InvolvementTab[],
@@ -275,5 +326,11 @@ export const about = {
   } satisfies YouTubeVideo,
 };
 
-/** Add photo files to src/assets/gallery/ and list them here. Empty hides the section. */
-export const gallery: { file: string; alt: string }[] = [];
+/** Photos from src/assets/photos/ shown in the gallery strip. Empty hides the section. */
+export const gallery: Photo[] = [
+  {
+    file: "face-paint-closeup.jpg",
+    alt: "A child with a colorful painted face at a community event",
+    focus: "center 35%",
+  },
+];

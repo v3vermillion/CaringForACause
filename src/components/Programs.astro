@@ -1,5 +1,7 @@
 ---
 import { contact, getHelp, links, org, programs } from "../data/site";
+import Photo from "./Photo.astro";
+import VideoLink from "./VideoLink.astro";
 import YouTubeLite from "./YouTubeLite.astro";
 
 const active = programs.filter((p) => p.active);
@@ -50,14 +52,22 @@ const applyEmail = `mailto:${contact.email}?subject=${encodeURIComponent("Applic
               ))}
             </ul>
           )}
+          {featured.photo && featured.video && <VideoLink video={featured.video} />}
         </div>
-        {featured.video && <YouTubeLite video={featured.video} />}
+        {featured.photo ? (
+          <Photo photo={featured.photo} ratio="4 / 3" />
+        ) : (
+          featured.video && <YouTubeLite video={featured.video} />
+        )}
       </article>
     )}
 
     <div class="list">
       {rest.map((program) => (
-        <article id={program.slug} class:list={["row", { "has-video": program.video }]}>
+        <article
+          id={program.slug}
+          class:list={["row", { "has-media": program.photo || program.video }]}
+        >
           <div class="stack">
             <h3>{program.name}</h3>
             <p class="summary">{program.summary}</p>
@@ -88,8 +98,17 @@ const applyEmail = `mailto:${contact.email}?subject=${encodeURIComponent("Applic
                 </div>
               </details>
             )}
+            {program.photo && program.video && <VideoLink video={program.video} />}
           </div>
-          {program.video && <YouTubeLite video={program.video} />}
+          {program.photo ? (
+            <Photo
+              photo={program.photo}
+              ratio="4 / 3"
+              sizes="(min-width: 56rem) 460px, calc(100vw - 2.5rem)"
+            />
+          ) : (
+            program.video && <YouTubeLite video={program.video} />
+          )}
         </article>
       ))}
     </div>
@@ -189,10 +208,14 @@ const applyEmail = `mailto:${contact.email}?subject=${encodeURIComponent("Applic
       align-items: end;
       padding: var(--space-l);
     }
-    .feature,
-    .row.has-video {
+    .feature {
       grid-template-columns: 1fr 1fr;
       gap: var(--space-l);
+    }
+    .row.has-media {
+      grid-template-columns: 7fr 5fr;
+      gap: var(--space-l);
+      align-items: start;
     }
     .groups {
       grid-template-columns: 1fr 1fr;

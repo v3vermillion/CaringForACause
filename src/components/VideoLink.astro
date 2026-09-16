@@ -1,0 +1,25 @@
+---
+import type { YouTubeVideo } from "../data/site";
+
+type Props = { video: YouTubeVideo };
+const { video } = Astro.props;
+---
+
+<a
+  class="video-link"
+  href={`https://www.youtube.com/watch?v=${video.id}`}
+  target="_blank"
+  rel="noopener"
+>
+  Watch the video: {video.title}
+  <span class="visually-hidden"> (opens in a new tab on YouTube)</span>
+</a>
+
+<style>
+  .video-link {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    font-weight: 700;
+  }
+</style>

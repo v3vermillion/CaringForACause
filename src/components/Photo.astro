@@ -1,0 +1,57 @@
+---
+import { Picture } from "astro:assets";
+import type { ImageMetadata } from "astro";
+import type { Photo } from "../data/site";
+
+type Props = {
+  photo: Photo;
+  /** CSS aspect ratio for the crop, e.g. "1 / 1". */
+  ratio?: string;
+  /** Rendered widths, matched to the layout. */
+  sizes?: string;
+  class?: string;
+};
+
+const {
+  photo,
+  ratio = "1 / 1",
+  sizes = "(min-width: 56rem) 560px, calc(100vw - 2.5rem)",
+  class: className,
+} = Astro.props;
+
+// Photos live in src/assets/photos/ and are referenced by file name in src/data/site.ts.
+const files = import.meta.glob<{ default: ImageMetadata }>(
+  "../assets/photos/*.{jpg,jpeg,png,webp}",
+  { eager: true },
+);
+const match = files[`../assets/photos/${photo.file}`];
+if (!match) {
+  throw new Error(`Photo not found: src/assets/photos/${photo.file}`);
+}
+const src = match.default;
+// Never request images wider than the source; the photos are phone-sized.
+const widths = [360, 540, 720, 1080].filter((w) => w <= src.width);
+---
+
+<Picture
+  src={src}
+  formats={["avif", "webp"]}
+  alt={photo.alt}
+  widths={widths}
+  sizes={sizes}
+  loading="lazy"
+  decoding="async"
+  class:list={["photo", className]}
+  style={`aspect-ratio: ${ratio}; object-position: ${photo.focus ?? "center"};`}
+/>
+
+<style>
+  .photo {
+    display: block;
+    width: 100%;
+    height: auto;
+    object-fit: cover;
+    border-radius: 16px;
+    background: var(--lilac);
+  }
+</style>

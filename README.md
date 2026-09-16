@@ -74,7 +74,7 @@ src/
   components/           One file per page section
   styles/global.css     Design tokens and shared styles
   assets/brand/         Logo and icon (optimized at build time)
-  assets/gallery/       Event photos
+  assets/photos/        Event photos (metadata stripped)
 public/                 Icons, sharing image, web manifest, _headers (security and cache rules)
 tests/                  Browser tests
 docs/                   Plan and decisions

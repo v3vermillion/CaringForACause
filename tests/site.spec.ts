@@ -60,6 +60,7 @@ test.describe("device compatibility", () => {
       ".checklist summary",
       ".site-footer li a",
       ".door",
+      ".video-link",
     ];
     for (const selector of selectors) {
       for (const el of await page.locator(selector).all()) {
@@ -88,14 +89,26 @@ test.describe("device compatibility", () => {
     expect(loaded).toEqual({ display: true, body: true });
   });
 
-  test("the hero logo and header icon load in a supported format", async ({ page }) => {
-    await page.goto("/");
-    for (const selector of [".hero .logo img", ".brand img"]) {
-      const img = page.locator(selector);
+  test("the logo, icon, and every photo load in a supported format", async ({ page }) => {
+    const loaded = async (img: import("@playwright/test").Locator) => {
       await img.scrollIntoViewIfNeeded();
       await expect
         .poll(() => img.evaluate((el: HTMLImageElement) => el.complete && el.naturalWidth > 0))
         .toBe(true);
+    };
+    await page.goto("/");
+    await loaded(page.locator(".hero .logo img"));
+    await loaded(page.locator(".brand img"));
+
+    // Photos outside the tabs
+    const outside = page.locator("img.photo:not([data-panel] img)");
+    expect(await outside.count()).toBeGreaterThanOrEqual(5);
+    for (const img of await outside.all()) await loaded(img);
+
+    // Photos inside tabs only load once their tab is open
+    for (const id of ["sponsor", "donate", "volunteer", "partner"]) {
+      await page.locator(`#tab-${id}`).click();
+      await loaded(page.locator(`#${id} img.photo`));
     }
   });
 
@@ -230,8 +243,8 @@ test.describe("videos", () => {
       route.fulfill({ status: 200, contentType: "text/html", body: "<p>player</p>" }),
     );
     await page.goto("/");
-    await page.locator("#holiday-assistance .yt-link").click();
-    const iframe = page.locator("#holiday-assistance iframe");
+    await page.locator("#about .yt-link").click();
+    const iframe = page.locator("#about iframe");
     await expect(iframe).toHaveAttribute("src", /^https:\/\/www\.youtube-nocookie\.com\/embed\//);
     await expect(iframe).toHaveAttribute("title", /.+/);
   });
