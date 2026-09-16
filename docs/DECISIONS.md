@@ -107,3 +107,11 @@ Short records of the technical choices behind this site, so anyone taking it ove
 **Why:** GitHub branch protection and rulesets aren't available for private repositories on the free plan, and Cloudflare can't wait for GitHub checks. Deploying from the workflow makes the full suite a real precondition at no cost. The version tag lets anyone confirm what is live.
 
 **Trade-off:** The owner's GitHub repository needs one Cloudflare API token secret. Handoff instructions cover creating it.
+
+## 17. Pull requests only, with deploy confirmation
+
+**Decision:** A GitHub ruleset (GitHub Pro) requires a pull request, squash merging, and the browser-test check before anything reaches `main`, with no bypass list. After every merge, the live check waits for the page's `version` meta tag (the short commit from Cloudflare's `WORKERS_CI_COMMIT_SHA`) to match the merged commit. Merged branches are deleted as a process step rather than automatically. See `docs/WORKFLOW.md`.
+
+**Relation to decision 16:** decision 16 was written when branch protection was unavailable. With the ruleset enforced, Cloudflare Workers Builds deploys only commits that passed the required check, so the workflow `deploy` job is not needed. It stays inactive without the `CLOUDFLARE_API_TOKEN` secret. If that secret is ever added, disconnect Workers Builds first so the site is not deployed by two paths.
+
+**Why:** The build gate cannot run browser tests, so the ruleset makes them a precondition. An empty bypass list matters because automated changes use the owner's token: any bypass the owner has, automation has too. Confirming the deployed commit closes the last gap, where a merge could silently fail to publish.

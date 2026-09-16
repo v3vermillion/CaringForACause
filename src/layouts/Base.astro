@@ -38,6 +38,11 @@ const version = (process.env.GITHUB_SHA || process.env.WORKERS_CI_COMMIT_SHA || 
   7,
 );
 const canonical = new URL(Astro.url.pathname, Astro.site);
+
+// The commit this page was built from. Cloudflare Workers Builds provides
+// WORKERS_CI_COMMIT_SHA; the live check waits until this matches the merged
+// commit to confirm the deploy actually happened.
+const buildCommit = process.env.WORKERS_CI_COMMIT_SHA || process.env.GITHUB_SHA || "local";
 const ogImage = new URL("/og-image.jpg", Astro.site);
 
 // Structured data so search engines recognize a registered nonprofit.

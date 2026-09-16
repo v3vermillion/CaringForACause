@@ -7,6 +7,7 @@ Website for [Caring for a Cause Supportive Services Inc.](https://caring4acauses
 - [Site plan](docs/SITE-PLAN.md): audiences, page structure, design tokens, open questions
 - [Approach](docs/APPROACH.md): the principles every change follows
 - [Decisions](docs/DECISIONS.md): why the site is built this way
+- [Workflow](docs/WORKFLOW.md): how every change is checked and shipped
 
 ## Stack
 
@@ -83,7 +84,7 @@ To run the browser tests locally the first time: `npx playwright install chromiu
 
 ## Live site check
 
-`.github/workflows/live-check.yml` tests the deployed site every Monday and on demand (Actions → Live site check → Run workflow). It runs the full browser suite against the live URL, checks status codes, security headers, caching, and compression (`scripts/check-live-headers.sh`), and records Lighthouse scores. Results are posted to an open issue labeled `live-check`. To change the URL it checks, set a repository variable named `SITE_URL`.
+`.github/workflows/live-check.yml` runs after every merge to `main`, every Monday, and on demand (Actions → Live site check → Run workflow). After a merge, it first waits until the live page's `version` tag matches the merged commit, which confirms Cloudflare published it. It runs the full browser suite against the live URL, checks status codes, security headers, caching, and compression (`scripts/check-live-headers.sh`), and records Lighthouse scores. Results are posted to an open issue labeled `live-check`. To change the URL it checks, set a repository variable named `SITE_URL`.
 
 ## Project structure
 

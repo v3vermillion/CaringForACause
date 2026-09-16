@@ -1,8 +1,12 @@
 # Checks the deployed site: browser tests, headers, and Lighthouse.
-# Runs on demand and weekly, and posts results to one issue labeled live-check.
+# Runs after every merge to main, weekly, and on demand, and posts results to
+# one issue labeled live-check.
 name: Live site check
 
 on:
+  # After every merge to main: wait for Cloudflare to publish that commit, then check it.
+  push:
+    branches: [main]
   workflow_dispatch:
     inputs:
       url:
@@ -31,6 +35,23 @@ jobs:
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@v7
+
+      # Cloudflare builds each push independently of GitHub. Wait until the live
+      # page reports this commit; if it never does, the deploy failed or was
+      # blocked by the build gate, and the check fails.
+      - name: Wait for Cloudflare to publish this commit
+        id: deploy
+        if: github.event_name == 'push'
+        run: |
+          for i in $(seq 1 60); do
+            live=$(curl -fsS "$SITE_URL/" | grep -oE '<meta name="version" content="[^"]*"' | sed -E 's/.*content="([^"]*)"/\1/' || true)
+            if [ "$live" = "${GITHUB_SHA:0:7}" ]; then echo "Deployed: $live"; exit 0; fi
+            echo "Waiting ($i/60): live commit is ${live:-unknown}"
+            sleep 20
+          done
+          echo "::error::Cloudflare did not publish $GITHUB_SHA within 20 minutes. Check the Cloudflare build log."
+          exit 1
+
       - uses: actions/setup-node@v7
         with:
           node-version-file: .nvmrc
@@ -90,7 +111,7 @@ jobs:
             echo "## Live check: $SITE_URL"
             echo "Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }} · Commit: ${{ github.sha }}"
             echo
-            echo "**Headers:** ${{ steps.headers.outcome }} · **Browser tests:** ${{ steps.browser.outcome }} · **Lighthouse:** ${{ steps.lighthouse.outcome }}"
+            echo "**Deploy:** ${{ steps.deploy.outcome || 'not checked (manual or scheduled run)' }} · **Headers:** ${{ steps.headers.outcome }} · **Browser tests:** ${{ steps.browser.outcome }} · **Lighthouse:** ${{ steps.lighthouse.outcome }}"
             echo
             echo "### Headers and status codes"
             cat headers.md 2>/dev/null || echo "(not run)"
@@ -115,5 +136,5 @@ jobs:
           fi
 
       - name: Fail if any check failed
-        if: steps.headers.outcome == 'failure' || steps.browser.outcome == 'failure' || steps.lighthouse.outcome == 'failure'
+        if: steps.deploy.outcome == 'failure' || steps.headers.outcome == 'failure' || steps.browser.outcome == 'failure' || steps.lighthouse.outcome == 'failure'
         run: exit 1
