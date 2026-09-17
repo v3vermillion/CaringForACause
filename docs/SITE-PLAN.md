@@ -24,7 +24,7 @@ The site is delivered to Tamara as a finished gift. Contact with her is kept to 
 ## Grouping logic
 
 1. **Split by intent, not by org chart.** The first decision a visitor makes is "get help" or "give help," so the hero offers exactly those two doors.
-2. **Programs are cards in a list, not tabs.** On a phone, tabs hide programs people would otherwise scroll past. Holiday Assistance is featured first because it is her largest program and the current season.
+2. **Programs are rows in a list, not tabs, with jump tiles on top.** On a phone, tabs hide programs people would otherwise scroll past; the tiles show all of them at a glance and jump to each. Holiday Assistance is featured first because it is her largest program and the current season.
 3. **Get involved uses tabs.** Each supporter needs only one of four options, so tabs keep the section short. Without JavaScript, all four panels show in order.
 4. **One source of truth.** Every word, link, and date lives in `src/data/site.ts`. Seasonal changes never touch layout code.
 5. **Nothing half-built ships.** Values not set up yet (donation page, online application) are `null`, and buttons fall back to email. Inactive programs and an empty gallery are hidden.

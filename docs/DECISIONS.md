@@ -131,3 +131,9 @@ Short records of the technical choices behind this site, so anyone taking it ove
 **Why:** Before, the first phone screen showed only the preview notice, header, and a 280-pixel logo; the two doors, the page's main choice, were a screen and a half down. Real faces on the first screen do more for trust than a logo, and the organization already publishes these photos. The crossfade is the page's single use of motion.
 
 **Cost:** mobile Lighthouse performance moved from 99 to about 97 (LCP 2.5 s on simulated slow 4G) because the first photo is now the largest element. That trade is intentional; the budget floor is 95.
+
+## 20. Programs: jump tiles, a dark Get help card, alternating rows
+
+**Decision:** The programs section opens with one compact tile per program (photo, name, a three-to-five-word label) that jumps to that program; a scroll strip on phones, four across on desktop. The Get help card is the page's one dark card so families can't miss it. Program rows put the photo above the text on phones with a shorter 3:2 crop, and alternate photo sides on desktop.
+
+**Why:** The section was four identical heading-text-photo blocks, about four phone screens long with no way to scan it. The tiles show the whole offering in one glance and let people jump; the varied rows are easier to read; the shorter phone crops cut the section's length. Labels are drawn from her published program descriptions, not invented.

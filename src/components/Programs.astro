@@ -6,7 +6,6 @@ import VideoLink from "./VideoLink.astro";
 import YouTubeLite from "./YouTubeLite.astro";
 
 const active = programs.filter((p) => p.active);
-const [featured, ...rest] = active;
 const phone = show(facts.phone);
 const applyEmail = `mailto:${show(facts.email)}?subject=${encodeURIComponent("Application request")}`;
 ---
@@ -17,6 +16,25 @@ const applyEmail = `mailto:${show(facts.email)}?subject=${encodeURIComponent("Ap
       <h2 id="programs-title">Our programs</h2>
       <p>{org.mission}</p>
     </header>
+
+    <!-- Jump tiles: one per program, so the whole offering fits one glance. -->
+    <nav class="tiles" aria-label="Jump to a program">
+      <ul>
+        {active.map((program) => (
+          <li>
+            <a class="tile" href={`#${program.slug}`}>
+              {program.photo && (
+                <Photo photo={program.photo} ratio="1 / 1" sizes="72px" class="tile-photo" />
+              )}
+              <span class="tile-text">
+                <span class="tile-name">{program.name}</span>
+                <span class="tile-label">{program.label}</span>
+              </span>
+            </a>
+          </li>
+        ))}
+      </ul>
+    </nav>
 
     <div id="get-help" class="get-help">
       <div class="stack">
@@ -30,47 +48,23 @@ const applyEmail = `mailto:${show(facts.email)}?subject=${encodeURIComponent("Ap
             Apply online
           </a>
         )}
-        <a class="button button--purple" href={phone.href}>
+        <a class="button button--crimson" href={phone.href}>
           Call {phone.display}
         </a>
-        <a class="button button--outline" href={applyEmail}>
+        <a class="button button--ghost" href={applyEmail}>
           Email us
         </a>
       </div>
     </div>
 
-    {featured && (
-      <article id={featured.slug} class="feature">
-        <div class="stack">
-          <h3>{featured.name}</h3>
-          <p class="summary">{featured.summary}</p>
-          <p class="for">
-            <strong>Who it's for:</strong> {featured.forWhom}
-          </p>
-          {featured.details && (
-            <ul class="details">
-              {featured.details.map((d) => (
-                <li>{d}</li>
-              ))}
-            </ul>
-          )}
-          {featured.photo && featured.video && <VideoLink video={featured.video} />}
-        </div>
-        {featured.photo ? (
-          <Photo photo={featured.photo} ratio="4 / 3" />
-        ) : (
-          featured.video && <YouTubeLite video={featured.video} />
-        )}
-      </article>
-    )}
-
     <div class="list">
-      {rest.map((program) => (
+      {active.map((program, i) => (
         <article
           id={program.slug}
-          class:list={["row", { "has-media": program.photo || program.video }]}
+          class:list={["row", { featured: i === 0, "has-media": program.photo || program.video }]}
         >
-          <div class="stack">
+          <div class="stack copy">
+            <p class="label">{program.label}</p>
             <h3>{program.name}</h3>
             <p class="summary">{program.summary}</p>
             <p class="for">
@@ -103,13 +97,19 @@ const applyEmail = `mailto:${show(facts.email)}?subject=${encodeURIComponent("Ap
             {program.photo && program.video && <VideoLink video={program.video} />}
           </div>
           {program.photo ? (
-            <Photo
-              photo={program.photo}
-              ratio="4 / 3"
-              sizes="(min-width: 56rem) 460px, calc(100vw - 2.5rem)"
-            />
+            <div class="media">
+              <Photo
+                photo={program.photo}
+                ratio={i === 0 ? "4 / 3" : "3 / 2"}
+                sizes="(min-width: 56rem) 520px, calc(100vw - 2.5rem)"
+              />
+            </div>
           ) : (
-            program.video && <YouTubeLite video={program.video} />
+            program.video && (
+              <div class="media">
+                <YouTubeLite video={program.video} />
+              </div>
+            )
           )}
         </article>
       ))}
@@ -119,7 +119,7 @@ const applyEmail = `mailto:${show(facts.email)}?subject=${encodeURIComponent("Ap
 
 <style>
   .intro {
-    margin-bottom: var(--space-l);
+    margin-bottom: var(--space-m);
   }
 
   .intro p {
@@ -128,27 +128,148 @@ const applyEmail = `mailto:${show(facts.email)}?subject=${encodeURIComponent("Ap
     color: var(--muted);
   }
 
+  /* Tiles: a scroll strip on phones, a four-up grid on desktop. */
+  .tiles ul {
+    display: flex;
+    gap: var(--space-xs);
+    padding: 0.25rem 0 0.75rem;
+    margin-inline: -1.25rem;
+    padding-inline: 1.25rem;
+    list-style: none;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .tiles ul::-webkit-scrollbar {
+    display: none;
+  }
+
+  .tiles li {
+    flex: 0 0 min(78%, 17rem);
+    scroll-snap-align: start;
+  }
+
+  .tile {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+    min-height: 44px;
+    padding: 0.75rem;
+    border-radius: 18px;
+    background: #fff;
+    border: 1px solid var(--rule);
+    color: var(--ink);
+    text-decoration: none;
+    transition:
+      border-color 150ms ease,
+      transform 150ms ease;
+  }
+
+  .tile:hover {
+    border-color: var(--purple);
+    transform: translateY(-2px);
+  }
+
+  .tile :global(.tile-photo) {
+    flex: none;
+    width: 4.5rem;
+    height: 4.5rem;
+    border-radius: 12px;
+  }
+
+  .tile-text {
+    display: grid;
+    gap: 0.15rem;
+    min-width: 0;
+  }
+
+  .tile-name {
+    font-family: var(--font-display);
+    font-weight: 750;
+    font-size: var(--step-0);
+    line-height: 1.15;
+    letter-spacing: -0.01em;
+  }
+
+  .tile-label {
+    font-size: var(--step--1);
+    color: var(--muted);
+    line-height: 1.3;
+  }
+
+  /* Get help: the one card on the page that is dark, so it can't be missed. */
   .get-help {
     display: grid;
     gap: var(--space-m);
+    margin-block: var(--space-m) var(--space-xl);
     padding: var(--space-m);
-    border: 2px solid var(--purple);
-    border-radius: 16px;
-    background: #fff;
-    margin-bottom: var(--space-xl);
+    border-radius: 24px;
+    background: var(--night);
+    color: #fff;
   }
 
-  .feature {
+  .get-help h3 {
+    color: #fff;
+  }
+
+  .get-help p {
+    color: var(--night-soft);
+  }
+
+  .button--ghost {
+    background: rgb(255 255 255 / 0.1);
+    color: #fff;
+    border-color: rgb(255 255 255 / 0.35);
+  }
+
+  .button--ghost:hover {
+    background: rgb(255 255 255 / 0.18);
+  }
+
+  /* Program rows: photo above text on phones; sides alternate on desktop. */
+  .list {
+    display: grid;
+    gap: var(--space-l);
+  }
+
+  .row {
     display: grid;
     gap: var(--space-m);
-    align-items: center;
-    padding-bottom: var(--space-l);
-    border-bottom: 1px solid var(--rule);
+    padding-top: var(--space-l);
+    border-top: 1px solid var(--rule);
   }
 
-  .feature h3 {
-    font-size: var(--step-3);
+  .row:first-child {
+    padding-top: 0;
+    border-top: 0;
+  }
+
+  .copy {
+    order: 1;
+  }
+
+  .media {
+    order: 0;
+  }
+
+  .label {
+    font-weight: 700;
+    color: var(--purple);
+    font-size: var(--step--1);
+  }
+
+  .featured .label {
     color: var(--crimson);
+  }
+
+  .row h3 {
+    font-size: var(--step-2);
+  }
+
+  .featured h3 {
+    font-size: var(--step-3);
   }
 
   .summary {
@@ -164,17 +285,6 @@ const applyEmail = `mailto:${show(facts.email)}?subject=${encodeURIComponent("Ap
     padding-left: 1.2rem;
     display: grid;
     gap: 0.35rem;
-  }
-
-  .row {
-    display: grid;
-    gap: var(--space-m);
-    padding-block: var(--space-l);
-    border-bottom: 1px solid var(--rule);
-  }
-
-  .row h3 {
-    color: var(--purple);
   }
 
   .checklist summary {
@@ -204,20 +314,37 @@ const applyEmail = `mailto:${show(facts.email)}?subject=${encodeURIComponent("Ap
     padding-left: 1.2rem;
   }
 
+  @media (min-width: 40rem) {
+    .tiles li {
+      flex-basis: min(46%, 17rem);
+    }
+  }
+
   @media (min-width: 56rem) {
+    .tiles ul {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: var(--space-s);
+      margin-inline: 0;
+      padding-inline: 0;
+      overflow: visible;
+    }
     .get-help {
       grid-template-columns: 1fr auto;
       align-items: end;
       padding: var(--space-l);
     }
-    .feature {
-      grid-template-columns: 1fr 1fr;
-      gap: var(--space-l);
-    }
     .row.has-media {
-      grid-template-columns: 7fr 5fr;
-      gap: var(--space-l);
-      align-items: start;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--space-xl);
+      align-items: center;
+    }
+    .copy,
+    .media {
+      order: 0;
+    }
+    .row.has-media:nth-child(even) .media {
+      order: -1;
     }
     .groups {
       grid-template-columns: 1fr 1fr;
