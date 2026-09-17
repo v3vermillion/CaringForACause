@@ -48,11 +48,11 @@ Short records of the technical choices behind this site, so anyone taking it ove
 
 **Why:** A full YouTube embed adds hundreds of kilobytes per video and sets cookies before a visitor chooses to watch. The page has four videos.
 
-## 8. Logo on a light plate in the hero
+## 8. Logo on a light plate in the hero (superseded by 19)
 
-**Decision:** The hero is dark, and the full logo sits on a white circular plate.
+**Decision:** The hero was dark with the full logo on a white circular plate.
 
-**Why:** The logo's purple measures about 2.2:1 against the dark background, below the 3:1 minimum for graphics. The plate keeps her name legible. It can be removed with `logoPlate={false}`.
+**Why:** The logo's purple measures about 2.2:1 against the dark background, below the 3:1 minimum for graphics. Superseded: the full logo left the hero in decision 19 and lives in the header mark, link preview, and footer.
 
 ## 9. Interim icon
 
@@ -123,3 +123,11 @@ Short records of the technical choices behind this site, so anyone taking it ove
 **Decision:** Dependabot proposes npm and GitHub Actions updates monthly, grouped (minor and patch together, majors separately), with a 7-day cooldown (30 days for major npm versions). Security updates are grouped and never delayed.
 
 **Why:** Outdated packages are the most common way a finished, rarely touched site becomes vulnerable. The `main` ruleset makes updates safe to accept, because each one must pass the full browser suite. Grouping and a monthly schedule keep the volume low for a solo maintainer, and the cooldown avoids adopting a release before problems with it surface.
+
+## 19. Hero: real photos behind the two doors, doors on the first screen
+
+**Decision:** The hero's background is a slow crossfade of four of the organization's own event photos (six seconds each), darkened and blended into the night purple. The full logo leaves the hero. On phones the doors sit side by side so a visitor on a 390-pixel screen sees the headline, real people, and both choices without scrolling; on desktop the montage becomes a framed panel so the 720-pixel photos are never upscaled across the full width. The first photo is preloaded and served at quality 55 (it sits under a dark veil). Under `prefers-reduced-motion` the first photo stays still. See `docs/CONTENT-MAP.md` section 3.
+
+**Why:** Before, the first phone screen showed only the preview notice, header, and a 280-pixel logo; the two doors, the page's main choice, were a screen and a half down. Real faces on the first screen do more for trust than a logo, and the organization already publishes these photos. The crossfade is the page's single use of motion.
+
+**Cost:** mobile Lighthouse performance moved from 99 to about 97 (LCP 2.5 s on simulated slow 4G) because the first photo is now the largest element. That trade is intentional; the budget floor is 95.

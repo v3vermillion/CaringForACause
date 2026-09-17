@@ -104,7 +104,7 @@ test.describe("device compatibility", () => {
         .toBe(true);
     };
     await page.goto("/");
-    await loaded(page.locator(".hero .logo img"));
+    await loaded(page.locator(".hero .montage img").first());
     await loaded(page.locator(".brand img"));
 
     // Photos outside the tabs

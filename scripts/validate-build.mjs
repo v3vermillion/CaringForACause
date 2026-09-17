@@ -143,8 +143,10 @@ export function validateBuild(dist, { allowIndexing }) {
       fail(`Image without alt attribute: ${img.getAttribute("src")}`);
   }
   const localRefs = new Set();
-  for (const el of doc.querySelectorAll("img[src], source[srcset], img[srcset], link[href]")) {
-    for (const attr of ["src", "srcset", "href"]) {
+  for (const el of doc.querySelectorAll(
+    "img[src], source[srcset], img[srcset], link[href], link[imagesrcset]",
+  )) {
+    for (const attr of ["src", "srcset", "href", "imagesrcset"]) {
       const value = el.getAttribute(attr);
       if (!value) continue;
       for (const part of value.split(",")) {

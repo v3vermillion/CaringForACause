@@ -38,7 +38,7 @@ Single page, top to bottom:
 │ Header: mark + name     nav        [Donate]   │  sticky
 ├───────────────────────────────────────────────┤
 │ HERO (night)                                  │
-│  ( logo on light plate )   Headline           │
+│  Headline              [ photo montage ]      │
 │                            Subhead            │
 │                            [I need help]      │  crimson door
 │                            [I want to help]   │  white door
@@ -100,7 +100,7 @@ Brand colors are sampled from the final logo file.
 
 All text pairings pass WCAG AA; most pass AAA.
 
-**Logo on dark:** the logo's purple measures about 2.2:1 against `--night`, below the 3:1 minimum for graphics, so the hero places it on a light circular plate. To place it directly on the dark background instead, pass `logoPlate={false}` to `<Hero />` in `src/pages/index.astro`.
+**Logo on dark:** the logo's purple measures about 2.2:1 against `--night`, below the 3:1 minimum for graphics, so the full logo is never placed directly on the dark background. The hero uses her event photos instead (decision 19); the logo appears in the header mark, the link preview (on a white circle), and the footer.
 
 **Type:**
 
@@ -108,7 +108,7 @@ All text pairings pass WCAG AA; most pass AAA.
 - **Atkinson Hyperlegible Next** (body): designed by the Braille Institute for low-vision readers, which suits an audience reading on older phones. Its slashed zero is intentional and keeps phone numbers and the EIN unambiguous.
 - 18px base size, major-third scale. Both fonts are self-hosted, with no third-party requests.
 
-**Signature element:** the two hero doors. Everything else stays quiet: one rounded button style, list rows with dividers instead of a grid of identical cards, and no scroll animations.
+**Signature element:** the two hero doors over the crossfading photo montage. Everything else stays quiet: one rounded button style, list rows with dividers instead of a grid of identical cards, and no scroll animations.
 
 ## Open questions for Tamara
 

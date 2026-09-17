@@ -1,38 +1,57 @@
 ---
 import { Picture } from "astro:assets";
-import logo from "../assets/brand/logo-full.png";
-import { claim } from "../data/facts.ts";
-import { facts, hero } from "../data/site";
+import type { ImageMetadata } from "astro";
+import { hero } from "../data/site";
 
-type Props = {
-  /**
-   * The logo's purple measures about 2.2:1 against the dark background,
-   * below the 3:1 minimum for graphics. The light plate keeps it legible.
-   * Set to false to place the logo directly on the dark background.
-   */
-  logoPlate?: boolean;
+const { doors, montage } = hero;
+
+const files = import.meta.glob<{ default: ImageMetadata }>(
+  "../assets/photos/*.{jpg,jpeg,png,webp}",
+  { eager: true },
+);
+const slides = montage.map((photo, i) => {
+  const match = files[`../assets/photos/${photo.file}`];
+  if (!match) throw new Error(`Hero photo not found: src/assets/photos/${photo.file}`);
+  return { ...photo, src: match.default, index: i };
+});
+const cycle = slides.length * 6; // seconds for one full rotation
+
+/** Image options shared with the preload in the page head. Keep in sync. */
+export const MONTAGE_IMAGE = {
+  formats: ["avif", "webp"] as ("avif" | "webp")[],
+  quality: 55,
+  widths: [480, 720],
+  sizes: "(min-width: 56rem) 560px, 100vw",
 };
-
-const { logoPlate = true } = Astro.props;
-const { doors } = hero;
 ---
 
-<section class="hero" aria-labelledby="hero-title">
-  <div class="wrap grid">
-    <div class:list={["logo", { plate: logoPlate }]}>
-      <Picture
-        src={logo}
-        formats={["avif", "webp"]}
-        alt={`${claim(facts.legalName)} logo`}
-        width={700}
-        widths={[240, 360, 480, 700]}
-        sizes="(min-width: 56rem) 348px, 232px"
-        loading="eager"
-        fetchpriority="high"
-      />
+<section
+  class="hero"
+  aria-labelledby="hero-title"
+  style={`--slides: ${slides.length}; --cycle: ${cycle}s;`}
+>
+  <div class="wrap frame">
+    <!-- Decorative montage of the organization's own event photos. -->
+    <div class="montage" aria-hidden="true">
+      {slides.map((slide) => (
+        <Picture
+          src={slide.src}
+          formats={MONTAGE_IMAGE.formats}
+          alt=""
+          quality={MONTAGE_IMAGE.quality}
+          widths={MONTAGE_IMAGE.widths}
+          sizes={MONTAGE_IMAGE.sizes}
+          loading={slide.index === 0 ? "eager" : "lazy"}
+          fetchpriority={slide.index === 0 ? "high" : "auto"}
+          decoding="async"
+          class="slide"
+          style={`--i: ${slide.index}; object-position: ${slide.focus ?? "center"};`}
+        />
+      ))}
+      <div class="veil"></div>
     </div>
 
-    <div class="copy">
+    <div class="content">
       <h1 id="hero-title">{hero.headline}</h1>
       <p class="subhead">{hero.subhead}</p>
 
@@ -52,117 +71,231 @@ const { doors } = hero;
 
 <style>
   .hero {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
     background: var(--night);
     color: #fff;
-    padding-block: var(--space-l) var(--space-xl);
-  }
-
-  .grid {
+    /* Fill the first screen below the header on phones, no more. */
+    min-height: calc(100svh - 10rem);
     display: grid;
-    gap: var(--space-l);
-    align-items: center;
+    align-items: end;
   }
 
-  .logo {
-    justify-self: center;
-    width: min(100%, 280px);
+  /* Photo montage: crossfading, darkened, blended into the night purple. */
+  .montage {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
   }
 
-  .logo.plate {
-    padding: 1.5rem;
-    background: #fff;
-    border-radius: 50%;
-    aspect-ratio: 1;
+  .slide,
+  .montage :global(img) {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .montage :global(img) {
+    opacity: 0;
+    animation: crossfade var(--cycle) infinite;
+    animation-delay: calc(var(--i) * (var(--cycle) / var(--slides)));
+    transform: scale(1.04);
+  }
+
+  @keyframes crossfade {
+    0% {
+      opacity: 0;
+    }
+    8%,
+    25% {
+      opacity: 1;
+    }
+    33%,
+    100% {
+      opacity: 0;
+    }
+  }
+
+  .veil {
+    position: absolute;
+    inset: 0;
+    background:
+      linear-gradient(
+        180deg,
+        rgb(27 15 46 / 0.55) 0%,
+        rgb(27 15 46 / 0.35) 35%,
+        rgb(27 15 46 / 0.92) 68%,
+        var(--night) 100%
+      ),
+      radial-gradient(120% 80% at 100% 0%, rgb(96 8 215 / 0.35), transparent 60%);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .montage :global(img) {
+      animation: none;
+      transform: none;
+    }
+    .montage :global(picture:first-child img) {
+      opacity: 1;
+    }
+  }
+
+  /* On phones the montage is positioned against the whole section. */
+  .frame {
+    position: static;
+  }
+
+  .content {
     display: grid;
-    place-items: center;
-  }
-
-  .copy {
-    display: grid;
-    gap: var(--space-m);
+    gap: var(--space-s);
+    padding-block: clamp(8.5rem, 26vh, 14rem) var(--space-m);
   }
 
   h1 {
-    max-width: 16ch;
+    max-width: 14ch;
+    text-shadow: 0 2px 24px rgb(27 15 46 / 0.6);
   }
 
   .subhead {
     color: var(--night-soft);
     font-size: var(--step-1);
     line-height: 1.4;
+    max-width: 34ch;
   }
 
-  /* The two doors are the page's signature element. */
+  /* The two doors: the page's signature element. */
   .doors {
     display: grid;
-    gap: var(--space-s);
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-xs);
     margin-top: var(--space-xs);
   }
 
   .door {
     display: grid;
-    gap: 0.35rem;
-    padding: 1.4rem 1.5rem;
-    border-radius: 24px;
+    align-content: start;
+    gap: 0.3rem;
+    min-height: 44px;
+    padding: 1rem 1.05rem 1.1rem;
+    border-radius: 20px;
     text-decoration: none;
-    transition: transform 150ms ease;
+    transition:
+      transform 150ms ease,
+      background-color 150ms ease;
   }
 
   .door:hover {
     transform: translateY(-2px);
   }
 
-  .door:hover .door-title {
-    text-decoration: underline;
-    text-underline-offset: 0.15em;
-  }
-
   .door--help {
     background: var(--crimson);
     color: #fff;
+    box-shadow: 0 12px 40px rgb(186 1 12 / 0.35);
+  }
+
+  .door--help:hover {
+    background: #950009;
   }
 
   .door--give {
-    background: #fff;
-    color: var(--ink);
+    background: rgb(255 255 255 / 0.12);
+    color: #fff;
+    border: 1px solid rgb(255 255 255 / 0.28);
+    -webkit-backdrop-filter: blur(14px);
+    backdrop-filter: blur(14px);
   }
 
-  .door--give .door-title {
-    color: var(--purple);
+  .door--give:hover {
+    background: rgb(255 255 255 / 0.2);
   }
 
   .door-title {
     font-family: var(--font-display);
-    font-size: var(--step-2);
+    font-size: var(--step-1);
     font-weight: 800;
     line-height: 1.1;
     letter-spacing: -0.02em;
   }
 
   .door-body {
-    font-size: var(--step-0);
-    line-height: 1.45;
+    font-size: var(--step--1);
+    line-height: 1.4;
+  }
+
+  @media (max-width: 22.4rem) {
+    .doors {
+      grid-template-columns: 1fr;
+    }
   }
 
   @media (min-width: 40rem) {
-    .doors {
-      grid-template-columns: 1fr 1fr;
+    .door {
+      padding: 1.4rem 1.5rem;
+      gap: 0.4rem;
+    }
+    .door-title {
+      font-size: var(--step-2);
+    }
+    .door-body {
+      font-size: var(--step-0);
     }
   }
 
+  /* Desktop: copy on the left, the montage becomes a tall framed panel on the
+     right so the 720px photos are never stretched across the full width. */
   @media (min-width: 56rem) {
     .hero {
+      min-height: 0;
+      align-items: center;
       padding-block: var(--space-xl);
     }
-    .grid {
-      grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
-      gap: var(--space-xl);
+    .frame {
+      display: grid;
+      grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+      column-gap: var(--space-xl);
+      align-items: center;
     }
-    .logo {
-      width: min(100%, 420px);
+    .content {
+      padding-block: 0;
+      gap: var(--space-m);
     }
-    .logo.plate {
-      padding: 2.25rem;
+    .content > * {
+      grid-area: auto;
+    }
+    h1 {
+      max-width: 15ch;
+    }
+    .doors {
+      max-width: 40rem;
+      margin-top: var(--space-s);
+    }
+    .montage {
+      position: relative;
+      inset: auto;
+      z-index: 0;
+      order: 2;
+      aspect-ratio: 5 / 6;
+      max-height: 34rem;
+      align-self: center;
+      border-radius: 28px;
+      overflow: hidden;
+      box-shadow:
+        0 30px 80px rgb(0 0 0 / 0.45),
+        0 0 0 1px rgb(255 255 255 / 0.12);
+    }
+    .hero::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      z-index: -1;
+      background: radial-gradient(70% 60% at 85% 50%, rgb(96 8 215 / 0.3), transparent 70%);
+    }
+    .veil {
+      background: linear-gradient(180deg, rgb(27 15 46 / 0.08) 0%, rgb(27 15 46 / 0.55) 100%);
     }
   }
 </style>
