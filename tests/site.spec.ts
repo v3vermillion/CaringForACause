@@ -326,8 +326,8 @@ test.describe("videos", () => {
       route.fulfill({ status: 200, contentType: "text/html", body: "<p>player</p>" }),
     );
     await page.goto("/");
-    await page.locator("#about .yt-link").click();
-    const iframe = page.locator("#about iframe");
+    await page.locator(".hero .yt-link").click();
+    const iframe = page.locator(".hero iframe");
     await expect(iframe).toHaveAttribute("src", /^https:\/\/www\.youtube-nocookie\.com\/embed\//);
     await expect(iframe).toHaveAttribute("title", /.+/);
   });

@@ -155,3 +155,9 @@ Short records of the technical choices behind this site, so anyone taking it ove
 **Decision:** The hero opens with "Caring for a Cause" and "Together / we can." set in Lobster, the open-licensed typeface her logo's lettering uses, so the wordmark is real text. The heart-and-hands mark is large, lit by a soft glow, and "Help me" sits in the palms as a crimson pill with the full signal treatment (glow, hairline edge, a slow breathing glow that stops under reduced motion). "I want to help" is a glass bar directly under the mark. The descriptive headline becomes the second heading below. The header pill reads "Give".
 
 **Why:** The page's first words are now her name in her own lettering, and its first action is held by her own mark. That is the most branded first screen possible without inventing anything. It fits an iPhone 15 Safari screen with the top of "I want to help" showing.
+
+## 24. The flow under the identity block
+
+**Decision:** After "I want to help" comes her "Do More" video, dead center, click-to-play with a self-hosted poster; then the descriptive headline and subhead as the lead-in to Programs. The background deepens toward the bottom of the hero and continues into the trust facts, which are now glass pills on the same dark ground, before the purple season banner. The photo crossfade moved to Meet Tamara (now a dark section) as a framed panel with her tagline as the caption.
+
+**Why:** The video is the one asset that shows the whole organization at once, so it sits where a visitor lands after choosing a door or reading her name. The facts as pills read as proof rather than a list, and keeping them dark makes the top of the page one continuous surface.
