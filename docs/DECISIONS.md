@@ -130,7 +130,7 @@ Short records of the technical choices behind this site, so anyone taking it ove
 
 **Why:** Before, the first phone screen showed only the preview notice, header, and a 280-pixel logo; the two doors, the page's main choice, were a screen and a half down. Real faces on the first screen do more for trust than a logo, and the organization already publishes these photos. The crossfade is the page's single use of motion.
 
-**Cost control:** only the first photo loads with the page (preloaded, 640 px wide, quality 50 under the dark veil). The other three stay hidden until the page has loaded, then the crossfade starts from the first photo without a dip. Mobile Lighthouse stays at about 99 (LCP 2.2 s on simulated slow 4G). Without JavaScript the first photo simply stays.
+**Cost control:** only the first photo loads with the page (preloaded, 640 px wide, quality 50 under the dark veil). The other three stay hidden until the page has loaded, then the crossfade starts from the first photo without a dip. Mobile Lighthouse stays at about 99 (LCP 2.2 s on simulated slow 4G). Without JavaScript the first photo simply stays. The hero is sized for a real iPhone Safari screen (URL bar plus toolbar, about 660 px on an iPhone 15), where a first review on the device showed the doors cut off and the photo too bright behind the headline; the veil was darkened and brand-tinted and the vertical spacing tightened in response.
 
 ## 20. Programs: jump tiles, a dark Get help card, alternating rows
 

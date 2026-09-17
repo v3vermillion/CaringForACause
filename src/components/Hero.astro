@@ -96,7 +96,9 @@ export const MONTAGE_IMAGE = {
     background: var(--night);
     color: #fff;
     /* Fill the first screen below the header on phones, no more. */
-    min-height: calc(100svh - 10rem);
+    /* Fill the first screen below the header on phones, no more. On a real
+       iPhone Safari (URL bar plus toolbar) that screen is about 660px tall. */
+    min-height: calc(100svh - 9.6rem);
     display: grid;
     align-items: end;
   }
@@ -157,12 +159,18 @@ export const MONTAGE_IMAGE = {
     background:
       linear-gradient(
         180deg,
-        rgb(27 15 46 / 0.55) 0%,
-        rgb(27 15 46 / 0.35) 35%,
-        rgb(27 15 46 / 0.92) 68%,
+        rgb(27 15 46 / 0.62) 0%,
+        rgb(27 15 46 / 0.5) 30%,
+        rgb(27 15 46 / 0.86) 55%,
+        rgb(27 15 46 / 0.97) 75%,
         var(--night) 100%
       ),
-      radial-gradient(120% 80% at 100% 0%, rgb(96 8 215 / 0.35), transparent 60%);
+      radial-gradient(120% 80% at 100% 0%, rgb(96 8 215 / 0.4), transparent 60%);
+  }
+
+  /* Brand tint: photos read as part of the purple world, not pasted on. */
+  .montage :global(img) {
+    filter: saturate(0.8) contrast(1.05);
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -182,19 +190,20 @@ export const MONTAGE_IMAGE = {
 
   .content {
     display: grid;
-    gap: var(--space-s);
-    padding-block: clamp(8.5rem, 26vh, 14rem) var(--space-m);
+    gap: 0.75rem;
+    padding-block: clamp(5.5rem, 18vh, 14rem) var(--space-s);
   }
 
   h1 {
     max-width: 14ch;
-    text-shadow: 0 2px 24px rgb(27 15 46 / 0.6);
+    font-size: clamp(2rem, 1.3rem + 3.4vw, 4rem);
+    text-shadow: 0 2px 24px rgb(27 15 46 / 0.7);
   }
 
   .subhead {
-    color: var(--night-soft);
-    font-size: var(--step-1);
-    line-height: 1.4;
+    color: #e9e1fa;
+    font-size: var(--step-0);
+    line-height: 1.45;
     max-width: 34ch;
   }
 
@@ -211,7 +220,7 @@ export const MONTAGE_IMAGE = {
     align-content: start;
     gap: 0.3rem;
     min-height: 44px;
-    padding: 1rem 1.05rem 1.1rem;
+    padding: 0.9rem 1rem 1rem;
     border-radius: 20px;
     text-decoration: none;
     transition:
@@ -254,8 +263,8 @@ export const MONTAGE_IMAGE = {
   }
 
   .door-body {
-    font-size: var(--step--1);
-    line-height: 1.4;
+    font-size: 0.85rem;
+    line-height: 1.35;
   }
 
   @media (max-width: 22.4rem) {
