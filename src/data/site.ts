@@ -151,6 +151,8 @@ export const seasonalBanner = {
 };
 
 export const hero = {
+  /** Her own tagline, from her website. Shown as the caption under the photos. */
+  tagline: "Together we can.",
   headline: "Holiday meals, gifts, and diapers for Central Indiana families",
   /**
    * Real event photos shown behind the headline, crossfading slowly. Order

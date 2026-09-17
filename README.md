@@ -8,6 +8,8 @@ Website for [Caring for a Cause Supportive Services Inc.](https://caring4acauses
 - [Approach](docs/APPROACH.md): the principles every change follows
 - [Decisions](docs/DECISIONS.md): why the site is built this way
 - [Workflow](docs/WORKFLOW.md): how every change is checked and shipped
+- [Design](docs/DESIGN.md): the design language every section follows
+- [Content map](docs/CONTENT-MAP.md): everything the site carries and where it goes
 
 ## Stack
 
