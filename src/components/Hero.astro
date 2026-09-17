@@ -189,6 +189,7 @@ const cycle = slides.length * 7;
   /* Two doors, equal weight. Crimson is the signal; the other is glass. */
   .doors {
     display: grid;
+    grid-auto-rows: 1fr; /* stacked or side by side, the doors stay the same size */
     gap: 0.75rem;
     margin-top: var(--space-m);
   }
