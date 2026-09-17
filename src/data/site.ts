@@ -38,6 +38,8 @@ export type Program = {
   /** Used for page anchors, e.g. /#holiday-assistance */
   slug: string;
   name: string;
+  /** Three to five words for the program tiles, e.g. "Monthly diapers". */
+  label: string;
   /** One sentence shown first. */
   summary: string;
   /** Who the program is for. */
@@ -204,6 +206,7 @@ export const programs: Program[] = [
   {
     slug: "holiday-assistance",
     name: "Holiday Assistance",
+    label: "Thanksgiving, Christmas, Easter",
     summary:
       "Food boxes and gifts for families at Thanksgiving, Christmas, and Easter, so every household has a meal and something to open.",
     forWhom: "Low-income families in Central Indiana, especially households with children.",
@@ -222,6 +225,7 @@ export const programs: Program[] = [
   {
     slug: "diaper-drive",
     name: "Diaper Drive",
+    label: "Diapers every month",
     summary: "A reliable monthly supply of diapers, plus referrals to partner resources.",
     forWhom: "Families with babies and toddlers who need help with diapers.",
     photo: {
@@ -234,6 +238,7 @@ export const programs: Program[] = [
   {
     slug: "back-to-school",
     name: "Back-to-School Care Packages",
+    label: "Hygiene and school supplies",
     summary: "Hygiene items and school supplies for girls and boys in our community.",
     forWhom: "Students from families who need help getting ready for school.",
     photo: {
@@ -294,6 +299,7 @@ export const programs: Program[] = [
   {
     slug: "haircuts",
     name: "Free Haircuts & Styles",
+    label: "Cuts, styles, face painting",
     summary:
       "Volunteer barbers, stylists, makeup artists, and face painters give free cuts and styles.",
     forWhom: "People experiencing homelessness and low-income families.",
@@ -308,6 +314,7 @@ export const programs: Program[] = [
   {
     slug: "bikes",
     name: "Free Bike Program",
+    label: "Bikes for kids",
     summary: "Listed on the 2021 site. Hidden until Tamara confirms it is still running.",
     forWhom: "To confirm.",
     active: false,
