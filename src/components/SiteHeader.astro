@@ -19,7 +19,7 @@ const email = show(facts.email);
   <div class="bar">
     <a class="brand" href="/">
       <Image src={mark} alt="" width={40} height={40} densities={[1, 2, 3]} loading="eager" />
-      <span>{org.shortName}</span>
+      <span class="brand-name">{org.shortName}</span>
     </a>
 
     <!-- Inline links show on wide screens, and everywhere without JavaScript. -->
@@ -194,6 +194,29 @@ const email = show(facts.email);
   .inline-nav a:hover {
     color: var(--purple);
     text-decoration: underline;
+  }
+
+  /*
+    Phones: the hero already shows her name in her lettering, so the header is
+    the mark on the left, Give centered, and the menu wedge on the right. The
+    name stays available to screen readers.
+  */
+  @media (max-width: 55.99rem) {
+    .site-header.has-menu .brand {
+      margin-right: 0;
+    }
+    .site-header.has-menu .brand-name {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip: rect(0 0 0 0);
+      white-space: nowrap;
+    }
+    .site-header.has-menu .donate {
+      margin-inline: auto;
+      min-width: 7rem;
+    }
   }
 
   /* Without JavaScript the inline links wrap under the brand row on phones. */

@@ -161,3 +161,9 @@ Short records of the technical choices behind this site, so anyone taking it ove
 **Decision:** After "I want to help" comes her "Do More" video, dead center, click-to-play with a self-hosted poster; then the descriptive headline and subhead as the lead-in to Programs. The background deepens toward the bottom of the hero and continues into the trust facts, which are now glass pills on the same dark ground, before the purple season banner. The photo crossfade moved to Meet Tamara (now a dark section) as a framed panel with her tagline as the caption.
 
 **Why:** The video is the one asset that shows the whole organization at once, so it sits where a visitor lands after choosing a door or reading her name. The facts as pills read as proof rather than a list, and keeping them dark makes the top of the page one continuous surface.
+
+## 25. Refining the identity block to a finished standard
+
+**Decision:** Four refinements after a real-iPhone review. (1) The mark is a night version with lit gradients, built for the dark background. (2) "Help me" moved into the open red space above the fingertips, set in her lettering with a white ring that echoes the logo's outlines, a top sheen, a white chevron disc, and the breathing glow; sized in container units. (3) On phones the header is the mark, Give centered, and the wedge; the name stays for screen readers. (4) The preview notice is one line, and the gap above the heart is tightened.
+
+**Why:** The first version placed a generic pill across the fingers of a flat, print-colored mark. The most important button on the site now looks designed for its place, and the header no longer repeats the name the hero already shows.
