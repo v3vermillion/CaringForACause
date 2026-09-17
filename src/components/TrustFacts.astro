@@ -19,32 +19,41 @@ const items = [
 
 <style>
   .facts {
-    border-bottom: 1px solid var(--rule);
+    background: #150b26;
+    color: #fff;
   }
 
   ul {
     display: flex;
     flex-wrap: wrap;
-    gap: var(--space-xs) var(--space-l);
+    justify-content: center;
+    gap: 0.5rem;
     padding-block: var(--space-m);
     padding-inline: 0;
+    margin: 0;
     list-style: none;
-    color: var(--muted);
-    font-weight: 700;
   }
 
   li {
-    display: flex;
+    display: inline-flex;
     align-items: center;
     gap: 0.5rem;
+    min-height: 40px;
+    padding: 0.35rem 0.9rem;
+    border-radius: 999px;
+    background: rgb(255 255 255 / 0.07);
+    box-shadow: 0 0 0 1px rgb(255 255 255 / 0.14);
+    color: #e3daf6;
+    font-size: var(--step--1);
+    font-weight: 700;
   }
 
   li::before {
     content: "";
-    width: 0.55rem;
-    height: 0.55rem;
+    width: 0.5rem;
+    height: 0.5rem;
     border-radius: 50%;
-    background: var(--crimson);
+    background: #ff5a63;
     flex: none;
   }
 </style>

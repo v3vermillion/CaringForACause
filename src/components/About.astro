@@ -1,21 +1,26 @@
 ---
-import { about } from "../data/site";
-import YouTubeLite from "./YouTubeLite.astro";
+import { about, hero } from "../data/site";
+import PhotoMontage from "./PhotoMontage.astro";
 ---
 
-<section id="about" class="section" aria-labelledby="about-title">
+<section id="about" class="section section--night" aria-labelledby="about-title">
   <div class="wrap grid">
+    <PhotoMontage photos={hero.montage} ratio="4 / 5" caption={hero.tagline} />
     <div class="stack">
       <h2 id="about-title">{about.heading}</h2>
       {about.body.map((line) => (
         <p>{line}</p>
       ))}
     </div>
-    <YouTubeLite video={about.video} />
   </div>
 </section>
 
 <style>
+  .section--night {
+    background: var(--night);
+    color: #fff;
+  }
+
   .grid {
     display: grid;
     gap: var(--space-l);
@@ -25,6 +30,7 @@ import YouTubeLite from "./YouTubeLite.astro";
   p {
     font-size: var(--step-1);
     line-height: 1.5;
+    color: #e3daf6;
   }
 
   @media (min-width: 56rem) {
