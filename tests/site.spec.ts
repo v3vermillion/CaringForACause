@@ -262,8 +262,7 @@ test.describe("videos", () => {
 });
 
 test.describe("preview notice", () => {
-  const text =
-    "Preview: this site isn't public yet, and some contact details are still being confirmed.";
+  const text = "Preview: not public yet. Some contact details are still being confirmed.";
 
   test("appears first, with exact wording, and cannot be dismissed", async ({ page }) => {
     await page.goto("/");
