@@ -104,7 +104,7 @@ test.describe("device compatibility", () => {
         .toBe(true);
     };
     await page.goto("/");
-    await loaded(page.locator(".hero .montage img").first());
+    await loaded(page.locator(".hero .mark img"));
     await loaded(page.locator(".brand img"));
 
     // Photos outside the tabs
@@ -155,7 +155,7 @@ test.describe("scrolling stability", () => {
           const r = document.querySelector(sel)!.getBoundingClientRect();
           return [Math.round(r.width), Math.round(r.height)];
         };
-        return { hero: box(".hero"), photo: box(".hero .montage img"), door: box(".door--help") };
+        return { hero: box(".hero"), mark: box(".hero .mark img"), door: box(".door--help") };
       });
     const before = await measure();
     await page.setViewportSize({ width: 390, height: 750 }); // bars collapsed
@@ -177,7 +177,7 @@ test.describe("layout", () => {
     });
   }
 
-  test("brand and Donate share the first header row", async ({ page }) => {
+  test("brand and Give share the first header row", async ({ page }) => {
     await page.goto("/");
     const brand = await page.locator(".brand").boundingBox();
     const donate = await page.locator(".site-header .donate").boundingBox();
@@ -210,7 +210,7 @@ test.describe("navigation", () => {
     }
   });
 
-  test("donate button opens the Donate tab", async ({ page }) => {
+  test("Give button opens the Donate tab", async ({ page }) => {
     await page.goto("/");
     await page.locator(".site-header .donate").click();
     await expect(page.locator("#tab-donate")).toHaveAttribute("aria-selected", "true");

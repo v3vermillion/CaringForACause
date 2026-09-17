@@ -39,7 +39,8 @@ One orchestrated moment: the hero photos crossfade (six seconds each). Everythin
 
 ## Type
 
-- **Bricolage Grotesque** for anything that should be read as a voice: doors, headings, menu, the tagline.
+- **Lobster** (her logo's lettering) for the wordmark and her tagline only. Never for body text or buttons.
+- **Bricolage Grotesque** for anything that should be read as a voice: doors, headings, menu.
 - **Atkinson Hyperlegible Next** for anything that should be read as information.
 - The page's first words are always a choice: "Help me" / "I want to help."
 - Sentence case everywhere. No all-caps labels, no tracked-out eyebrows.

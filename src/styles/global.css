@@ -16,6 +16,8 @@
 
   --font-display: "Bricolage Grotesque Variable", "Arial Rounded MT Bold", system-ui, sans-serif;
   --font-body: "Atkinson Hyperlegible Next", system-ui, -apple-system, "Segoe UI", sans-serif;
+  /* Her logo's lettering is Lobster; the wordmark and tagline use it as real text. */
+  --font-script: "Lobster", "Brush Script MT", cursive;
 
   /* Type scale (major third, 1.25) on an 18px base for easy reading on phones. */
   --step--1: 0.9rem;
