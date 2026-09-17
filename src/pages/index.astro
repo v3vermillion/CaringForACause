@@ -22,8 +22,8 @@ const first = photos[`../assets/photos/${hero.montage[0]!.file}`]!.default;
 const preload = await getImage({
   src: first,
   format: "avif",
-  quality: 55,
-  widths: [480, 720],
+  quality: 50,
+  widths: [480, 640],
 });
 const preloadImage = {
   srcset: preload.srcSet.attribute,

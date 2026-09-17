@@ -130,7 +130,7 @@ Short records of the technical choices behind this site, so anyone taking it ove
 
 **Why:** Before, the first phone screen showed only the preview notice, header, and a 280-pixel logo; the two doors, the page's main choice, were a screen and a half down. Real faces on the first screen do more for trust than a logo, and the organization already publishes these photos. The crossfade is the page's single use of motion.
 
-**Cost:** mobile Lighthouse performance moved from 99 to about 97 (LCP 2.5 s on simulated slow 4G) because the first photo is now the largest element. That trade is intentional; the budget floor is 95.
+**Cost control:** only the first photo loads with the page (preloaded, 640 px wide, quality 50 under the dark veil). The other three stay hidden until the page has loaded, then the crossfade starts from the first photo without a dip. Mobile Lighthouse stays at about 99 (LCP 2.2 s on simulated slow 4G). Without JavaScript the first photo simply stays.
 
 ## 20. Programs: jump tiles, a dark Get help card, alternating rows
 

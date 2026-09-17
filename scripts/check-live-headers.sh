@@ -54,7 +54,7 @@ for h in content-security-policy x-content-type-options x-frame-options referrer
 done
 
 echo; echo "#### Caching and compression"
-asset=$(grep -oE '/_astro/[^"]+\.(woff2|avif|webp)' <<<"$html" | head -1)
+asset=$(grep -oE '/_astro/[^" ,]+\.(woff2|avif|webp)' <<<"$html" | head -1)
 if [ -n "$asset" ]; then
   cc=$(header "$asset" cache-control)
   echo "$cc" | grep -q immutable && pass "hashed asset \`$asset\` cached: \`$cc\`" || bad "hashed asset cache-control is \`$cc\`"
