@@ -29,6 +29,10 @@ Paper (`--paper`) and lilac sections stay as they are: clean, high contrast, no 
 - Photos are slightly desaturated (0.8–0.85) in dark sections so they belong to the purple world, and untouched in light sections.
 - Crops keep faces in the top third on phones.
 
+## Stability on phones
+
+Nothing is sized with viewport-height units (`vh`, `svh`, `dvh`, `lvh`). On phones the address bar collapses as you scroll, the viewport height changes, and anything tied to it resizes, which makes photos look like they zoom while scrolling. Sections are sized by their content and photos by aspect ratio. The publish gate rejects builds that use these units, and a browser test resizes the viewport and checks the first screen holds still.
+
 ## Motion
 
 One orchestrated moment: the hero photos crossfade (six seconds each). Everything else moves only in response to a person: doors lift 2 px on hover, the menu fades in, items stagger in. All of it stops under `prefers-reduced-motion`.

@@ -142,6 +142,29 @@ test.describe("device compatibility", () => {
   });
 });
 
+test.describe("scrolling stability", () => {
+  // On phones the browser's address bar collapses as you scroll, which changes
+  // the viewport height. Nothing on the first screen may resize when that
+  // happens, or photos appear to zoom while scrolling.
+  test("the first screen does not resize when the browser bars collapse", async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 664 });
+    await page.goto("/");
+    const measure = () =>
+      page.evaluate(() => {
+        const box = (sel: string) => {
+          const r = document.querySelector(sel)!.getBoundingClientRect();
+          return [Math.round(r.width), Math.round(r.height)];
+        };
+        return { hero: box(".hero"), photo: box(".hero .montage img"), door: box(".door--help") };
+      });
+    const before = await measure();
+    await page.setViewportSize({ width: 390, height: 750 }); // bars collapsed
+    await page.waitForTimeout(100);
+    const after = await measure();
+    expect(after).toEqual(before);
+  });
+});
+
 test.describe("layout", () => {
   for (const width of [320, 360, 390, 430, 768, 1024, 1280, 1440]) {
     test(`no horizontal scrolling at ${width}px`, async ({ page }) => {

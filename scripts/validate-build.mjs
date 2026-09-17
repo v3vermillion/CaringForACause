@@ -166,6 +166,14 @@ export function validateBuild(dist, { allowIndexing }) {
     if (pattern.test(text)) fail(`Placeholder text found on the page: ${pattern}`);
   }
 
+  // Viewport-height units (vh, svh, dvh, lvh) make phone layouts resize as the
+  // browser's address bar collapses, which looks like photos zooming on scroll.
+  const cssUnits = raw.match(/[0-9.]+(?:[sdl]?vh)\b/g) ?? [];
+  if (cssUnits.length > 0)
+    fail(
+      `Viewport-height units in CSS cause scroll zoom on phones: ${[...new Set(cssUnits)].join(", ")}`,
+    );
+
   // Security headers
   const headers = existsSync(join(dist, "_headers")) ? read("_headers") : "";
   for (const name of REQUIRED_HEADERS) {

@@ -87,6 +87,13 @@ describe("publish gate", () => {
     expectError(dir, /expected "NGO"/);
   });
 
+  it("blocks viewport-height units, which cause scroll zoom on phones", () => {
+    const dir = brokenBuild("index.html", (h) =>
+      h.replace("</style>", ".x{min-height:100svh}</style>"),
+    );
+    expectError(dir, /Viewport-height units/);
+  });
+
   it("blocks missing security headers", () => {
     const dir = brokenBuild("_headers", (h) => h.replace(/Content-Security-Policy:.*\n/, ""));
     expectError(dir, /missing Content-Security-Policy/);
