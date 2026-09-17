@@ -19,8 +19,8 @@ const cycle = slides.length * 6; // seconds for one full rotation
 /** Image options shared with the preload in the page head. Keep in sync. */
 export const MONTAGE_IMAGE = {
   formats: ["avif", "webp"] as ("avif" | "webp")[],
-  quality: 55,
-  widths: [480, 720],
+  quality: 50,
+  widths: [480, 640],
   sizes: "(min-width: 56rem) 560px, 100vw",
 };
 ---
@@ -32,21 +32,22 @@ export const MONTAGE_IMAGE = {
 >
   <div class="wrap frame">
     <!-- Decorative montage of the organization's own event photos. -->
-    <div class="montage" aria-hidden="true">
+    <div class="montage" aria-hidden="true" data-montage>
       {slides.map((slide) => (
-        <Picture
-          src={slide.src}
-          formats={MONTAGE_IMAGE.formats}
-          alt=""
-          quality={MONTAGE_IMAGE.quality}
-          widths={MONTAGE_IMAGE.widths}
-          sizes={MONTAGE_IMAGE.sizes}
-          loading={slide.index === 0 ? "eager" : "lazy"}
-          fetchpriority={slide.index === 0 ? "high" : "auto"}
-          decoding="async"
-          class="slide"
-          style={`--i: ${slide.index}; object-position: ${slide.focus ?? "center"};`}
-        />
+        <div class="slide-wrap" hidden={slide.index > 0} style={`--i: ${slide.index};`}>
+          <Picture
+            src={slide.src}
+            formats={MONTAGE_IMAGE.formats}
+            alt=""
+            quality={MONTAGE_IMAGE.quality}
+            widths={MONTAGE_IMAGE.widths}
+            sizes={MONTAGE_IMAGE.sizes}
+            loading={slide.index === 0 ? "eager" : "lazy"}
+            fetchpriority={slide.index === 0 ? "high" : "auto"}
+            decoding="async"
+            style={`object-position: ${slide.focus ?? "center"};`}
+          />
+        </div>
       ))}
       <div class="veil"></div>
     </div>
@@ -69,6 +70,24 @@ export const MONTAGE_IMAGE = {
   </div>
 </section>
 
+<script>
+  // The first photo loads with the page. The rest are hidden (so they don't
+  // download) until the page has loaded, then the crossfade starts. Without
+  // JavaScript, or with reduced motion, the first photo simply stays.
+  const montage = document.querySelector<HTMLElement>("[data-montage]");
+  const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if (montage && !reduce) {
+    const start = () => {
+      montage.querySelectorAll<HTMLElement>(".slide-wrap[hidden]").forEach((el) => {
+        el.hidden = false;
+      });
+      montage.classList.add("play");
+    };
+    if (document.readyState === "complete") setTimeout(start, 1200);
+    else addEventListener("load", () => setTimeout(start, 1200), { once: true });
+  }
+</script>
+
 <style>
   .hero {
     position: relative;
@@ -89,20 +108,33 @@ export const MONTAGE_IMAGE = {
     z-index: -1;
   }
 
-  .slide,
+  .slide-wrap,
   .montage :global(img) {
     position: absolute;
     inset: 0;
     width: 100%;
     height: 100%;
-    object-fit: cover;
+  }
+
+  .slide-wrap[hidden] {
+    display: none;
   }
 
   .montage :global(img) {
+    object-fit: cover;
+    transform: scale(1.04);
+  }
+
+  /* Before the crossfade starts (and without JavaScript), the first photo shows. */
+  .slide-wrap:first-child :global(img) {
+    opacity: 1;
+  }
+
+  .montage.play .slide-wrap :global(img) {
     opacity: 0;
     animation: crossfade var(--cycle) infinite;
-    animation-delay: calc(var(--i) * (var(--cycle) / var(--slides)));
-    transform: scale(1.04);
+    /* Start 8% into the cycle so the first photo begins fully visible (no dip). */
+    animation-delay: calc(var(--i) * (var(--cycle) / var(--slides)) - var(--cycle) * 0.08);
   }
 
   @keyframes crossfade {
@@ -135,11 +167,11 @@ export const MONTAGE_IMAGE = {
 
   @media (prefers-reduced-motion: reduce) {
     .montage :global(img) {
-      animation: none;
+      animation: none !important;
       transform: none;
     }
-    .montage :global(picture:first-child img) {
-      opacity: 1;
+    .slide-wrap:first-child :global(img) {
+      opacity: 1 !important;
     }
   }
 
