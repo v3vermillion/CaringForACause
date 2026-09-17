@@ -12,9 +12,12 @@ import { facts, org } from "../data/site";
 type Props = {
   title?: string;
   description?: string;
+  /** Preload the largest above-the-fold image so it doesn't wait behind fonts. */
+  preloadImage?: { srcset: string; sizes: string; type: string };
 };
 
 const {
+  preloadImage,
   title = `${org.name} | ${claim(facts.serviceArea)}`,
   description = `${org.shortName} helps families in ${claim(facts.serviceArea)} with holiday meals and gifts, monthly diapers, and school supplies.`,
 } = Astro.props;
@@ -83,6 +86,16 @@ const structuredData = {
     <title>{title}</title>
     <meta name="description" content={description} />
     <meta name="robots" content={allowIndexing ? "index, follow" : "noindex, nofollow"} />
+    {preloadImage && (
+      <link
+        rel="preload"
+        as="image"
+        imagesrcset={preloadImage.srcset}
+        imagesizes={preloadImage.sizes}
+        type={preloadImage.type}
+        fetchpriority="high"
+      />
+    )}
     <link rel="preload" href={displayFont} as="font" type="font/woff2" crossorigin />
     <link rel="preload" href={bodyFont} as="font" type="font/woff2" crossorigin />
     <link rel="canonical" href={canonical} />

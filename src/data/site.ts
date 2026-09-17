@@ -150,6 +150,33 @@ export const seasonalBanner = {
 
 export const hero = {
   headline: "Holiday meals, gifts, and diapers for Central Indiana families",
+  /**
+   * Real event photos shown behind the headline, crossfading slowly. Order
+   * matters: the first one is what people with reduced motion see. Use
+   * photos with faces near the top, since the bottom is covered by text.
+   */
+  montage: [
+    {
+      file: "holiday-gift-bags.jpg",
+      alt: "",
+      focus: "center 22%",
+    },
+    {
+      file: "haircut-boy.jpg",
+      alt: "",
+      focus: "center 20%",
+    },
+    {
+      file: "families-banner.jpg",
+      alt: "",
+      focus: "center 30%",
+    },
+    {
+      file: "holiday-shopping.jpg",
+      alt: "",
+      focus: "center 30%",
+    },
+  ] satisfies Photo[],
   subhead: `A volunteer-run nonprofit helping families in ${claim(facts.serviceArea)} since ${claim(facts.founded)}.`,
   doors: {
     getHelp: {
