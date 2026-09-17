@@ -155,7 +155,7 @@ export const hero = {
   tagline: "Together we can.",
   headline: "Holiday meals, gifts, and diapers for Central Indiana families",
   /**
-   * Real event photos shown behind the headline, crossfading slowly. Order
+   * Real event photos shown behind the banner, crossfading slowly. Order
    * matters: the first one is what people with reduced motion see. Use
    * photos with faces near the top, since the bottom is covered by text.
    */
@@ -182,18 +182,57 @@ export const hero = {
     },
   ] satisfies Photo[],
   subhead: `A volunteer-run nonprofit helping families in ${claim(facts.serviceArea)} since ${claim(facts.founded)}.`,
+  /** The two doors. Families first; giving second. */
   doors: {
     getHelp: {
       title: "Help me",
       body: "Holiday meals and gifts, monthly diapers, and school supplies.",
-      href: "/#get-help",
+      href: "/apply",
     },
-    giveHelp: {
-      title: "I want to help",
-      body: "Sponsor a family, donate, or volunteer your time.",
-      href: "/#get-involved",
+    donate: {
+      title: "Donate",
+      body: "Give once or monthly to families in Central Indiana.",
+      href: "/donate",
     },
   },
+  /** The quiet third option under the doors. */
+  more: { label: "Sponsor a family, volunteer, or partner with us", href: "/#get-involved" },
+};
+
+/**
+ * Site navigation. The phone menu and the desktop links share this list;
+ * an item with `children` becomes a dropdown on desktop and a group of
+ * links in the menu.
+ */
+export type NavItem = {
+  id: string;
+  label: string;
+  href: string;
+  /** One line under the label in the phone menu. */
+  detail: string;
+  children?: { label: string; href: string }[];
+};
+
+export const navigation = {
+  items: [
+    { id: "about", label: "About", href: "/#about", detail: "Meet Tamara and the mission" },
+    { id: "programs", label: "Our programs", href: "/#programs", detail: "What we do, all year" },
+    {
+      id: "involved",
+      label: "Get involved",
+      href: "/#get-involved",
+      detail: "Choose how you'd like to help",
+      children: [
+        { label: "Sponsor a family", href: "/#sponsor" },
+        { label: "Volunteer", href: "/#volunteer" },
+        { label: "Partner", href: "/#partner" },
+        { label: "Donate", href: "/donate" },
+      ],
+    },
+    { id: "contact", label: "Contact", href: "/#contact", detail: "Phone, email, Facebook" },
+  ] satisfies NavItem[],
+  donate: { label: "Donate", href: "/donate" },
+  help: { label: "Help me", href: "/apply" },
 };
 
 export const getHelp = {
@@ -201,7 +240,95 @@ export const getHelp = {
   whoCanApply:
     "Households with children and seniors are our focus, but anyone who is struggling right now can apply.",
   howToApply:
-    "Call or email us to request an application. We'll send you the application and more information.",
+    "Start an application here, or call or email us and we'll send you one with more information.",
+  action: { label: "Start an application", href: "/apply" },
+};
+
+/** The application page (/apply). Field choices live here so they can be edited without touching layout. */
+export const applyPage = {
+  eyebrow: "Help me",
+  heading: "Apply for help",
+  intro:
+    "Tell us a little about your household and what you need. It goes straight to us by email, and we'll follow up with next steps.",
+  privacy:
+    "We use this only to contact you about help. Nothing is stored on this website; your answers are sent to us by email.",
+  /** Shown when JavaScript is off, since the form can't send without it. */
+  noScript:
+    "This form needs JavaScript to send. Call or email us instead and we'll send you an application.",
+  steps: [
+    { id: "you", title: "About you", hint: "How we can reach you" },
+    { id: "household", title: "Your household", hint: "Where you live and who lives with you" },
+    { id: "needs", title: "What you need", hint: "Choose everything that applies" },
+    { id: "review", title: "Review and send", hint: "Check your answers" },
+  ],
+  /** Counties in Central Indiana, for the county picker. */
+  counties: [
+    "Marion",
+    "Hamilton",
+    "Hendricks",
+    "Johnson",
+    "Hancock",
+    "Boone",
+    "Morgan",
+    "Shelby",
+    "Madison",
+    "Other",
+  ],
+  contactMethods: ["Call", "Text", "Email"],
+  diaperSizes: ["Newborn", "Size 1", "Size 2", "Size 3", "Size 4", "Size 5", "Size 6", "Pull-ups"],
+  grades: ["Pre-K", "K", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"],
+  holidays: ["Thanksgiving", "Christmas", "Easter"],
+  emailSubject: "Application for help",
+  done: {
+    heading: "Your email app should be open",
+    body: "Press send to finish. If it didn't open, copy the text below and email it to us, or call us.",
+  },
+};
+
+/** The donation page (/donate). */
+export const donatePage = {
+  eyebrow: "Donate",
+  heading: `Give to families in ${claim(facts.serviceArea)}`,
+  intro:
+    "Donations help provide diapers, holiday meals, gifts, and school supplies for local families.",
+  amounts: [25, 50, 100, 250],
+  frequencies: [
+    { id: "once", label: "One time" },
+    { id: "monthly", label: "Monthly" },
+  ],
+  /** Shown while `links.donate` is not set: giving is arranged by email. */
+  emailSubject: "Donation",
+  continueLabel: "Continue to secure payment",
+  emailLabel: "Email us to give",
+  emailNote:
+    "Online payments open once our secure giving page is set up. Until then, choose an amount and email us; we'll arrange it with you directly.",
+  otherWays: {
+    heading: "Other ways to give",
+    items: [
+      {
+        title: "Sponsor a family",
+        body: "Fill a family's holiday wish list, provide a meal, or both.",
+        href: "/#sponsor",
+      },
+      {
+        title: "Donate items",
+        body: "Diapers, and hygiene and school supplies from our back-to-school list.",
+        href: "/#back-to-school",
+      },
+      {
+        title: "Partner with us",
+        body: "Businesses, churches, and organizations can partner on a program.",
+        href: "/#partner",
+      },
+    ],
+  },
+};
+
+/** The contact section on the home page. */
+export const contact = {
+  eyebrow: "Contact",
+  heading: "Reach us",
+  intro: "Call or email us, or send a message on Facebook.",
 };
 
 export const programs: Program[] = [
@@ -355,7 +482,7 @@ export const getInvolved = {
         "Donations help provide diapers, holiday meals, gifts, and school supplies for local families.",
         `${claim(facts.legalName)} is a ${claim(facts.taxExempt).section} nonprofit (EIN ${claim(facts.ein)}), so donations are tax-deductible.`,
       ],
-      action: { label: "Donate now", href: links.donate, fallbackLabel: "Email us to give" },
+      action: { label: "Give online", href: "/donate", fallbackLabel: "Give online" },
       photo: {
         file: "families-banner.jpg",
         alt: "Families and children in front of a Caring for a Cause banner",
@@ -404,19 +531,28 @@ export const getInvolved = {
 };
 
 export const about = {
+  eyebrow: "About",
   heading: `Meet ${claim(facts.founder)}`,
   body: [
     `${claim(facts.founder)} founded ${org.shortName} in ${claim(facts.founded)} to support families in ${claim(facts.serviceArea)} who are facing financial hardship.`,
     "Part-time volunteers help run every program, and the organization has grown thanks to the helping hands of this community.",
   ],
+  /** Her tagline, as the caption on the portrait. */
+  tagline: hero.tagline,
+  /** A still from her "Do More" feature, cropped to leave out the program's caption. */
+  portrait: {
+    file: "tamara-portrait.jpg",
+    alt: `${claim(facts.founder)}, founder of ${org.shortName}, smiling outside in a red top`,
+    focus: "center 25%",
+  } satisfies Photo,
+  watchLabel: "Watch her story",
   video: {
     id: "7smWzJwY9kA",
     title: "Do More: Tamara Long-Ajimati provides supportive services to families in need",
-    poster: "video-do-more-poster.jpg",
   } satisfies YouTubeVideo,
 };
 
-/** Photos from src/assets/photos/ shown in the gallery strip. Empty hides the section. */
+/** Photos from src/assets/photos/ shown in the gallery strip. Fewer than four hides the section. */
 export const gallery: Photo[] = [
   {
     file: "face-paint-closeup.jpg",

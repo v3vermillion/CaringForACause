@@ -5,21 +5,111 @@ type Props = { video: YouTubeVideo };
 const { video } = Astro.props;
 ---
 
+<!--
+  A small poster button for a video that belongs to a section, opening on
+  YouTube. The thumbnail is YouTube's own and loads lazily.
+-->
 <a
   class="video-link"
   href={`https://www.youtube.com/watch?v=${video.id}`}
   target="_blank"
   rel="noopener"
 >
-  Watch the video: {video.title}
-  <span class="visually-hidden"> (opens in a new tab on YouTube)</span>
+  <span class="thumb" aria-hidden="true">
+    <img
+      src={`https://i.ytimg.com/vi/${video.id}/mqdefault.jpg`}
+      alt=""
+      width="320"
+      height="180"
+      loading="lazy"
+      decoding="async"
+    />
+    <span class="play"></span>
+  </span>
+  <span class="text">
+    <span class="kicker">Watch the video</span>
+    <span class="title">{video.title}</span>
+    <span class="visually-hidden"> (opens in a new tab on YouTube)</span>
+  </span>
 </a>
 
 <style>
   .video-link {
-    display: inline-flex;
+    display: flex;
     align-items: center;
+    gap: 0.9rem;
     min-height: 44px;
+    max-width: 28rem;
+    padding: 0.5rem;
+    border: 1px solid var(--rule);
+    border-radius: var(--r-img);
+    background: #fff;
+    color: var(--ink);
+    text-decoration: none;
+    transition:
+      border-color 150ms ease,
+      transform 150ms ease;
+  }
+
+  .video-link:hover {
+    border-color: var(--purple);
+    transform: translateY(-2px);
+  }
+
+  .thumb {
+    position: relative;
+    flex: none;
+    width: 6.5rem;
+    aspect-ratio: 16 / 9;
+    overflow: hidden;
+    border-radius: 8px;
+    background: var(--night);
+  }
+
+  .thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .play {
+    position: absolute;
+    inset: 0;
+    margin: auto;
+    width: 2rem;
+    height: 2rem;
+    border-radius: 50%;
+    background: var(--crimson);
+    box-shadow: 0 0 0 3px rgb(255 255 255 / 0.9);
+  }
+
+  .play::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 55%;
+    transform: translate(-50%, -50%);
+    border-style: solid;
+    border-width: 6px 0 6px 10px;
+    border-color: transparent transparent transparent #fff;
+  }
+
+  .text {
+    display: grid;
+    gap: 0.1rem;
+    min-width: 0;
+  }
+
+  .kicker {
+    font-family: var(--font-display);
+    font-size: var(--step--1);
     font-weight: 700;
+    color: var(--purple);
+  }
+
+  .title {
+    font-size: var(--step--1);
+    line-height: 1.35;
+    color: var(--muted);
   }
 </style>

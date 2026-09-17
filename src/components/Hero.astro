@@ -1,94 +1,88 @@
 ---
-import { Image } from "astro:assets";
-import mark from "../assets/brand/logo-mark-night.png";
-import { about, hero, org } from "../data/site";
-import YouTubeLite from "./YouTubeLite.astro";
+import { Picture } from "astro:assets";
+import type { ImageMetadata } from "astro";
+import { hero } from "../data/site";
+import Brand from "./Brand.astro";
 
 const { doors } = hero;
+
+// Her event photos, crossfading slowly behind the banner. Only the first one
+// loads with the page; the others load after, then the crossfade starts.
+const files = import.meta.glob<{ default: ImageMetadata }>(
+  "../assets/photos/*.{jpg,jpeg,png,webp}",
+  { eager: true },
+);
+const slides = hero.montage.map((photo, index) => {
+  const match = files[`../assets/photos/${photo.file}`];
+  if (!match) throw new Error(`Photo not found: src/assets/photos/${photo.file}`);
+  return { ...photo, src: match.default, index };
+});
+const cycle = slides.length * 7;
 ---
 
 <!--
-  The identity block. Her name and tagline in her logo's lettering, the heart
-  and hands large, and "Help me" held in the palms. Then "I want to help".
+  The banner: her photos, her lettering, one sentence, two doors.
+  Nothing here is sized with viewport-height units (see docs/DESIGN.md).
 -->
-<section class="hero" aria-labelledby="hero-title">
+<section class="hero on-dark" aria-labelledby="hero-title">
+  <div class="montage" aria-hidden="true" data-montage style={`--cycle: ${cycle}s;`}>
+    {slides.map((slide) => (
+      <div class="slide" hidden={slide.index > 0} style={`--i: ${slide.index};`}>
+        <Picture
+          src={slide.src}
+          formats={["avif", "webp"]}
+          alt=""
+          quality={62}
+          widths={[480, 640, 720]}
+          sizes="(min-width: 56rem) 62vw, 100vw"
+          loading={slide.index === 0 ? "eager" : "lazy"}
+          fetchpriority={slide.index === 0 ? "high" : "auto"}
+          decoding="async"
+          style={`object-position: ${slide.focus ?? "center"};`}
+        />
+      </div>
+    ))}
+  </div>
+  <div class="scrim"></div>
+
   <div class="wrap">
-    <h1 id="hero-title" class="script name">
-      {org.shortName}
-    </h1>
-    <p class="script together">
-      <span>Together</span>
-      <span class="we-can">
-        we can.
-        <svg class="underline" viewBox="0 0 220 14" aria-hidden="true" preserveAspectRatio="none">
-          <path
-            d="M4 9 C 60 2, 140 2, 216 8"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="4"
-            stroke-linecap="round"
-          />
-        </svg>
-      </span>
-    </p>
+    <div class="content">
+      <Brand kind="wordmark" class="wordmark" />
+      <p class="tagline">{hero.tagline}</p>
+      <h1 id="hero-title">{hero.headline}</h1>
+      <p class="sub">{hero.subhead}</p>
 
-    <div class="mark">
-      <Image
-        src={mark}
-        alt=""
-        width={640}
-        densities={[1, 1.5, 2]}
-        loading="eager"
-        fetchpriority="high"
-      />
-      <a class="door door--help" href={doors.getHelp.href}>
-        <span class="help-label">{doors.getHelp.title}</span>
-        <span class="help-go" aria-hidden="true">
-          <svg viewBox="0 0 24 24" width="16" height="16">
-            <path
-              d="M9 5l7 7-7 7"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="3"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            ></path>
-          </svg>
-        </span>
-        <span class="visually-hidden">: {doors.getHelp.body}</span>
+      <div class="doors">
+        <a class="door door--help" href={doors.getHelp.href}>
+          <span class="door-title">{doors.getHelp.title}</span>
+          <span class="door-body">{doors.getHelp.body}</span>
+        </a>
+        <a class="door door--give" href={doors.donate.href}>
+          <span class="door-title">{doors.donate.title}</span>
+          <span class="door-body">{doors.donate.body}</span>
+        </a>
+      </div>
+
+      <a class="arrow-link more" href={hero.more.href}>
+        {hero.more.label}
       </a>
-    </div>
-
-    <a class="door door--give" href={doors.giveHelp.href}>
-      <span class="door-text">
-        <span class="door-title">{doors.giveHelp.title}</span>
-        <span class="door-body">{doors.giveHelp.body}</span>
-      </span>
-      <span class="door-go" aria-hidden="true">
-        <svg viewBox="0 0 24 24" width="22" height="22">
-          <path
-            d="M9 5l7 7-7 7"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2.4"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          />
-        </svg>
-      </span>
-    </a>
-
-    <!-- Her story, dead center: the video that shows what all of this is. -->
-    <div class="film">
-      <YouTubeLite video={about.video} />
-    </div>
-
-    <div class="copy">
-      <h2>{hero.headline}</h2>
-      <p class="subhead">{hero.subhead}</p>
     </div>
   </div>
 </section>
+
+<script>
+  document.querySelectorAll<HTMLElement>("[data-montage]").forEach((montage) => {
+    if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const start = () => {
+      montage.querySelectorAll<HTMLElement>(".slide[hidden]").forEach((el) => {
+        el.hidden = false;
+      });
+      montage.classList.add("play");
+    };
+    if (document.readyState === "complete") setTimeout(start, 1500);
+    else addEventListener("load", () => setTimeout(start, 1500), { once: true });
+  });
+</script>
 
 <style>
   .hero {
@@ -96,304 +90,231 @@ const { doors } = hero;
     isolation: isolate;
     overflow: hidden;
     background: var(--night);
-    color: #fff;
-    padding-block: 1.1rem var(--space-xl);
-    text-align: center;
+    padding-block: clamp(8rem, 6rem + 9vw, 14rem) var(--space-l);
   }
 
-  /* The light behind everything: one glow up top, a faint crimson at the base. */
-  .hero::before {
-    content: "";
+  .montage {
     position: absolute;
     inset: 0;
-    z-index: -1;
-    background:
-      radial-gradient(60% 34% at 50% 38%, rgb(150 90 255 / 0.28), transparent 70%),
-      radial-gradient(70% 45% at 100% 0%, rgb(96 8 215 / 0.4), transparent 65%),
-      radial-gradient(60% 40% at 0% 100%, rgb(186 1 12 / 0.16), transparent 60%),
-      linear-gradient(180deg, var(--night) 0%, #150b26 100%);
+    z-index: -2;
+    background: #2a1640;
   }
 
-  .script {
-    font-family: var(--font-script);
-    font-weight: 400;
-    letter-spacing: 0;
-    text-wrap: balance;
-  }
-
-  .name {
-    margin: 0;
-    font-size: clamp(2.4rem, 1.2rem + 6vw, 4.5rem);
-    line-height: 1.05;
-    color: #fff;
-    text-shadow: 0 2px 30px rgb(96 8 215 / 0.55);
-  }
-
-  .together {
-    display: grid;
-    justify-items: center;
-    gap: 0;
-    margin: 0.4rem auto 0;
-    font-size: clamp(1.7rem, 0.9rem + 4vw, 3rem);
-    line-height: 1.05;
-    color: var(--night-soft);
-    max-width: none;
-  }
-
-  .we-can {
-    position: relative;
-    display: inline-block;
-    padding-bottom: 0.45rem;
-  }
-
-  .underline {
+  .slide,
+  .montage :global(img) {
     position: absolute;
-    left: -2%;
-    bottom: 0;
-    width: 104%;
-    height: 0.34em;
-    color: #ff5a63;
-  }
-
-  /* The heart and hands, holding the button. */
-  .mark {
-    position: relative;
-    width: min(100%, 22.5rem);
-    margin: -0.35rem auto 0;
-    container-type: inline-size;
-  }
-
-  .mark::before {
-    content: "";
-    position: absolute;
-    inset: 4% -8% -2%;
-    z-index: -1;
-    border-radius: 50%;
-    background: radial-gradient(
-      closest-side,
-      rgb(140 70 255 / 0.35),
-      rgb(96 8 215 / 0.12) 62%,
-      transparent 100%
-    );
-  }
-
-  .mark :global(img) {
+    inset: 0;
     width: 100%;
-    height: auto;
-    filter: drop-shadow(0 0 18px rgb(120 50 255 / 0.35)) drop-shadow(0 22px 30px rgb(0 0 0 / 0.45));
+    height: 100%;
   }
 
-  /*
-    Help me sits in the open red space above the fingertips (about 36% down the
-    heart, where the clear width is about half the heart). Sized in container
-    units so it stays in that space at every mark size.
-  */
-  .door--help {
-    position: absolute;
-    left: 50%;
-    top: 36%;
-    transform: translate(-50%, -50%);
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 3cqi;
-    width: 50cqi;
-    height: 15.5cqi;
-    min-height: 44px;
-    padding: 0 3cqi 0 5cqi;
-    border-radius: 999px;
-    color: #fff;
-    text-decoration: none;
-    white-space: nowrap;
-    background:
-      linear-gradient(180deg, rgb(255 255 255 / 0.22) 0%, rgb(255 255 255 / 0) 48%),
-      linear-gradient(135deg, #ef2a37 0%, #c3000d 55%, #8a0008 100%);
-    box-shadow:
-      0 0 0 1.5px rgb(255 255 255 / 0.85),
-      0 0 0 5px rgb(255 60 70 / 0.18),
-      0 10px 26px rgb(90 0 6 / 0.55),
-      0 0 34px rgb(255 50 62 / 0.45);
-    animation: breathe 3.6s ease-in-out infinite;
-    transition: transform 160ms ease;
+  .slide[hidden] {
+    display: none;
   }
 
-  .door--help:hover,
-  .door--help:focus-visible {
-    transform: translate(-50%, -50%) scale(1.04);
+  .montage :global(img) {
+    object-fit: cover;
+    filter: saturate(0.85);
+    transform: scale(1.02);
   }
 
-  .door--help:active {
-    transform: translate(-50%, -50%) scale(0.98);
+  .slide:first-child :global(img) {
+    opacity: 1;
   }
 
-  @keyframes breathe {
-    0%,
+  .montage.play .slide :global(img) {
+    opacity: 0;
+    animation: crossfade var(--cycle) infinite;
+    animation-delay: calc(var(--i) * (var(--cycle) / 4) - var(--cycle) * 0.08);
+  }
+
+  @keyframes crossfade {
+    0% {
+      opacity: 0;
+    }
+    8%,
+    25% {
+      opacity: 1;
+    }
+    33%,
     100% {
-      box-shadow:
-        0 0 0 1.5px rgb(255 255 255 / 0.85),
-        0 0 0 5px rgb(255 60 70 / 0.18),
-        0 10px 26px rgb(90 0 6 / 0.55),
-        0 0 34px rgb(255 50 62 / 0.45);
-    }
-    50% {
-      box-shadow:
-        0 0 0 1.5px rgb(255 255 255 / 0.95),
-        0 0 0 8px rgb(255 60 70 / 0.12),
-        0 10px 26px rgb(90 0 6 / 0.55),
-        0 0 48px rgb(255 70 80 / 0.7);
+      opacity: 0;
     }
   }
 
-  .help-label {
-    font-family: var(--font-script);
-    font-size: 8.4cqi;
-    line-height: 1;
-    padding-bottom: 0.08em;
-    text-shadow: 0 1px 2px rgb(90 0 6 / 0.45);
-  }
-
-  .help-go {
-    flex: none;
-    display: grid;
-    place-items: center;
-    width: 8cqi;
-    height: 8cqi;
-    border-radius: 50%;
-    background: #fff;
-    color: #c3000d;
-    box-shadow: 0 2px 6px rgb(90 0 6 / 0.35);
-  }
-
-  .help-go :global(svg) {
-    width: 4.4cqi;
-    height: 4.4cqi;
-  }
-
-  .door-go {
-    flex: none;
-    display: grid;
-    place-items: center;
-    width: 2.25rem;
-    height: 2.25rem;
-    border-radius: 50%;
-    background: rgb(255 255 255 / 0.18);
-  }
-
-  /* I want to help: glass bar under the mark. */
-  .door--give {
-    position: relative;
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    width: min(100%, 26rem);
-    min-height: 4.75rem;
-    margin: 0.9rem auto 0;
-    padding: 0.9rem 0.9rem 0.9rem 1.25rem;
-    border-radius: 22px;
-    background: rgb(255 255 255 / 0.09);
-    color: #fff;
-    text-align: left;
-    text-decoration: none;
-    -webkit-backdrop-filter: blur(16px);
-    backdrop-filter: blur(16px);
-    transition: background-color 150ms ease;
-  }
-
-  .door--give:hover {
-    background: rgb(255 255 255 / 0.15);
-  }
-
-  .door--give::before {
-    content: "";
+  /* The veil: photos stay bright at the top, the words sit on night at the bottom. */
+  .scrim {
     position: absolute;
     inset: 0;
-    border-radius: inherit;
-    padding: 1px;
-    background: linear-gradient(
-      135deg,
-      rgb(255 255 255 / 0.55),
-      rgb(96 8 215 / 0.6) 45%,
-      rgb(186 1 12 / 0.45)
-    );
-    -webkit-mask:
-      linear-gradient(#000 0 0) content-box,
-      linear-gradient(#000 0 0);
-    mask:
-      linear-gradient(#000 0 0) content-box,
-      linear-gradient(#000 0 0);
-    -webkit-mask-composite: xor;
-    mask-composite: exclude;
-    pointer-events: none;
+    z-index: -1;
+    background:
+      linear-gradient(180deg, rgb(27 15 46 / 0.35) 0%, rgb(27 15 46 / 0.55) 35%, #1b0f2e 78%),
+      linear-gradient(90deg, rgb(27 15 46 / 0.35), transparent 60%);
   }
 
-  .door-text {
+  .content {
     display: grid;
-    gap: 0.15rem;
-    flex: 1;
-    min-width: 0;
+    gap: 0;
+    max-width: 38rem;
   }
 
-  .door--give .door-title {
+  .content :global(.wordmark) {
+    width: min(100%, 30rem);
+    color: #fff;
+    filter: drop-shadow(0 6px 24px rgb(0 0 0 / 0.45));
+  }
+
+  .tagline {
+    margin-top: 0.75rem;
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: var(--step-0);
+    color: var(--night-soft);
+  }
+
+  h1 {
+    margin-top: var(--space-m);
+    font-size: clamp(1.75rem, 1.2rem + 2.6vw, 3.1rem);
+    line-height: 1.05;
+    color: #fff;
+  }
+
+  .sub {
+    margin-top: 0.75rem;
+    font-size: var(--step-0);
+    line-height: 1.5;
+    color: #e3daf6;
+  }
+
+  /* Two doors, equal weight. Crimson is the signal; the other is glass. */
+  .doors {
+    display: grid;
+    gap: 0.75rem;
+    margin-top: var(--space-m);
+  }
+
+  .door {
+    position: relative;
+    display: grid;
+    align-content: center;
+    gap: 0.2rem;
+    min-height: 5.25rem;
+    padding: 0.9rem 3rem 0.9rem 1.25rem;
+    border-radius: var(--r-card);
+    color: #fff;
+    text-decoration: none;
+    transition:
+      transform 150ms ease,
+      background-color 150ms ease,
+      box-shadow 150ms ease;
+  }
+
+  .door::after {
+    content: "";
+    position: absolute;
+    right: 1.1rem;
+    top: 50%;
+    width: 0.7rem;
+    height: 0.7rem;
+    border-right: 3px solid currentColor;
+    border-top: 3px solid currentColor;
+    transform: translateY(-50%) rotate(45deg);
+    transition: transform 150ms ease;
+  }
+
+  .door:hover {
+    transform: translateY(-2px);
+  }
+
+  .door:hover::after {
+    transform: translateY(-50%) translateX(3px) rotate(45deg);
+  }
+
+  .door-title {
     font-family: var(--font-display);
     font-size: var(--step-2);
     font-weight: 800;
-    letter-spacing: -0.025em;
+    letter-spacing: -0.02em;
     line-height: 1.05;
   }
 
   .door-body {
     font-size: var(--step--1);
     line-height: 1.35;
+    opacity: 0.92;
   }
 
-  .door--give .door-go {
-    width: 2.75rem;
-    height: 2.75rem;
-    background: rgb(255 255 255 / 0.12);
-  }
-
-  .film {
-    width: min(100%, 40rem);
-    margin: var(--space-xl) auto 0;
-    border-radius: 24px;
+  .door--help {
+    background: linear-gradient(135deg, #ef2f3a 0%, var(--signal) 45%, #a3000a 100%);
     box-shadow:
-      0 30px 80px rgb(0 0 0 / 0.5),
-      0 0 0 1px rgb(255 255 255 / 0.14);
+      0 14px 40px rgb(226 32 44 / 0.4),
+      0 0 0 1px rgb(255 255 255 / 0.18) inset;
   }
 
-  .copy {
-    display: grid;
-    gap: 0.5rem;
-    max-width: 34rem;
-    margin: var(--space-l) auto 0;
+  .door--help:hover {
+    box-shadow:
+      0 18px 48px rgb(226 32 44 / 0.5),
+      0 0 0 1px rgb(255 255 255 / 0.25) inset;
   }
 
-  .copy h2 {
-    font-size: clamp(1.4rem, 1rem + 2vw, 2rem);
+  .door--give {
+    background: rgb(255 255 255 / 0.1);
+    box-shadow: 0 0 0 1px rgb(255 255 255 / 0.35) inset;
+    -webkit-backdrop-filter: blur(14px);
+    backdrop-filter: blur(14px);
   }
 
-  .subhead {
-    margin: 0 auto;
-    color: #d9cef2;
-    font-size: var(--step-0);
-    line-height: 1.45;
+  .door--give:hover {
+    background: rgb(255 255 255 / 0.17);
   }
 
-  @media (prefers-reduced-motion: reduce) {
-    .door--help {
-      animation: none;
+  .more {
+    margin-top: var(--space-s);
+    color: var(--night-soft);
+  }
+
+  .more:hover {
+    color: #fff;
+  }
+
+  @media (min-width: 36rem) {
+    .doors {
+      grid-template-columns: 1fr 1fr;
     }
   }
 
   @media (min-width: 56rem) {
     .hero {
-      padding-block: var(--space-xl);
+      padding-block: clamp(6rem, 3rem + 6vw, 8rem) var(--space-xl);
+      min-height: 40rem;
+      display: grid;
+      align-items: center;
     }
-    .mark {
-      width: 24rem;
+    /* Her photos sit on the right at close to their native size; night takes the
+       left, and the veil hides the photo's edge. */
+    .montage {
+      left: 22%;
     }
-    .door--give {
-      width: 30rem;
+    .scrim {
+      background:
+        linear-gradient(
+          90deg,
+          #1b0f2e 0%,
+          #1b0f2e 30%,
+          rgb(27 15 46 / 0.75) 48%,
+          rgb(27 15 46 / 0.2) 70%,
+          rgb(27 15 46 / 0.15) 100%
+        ),
+        linear-gradient(180deg, rgb(27 15 46 / 0.2) 0%, transparent 40%, rgb(27 15 46 / 0.85) 100%);
+    }
+    .content {
+      max-width: 36rem;
+    }
+    .content :global(.wordmark) {
+      width: min(100%, 32rem);
+    }
+    h1 {
+      font-size: clamp(2.2rem, 1.4rem + 2.2vw, 3.2rem);
     }
   }
 </style>

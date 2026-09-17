@@ -59,27 +59,37 @@ describe("publish gate", () => {
   });
 
   it("blocks an in-page link with no target", () => {
-    const dir = brokenBuild("index.html", (h) => h.replace('id="get-help"', 'id="gethelp"'));
-    expectError(dir, /\/#get-help has no matching element/);
+    const dir = brokenBuild("index.html", (h) => h.replace('id="about"', 'id="abouts"'));
+    expectError(dir, /\/#about has no matching element/);
+  });
+
+  it("checks every page, not only the home page", () => {
+    const dir = brokenBuild("donate/index.html", (h) =>
+      h.replace("</main>", "<h1>Again</h1></main>"),
+    );
+    expectError(dir, /donate\/index\.html must have exactly one <h1>/);
+    const missing = brokenBuild(null);
+    rmSync(join(missing, "apply"), { recursive: true });
+    expectError(missing, /Missing file: apply\/index\.html/);
   });
 
   it("blocks a missing image file", () => {
     const dir = brokenBuild("index.html", (h) =>
       h.replace(/\/_astro\/[^"\s]+\.avif/, "/_astro/gone.avif"),
     );
-    expectError(dir, /Referenced file missing from build: \/_astro\/gone\.avif/);
+    expectError(dir, /referenced file missing from build: \/_astro\/gone\.avif/i);
   });
 
   it("blocks an image without alt text", () => {
     const dir = brokenBuild("index.html", (h) => h.replace(/(<img\b[^>]*?)\s+alt="[^"]*"/, "$1"));
-    expectError(dir, /Image without alt attribute/);
+    expectError(dir, /image without alt attribute/i);
   });
 
   it("blocks placeholder text", () => {
     const dir = brokenBuild("index.html", (h) =>
       h.replace("</main>", "<p>(000) 000-0000</p></main>"),
     );
-    expectError(dir, /Placeholder text/);
+    expectError(dir, /placeholder text/i);
   });
 
   it("blocks invalid structured data", () => {
@@ -91,7 +101,7 @@ describe("publish gate", () => {
     const dir = brokenBuild("index.html", (h) =>
       h.replace("</style>", ".x{min-height:100svh}</style>"),
     );
-    expectError(dir, /Viewport-height units/);
+    expectError(dir, /viewport-height units/i);
   });
 
   it("blocks missing security headers", () => {
@@ -111,6 +121,6 @@ describe("publish gate", () => {
       h.replace("</main>", '<h1 id="about">Again</h1></main>'),
     );
     expectError(dir, /exactly one <h1>/);
-    expectError(dir, /Duplicate id: #about/);
+    expectError(dir, /duplicate id: #about/);
   });
 });

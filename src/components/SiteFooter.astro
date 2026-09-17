@@ -1,77 +1,149 @@
 ---
 import { claim, show } from "../data/facts.ts";
-import { facts, org } from "../data/site";
+import { facts, navigation, org, programs } from "../data/site";
+import Brand from "./Brand.astro";
 
 const phone = show(facts.phone);
 const email = show(facts.email);
 const taxExempt = claim(facts.taxExempt);
+const active = programs.filter((p) => p.active);
+const involved = navigation.items.find((item) => item.children)?.children ?? [];
 
 const year = new Date().getFullYear();
 ---
 
-<footer class="site-footer">
-  <div class="wrap grid">
-    <p class="sign-off">{org.signOff}</p>
-
-    <div class="stack">
-      <h2 class="label">Contact</h2>
-      <ul>
-        <li>
-          <a href={phone.href}>{phone.display}</a>
-        </li>
-        <li>
-          <a href={`mailto:${email}`}>{email}</a>
-        </li>
-        <li>
-          <a href={show(facts.facebook)} target="_blank" rel="noopener">
-            Facebook<span class="visually-hidden"> (opens in a new tab)</span>
-          </a>
-        </li>
-      </ul>
+<footer class="site-footer on-dark">
+  <div class="wrap">
+    <div class="top">
+      <a class="brand" href="/" aria-label="Caring for a Cause home">
+        <Brand kind="mark" class="mark" label="" />
+        <Brand kind="wordmark" class="wordmark" label="" />
+      </a>
+      <p class="sign-off">{org.signOff}</p>
+      <div class="doors">
+        <a class="button button--signal" href={navigation.help.href}>
+          {navigation.help.label}
+        </a>
+        <a class="button button--glass" href={navigation.donate.href}>
+          {navigation.donate.label}
+        </a>
+      </div>
     </div>
 
-    <div class="stack">
-      <h2 class="label">{claim(facts.legalName)}</h2>
+    <div class="columns">
+      <div>
+        <h2 class="label">Contact</h2>
+        <ul>
+          <li>
+            <a href={phone.href}>{phone.display}</a>
+          </li>
+          <li>
+            <a class="email" href={`mailto:${email}`}>
+              {email}
+            </a>
+          </li>
+          <li>
+            <a href={show(facts.facebook)} target="_blank" rel="noopener">
+              Facebook<span class="visually-hidden"> (opens in a new tab)</span>
+            </a>
+          </li>
+        </ul>
+      </div>
+      <div>
+        <h2 class="label">Programs</h2>
+        <ul>
+          {active.map((program) => (
+            <li>
+              <a href={`/#${program.slug}`}>{program.name}</a>
+            </li>
+          ))}
+        </ul>
+      </div>
+      <div>
+        <h2 class="label">Get involved</h2>
+        <ul>
+          {involved.map((item) => (
+            <li>
+              <a href={item.href}>{item.label}</a>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </div>
+
+    <div class="legal">
       <p>
+        <strong>{claim(facts.legalName)}</strong>
         {show(facts.city)}. Serving {claim(facts.serviceArea)}.
       </p>
       <p>
         A {taxExempt.section} nonprofit, EIN {claim(facts.ein)}.
         {taxExempt.deductible && " Donations are tax-deductible to the extent allowed by law."}
       </p>
+      <p class="copyright">
+        &copy; {year} {claim(facts.legalName)}
+      </p>
     </div>
-  </div>
-  <div class="wrap legal">
-    <p>
-      &copy; {year} {claim(facts.legalName)}
-    </p>
   </div>
 </footer>
 
 <style>
   .site-footer {
-    background: var(--night);
+    background:
+      radial-gradient(60% 50% at 0% 0%, rgb(96 8 215 / 0.3), transparent 60%), var(--night-2);
     color: var(--night-soft);
     padding-block: var(--space-xl) var(--space-m);
   }
 
-  .grid {
+  .top {
     display: grid;
-    gap: var(--space-l);
+    gap: var(--space-m);
+    padding-bottom: var(--space-l);
+    border-bottom: 1px solid rgb(255 255 255 / 0.12);
+  }
+
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    color: #fff;
+    text-decoration: none;
+  }
+
+  .brand :global(.mark) {
+    width: 3rem;
+    flex: none;
+  }
+
+  .brand :global(.wordmark) {
+    width: min(100%, 16rem);
   }
 
   .sign-off {
     font-family: var(--font-display);
-    font-size: var(--step-4);
+    font-size: var(--step-3);
     font-weight: 800;
     line-height: 1;
     letter-spacing: -0.03em;
     color: #fff;
   }
 
+  .doors {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+  }
+
+  .columns {
+    display: grid;
+    gap: var(--space-l);
+    padding-block: var(--space-l);
+  }
+
   .label {
-    font-size: var(--step-1);
+    font-size: var(--step-0);
     color: #fff;
+    margin-bottom: 0.5rem;
   }
 
   ul {
@@ -85,22 +157,62 @@ const year = new Date().getFullYear();
     display: inline-flex;
     align-items: center;
     min-height: 44px;
+    color: var(--night-soft);
+    text-decoration: none;
   }
 
-  a {
+  li a:hover {
     color: #fff;
+    text-decoration: underline;
+  }
+
+  .email {
+    overflow-wrap: anywhere;
   }
 
   .legal {
-    margin-top: var(--space-l);
+    display: grid;
+    gap: 0.5rem;
     padding-top: var(--space-m);
-    border-top: 1px solid rgb(201 182 242 / 0.25);
+    border-top: 1px solid rgb(255 255 255 / 0.12);
     font-size: var(--step--1);
   }
 
+  .legal strong {
+    display: block;
+    color: #fff;
+  }
+
+  .copyright {
+    margin-top: 0.5rem;
+  }
+
+  @media (min-width: 40rem) {
+    .columns {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+
   @media (min-width: 56rem) {
-    .grid {
-      grid-template-columns: 6fr 3fr 4fr;
+    .top {
+      grid-template-columns: 1fr auto;
+      align-items: center;
+    }
+    .sign-off {
+      grid-column: 1;
+    }
+    .doors {
+      grid-column: 2;
+      grid-row: 1 / span 2;
+      align-self: center;
+    }
+    .legal {
+      grid-template-columns: 1fr 1fr auto;
+      align-items: end;
+    }
+    .copyright {
+      margin-top: 0;
+      text-align: right;
     }
   }
 </style>

@@ -10,30 +10,30 @@ Night purple is the world; her real photos are the light in it; crimson is the s
 
 Three materials, each with a job. Use them by job, not by mood.
 
-| Material   | What it is                                                                                                     | Where it's used                                                    | Rules                                                                                            |
-| ---------- | -------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------ |
-| **Night**  | `--night` #1B0F2E with one soft radial purple glow                                                             | Hero, Get help card, menu, footer                                  | One glow per surface, never two competing. Text on it is white or `--night-soft`.                |
-| **Glass**  | White at 9–15% over night, 14–16 px blur, a 1 px "light on glass" gradient hairline (white → purple → crimson) | "I want to help" door, the photo panel edge, the menu close button | Only over night. Never over photos with text on top. Never more than two glass elements in view. |
-| **Signal** | Crimson with a soft crimson glow (`0 14px 40px rgb(186 1 12 / .4)`)                                            | "Help me" door, Donate, primary calls in dark cards                | One signal per screen. It marks the action she most wants taken.                                 |
+| Material   | What it is                                                                                                  | Where it's used                                                            | Rules                                                                                           |
+| ---------- | ----------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
+| **Night**  | `--night` #1B0F2E, deepening to `--night-2` #150B26, with at most one soft radial purple glow               | The banner's veil, Get help card, About, page openers, menu, footer        | One glow per surface, never two competing. Text on it is white or `--night-soft`.               |
+| **Glass**  | White at 10% over night, 12–14 px blur, a 1 px white hairline at 35%                                        | The "Donate" door, "Call" and "Donate" buttons on night, the menu's Donate | Only over night. Never more than two glass elements in view.                                    |
+| **Signal** | `--signal` #E2202C with its own soft glow (`0 14px 40px rgb(226 32 44 / .4)`); `--crimson` #BA010C on paper | "Help me" door, "Start an application", the menu's Help me, header Donate  | One signal per screen. It marks the action she most wants taken. It is red, never pink or rose. |
 
-Paper (`--paper`) and lilac sections stay as they are: clean, high contrast, no effects.
+Paper (`--paper`) and lilac sections stay clean: high contrast, no effects. The seasonal strip is lilac, never louder than the banner above it.
 
-## Neon and glow, precisely
+## Brand marks
 
-"Neon" here means light, not color. The glow is always the element's own color bleeding softly into the dark, never a different color and never on text. The hairline gradient is the only place three colors meet, and it is 1 px wide. If something looks like a nightclub, it's over the line.
+Both marks are vector tracings of her logo files, made once by `scripts/brand/trace-brand.py` and kept in `src/assets/brand/`:
 
-## The mark on dark
+- **The wordmark** (`wordmark.svg`) is her calligraphic "Caring For A Cause" lettering. It is the first thing on the banner, white over her photos, and appears again in the footer. It inherits `color`, so it is purple on paper if ever needed there.
+- **The heart-and-hands mark** (`mark.svg`) is flat: logo purple ring, crimson heart, violet hands, white keylines. It lives in the header, the menu, the footer, and the favicon. It is never blown up as an illustration.
 
-The hero uses `logo-mark-night.png`, a version of her heart-and-hands mark recolored for the night background: the ring lit from the top-left, the hands with a soft vertical gradient so they separate from the ring, the red fill lit from its center and falling into shadow at the edges, and the white outlines softened toward lavender. Shapes are unchanged. It carries a faint purple glow. The original flat mark stays on light backgrounds (header, link preview).
-
-"Help me" sits in the open red space above the fingertips, about 36% down the heart where the clear width is about half the heart, sized in container units so it holds that position at every size.
+Nothing else is drawn. The mark is not a container for buttons.
 
 ## Photos
 
 - Her own photos only. Never stock, never AI-generated, never presented as something they aren't.
-- **Nothing is written on a photo.** Photos sit in framed panels with the glass hairline; text sits beside or below them. The one exception is a small caption pill that overlaps the panel's edge.
-- Photos are slightly desaturated (0.8–0.85) in dark sections so they belong to the purple world, and untouched in light sections.
-- Crops keep faces in the top third on phones.
+- The banner is the one place words sit on photos, and only under a night veil heavy enough that white text stays above 7:1. Everywhere else, photos sit in framed panels and text sits beside or below them; the one exception is a small caption pill that overlaps a panel's edge.
+- Photos are slightly desaturated (0.85) on night so they belong to the purple world, and untouched in light sections.
+- Crops keep faces in the top third on phones. On desktop the banner's photo occupies the right side at close to its native 720 px width and the veil hides its left edge.
+- Every image is served at its rendered size or larger on a 2× screen (`sizes` and `widths` are set per placement).
 
 ## Stability on phones
 
@@ -41,15 +41,20 @@ Nothing is sized with viewport-height units (`vh`, `svh`, `dvh`, `lvh`). On phon
 
 ## Motion
 
-One orchestrated moment: the hero photos crossfade (six seconds each). Everything else moves only in response to a person: doors lift 2 px on hover, the menu fades in, items stagger in. All of it stops under `prefers-reduced-motion`.
+One orchestrated moment: the banner photos crossfade (seven seconds each). Everything else moves only in response to a person: doors and cards lift 2 px on hover, the menu fades in, items stagger in. All of it stops under `prefers-reduced-motion`.
 
 ## Type
 
-- **Lobster** (her logo's lettering) for the wordmark, her tagline, and the "Help me" signal only. Never for body text or other buttons.
-- **Bricolage Grotesque** for anything that should be read as a voice: doors, headings, menu.
+- **Bricolage Grotesque** for anything that should be read as a voice: the headline, doors, headings, labels, buttons, menu.
 - **Atkinson Hyperlegible Next** for anything that should be read as information.
-- The page's first words are always a choice: "Help me" / "I want to help."
+- Her lettering is the wordmark itself, so no script typeface is loaded. Her phrases ("Together we can.", "Never give up.") are set in Bricolage.
+- The page's first words are her name, then one sentence that says what she does, then a choice: "Help me" / "Donate."
+- Section openers are always the same: a small purple label, a heading, one lede line.
 - Sentence case everywhere. No all-caps labels, no tracked-out eyebrows.
+
+## Shape
+
+Three radii and nothing else: pills (`--r-pill`) for buttons, chips and tabs; cards (`--r-card`, 20 px) for doors, panels and cards; images (`--r-img`, 14 px). Focus rings are purple on light surfaces and white on dark ones (`--focus`), never a third color.
 
 ## Decoration
 
@@ -57,8 +62,8 @@ Decoration must come from her: the heart-and-hands mark, the diagonal cut (from 
 
 ## Words
 
-Every sentence does one job. Plain verbs, her own phrases where they exist ("Together we can.", "Never give up."). Claims are facts with sources (`src/data/facts.ts`); anything unconfirmed stays off public builds.
+Every sentence does one job. Plain verbs, her own phrases where they exist. Claims are facts with sources (`src/data/facts.ts`); anything unconfirmed stays off public builds.
 
 ## What "premium" means here
 
-Not more effects. It means: the first screen routes people in one glance, everything is legible at arm's length, nothing is misaligned by a pixel, every image is sharp for its size, the page loads in under two seconds on a cheap phone, and it works without JavaScript, with a keyboard, and with a screen reader. Luxury is care that holds up under inspection.
+Not more effects. It means: the first screen routes people in one glance, everything is legible at arm's length, nothing is misaligned by a pixel (the header, every section, and the footer share one left edge, and a test checks it), every image is sharp for its size, the page loads in under two seconds on a cheap phone, and it works without JavaScript, with a keyboard, and with a screen reader. Luxury is care that holds up under inspection.

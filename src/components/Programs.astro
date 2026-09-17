@@ -8,13 +8,15 @@ import YouTubeLite from "./YouTubeLite.astro";
 const active = programs.filter((p) => p.active);
 const phone = show(facts.phone);
 const applyEmail = `mailto:${show(facts.email)}?subject=${encodeURIComponent("Application request")}`;
+const applyHref = links.familyApplication ?? getHelp.action.href;
 ---
 
 <section id="programs" class="section" aria-labelledby="programs-title">
   <div class="wrap">
-    <header class="intro stack">
-      <h2 id="programs-title">Our programs</h2>
-      <p>{org.mission}</p>
+    <header class="intro">
+      <span class="eyebrow">Our programs</span>
+      <h2 id="programs-title">What we do, all year</h2>
+      <p class="lede">{org.mission}</p>
     </header>
 
     <!-- Jump tiles: one per program, so the whole offering fits one glance. -->
@@ -24,7 +26,13 @@ const applyEmail = `mailto:${show(facts.email)}?subject=${encodeURIComponent("Ap
           <li>
             <a class="tile" href={`#${program.slug}`}>
               {program.photo && (
-                <Photo photo={program.photo} ratio="1 / 1" sizes="72px" class="tile-photo" />
+                <Photo
+                  photo={program.photo}
+                  ratio="1 / 1"
+                  sizes="72px"
+                  widths={[144, 216]}
+                  class="tile-photo"
+                />
               )}
               <span class="tile-text">
                 <span class="tile-name">{program.name}</span>
@@ -36,22 +44,21 @@ const applyEmail = `mailto:${show(facts.email)}?subject=${encodeURIComponent("Ap
       </ul>
     </nav>
 
-    <div id="get-help" class="get-help">
+    <!-- Get help: the one dark card on the page, so families can't miss it. -->
+    <div id="get-help" class="get-help on-dark">
       <div class="stack">
         <h3>{getHelp.heading}</h3>
         <p>{getHelp.whoCanApply}</p>
         <p>{getHelp.howToApply}</p>
       </div>
-      <div class="button-row">
-        {links.familyApplication && (
-          <a class="button button--crimson" href={links.familyApplication}>
-            Apply online
-          </a>
-        )}
-        <a class="button button--crimson" href={phone.href}>
+      <div class="actions">
+        <a class="button button--signal" href={applyHref}>
+          {getHelp.action.label}
+        </a>
+        <a class="button button--glass" href={phone.href}>
           Call {phone.display}
         </a>
-        <a class="button button--ghost" href={applyEmail}>
+        <a class="arrow-link" href={applyEmail}>
           Email us
         </a>
       </div>
@@ -61,14 +68,17 @@ const applyEmail = `mailto:${show(facts.email)}?subject=${encodeURIComponent("Ap
       {active.map((program, i) => (
         <article
           id={program.slug}
-          class:list={["row", { featured: i === 0, "has-media": program.photo || program.video }]}
+          class:list={["row", { "has-media": program.photo || program.video }]}
         >
           <div class="stack copy">
-            <p class="label">{program.label}</p>
-            <h3>{program.name}</h3>
+            <div>
+              <span class="eyebrow">{program.label}</span>
+              <h3>{program.name}</h3>
+            </div>
             <p class="summary">{program.summary}</p>
             <p class="for">
-              <strong>Who it's for:</strong> {program.forWhom}
+              <span class="for-label">Who it's for</span>
+              {program.forWhom}
             </p>
             {program.details && (
               <ul class="details">
@@ -101,7 +111,7 @@ const applyEmail = `mailto:${show(facts.email)}?subject=${encodeURIComponent("Ap
               <Photo
                 photo={program.photo}
                 ratio={i === 0 ? "4 / 3" : "3 / 2"}
-                sizes="(min-width: 56rem) 520px, calc(100vw - 2.5rem)"
+                sizes="(min-width: 56rem) 540px, calc(100vw - 2.5rem)"
               />
             </div>
           ) : (
@@ -122,22 +132,20 @@ const applyEmail = `mailto:${show(facts.email)}?subject=${encodeURIComponent("Ap
     margin-bottom: var(--space-m);
   }
 
-  .intro p {
-    font-size: var(--step-1);
-    line-height: 1.45;
-    color: var(--muted);
+  .intro .lede {
+    margin-top: var(--space-s);
   }
 
   /* Tiles: a scroll strip on phones, a four-up grid on desktop. */
   .tiles ul {
     display: flex;
     gap: var(--space-xs);
-    padding: 0.25rem 0 0.75rem;
-    margin-inline: -1.25rem;
-    padding-inline: 1.25rem;
+    padding: 0.25rem var(--gutter) 0.75rem;
+    margin: 0 calc(-1 * var(--gutter));
     list-style: none;
     overflow-x: auto;
     scroll-snap-type: x mandatory;
+    scroll-padding-inline: var(--gutter);
     scrollbar-width: none;
     -webkit-overflow-scrolling: touch;
   }
@@ -155,20 +163,23 @@ const applyEmail = `mailto:${show(facts.email)}?subject=${encodeURIComponent("Ap
     display: flex;
     align-items: center;
     gap: 0.85rem;
+    height: 100%;
     min-height: 44px;
     padding: 0.75rem;
-    border-radius: 18px;
+    border-radius: var(--r-card);
     background: #fff;
     border: 1px solid var(--rule);
     color: var(--ink);
     text-decoration: none;
     transition:
       border-color 150ms ease,
+      box-shadow 150ms ease,
       transform 150ms ease;
   }
 
   .tile:hover {
     border-color: var(--purple);
+    box-shadow: 0 10px 30px rgb(27 15 46 / 0.08);
     transform: translateY(-2px);
   }
 
@@ -176,7 +187,7 @@ const applyEmail = `mailto:${show(facts.email)}?subject=${encodeURIComponent("Ap
     flex: none;
     width: 4.5rem;
     height: 4.5rem;
-    border-radius: 12px;
+    border-radius: 10px;
   }
 
   .tile-text {
@@ -199,18 +210,18 @@ const applyEmail = `mailto:${show(facts.email)}?subject=${encodeURIComponent("Ap
     line-height: 1.3;
   }
 
-  /* Get help: the one card on the page that is dark, so it can't be missed. */
   .get-help {
     display: grid;
     gap: var(--space-m);
     margin-block: var(--space-m) var(--space-xl);
     padding: var(--space-m);
-    border-radius: 24px;
-    background: var(--night);
-    color: #fff;
+    border-radius: var(--r-card);
+    background:
+      radial-gradient(70% 60% at 100% 0%, rgb(96 8 215 / 0.35), transparent 60%), var(--night);
   }
 
   .get-help h3 {
+    font-size: var(--step-3);
     color: #fff;
   }
 
@@ -218,14 +229,11 @@ const applyEmail = `mailto:${show(facts.email)}?subject=${encodeURIComponent("Ap
     color: var(--night-soft);
   }
 
-  .button--ghost {
-    background: rgb(255 255 255 / 0.1);
-    color: #fff;
-    border-color: rgb(255 255 255 / 0.35);
-  }
-
-  .button--ghost:hover {
-    background: rgb(255 255 255 / 0.18);
+  .actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-xs) var(--space-s);
   }
 
   /* Program rows: photo above text on phones; sides alternate on desktop. */
@@ -254,21 +262,7 @@ const applyEmail = `mailto:${show(facts.email)}?subject=${encodeURIComponent("Ap
     order: 0;
   }
 
-  .label {
-    font-weight: 700;
-    color: var(--purple);
-    font-size: var(--step--1);
-  }
-
-  .featured .label {
-    color: var(--crimson);
-  }
-
   .row h3 {
-    font-size: var(--step-2);
-  }
-
-  .featured h3 {
     font-size: var(--step-3);
   }
 
@@ -278,7 +272,16 @@ const applyEmail = `mailto:${show(facts.email)}?subject=${encodeURIComponent("Ap
   }
 
   .for {
+    display: grid;
+    gap: 0.15rem;
     color: var(--muted);
+  }
+
+  .for-label {
+    font-family: var(--font-display);
+    font-size: var(--step--1);
+    font-weight: 700;
+    color: var(--ink);
   }
 
   .details {
@@ -289,11 +292,32 @@ const applyEmail = `mailto:${show(facts.email)}?subject=${encodeURIComponent("Ap
 
   .checklist summary {
     cursor: pointer;
+    font-family: var(--font-display);
     font-weight: 700;
     color: var(--purple);
     min-height: 44px;
     display: flex;
     align-items: center;
+    gap: 0.5rem;
+    list-style: none;
+  }
+
+  .checklist summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .checklist summary::before {
+    content: "";
+    width: 0.5rem;
+    height: 0.5rem;
+    border-right: 2.5px solid currentColor;
+    border-bottom: 2.5px solid currentColor;
+    transform: rotate(-45deg);
+    transition: transform 150ms ease;
+  }
+
+  .checklist[open] summary::before {
+    transform: rotate(45deg);
   }
 
   .groups {
@@ -303,8 +327,6 @@ const applyEmail = `mailto:${show(facts.email)}?subject=${encodeURIComponent("Ap
   }
 
   h4 {
-    font-family: var(--font-display);
-    font-size: var(--step-1);
     margin: 0 0 0.4rem;
   }
 
@@ -331,8 +353,15 @@ const applyEmail = `mailto:${show(facts.email)}?subject=${encodeURIComponent("Ap
     }
     .get-help {
       grid-template-columns: 1fr auto;
-      align-items: end;
+      align-items: center;
       padding: var(--space-l);
+    }
+    .actions {
+      flex-direction: column;
+      align-items: stretch;
+    }
+    .actions .arrow-link {
+      justify-content: center;
     }
     .row.has-media {
       grid-template-columns: 1fr 1fr;

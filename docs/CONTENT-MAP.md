@@ -67,18 +67,22 @@ Everything the site needs to carry for Caring for a Cause, where each piece live
 
 ## 2. Where it goes
 
-The page is organized by what a visitor came to do, not by org chart. Two audiences, two doors, one path each.
+The site is organized by what a visitor came to do, not by org chart. Two audiences, two doors, one page each.
 
 ```
-HEADER        mark + name, 4 links, Donate                    (always visible)
-HERO          real photos + headline + the two doors           who we are, choose your path
-SEASON        one line: what's needed now + one button         urgency, changes each season
-TRUST         since 2015 · 501(c)(3) · Toys for Tots            proof, in a glance
-PROGRAMS      Get help card, then 4 programs as tiles + rows   what exists, who qualifies, how to apply
-GET INVOLVED  4 tabs: Sponsor · Donate · Volunteer · Partner   one action per supporter
-MEET TAMARA   her photo + story + "Do More" video              why to trust it
-MOMENTS       photo gallery (hidden until 3+ photos)           the work, unposed
-FOOTER        "Never give up." · contact · legal · EIN         reach her, verify her
+HEADER        mark + name · About · Our programs · Get involved ▾ · Contact · Donate
+BANNER        her photos + wordmark + one sentence + Help me / Donate     who she is, choose your path
+TRUST         since 2015 · 501(c)(3) · Toys for Tots                      proof, in a glance
+SEASON        one line: what's needed now + one link                      urgency, changes each season
+PROGRAMS      tiles, Get help card, then 4 programs as rows               what exists, who qualifies, how to apply
+GET INVOLVED  4 tabs: Sponsor · Donate · Volunteer · Partner              one action per supporter
+ABOUT         her portrait + story + "Do More" video on request           why to trust it
+MOMENTS       photo gallery (hidden until 4+ photos)                      the work, unposed
+CONTACT       call · email · Facebook · start an application              reach her
+FOOTER        wordmark · "Never give up." · doors · links · legal · EIN   reach her, verify her
+
+/apply        four-step application, sent by email                        families
+/donate       frequency + amount, then the payment page or an email       donors
 ```
 
 Rules that keep it premium rather than busy:
@@ -86,18 +90,15 @@ Rules that keep it premium rather than busy:
 - One idea per section, one button per idea. No section asks two things.
 - Real photos carry the emotion; they are never stock and never decorative filler.
 - Every fact on the page is traceable (`facts.ts`). Unconfirmed details are kept off public builds by the launch check.
-- Motion is used once, in the hero, and stops for people who prefer reduced motion.
+- Motion is used once, in the banner, and stops for people who prefer reduced motion.
 - Everything must work on a 375-pixel phone first. Desktop is a widening, not a redesign.
 
-## 3. Hero specification (fix 1 of 7)
+## 3. Banner specification
 
-Goal: within the first screen on a phone, a visitor sees real people, understands what the organization does, and can choose "I need help" or "I want to help."
+Goal: within the first screen on a phone, a visitor sees real people, her name in her own lettering, understands what the organization does, and can choose "Help me" or "Donate." See `docs/DESIGN.md` and decision 26.
 
-- **Background:** a slow, silent crossfade of four of her event photos (24-second cycle, 6 seconds each), darkened and blended into the brand's night purple so white text stays above 7:1 contrast. On phones it fills the hero; on desktop it becomes a tall panel on the right so the 720-pixel photos are never upscaled past their quality. Under `prefers-reduced-motion`, the first photo stays still.
-- **Logo:** the full logo leaves the hero (it lives in the header, the link preview, and the footer). Removing the 280-pixel plate is what brings the doors onto the first screen.
-- **Copy:** headline unchanged; subhead unchanged.
-- **Doors:** side by side on phones (two compact panels), stacked only under 360 pixels. "I need help" stays crimson, "I want to help" is a frosted-glass panel over the photos. Both are 44-pixel-plus tap targets.
-- **Preview notice:** kept (required until launch) but reduced to one slim line.
-- **Facts:** the trust strip stays directly below the hero.
-
-Order of the remaining fixes: program tiles and rows → trust facts → Meet Tamara → gallery → screenshot tests.
+- **Background:** a slow, silent crossfade of four of her event photos (28-second cycle, 7 seconds each) under a night veil that keeps white text above 7:1. On phones it fills the banner; on desktop it occupies the right side at close to its native width and the veil hides its edge. Under `prefers-reduced-motion`, the first photo stays still.
+- **Words:** wordmark, "Together we can.", headline, subhead. All from her materials.
+- **Doors:** two, the same size: "Help me" (signal) and "Donate" (glass), stacked on phones, side by side from 36rem. A test checks the "Help me" door fits an iPhone 15 Safari screen.
+- **Preview notice:** kept (required until launch) as one slim line.
+- **Facts:** the trust line sits directly below the banner on the same ground.

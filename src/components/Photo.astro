@@ -9,6 +9,9 @@ type Props = {
   ratio?: string;
   /** Rendered widths, matched to the layout. */
   sizes?: string;
+  /** Source widths to generate. Defaults suit a half-width column. */
+  widths?: number[];
+  loading?: "lazy" | "eager";
   class?: string;
 };
 
@@ -16,6 +19,8 @@ const {
   photo,
   ratio = "1 / 1",
   sizes = "(min-width: 56rem) 560px, calc(100vw - 2.5rem)",
+  widths: requested = [360, 540, 720, 1080],
+  loading = "lazy",
   class: className,
 } = Astro.props;
 
@@ -30,7 +35,8 @@ if (!match) {
 }
 const src = match.default;
 // Never request images wider than the source; the photos are phone-sized.
-const widths = [360, 540, 720, 1080].filter((w) => w <= src.width);
+const widths = requested.filter((w) => w <= src.width);
+if (widths.length === 0) widths.push(src.width);
 ---
 
 <Picture
@@ -39,7 +45,7 @@ const widths = [360, 540, 720, 1080].filter((w) => w <= src.width);
   alt={photo.alt}
   widths={widths}
   sizes={sizes}
-  loading="lazy"
+  loading={loading}
   decoding="async"
   class:list={["photo", className]}
   style={`aspect-ratio: ${ratio}; object-position: ${photo.focus ?? "center"};`}
@@ -51,7 +57,7 @@ const widths = [360, 540, 720, 1080].filter((w) => w <= src.width);
     width: 100%;
     height: auto;
     object-fit: cover;
-    border-radius: 16px;
+    border-radius: var(--r-img);
     background: var(--lilac);
   }
 </style>

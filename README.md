@@ -2,7 +2,7 @@
 
 Website for [Caring for a Cause Supportive Services Inc.](https://caring4acausesupportiveservices.com), a Central Indiana nonprofit founded in 2015 by Tamara Long-Ajimati.
 
-**Status:** in development as a private preview. Search engines are blocked. Nothing on this site collects money or personal information yet.
+**Status:** in development as a private preview. Search engines are blocked. Nothing on this site stores money or personal information: the application and donation pages send by email until accounts in her name exist (see `links` in `src/data/site.ts`).
 
 - [Site plan](docs/SITE-PLAN.md): audiences, page structure, design tokens, open questions
 - [Approach](docs/APPROACH.md): the principles every change follows
@@ -14,7 +14,7 @@ Website for [Caring for a Cause Supportive Services Inc.](https://caring4acauses
 ## Stack
 
 - [Astro 7](https://astro.build), static output, TypeScript (strict)
-- Self-hosted fonts: Bricolage Grotesque and Atkinson Hyperlegible Next
+- Self-hosted fonts: Bricolage Grotesque and Atkinson Hyperlegible Next; her wordmark and mark are inline SVG (`src/assets/brand/`)
 - Hosted on Cloudflare Workers static assets (`wrangler.jsonc`, `public/_headers`)
 - GitHub Actions runs formatting, type checks, the gated build, browser tests on 10 devices, and Lighthouse budgets on every push
 
@@ -40,18 +40,23 @@ npm run dev        # http://localhost:4321
 
 Everything visitors read lives in **`src/data/site.ts`**. Common updates:
 
-| To change                                          | Edit                                                            |
-| -------------------------------------------------- | --------------------------------------------------------------- |
-| The strip under the hero                           | `seasonalBanner` (set `active: false` to hide it)               |
-| Phone, email, Facebook                             | `contact`                                                       |
-| Donation page, online application, sponsor sign-up | `links`                                                         |
-| A program's text, or hide a program                | `programs` (set `active: false`)                                |
-| Get involved tabs                                  | `getInvolved.tabs`                                              |
-| Gallery photos                                     | Add files to `src/assets/gallery/`, then list them in `gallery` |
+| To change                                          | Edit                                                                         |
+| -------------------------------------------------- | ---------------------------------------------------------------------------- |
+| The strip under the banner                         | `seasonalBanner` (set `active: false` to hide it)                            |
+| Phone, email, Facebook, city                       | `facts`                                                                      |
+| Banner words and the two doors                     | `hero`                                                                       |
+| Menu and header links                              | `navigation`                                                                 |
+| Donation page, online application, sponsor sign-up | `links` (the pages upgrade themselves when a link is set)                    |
+| Donation amounts and wording                       | `donatePage`                                                                 |
+| Application steps, counties, sizes, grades         | `applyPage`                                                                  |
+| A program's text, or hide a program                | `programs` (set `active: false`)                                             |
+| Get involved tabs                                  | `getInvolved.tabs`                                                           |
+| About and the contact section                      | `about`, `contact`                                                           |
+| Gallery photos                                     | Add files to `src/assets/photos/`, then list them in `gallery` (shows at 4+) |
 
 Run `npm run verify` after editing. It catches missing fields and typos in field names.
 
-**Links set to `null`** are not set up yet. Their buttons automatically email Tamara instead.
+**Links set to `null`** are not set up yet. `/donate` then opens an email with the chosen gift written in, and `/apply` sends the application by email; both switch to the hosted page or form the moment the link is filled in.
 
 ### Facts and confirmation
 
@@ -67,11 +72,11 @@ When Tamara confirms a detail, change it to `orgPublished(...)` with her confirm
 
 ## Quality checks
 
-**What blocks publishing:** Cloudflare runs `npm run build`, which fails, and publishes nothing, if the type check or `scripts/validate-build.mjs` finds a problem: missing files, broken in-page links or images, missing alt text, placeholder text, a wrong or missing link-preview image, invalid structured data, missing security headers, or search indexing that doesn't match its setting (indexing is only ever allowed on the production domain). The last good deployment stays live.
+**What blocks publishing:** Cloudflare runs `npm run build`, which fails, and publishes nothing, if the type check or `scripts/validate-build.mjs` finds a problem on any page (home, `/donate`, `/apply`, 404): missing files, broken in-page links or images, missing alt text, placeholder text, a wrong or missing link-preview image, invalid structured data, viewport-height units, missing security headers, or search indexing that doesn't match its setting (indexing is only ever allowed on the production domain). The last good deployment stays live.
 
 **What GitHub Actions checks** on every push and pull request. The browser-test check is required by the `main` ruleset, so nothing reaches `main` (and therefore Cloudflare) without passing it. Lighthouse reports results but is not required, because scores vary slightly between runs.
 
-- **Browser tests** (`tests/site.spec.ts`, Playwright): 37 checks on each of 10 devices across all three browser engines: iPhone SE, 12 mini, 17, and 17 Pro Max, iPad mini, Galaxy S24, Pixel 7, and desktop Safari, Firefox, and Chrome. Every iPhone browser uses WebKit, so the WebKit runs cover iOS. Checks include a WCAG 2.2 AA accessibility scan with axe, 44px tap targets, font and image loading, no console errors, no sideways scrolling from 320 to 1440 px, keyboard-accessible tabs, the no-JavaScript fallback, video embeds, in-page links, search blocking, metadata, structured data, and the 404 page.
+- **Browser tests** (`tests/site.spec.ts`, Playwright): about 70 checks on each of 10 devices across all three browser engines: iPhone SE, 12 mini, 17, and 17 Pro Max, iPad mini, Galaxy S24, Pixel 7, and desktop Safari, Firefox, and Chrome. Every iPhone browser uses WebKit, so the WebKit runs cover iOS. Checks include a WCAG 2.2 AA accessibility scan with axe on all three pages, 44px tap targets, font and image loading, no console errors, no sideways scrolling from 320 to 1440 px, the phone menu and desktop dropdown, keyboard-accessible tabs, the header-to-footer alignment, the door sizes and the phone fold, both forms end to end, the no-JavaScript fallbacks, the video player, in-page links, search blocking, metadata, structured data, and the 404 page.
 - **Lighthouse budgets** (`lighthouserc.json`, three runs): performance at least 95, accessibility 100, best practices at least 95, every SEO audit except "is crawlable" (search blocking is intentional on the preview), layout shift under 0.05. Reports are saved as a build artifact, not published.
 
 Measured at setup (Lighthouse, local build): mobile performance 99, desktop 100, accessibility 100, best practices 100, SEO 100 with indexing enabled.
@@ -94,12 +99,15 @@ To run the browser tests locally the first time: `npx playwright install chromiu
 src/
   data/site.ts          All content
   pages/index.astro     Home page (section order)
+  pages/apply.astro     Help me: the application (sent by email)
+  pages/donate.astro    Donate: amount, frequency, payment hand-off
   pages/404.astro       Not-found page
   pages/robots.txt.ts   Crawler rules (blocked unless indexing is enabled)
   layouts/Base.astro    <head>, fonts, meta tags
   components/           One file per page section
   styles/global.css     Design tokens and shared styles
-  assets/brand/         Logo and icon (optimized at build time)
+  assets/brand/         Wordmark and mark as SVG, plus the logo files they were traced from
+scripts/brand/          The tracing script that made the SVGs
   assets/photos/        Event photos (metadata stripped)
 public/                 Icons, sharing image, web manifest, _headers (security and cache rules)
 tests/                  Browser tests
@@ -128,8 +136,8 @@ This is the only deploy path. Don't add a second one (for example, a GitHub Acti
 Complete only after Tamara approves the site.
 
 - [ ] Confirm every pending fact (listed in the build log) and update `src/data/site.ts`; the launch build refuses to run until this is done
-- [ ] Create her free donation page (e.g. Zeffy) in her name and set `links.donate`
-- [ ] Create the family application and sponsor sign-up forms in her name and set their links
+- [ ] Create her free donation page (e.g. Zeffy) in her name and set `links.donate`; `/donate` then hands off to it
+- [ ] Decide whether the email-based application on `/apply` is enough, or create a hosted form in her name and set `links.familyApplication`; set `links.sponsorSignup` if she wants one
 - [ ] Add hero and gallery photos she provides
 - [ ] Add `@astrojs/sitemap` and reference it in `src/pages/robots.txt.ts`
 - [ ] Add `caring4acausesupportiveservices.com` to Cloudflare and point it at the Worker (with her GoDaddy login)

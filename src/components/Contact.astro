@@ -1,0 +1,140 @@
+---
+import { claim, show } from "../data/facts.ts";
+import { contact, facts, navigation } from "../data/site";
+
+const phone = show(facts.phone);
+const email = show(facts.email);
+---
+
+<section id="contact" class="section" aria-labelledby="contact-title">
+  <div class="wrap grid">
+    <header>
+      <span class="eyebrow">{contact.eyebrow}</span>
+      <h2 id="contact-title">{contact.heading}</h2>
+      <p class="lede">{contact.intro}</p>
+      <p class="where">
+        {show(facts.city)}. Serving {claim(facts.serviceArea)}.
+      </p>
+    </header>
+
+    <ul class="cards">
+      <li>
+        <a class="card" href={phone.href}>
+          <span class="card-label">Call</span>
+          <span class="card-value">{phone.display}</span>
+        </a>
+      </li>
+      <li>
+        <a class="card" href={`mailto:${email}`}>
+          <span class="card-label">Email</span>
+          <span class="card-value card-email">{email}</span>
+        </a>
+      </li>
+      <li>
+        <a class="card" href={show(facts.facebook)} target="_blank" rel="noopener">
+          <span class="card-label">Facebook</span>
+          <span class="card-value">Message or follow us</span>
+          <span class="visually-hidden"> (opens in a new tab)</span>
+        </a>
+      </li>
+      <li>
+        <a class="card card--signal" href={navigation.help.href}>
+          <span class="card-label">Need help?</span>
+          <span class="card-value">Start an application</span>
+        </a>
+      </li>
+    </ul>
+  </div>
+</section>
+
+<style>
+  .grid {
+    display: grid;
+    gap: var(--space-l);
+  }
+
+  header .lede {
+    margin-top: var(--space-s);
+  }
+
+  .where {
+    margin-top: var(--space-s);
+    color: var(--muted);
+  }
+
+  .cards {
+    display: grid;
+    gap: 0.75rem;
+    padding: 0;
+    margin: 0;
+    list-style: none;
+  }
+
+  .card {
+    display: grid;
+    gap: 0.2rem;
+    min-height: 44px;
+    padding: 1rem 1.25rem;
+    border: 1px solid var(--rule);
+    border-radius: var(--r-card);
+    background: #fff;
+    color: var(--ink);
+    text-decoration: none;
+    transition:
+      border-color 150ms ease,
+      transform 150ms ease;
+  }
+
+  .card:hover {
+    border-color: var(--purple);
+    transform: translateY(-2px);
+  }
+
+  .card-label {
+    font-family: var(--font-display);
+    font-size: var(--step--1);
+    font-weight: 700;
+    color: var(--purple);
+  }
+
+  .card-value {
+    font-family: var(--font-display);
+    font-size: var(--step-1);
+    font-weight: 750;
+    letter-spacing: -0.01em;
+    line-height: 1.2;
+  }
+
+  .card-email {
+    font-size: 0.95rem;
+    overflow-wrap: anywhere;
+  }
+
+  .card--signal {
+    background: var(--night);
+    border-color: var(--night);
+    color: #fff;
+  }
+
+  .card--signal .card-label {
+    color: var(--night-soft);
+  }
+
+  .card--signal:hover {
+    border-color: var(--signal);
+  }
+
+  @media (min-width: 40rem) {
+    .cards {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+
+  @media (min-width: 56rem) {
+    .grid {
+      grid-template-columns: 5fr 7fr;
+      gap: var(--space-xl);
+      align-items: start;
+    }
+  }
+</style>
