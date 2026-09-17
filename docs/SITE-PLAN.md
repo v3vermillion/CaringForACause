@@ -31,84 +31,84 @@ The site is delivered to Tamara as a finished gift. Contact with her is kept to 
 
 ## Page structure
 
-Single page, top to bottom:
+Three pages. The home page is the route map; the two doors lead to their own pages.
 
 ```
 ┌───────────────────────────────────────────────┐
-│ Header: mark + name     nav        [Donate]   │  sticky
+│ Header: mark + name   About · Our programs ·  │  sticky; phone: mark, name,
+│         Get involved ▾ · Contact   [Donate]   │  Donate, corner-wedge menu
 ├───────────────────────────────────────────────┤
-│ HERO (night)                                  │
-│  Headline              [ photo montage ]      │
-│                            Subhead            │
-│                            [I need help]      │  crimson door
-│                            [I want to help]   │  white door
+│ BANNER (her photos, crossfading, night veil)  │
+│  her wordmark · Together we can.              │
+│  Headline · subhead                           │
+│  [ Help me ]  [ Donate ]     equal doors      │  → /apply, /donate
+│  Sponsor a family, volunteer, or partner →    │
 ├───────────────────────────────────────────────┤
-│ Seasonal banner (purple)        [Sponsor]     │  optional
-├───────────────────────────────────────────────┤
-│ Trust facts: since 2015 / 501(c)(3) + EIN /   │
+│ Trust facts: since 2015 · 501(c)(3) + EIN ·   │  same night ground
 │              Toys for Tots partner            │
 ├───────────────────────────────────────────────┤
-│ OUR PROGRAMS                                  │
-│  Mission line                                 │
-│  ┌ Get help ─────────────────────────────┐    │  #get-help
-│  │ who can apply, how to apply  [Call][Email]│
+│ Seasonal strip (lilac)     Sponsor a family → │  optional
+├───────────────────────────────────────────────┤
+│ OUR PROGRAMS: jump tiles                      │
+│  ┌ Get help (night) ─────────────────────┐    │  #get-help
+│  │ who can apply  [Start an application] │    │
+│  │                [Call] Email us →      │    │
 │  └───────────────────────────────────────┘    │
-│  Holiday Assistance (featured)   [video]      │
-│  Diaper Drive                                 │
-│  Back-to-School  ▸ collecting list            │
-│  Free Haircuts & Styles          [video]      │
+│  Holiday Assistance · Diaper Drive ·          │  alternating rows,
+│  Back-to-School ▸ list · Free Haircuts ▸ video│  video poster buttons
 ├───────────────────────────────────────────────┤
 │ GET INVOLVED (lilac)                          │
 │  [Sponsor] [Donate] [Volunteer] [Partner]     │  tabs
-│  panel: heading, text, action   [video]       │
 ├───────────────────────────────────────────────┤
-│ MEET TAMARA          [Do More video]          │
+│ ABOUT (night): portrait · Meet Tamara ·       │  video loads on request
+│               [▶ Watch her story]             │
 ├───────────────────────────────────────────────┤
-│ Gallery strip (hidden until photos are added) │
+│ Gallery strip (hidden until 4+ photos)        │
 ├───────────────────────────────────────────────┤
-│ FOOTER (night): "Never give up." / contact /  │
-│ legal name, EIN, service area                 │
+│ CONTACT: Call · Email · Facebook · Need help? │  #contact
+├───────────────────────────────────────────────┤
+│ FOOTER (night): mark + wordmark · Never give  │
+│ up. · [Help me] [Donate] · Contact / Programs │
+│ / Get involved · legal name, EIN, area        │
 └───────────────────────────────────────────────┘
+
+/apply    Help me: four steps (about you · household · what you need ·
+          review and send), sent by email, one row per child
+/donate   Donate: frequency and amount, then the payment page
+          (`links.donate`) or an email with the gift written in
 ```
 
-On phones, every two-column block stacks, the hero logo sits above the headline, and the nav scrolls horizontally under the brand row.
+On phones every two-column block stacks, the doors stack under the headline, and the tabs and program tiles scroll sideways inside the page gutter.
 
-**Deep links:** `/#get-help`, `/#programs`, `/#get-involved`, `/#about`, each program slug (for example `/#holiday-assistance`), and each tab (`/#sponsor`, `/#donate`, `/#volunteer`, `/#partner`) opens that tab directly.
-
-## What was removed from the current site
-
-- The duplicated "Our History" block and its template filler text.
-- The empty "Can you assist us?" list and the "Team Work" images that don't load.
-- The second email address (pending her confirmation of which one she uses).
-- The link to the old 2021 Netlify site.
-- The cartoon family image and the "Join Us" button that only linked to Facebook.
+**Deep links:** `/#get-help`, `/#programs`, `/#get-involved`, `/#about`, `/#contact`, each program slug (for example `/#holiday-assistance`), and each tab (`/#sponsor`, `/#donate`, `/#volunteer`, `/#partner`) opens that tab directly.
 
 ## Design tokens
 
 Brand colors are sampled from the final logo file.
 
-| Token          | Hex       | Use                          | Contrast                          |
-| -------------- | --------- | ---------------------------- | --------------------------------- |
-| `--purple`     | `#6008D7` | Brand, buttons, headings     | White on it 8.4:1; on paper 7.9:1 |
-| `--crimson`    | `#BA010C` | Heart, "I need help," Donate | White on it 6.8:1; on paper 6.4:1 |
-| `--night`      | `#1B0F2E` | Hero and footer              | White on it 18.2:1                |
-| `--night-soft` | `#C9B6F2` | Secondary text on night      | 9.9:1                             |
-| `--paper`      | `#FAF7FD` | Page background              |                                   |
-| `--lilac`      | `#EFE6FA` | Get involved section         |                                   |
-| `--ink`        | `#22172E` | Body text                    | 16.1:1 on paper                   |
-| `--muted`      | `#5B4E68` | Secondary text               | 7.2:1 on paper                    |
+| Token          | Hex       | Use                                 | Contrast                             |
+| -------------- | --------- | ----------------------------------- | ------------------------------------ |
+| `--purple`     | `#6008D7` | Brand, buttons, headings            | White on it 8.4:1; on paper 7.9:1    |
+| `--crimson`    | `#BA010C` | Heart, Donate button on paper       | White on it 6.8:1; on paper 6.4:1    |
+| `--signal`     | `#E2202C` | The one crimson on night: "Help me" | White on it 4.6:1 (large, bold text) |
+| `--night`      | `#1B0F2E` | Hero and footer                     | White on it 18.2:1                   |
+| `--night-soft` | `#C9B6F2` | Secondary text on night             | 9.9:1                                |
+| `--paper`      | `#FAF7FD` | Page background                     |                                      |
+| `--lilac`      | `#EFE6FA` | Get involved section                |                                      |
+| `--ink`        | `#22172E` | Body text                           | 16.1:1 on paper                      |
+| `--muted`      | `#5B4E68` | Secondary text                      | 7.2:1 on paper                       |
 
 All text pairings pass WCAG AA; most pass AAA.
 
-**Logo on dark:** the logo's purple measures about 2.2:1 against `--night`, below the 3:1 minimum for graphics, so the full logo is never placed directly on the dark background. The hero uses her event photos instead (decision 19); the logo appears in the header mark, the link preview (on a white circle), and the footer.
+**Marks:** her wordmark and the heart-and-hands mark are inline SVG tracings of her logo files (`src/assets/brand/`, decision 29). The wordmark is white on the banner and in the footer; the mark appears in the header, the menu, the footer, and the link preview. The logo's purple measures about 2.2:1 against `--night`, so the full logo is never placed directly on the dark background.
 
 **Type:**
 
 - **Bricolage Grotesque** (headings): sturdy, friendly, and distinct from the logo's script.
 - **Atkinson Hyperlegible Next** (body): designed by the Braille Institute for low-vision readers, which suits an audience reading on older phones. Its slashed zero is intentional and keeps phone numbers and the EIN unambiguous.
-- 18px base size, major-third scale. Both fonts are self-hosted, with no third-party requests.
+- 18px base size, major-third scale. Both fonts are self-hosted, with no third-party requests. Her lettering is the wordmark itself, so no script typeface is loaded.
 
-**Signature element:** the two hero doors over the crossfading photo montage. Everything else stays quiet: one rounded button style, list rows with dividers instead of a grid of identical cards, and no scroll animations.
+**Signature element:** her wordmark and the two equal doors over the crossfading photos. Everything else stays quiet: one button shape, three radii, list rows with dividers instead of a grid of identical cards, and no scroll animations.
 
 ## Open questions for Tamara
 

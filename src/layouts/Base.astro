@@ -2,12 +2,10 @@
 import "@fontsource-variable/bricolage-grotesque/wght.css";
 import "@fontsource/atkinson-hyperlegible-next/400.css";
 import "@fontsource/atkinson-hyperlegible-next/700.css";
-import "@fontsource/lobster/400.css";
 import "../styles/global.css";
 import PreviewNotice from "../components/PreviewNotice.astro";
 import displayFont from "@fontsource-variable/bricolage-grotesque/files/bricolage-grotesque-latin-wght-normal.woff2?url";
 import bodyFont from "@fontsource/atkinson-hyperlegible-next/files/atkinson-hyperlegible-next-latin-400-normal.woff2?url";
-import scriptFont from "@fontsource/lobster/files/lobster-latin-400-normal.woff2?url";
 import { assertLaunchReady, claim, pendingFacts, show } from "../data/facts.ts";
 import { facts, org } from "../data/site";
 
@@ -43,11 +41,6 @@ const version = (process.env.GITHUB_SHA || process.env.WORKERS_CI_COMMIT_SHA || 
   7,
 );
 const canonical = new URL(Astro.url.pathname, Astro.site);
-
-// The commit this page was built from. Cloudflare Workers Builds provides
-// WORKERS_CI_COMMIT_SHA; the live check waits until this matches the merged
-// commit to confirm the deploy actually happened.
-const buildCommit = process.env.WORKERS_CI_COMMIT_SHA || process.env.GITHUB_SHA || "local";
 const ogImage = new URL("/og-image.jpg", Astro.site);
 
 // Structured data so search engines recognize a registered nonprofit.
@@ -100,7 +93,6 @@ const structuredData = {
     )}
     <link rel="preload" href={displayFont} as="font" type="font/woff2" crossorigin />
     <link rel="preload" href={bodyFont} as="font" type="font/woff2" crossorigin />
-    <link rel="preload" href={scriptFont} as="font" type="font/woff2" crossorigin />
     <link rel="canonical" href={canonical} />
     <meta name="theme-color" content="#1b0f2e" />
     <meta name="version" content={version} />
@@ -131,5 +123,6 @@ const structuredData = {
     </a>
     {!allowIndexing && <PreviewNotice />}
     <slot />
+    <slot name="after" />
   </body>
 </html>

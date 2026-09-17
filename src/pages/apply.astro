@@ -1,0 +1,968 @@
+---
+import SiteFooter from "../components/SiteFooter.astro";
+import SiteHeader from "../components/SiteHeader.astro";
+import Base from "../layouts/Base.astro";
+import { claim, show } from "../data/facts.ts";
+import { applyPage, facts, getHelp, links, org, programs } from "../data/site";
+
+const phone = show(facts.phone);
+const email = show(facts.email);
+const mailto = `mailto:${email}?subject=${encodeURIComponent(applyPage.emailSubject)}`;
+const description = `${getHelp.whoCanApply} Apply online for holiday meals and gifts, monthly diapers, school supplies, and free haircuts in ${claim(facts.serviceArea)}.`;
+
+const names = Object.fromEntries(programs.map((p) => [p.slug, p.name]));
+const adults = ["1", "2", "3", "4", "5", "6 or more"];
+const children = ["0", "1", "2", "3", "4", "5", "6", "7", "8 or more"];
+const ages = Array.from({ length: 18 }, (_, i) => String(i));
+const heard = [
+  "Facebook",
+  "A friend or family member",
+  "A school",
+  "A church",
+  "Another organization",
+  "Other",
+];
+---
+
+<Base title={`Apply for help | ${org.shortName}`} description={description}>
+  <SiteHeader />
+  <main id="main">
+    <section class="page-hero on-dark">
+      <div class="wrap">
+        <a class="back" href="/">
+          ← Back to home
+        </a>
+        <span class="eyebrow">{applyPage.eyebrow}</span>
+        <h1>{applyPage.heading}</h1>
+        <p class="lede">{getHelp.whoCanApply}</p>
+        <p class="talk">
+          Prefer to talk? Call <a href={phone.href}>{phone.display}</a> or email{" "}
+          <a href={`mailto:${email}`}>{email}</a>.
+        </p>
+      </div>
+    </section>
+
+    <section class="section" aria-labelledby="form-title">
+      <div class="wrap">
+        <div class="layout">
+          <h2 id="form-title" class="visually-hidden">
+            Application form
+          </h2>
+
+          {links.familyApplication && (
+            <p class="online">
+              <a
+                class="button button--purple"
+                href={links.familyApplication}
+                target="_blank"
+                rel="noopener"
+              >
+                Use our online application
+                <span class="visually-hidden"> (opens in a new tab)</span>
+              </a>
+            </p>
+          )}
+
+          <noscript>
+            <p class="noscript">
+              {applyPage.noScript} Call <a href={phone.href}>{phone.display}</a> or email{" "}
+              <a href={mailto}>{email}</a>.
+            </p>
+          </noscript>
+
+          <form class="apply" data-apply novalidate hidden>
+            <ol class="progress" aria-label="Steps">
+              {applyPage.steps.map((step, i) => (
+                <li data-progress={step.id} aria-current={i === 0 ? "step" : undefined}>
+                  <span class="num" aria-hidden="true">
+                    {i + 1}
+                  </span>
+                  <span class="step-title">{step.title}</span>
+                </li>
+              ))}
+            </ol>
+
+            <p class="intro">{applyPage.intro}</p>
+
+            <!-- Step 1: about you -->
+            <fieldset class="step" data-step="you">
+              <legend>
+                <span class="legend-title">{applyPage.steps[0]!.title}</span>
+                <span class="legend-hint">{applyPage.steps[0]!.hint}</span>
+              </legend>
+              <div class="fields two">
+                <div class="field">
+                  <label for="firstName">First name</label>
+                  <input
+                    class="input"
+                    id="firstName"
+                    name="firstName"
+                    autocomplete="given-name"
+                    required
+                  />
+                </div>
+                <div class="field">
+                  <label for="lastName">Last name</label>
+                  <input
+                    class="input"
+                    id="lastName"
+                    name="lastName"
+                    autocomplete="family-name"
+                    required
+                  />
+                </div>
+                <div class="field">
+                  <label for="phone">Phone</label>
+                  <input
+                    class="input"
+                    id="phone"
+                    name="phone"
+                    type="tel"
+                    autocomplete="tel"
+                    inputmode="tel"
+                    required
+                    data-kind="phone"
+                  />
+                </div>
+                <div class="field">
+                  <label for="email">
+                    Email <span class="optional">(optional)</span>
+                  </label>
+                  <input
+                    class="input"
+                    id="email"
+                    name="email"
+                    type="email"
+                    autocomplete="email"
+                    inputmode="email"
+                  />
+                </div>
+              </div>
+              <fieldset class="field">
+                <legend class="label">Best way to reach you</legend>
+                <div class="choices">
+                  {applyPage.contactMethods.map((method, i) => (
+                    <label class="choice">
+                      <input type="radio" name="contactMethod" value={method} checked={i === 0} />
+                      {method}
+                    </label>
+                  ))}
+                </div>
+              </fieldset>
+            </fieldset>
+
+            <!-- Step 2: household -->
+            <fieldset class="step" data-step="household" hidden>
+              <legend>
+                <span class="legend-title">{applyPage.steps[1]!.title}</span>
+                <span class="legend-hint">{applyPage.steps[1]!.hint}</span>
+              </legend>
+              <div class="fields">
+                <div class="field">
+                  <label for="street">Street address</label>
+                  <input
+                    class="input"
+                    id="street"
+                    name="street"
+                    autocomplete="street-address"
+                    required
+                  />
+                </div>
+              </div>
+              <div class="fields three">
+                <div class="field">
+                  <label for="city">City</label>
+                  <input
+                    class="input"
+                    id="city"
+                    name="city"
+                    autocomplete="address-level2"
+                    required
+                  />
+                </div>
+                <div class="field">
+                  <label for="zip">ZIP code</label>
+                  <input
+                    class="input"
+                    id="zip"
+                    name="zip"
+                    autocomplete="postal-code"
+                    inputmode="numeric"
+                    required
+                    data-kind="zip"
+                  />
+                </div>
+                <div class="field">
+                  <label for="county">County</label>
+                  <select class="select" id="county" name="county" required>
+                    <option value="">Choose one</option>
+                    {applyPage.counties.map((c) => (
+                      <option value={c}>{c}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+              <div class="fields two">
+                <div class="field">
+                  <label for="adults">Adults in your household</label>
+                  <select class="select" id="adults" name="adults" required>
+                    {adults.map((n) => (
+                      <option value={n}>{n}</option>
+                    ))}
+                  </select>
+                </div>
+                <div class="field">
+                  <label for="childCount">Children in your household</label>
+                  <select
+                    class="select"
+                    id="childCount"
+                    name="childCount"
+                    required
+                    data-child-count
+                  >
+                    {children.map((n) => (
+                      <option value={n}>{n}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+              <div class="children" data-children hidden>
+                <p class="label">About each child</p>
+                <p class="hint">
+                  Ages help us match the right gifts and supplies. Sizes are optional.
+                </p>
+                <div class="child-rows" data-child-rows></div>
+              </div>
+              <template data-child-template>
+                <div class="child-row">
+                  <div class="field">
+                    <label>Age</label>
+                    <select class="select" name="childAge">
+                      {ages.map((a) => (
+                        <option value={a}>{a}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div class="field">
+                    <label>Girl or boy</label>
+                    <select class="select" name="childGender">
+                      <option value="">Choose</option>
+                      <option value="Girl">Girl</option>
+                      <option value="Boy">Boy</option>
+                      <option value="Prefer not to say">Prefer not to say</option>
+                    </select>
+                  </div>
+                  <div class="field">
+                    <label>
+                      Clothing size <span class="optional">(optional)</span>
+                    </label>
+                    <input class="input" name="childClothing" placeholder="e.g. 5T, youth M" />
+                  </div>
+                  <div class="field">
+                    <label>
+                      Shoe size <span class="optional">(optional)</span>
+                    </label>
+                    <input class="input" name="childShoe" placeholder="e.g. 12C" />
+                  </div>
+                </div>
+              </template>
+            </fieldset>
+
+            <!-- Step 3: what you need -->
+            <fieldset class="step" data-step="needs" hidden>
+              <legend>
+                <span class="legend-title">{applyPage.steps[2]!.title}</span>
+                <span class="legend-hint">{applyPage.steps[2]!.hint}</span>
+              </legend>
+              <p class="error" data-needs-error hidden>
+                Choose at least one kind of help.
+              </p>
+              <div class="needs">
+                <div class="need">
+                  <label class="choice need-toggle">
+                    <input
+                      type="checkbox"
+                      name="need"
+                      value={names["holiday-assistance"]}
+                      data-toggle="holiday"
+                    />
+                    {names["holiday-assistance"]}
+                  </label>
+                  <fieldset class="sub" data-sub="holiday" hidden>
+                    <legend class="label">Which holidays?</legend>
+                    <div class="choices">
+                      {applyPage.holidays.map((h) => (
+                        <label class="choice">
+                          <input type="checkbox" name="holidays" value={h} />
+                          {h}
+                        </label>
+                      ))}
+                    </div>
+                  </fieldset>
+                </div>
+
+                <div class="need">
+                  <label class="choice need-toggle">
+                    <input
+                      type="checkbox"
+                      name="need"
+                      value={names["diaper-drive"]}
+                      data-toggle="diapers"
+                    />
+                    Diapers
+                  </label>
+                  <fieldset class="sub" data-sub="diapers" hidden>
+                    <legend class="label">Which sizes?</legend>
+                    <div class="choices">
+                      {applyPage.diaperSizes.map((s) => (
+                        <label class="choice">
+                          <input type="checkbox" name="diaperSizes" value={s} />
+                          {s}
+                        </label>
+                      ))}
+                    </div>
+                  </fieldset>
+                </div>
+
+                <div class="need">
+                  <label class="choice need-toggle">
+                    <input
+                      type="checkbox"
+                      name="need"
+                      value={names["back-to-school"]}
+                      data-toggle="school"
+                    />
+                    School supplies
+                  </label>
+                  <fieldset class="sub" data-sub="school" hidden>
+                    <legend class="label">Which grades?</legend>
+                    <div class="choices">
+                      {applyPage.grades.map((g) => (
+                        <label class="choice">
+                          <input type="checkbox" name="grades" value={g} />
+                          {g}
+                        </label>
+                      ))}
+                    </div>
+                  </fieldset>
+                </div>
+
+                <div class="need">
+                  <label class="choice need-toggle">
+                    <input type="checkbox" name="need" value={names["haircuts"]} />
+                    Free haircut or style
+                  </label>
+                </div>
+              </div>
+
+              <div class="field">
+                <label for="notes">
+                  Anything else we should know? <span class="optional">(optional)</span>
+                </label>
+                <textarea class="textarea" id="notes" name="notes" rows="4"></textarea>
+              </div>
+              <div class="field">
+                <label for="heard">
+                  How did you hear about us? <span class="optional">(optional)</span>
+                </label>
+                <select class="select" id="heard" name="heard">
+                  <option value="">Choose one</option>
+                  {heard.map((h) => (
+                    <option value={h}>{h}</option>
+                  ))}
+                </select>
+              </div>
+            </fieldset>
+
+            <!-- Step 4: review and send -->
+            <fieldset class="step" data-step="review" hidden>
+              <legend>
+                <span class="legend-title">{applyPage.steps[3]!.title}</span>
+                <span class="legend-hint">{applyPage.steps[3]!.hint}</span>
+              </legend>
+              <dl class="review" data-review></dl>
+              <label class="consent">
+                <input type="checkbox" name="consent" required />
+                <span>
+                  The information above is accurate, and I'd like {org.shortName} to contact me
+                  about help.
+                </span>
+              </label>
+              <p class="error" data-consent-error hidden>
+                Please confirm your information to send.
+              </p>
+              <p class="privacy">{applyPage.privacy}</p>
+            </fieldset>
+
+            <div class="nav">
+              <button type="button" class="button button--outline" data-back hidden>
+                Back
+              </button>
+              <button type="button" class="button button--purple" data-next>
+                Next
+              </button>
+              <button type="submit" class="button button--signal" data-send hidden>
+                Send my application
+              </button>
+            </div>
+          </form>
+
+          <div class="done" data-done hidden tabindex="-1">
+            <h2>{applyPage.done.heading}</h2>
+            <p>{applyPage.done.body}</p>
+            <textarea
+              class="textarea"
+              data-done-text
+              readonly
+              rows="12"
+              aria-label="Your application text"
+            ></textarea>
+            <div class="button-row">
+              <button type="button" class="button button--purple" data-copy>
+                Copy the text
+              </button>
+              <a class="button button--outline" href={phone.href}>
+                Call {phone.display}
+              </a>
+              <a class="arrow-link" href={mailto}>
+                Open a blank email to us
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+  <SiteFooter />
+</Base>
+
+<script>
+  const form = document.querySelector<HTMLFormElement>("[data-apply]");
+  if (form) {
+    form.hidden = false;
+    const email = form
+      .closest("main")!
+      .querySelector<HTMLAnchorElement>("a[href^='mailto:']")!.href;
+    const subject = new URL(email).searchParams.get("subject") ?? "Application for help";
+    const steps = Array.from(form.querySelectorAll<HTMLFieldSetElement>("[data-step]"));
+    const progress = Array.from(form.querySelectorAll<HTMLElement>("[data-progress]"));
+    const back = form.querySelector<HTMLButtonElement>("[data-back]")!;
+    const next = form.querySelector<HTMLButtonElement>("[data-next]")!;
+    const send = form.querySelector<HTMLButtonElement>("[data-send]")!;
+    const review = form.querySelector<HTMLElement>("[data-review]")!;
+    const done = document.querySelector<HTMLElement>("[data-done]")!;
+    const doneText = done.querySelector<HTMLTextAreaElement>("[data-done-text]")!;
+    let current = 0;
+
+    // Children: one row of fields per child.
+    const count = form.querySelector<HTMLSelectElement>("[data-child-count]")!;
+    const children = form.querySelector<HTMLElement>("[data-children]")!;
+    const rows = form.querySelector<HTMLElement>("[data-child-rows]")!;
+    const template = form.querySelector<HTMLTemplateElement>("[data-child-template]")!;
+    const renderChildren = () => {
+      const n = parseInt(count.value, 10) || 0;
+      children.hidden = n === 0;
+      while (rows.children.length > n) rows.lastElementChild!.remove();
+      while (rows.children.length < n) {
+        const row = template.content.firstElementChild!.cloneNode(true) as HTMLElement;
+        const index = rows.children.length + 1;
+        row.querySelectorAll("label").forEach((label, i) => {
+          const control = label.nextElementSibling as HTMLElement;
+          const id = `child-${index}-${i}`;
+          control.id = id;
+          label.setAttribute("for", id);
+          label.insertAdjacentText("afterbegin", `Child ${index}: `);
+        });
+        rows.append(row);
+      }
+    };
+    count.addEventListener("change", renderChildren);
+    renderChildren();
+
+    // Needs: a sub-group opens under each kind of help that is chosen.
+    form.querySelectorAll<HTMLInputElement>("[data-toggle]").forEach((box) => {
+      const sub = form.querySelector<HTMLElement>(`[data-sub="${box.dataset.toggle}"]`)!;
+      const sync = () => {
+        sub.hidden = !box.checked;
+      };
+      box.addEventListener("change", sync);
+      sync();
+    });
+
+    // Validation: required fields, a phone with 10 digits, a 5-digit ZIP.
+    const messageFor = (input: HTMLInputElement | HTMLSelectElement) => {
+      const value = input.value.trim();
+      if (input.required && !value) return "This is required.";
+      if (input.dataset.kind === "phone" && value.replace(/\D/g, "").length < 10)
+        return "Enter a phone number with area code.";
+      if (input.dataset.kind === "zip" && !/^\d{5}(-\d{4})?$/.test(value))
+        return "Enter a 5-digit ZIP code.";
+      if (
+        input instanceof HTMLInputElement &&
+        input.type === "email" &&
+        value &&
+        !input.validity.valid
+      )
+        return "Enter a valid email address.";
+      return "";
+    };
+    const setError = (input: HTMLInputElement | HTMLSelectElement, message: string) => {
+      const field = input.closest(".field")!;
+      let note = field.querySelector<HTMLElement>(".error");
+      if (message) {
+        if (!note) {
+          note = document.createElement("p");
+          note.className = "error";
+          note.id = `${input.id}-error`;
+          field.append(note);
+        }
+        note.textContent = message;
+        input.setAttribute("aria-invalid", "true");
+        input.setAttribute("aria-describedby", note.id);
+      } else {
+        note?.remove();
+        input.removeAttribute("aria-invalid");
+        input.removeAttribute("aria-describedby");
+      }
+    };
+    const validate = (step: HTMLFieldSetElement) => {
+      let first: HTMLElement | null = null;
+      step
+        .querySelectorAll<HTMLInputElement | HTMLSelectElement>(".input, .select")
+        .forEach((input) => {
+          const message = messageFor(input);
+          setError(input, message);
+          if (message && !first) first = input;
+        });
+      if (step.dataset.step === "needs") {
+        const chosen = step.querySelectorAll<HTMLInputElement>("input[name=need]:checked").length;
+        const error = step.querySelector<HTMLElement>("[data-needs-error]")!;
+        error.hidden = chosen > 0;
+        if (chosen === 0 && !first) first = step.querySelector("input[name=need]");
+      }
+      if (step.dataset.step === "review") {
+        const consent = step.querySelector<HTMLInputElement>("input[name=consent]")!;
+        const error = step.querySelector<HTMLElement>("[data-consent-error]")!;
+        error.hidden = consent.checked;
+        if (!consent.checked && !first) first = consent;
+      }
+      first?.focus();
+      return !first;
+    };
+    form
+      .querySelectorAll<HTMLInputElement | HTMLSelectElement>(".input, .select")
+      .forEach((input) => {
+        input.addEventListener("blur", () => {
+          if (input.value.trim() || input.getAttribute("aria-invalid"))
+            setError(input, messageFor(input));
+        });
+        input.addEventListener("input", () => {
+          if (input.getAttribute("aria-invalid")) setError(input, messageFor(input));
+        });
+      });
+
+    // The answers, as label/value pairs, for the review step and the email.
+    const answers = () => {
+      const data = new FormData(form);
+      const get = (name: string) => String(data.get(name) ?? "").trim();
+      const all = (name: string) => data.getAll(name).map(String);
+      const out: [string, string][] = [
+        ["Name", `${get("firstName")} ${get("lastName")}`.trim()],
+        ["Phone", get("phone")],
+        ["Email", get("email") || "(none)"],
+        ["Best way to reach", get("contactMethod")],
+        ["Address", `${get("street")}, ${get("city")} ${get("zip")} (${get("county")} County)`],
+        ["Adults", get("adults")],
+        ["Children", get("childCount")],
+      ];
+      const ages = all("childAge");
+      const genders = all("childGender");
+      const clothing = all("childClothing");
+      const shoes = all("childShoe");
+      ages.forEach((age, i) => {
+        const bits = [
+          `age ${age}`,
+          genders[i],
+          clothing[i] && `clothing ${clothing[i]}`,
+          shoes[i] && `shoes ${shoes[i]}`,
+        ]
+          .filter(Boolean)
+          .join(", ");
+        out.push([`Child ${i + 1}`, bits]);
+      });
+      out.push(["Help needed", all("need").join(", ")]);
+      if (all("holidays").length) out.push(["Holidays", all("holidays").join(", ")]);
+      if (all("diaperSizes").length) out.push(["Diaper sizes", all("diaperSizes").join(", ")]);
+      if (all("grades").length) out.push(["Grades", all("grades").join(", ")]);
+      if (get("notes")) out.push(["Notes", get("notes")]);
+      if (get("heard")) out.push(["Heard about us", get("heard")]);
+      return out;
+    };
+    const renderReview = () => {
+      review.replaceChildren(
+        ...answers().flatMap(([label, value]) => {
+          const dt = document.createElement("dt");
+          dt.textContent = label;
+          const dd = document.createElement("dd");
+          dd.textContent = value;
+          return [dt, dd];
+        }),
+      );
+    };
+
+    const show = (index: number, moveFocus = true) => {
+      current = index;
+      steps.forEach((step, i) => {
+        step.hidden = i !== index;
+      });
+      progress.forEach((item, i) => {
+        if (i === index) item.setAttribute("aria-current", "step");
+        else item.removeAttribute("aria-current");
+        item.classList.toggle("done", i < index);
+      });
+      back.hidden = index === 0;
+      next.hidden = index === steps.length - 1;
+      send.hidden = index !== steps.length - 1;
+      if (index === steps.length - 1) renderReview();
+      if (!moveFocus) return;
+      steps[index]!.scrollIntoView({ block: "start", behavior: "instant" });
+      steps[index]!.querySelector<HTMLElement>("input, select, textarea")?.focus({
+        preventScroll: true,
+      });
+    };
+
+    next.addEventListener("click", () => {
+      if (validate(steps[current]!)) show(current + 1);
+    });
+    back.addEventListener("click", () => show(current - 1));
+
+    form.addEventListener("submit", (event) => {
+      event.preventDefault();
+      if (!validate(steps[current]!)) return;
+      const lines = answers().map(([label, value]) => `${label}: ${value}`);
+      const body = `Application for help\n\n${lines.join("\n")}\n`;
+      // Built by hand: URLSearchParams writes spaces as "+", which mail apps show literally.
+      const url = new URL(email);
+      url.search = `?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+      doneText.value = body;
+      form.hidden = true;
+      done.hidden = false;
+      done.focus();
+      const send = new CustomEvent("application:send", {
+        detail: url.toString(),
+        cancelable: true,
+      });
+      if (form.dispatchEvent(send)) window.location.href = url.toString();
+    });
+
+    done
+      .querySelector<HTMLButtonElement>("[data-copy]")!
+      .addEventListener("click", async (event) => {
+        const button = event.currentTarget as HTMLButtonElement;
+        try {
+          await navigator.clipboard.writeText(doneText.value);
+          button.textContent = "Copied";
+        } catch {
+          doneText.select();
+        }
+      });
+
+    show(0, false);
+  }
+</script>
+
+<style>
+  .talk {
+    margin-top: var(--space-s);
+    color: var(--night-soft);
+  }
+
+  .talk a {
+    color: #fff;
+  }
+
+  .layout {
+    max-width: 44rem;
+  }
+
+  .online {
+    margin-bottom: var(--space-m);
+  }
+
+  .noscript {
+    padding: 1rem 1.25rem;
+    border-radius: var(--r-card);
+    background: var(--lilac);
+    font-weight: 700;
+  }
+
+  .apply {
+    display: grid;
+    gap: var(--space-m);
+  }
+
+  .apply[hidden] {
+    display: none;
+  }
+
+  /* Progress: four numbered steps, the current one in purple. */
+  .progress {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0.25rem;
+    padding: 0;
+    margin: 0;
+    list-style: none;
+    counter-reset: step;
+  }
+
+  .progress li {
+    display: grid;
+    gap: 0.4rem;
+    padding-top: 0.6rem;
+    border-top: 3px solid var(--rule);
+    font-size: var(--step--1);
+    color: var(--muted);
+  }
+
+  .progress li[aria-current],
+  .progress li.done {
+    border-top-color: var(--purple);
+  }
+
+  .progress li[aria-current] {
+    color: var(--ink);
+    font-weight: 700;
+  }
+
+  .num {
+    display: inline-grid;
+    place-items: center;
+    width: 1.6rem;
+    height: 1.6rem;
+    border-radius: 50%;
+    background: var(--rule);
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 0.8rem;
+    color: var(--ink);
+  }
+
+  .progress li[aria-current] .num,
+  .progress li.done .num {
+    background: var(--purple);
+    color: #fff;
+  }
+
+  .step-title {
+    display: none;
+  }
+
+  .intro {
+    color: var(--muted);
+  }
+
+  .step {
+    display: grid;
+    gap: var(--space-m);
+    margin: 0;
+    padding: var(--space-m);
+    border: 1px solid var(--rule);
+    border-radius: var(--r-card);
+    background: #fff;
+  }
+
+  .step[hidden] {
+    display: none;
+  }
+
+  .step > legend {
+    display: grid;
+    gap: 0.15rem;
+    padding: 0;
+    float: left;
+    width: 100%;
+    margin-bottom: var(--space-s);
+  }
+
+  .legend-title {
+    font-family: var(--font-display);
+    font-size: var(--step-2);
+    font-weight: 750;
+    letter-spacing: -0.02em;
+  }
+
+  .legend-hint {
+    color: var(--muted);
+  }
+
+  .fields {
+    display: grid;
+    gap: var(--space-s);
+  }
+
+  fieldset.field {
+    margin: 0;
+    padding: 0;
+    border: 0;
+  }
+
+  fieldset.field legend {
+    padding: 0;
+    margin-bottom: 0.5rem;
+  }
+
+  .optional {
+    font-weight: 400;
+    color: var(--muted);
+  }
+
+  .children {
+    display: grid;
+    gap: 0.35rem;
+  }
+
+  .children[hidden] {
+    display: none;
+  }
+
+  .child-rows {
+    display: grid;
+    gap: var(--space-s);
+    margin-top: 0.5rem;
+  }
+
+  .child-row {
+    display: grid;
+    gap: 0.75rem;
+    padding: 1rem;
+    border-radius: var(--r-img);
+    background: var(--paper);
+  }
+
+  .needs {
+    display: grid;
+    gap: 0.75rem;
+  }
+
+  .need {
+    display: grid;
+    gap: 0.75rem;
+  }
+
+  .need-toggle {
+    justify-self: start;
+    font-size: var(--step-0);
+  }
+
+  .sub {
+    margin: 0;
+    padding: 1rem;
+    border: 0;
+    border-radius: var(--r-img);
+    background: var(--paper);
+  }
+
+  .sub[hidden] {
+    display: none;
+  }
+
+  .sub legend {
+    display: block;
+    padding: 0;
+    margin-bottom: 0.5rem;
+  }
+
+  .review {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 0.4rem 1rem;
+    margin: 0;
+  }
+
+  .review dt {
+    font-family: var(--font-display);
+    font-weight: 700;
+    color: var(--muted);
+  }
+
+  .review dd {
+    margin: 0;
+    overflow-wrap: anywhere;
+  }
+
+  .consent {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    min-height: 44px;
+    cursor: pointer;
+  }
+
+  .consent input {
+    flex: none;
+    width: 1.4rem;
+    height: 1.4rem;
+    margin: 0.15rem 0 0;
+    accent-color: var(--purple);
+  }
+
+  .privacy {
+    font-size: var(--step--1);
+    color: var(--muted);
+  }
+
+  .nav {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: var(--space-s);
+  }
+
+  .nav [data-next],
+  .nav [data-send] {
+    margin-left: auto;
+  }
+
+  .nav [hidden] {
+    display: none;
+  }
+
+  .done {
+    display: grid;
+    gap: var(--space-s);
+    padding: var(--space-m);
+    border-radius: var(--r-card);
+    background: #fff;
+    border: 1px solid var(--rule);
+  }
+
+  .done[hidden] {
+    display: none;
+  }
+
+  .done h2 {
+    font-size: var(--step-2);
+  }
+
+  @media (min-width: 40rem) {
+    .step-title {
+      display: block;
+    }
+    .fields.two {
+      grid-template-columns: 1fr 1fr;
+    }
+    .fields.three {
+      grid-template-columns: 2fr 1fr 1.4fr;
+    }
+    .child-row {
+      grid-template-columns: repeat(4, 1fr);
+    }
+  }
+
+  @media (min-width: 56rem) {
+    .step {
+      padding: var(--space-l);
+    }
+  }
+</style>

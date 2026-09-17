@@ -1,0 +1,283 @@
+---
+import SiteFooter from "../components/SiteFooter.astro";
+import SiteHeader from "../components/SiteHeader.astro";
+import Base from "../layouts/Base.astro";
+import { claim, show } from "../data/facts.ts";
+import { donatePage, facts, links, org } from "../data/site";
+
+const email = show(facts.email);
+const taxExempt = claim(facts.taxExempt);
+const portal = links.donate;
+const mailto = `mailto:${email}?subject=${encodeURIComponent(donatePage.emailSubject)}`;
+const description = `${donatePage.intro} ${claim(facts.legalName)} is a ${taxExempt.section} nonprofit.`;
+---
+
+<Base title={`Donate | ${org.shortName}`} description={description}>
+  <SiteHeader />
+  <main id="main">
+    <section class="page-hero on-dark">
+      <div class="wrap">
+        <a class="back" href="/">
+          ← Back to home
+        </a>
+        <span class="eyebrow">{donatePage.eyebrow}</span>
+        <h1>{donatePage.heading}</h1>
+        <p class="lede">{donatePage.intro}</p>
+      </div>
+    </section>
+
+    <section class="section give" aria-labelledby="give-title">
+      <div class="wrap grid">
+        <form class="card" data-give novalidate>
+          <h2 id="give-title">Choose your gift</h2>
+
+          <fieldset class="field">
+            <legend class="label">How often</legend>
+            <div class="choices" role="radiogroup">
+              {donatePage.frequencies.map((f, i) => (
+                <label class="choice">
+                  <input type="radio" name="frequency" value={f.id} checked={i === 0} />
+                  {f.label}
+                </label>
+              ))}
+            </div>
+          </fieldset>
+
+          <fieldset class="field">
+            <legend class="label">Amount</legend>
+            <div class="choices amounts">
+              {donatePage.amounts.map((amount, i) => (
+                <label class="choice">
+                  <input type="radio" name="amount" value={amount} checked={i === 1} />${amount}
+                </label>
+              ))}
+              <label class="choice">
+                <input type="radio" name="amount" value="other" />
+                Other
+              </label>
+            </div>
+            <div class="other" data-other hidden>
+              <label for="other-amount">Other amount (USD)</label>
+              <input
+                class="input"
+                id="other-amount"
+                name="otherAmount"
+                type="number"
+                inputmode="decimal"
+                min="1"
+                step="1"
+                placeholder="75"
+              />
+            </div>
+          </fieldset>
+
+          <p class="summary" aria-live="polite" data-summary>
+            Your gift: $50, one time.
+          </p>
+
+          {portal ? (
+            <a class="button button--signal go" href={portal} data-portal>
+              {donatePage.continueLabel}
+            </a>
+          ) : (
+            <>
+              <a class="button button--signal go" href={mailto} data-email>
+                {donatePage.emailLabel}
+              </a>
+              <p class="note">{donatePage.emailNote}</p>
+            </>
+          )}
+
+          <p class="tax">
+            {claim(facts.legalName)} is a {taxExempt.section} nonprofit, EIN {claim(facts.ein)}.
+            {taxExempt.deductible && " Donations are tax-deductible to the extent allowed by law."}
+          </p>
+        </form>
+
+        <aside class="other-ways" aria-labelledby="other-title">
+          <h2 id="other-title">{donatePage.otherWays.heading}</h2>
+          <ul>
+            {donatePage.otherWays.items.map((item) => (
+              <li>
+                <a class="way" href={item.href}>
+                  <span class="way-title">{item.title}</span>
+                  <span class="way-body">{item.body}</span>
+                </a>
+              </li>
+            ))}
+          </ul>
+        </aside>
+      </div>
+    </section>
+  </main>
+  <SiteFooter />
+</Base>
+
+<script>
+  // Keeps the summary and the giving link in step with the chosen amount.
+  const form = document.querySelector<HTMLFormElement>("[data-give]");
+  if (form) {
+    const summary = form.querySelector<HTMLElement>("[data-summary]")!;
+    const other = form.querySelector<HTMLElement>("[data-other]")!;
+    const otherInput = form.querySelector<HTMLInputElement>("#other-amount")!;
+    const emailLink = form.querySelector<HTMLAnchorElement>("[data-email]");
+    const portalLink = form.querySelector<HTMLAnchorElement>("[data-portal]");
+
+    const read = () => {
+      const data = new FormData(form);
+      const frequency = data.get("frequency") === "monthly" ? "monthly" : "one time";
+      const picked = String(data.get("amount") ?? "");
+      const amount = picked === "other" ? Number(otherInput.value) || 0 : Number(picked);
+      return { frequency, amount, isOther: picked === "other" };
+    };
+
+    const update = () => {
+      const { frequency, amount, isOther } = read();
+      other.hidden = !isOther;
+      const dollars = amount > 0 ? `$${amount.toLocaleString("en-US")}` : "an amount";
+      summary.textContent = `Your gift: ${dollars}, ${frequency}.`;
+      if (emailLink) {
+        // Built by hand: URLSearchParams writes spaces as "+", which mail apps show literally.
+        const url = new URL(emailLink.href);
+        const subject = url.searchParams.get("subject") ?? "Donation";
+        const body = `Hello,\n\nI'd like to give ${dollars} (${frequency}) to Caring for a Cause. Please let me know the best way to send it.\n\nThank you,\n`;
+        url.search = `?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+        emailLink.href = url.toString();
+      }
+      if (portalLink) {
+        // Amount and frequency ride along as a hint; the payment page has the final say.
+        const url = new URL(portalLink.href);
+        if (amount > 0) url.searchParams.set("amount", String(amount));
+        url.searchParams.set("frequency", frequency === "monthly" ? "monthly" : "once");
+        portalLink.href = url.toString();
+      }
+    };
+
+    form.addEventListener("change", update);
+    otherInput.addEventListener("input", update);
+    form.addEventListener("submit", (event) => event.preventDefault());
+    update();
+  }
+</script>
+
+<style>
+  .grid {
+    display: grid;
+    gap: var(--space-l);
+    align-items: start;
+  }
+
+  .card {
+    display: grid;
+    gap: var(--space-m);
+    padding: var(--space-m);
+    background: #fff;
+    border: 1px solid var(--rule);
+    border-radius: var(--r-card);
+  }
+
+  .card h2 {
+    font-size: var(--step-2);
+  }
+
+  fieldset {
+    margin: 0;
+    padding: 0;
+    border: 0;
+  }
+
+  legend {
+    padding: 0;
+    margin-bottom: 0.5rem;
+  }
+
+  .amounts .choice {
+    min-width: 5rem;
+    justify-content: center;
+  }
+
+  .other {
+    display: grid;
+    gap: 0.35rem;
+    margin-top: 0.75rem;
+    max-width: 16rem;
+  }
+
+  .other[hidden] {
+    display: none;
+  }
+
+  .other label {
+    font-weight: 700;
+    font-size: var(--step--1);
+  }
+
+  .summary {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: var(--step-1);
+  }
+
+  .go {
+    justify-self: start;
+  }
+
+  .note,
+  .tax {
+    font-size: var(--step--1);
+    color: var(--muted);
+  }
+
+  .other-ways h2 {
+    font-size: var(--step-2);
+    margin-bottom: var(--space-s);
+  }
+
+  .other-ways ul {
+    display: grid;
+    gap: 0.75rem;
+    padding: 0;
+    list-style: none;
+  }
+
+  .way {
+    display: grid;
+    gap: 0.2rem;
+    padding: 1rem 1.25rem;
+    border: 1px solid var(--rule);
+    border-radius: var(--r-card);
+    background: #fff;
+    color: var(--ink);
+    text-decoration: none;
+    transition:
+      border-color 150ms ease,
+      transform 150ms ease;
+  }
+
+  .way:hover {
+    border-color: var(--purple);
+    transform: translateY(-2px);
+  }
+
+  .way-title {
+    font-family: var(--font-display);
+    font-weight: 750;
+    font-size: var(--step-0);
+    color: var(--purple);
+  }
+
+  .way-body {
+    font-size: var(--step--1);
+    color: var(--muted);
+  }
+
+  @media (min-width: 56rem) {
+    .grid {
+      grid-template-columns: 7fr 5fr;
+      gap: var(--space-xl);
+    }
+    .card {
+      padding: var(--space-l);
+    }
+  }
+</style>

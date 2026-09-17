@@ -167,3 +167,33 @@ Short records of the technical choices behind this site, so anyone taking it ove
 **Decision:** Four refinements after a real-iPhone review. (1) The mark is a night version with lit gradients, built for the dark background. (2) "Help me" moved into the open red space above the fingertips, set in her lettering with a white ring that echoes the logo's outlines, a top sheen, a white chevron disc, and the breathing glow; sized in container units. (3) On phones the header is the mark, Give centered, and the wedge; the name stays for screen readers. (4) The preview notice is one line, and the gap above the heart is tightened.
 
 **Why:** The first version placed a generic pill across the fingers of a flat, print-colored mark. The most important button on the site now looks designed for its place, and the header no longer repeats the name the hero already shows.
+
+## 26. The banner: her photos, her lettering, two equal doors
+
+**Decision:** The hero is a photo banner again: the four event photos crossfade behind a night veil, her calligraphic wordmark (a vector tracing of her logo lettering) sits on it in white, then one sentence saying what she does, then two doors of equal size: "Help me" (signal, to `/apply`) and "Donate" (glass, to `/donate`), with a quiet third link to Get involved. On desktop the photo takes the right side at close to its native width and the veil hides its edge; on phones it fills the banner and the doors fit an iPhone 15 Safari screen (a test checks). The large heart-and-hands illustration, the Lobster typeface, the identity block, and the video in the hero are gone. Supersedes decisions 22 through 25.
+
+**Why:** The identity block put a blown-up raster logo where a photograph belongs, made the two doors unequal, hid the sentence that explains the organization below a video, and read as cartoonish next to the sites it was measured against. Real people, her own lettering, and two equal choices are the strongest first screen her assets allow, and it is the structure the owner asked for.
+
+## 27. Real pages for the two doors
+
+**Decision:** `/apply` is a four-step application (about you, household, what you need, review and send) with choices as chips and selects, one row per child, and program-specific details that open only when chosen. `/donate` chooses a frequency and an amount and hands off to the payment page in `links.donate`; while that is unset, the button opens an email with the chosen gift written in. Both send by email (`mailto:`) because the site has no server and nothing may collect family or payment information outside accounts she owns (decision 5). Without JavaScript the application page explains how to apply by phone or email instead of showing a form that cannot send.
+
+**Why:** Families and donors each needed a place to act, not a tab. Email keeps every answer in her inbox with no third-party account, and the pages are built so that setting one link (`links.donate`, `links.familyApplication`) upgrades them to a hosted portal or form later.
+
+## 28. Navigation: About, Our programs, Get involved, Contact
+
+**Decision:** One list in `src/data/site.ts` drives both the desktop links and the phone menu: About, Our programs, Get involved (a dropdown on desktop and a group of chips in the menu: Sponsor a family, Volunteer, Partner, Donate), Contact. The header's button is "Donate". The phone menu ends with the two doors and her phone and email. The wedge shows on phones only; desktop has the inline links, so there is no second menu.
+
+**Why:** The previous header repeated the same links twice on desktop and led with "Help me" as a nav item while the hero already asked the same question. This is the order visitors use to orient, and Contact becomes a real section (`#contact`) with the doors repeated once more.
+
+## 29. Vector brand marks and one crimson on dark
+
+**Decision:** `scripts/brand/trace-brand.py` traces her logo files into `mark.svg` (flat colors) and `wordmark.svg` (inherits `color`), rendered inline through `src/components/Brand.astro`. `--signal` #E2202C is the only crimson on night surfaces; the earlier rose and salmon tints are removed. Focus rings use `--focus`, purple on light and white on dark. Three radii replace the six that had crept in. The video poster is cropped to a portrait (`tamara-portrait.jpg`) that leaves out the sponsor's burned-in caption, and the video plays in the About section when asked, not before.
+
+**Why:** The largest brand element was a raster served below 2× and the crimson had drifted into pink, which the owner ruled out. Vector marks are sharp at every size, and one signal color keeps crimson meaning "here."
+
+## 30. The publish gate checks every page
+
+**Decision:** `scripts/validate-build.mjs` runs its page checks (title, description, one h1, canonical URL, link preview, indexing, preview notice, structured data, ids and in-page links, alt text, referenced files, placeholders, viewport units) on `index.html`, `donate/index.html`, `apply/index.html`, and `404.html`. Links written as `/#section` are checked against the home page's ids from any page. The browser suite covers the three pages, the dropdown, the menu's contents, the header-to-footer alignment, the door sizes, the phone-fold rule, and both forms end to end.
+
+**Why:** A one-page gate would have let a broken donation page publish.

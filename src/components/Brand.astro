@@ -1,0 +1,36 @@
+---
+/**
+ * The heart-and-hands mark and her script wordmark, as inline SVG.
+ *
+ * Both are vector tracings of her logo files (scripts/brand/trace-brand.py),
+ * so they stay sharp at every size. The wordmark inherits `color`, so it is
+ * white on night and purple on paper.
+ */
+import Mark from "../assets/brand/mark.svg";
+import Wordmark from "../assets/brand/wordmark.svg";
+
+type Props = {
+  kind: "mark" | "wordmark";
+  class?: string;
+  /** Accessible name. Empty means decorative (hidden from screen readers). */
+  label?: string;
+};
+
+const { kind, class: className, label = "Caring for a Cause" } = Astro.props;
+const Svg = kind === "mark" ? Mark : Wordmark;
+const classes = [kind === "mark" ? "brand-mark" : "brand-wordmark", className];
+---
+
+{label ? (
+  <Svg class:list={classes} role="img" aria-label={label} />
+) : (
+  <Svg class:list={classes} aria-hidden="true" focusable="false" />
+)}
+
+<style is:global>
+  .brand-mark,
+  .brand-wordmark {
+    display: block;
+    height: auto;
+  }
+</style>

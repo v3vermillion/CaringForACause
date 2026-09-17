@@ -12,9 +12,10 @@ const mailto = (subject: string) =>
 
 <section id="get-involved" class="section section--lilac" aria-labelledby="involved-title">
   <div class="wrap">
-    <header class="stack head">
+    <header class="head">
+      <span class="eyebrow">Get involved</span>
       <h2 id="involved-title">{getInvolved.heading}</h2>
-      <p>{getInvolved.intro}</p>
+      <p class="lede">{getInvolved.intro}</p>
     </header>
 
     <!--
@@ -61,7 +62,11 @@ const mailto = (subject: string) =>
               {tab.photo && tab.video && <VideoLink video={tab.video} />}
             </div>
             {tab.photo ? (
-              <Photo photo={tab.photo} ratio="4 / 3" />
+              <Photo
+                photo={tab.photo}
+                ratio="4 / 3"
+                sizes="(min-width: 56rem) 520px, calc(100vw - 2.5rem)"
+              />
             ) : (
               tab.video && <YouTubeLite video={tab.video} />
             )}
@@ -92,7 +97,10 @@ const mailto = (subject: string) =>
         const on = tab.getAttribute("aria-controls") === id;
         tab.setAttribute("aria-selected", String(on));
         tab.tabIndex = on ? 0 : -1;
-        if (on && focus) tab.focus();
+        if (on && focus) {
+          tab.focus();
+          tab.scrollIntoView({ block: "nearest", inline: "nearest" });
+        }
       });
       panels.forEach((panel) => {
         panel.hidden = panel.id !== id;
@@ -117,7 +125,7 @@ const mailto = (subject: string) =>
       });
     });
 
-    // Links like /#donate open the matching tab and scroll to the section.
+    // Links like /#volunteer open the matching tab and scroll to the section.
     const fromHash = () => {
       const id = decodeURIComponent(location.hash.slice(1));
       if (panels.some((p) => p.id === id)) {
@@ -137,16 +145,23 @@ const mailto = (subject: string) =>
     margin-bottom: var(--space-l);
   }
 
-  .head p {
-    font-size: var(--step-1);
-    color: var(--muted);
+  .head .lede {
+    margin-top: var(--space-s);
   }
 
+  /* Tabs: one row that scrolls on phones, sitting on the panel's own axis. */
   .tablist {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: var(--space-xs);
-    margin-bottom: var(--space-m);
+    display: flex;
+    gap: 0.5rem;
+    padding: 0.25rem var(--gutter) 0.75rem;
+    margin: 0 calc(-1 * var(--gutter));
+    overflow-x: auto;
+    scroll-padding-inline: var(--gutter);
+    scrollbar-width: none;
+  }
+
+  .tablist::-webkit-scrollbar {
+    display: none;
   }
 
   .tablist[hidden] {
@@ -154,20 +169,31 @@ const mailto = (subject: string) =>
   }
 
   [role="tab"] {
-    min-height: 52px;
-    padding: 0.6rem 0.9rem;
-    border: 2px solid var(--purple);
-    border-radius: 12px;
+    flex: none;
+    min-height: 48px;
+    padding: 0.5rem 1.1rem;
+    border: 2px solid transparent;
+    border-radius: var(--r-pill);
     background: #fff;
-    color: var(--purple);
+    box-shadow: 0 0 0 1px var(--rule);
+    color: var(--ink);
     font: inherit;
     font-family: var(--font-display);
     font-weight: 700;
+    white-space: nowrap;
     cursor: pointer;
+    transition:
+      background-color 150ms ease,
+      color 150ms ease;
+  }
+
+  [role="tab"]:hover {
+    color: var(--purple);
   }
 
   [role="tab"][aria-selected="true"] {
     background: var(--purple);
+    box-shadow: none;
     color: #fff;
   }
 
@@ -177,7 +203,7 @@ const mailto = (subject: string) =>
     align-items: center;
     padding: var(--space-m);
     background: #fff;
-    border-radius: 16px;
+    border-radius: var(--r-card);
   }
 
   /* Without JavaScript, panels stack with space between them. */
@@ -194,20 +220,19 @@ const mailto = (subject: string) =>
   }
 
   .panel h3 {
+    font-size: var(--step-3);
     color: var(--ink);
   }
 
-  @media (min-width: 40rem) {
-    .tablist {
-      display: flex;
-      flex-wrap: wrap;
-    }
-    [role="tab"] {
-      padding-inline: 1.25rem;
-    }
+  .panel p {
+    font-size: var(--step-0);
   }
 
   @media (min-width: 56rem) {
+    .tablist {
+      margin-inline: 0;
+      padding-inline: 0;
+    }
     .panel {
       grid-template-columns: 1fr 1fr;
       gap: var(--space-l);
