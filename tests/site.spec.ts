@@ -195,6 +195,49 @@ test.describe("navigation", () => {
   });
 });
 
+test.describe("menu", () => {
+  test("opens as a modal, traps focus, closes with Escape, and returns focus", async ({ page }) => {
+    await page.goto("/");
+    const button = page.locator("[data-menu-open]");
+    await expect(button).toBeVisible();
+    await button.click();
+    const menu = page.locator("#menu");
+    await expect(menu).toBeVisible();
+    await expect(menu).toHaveAttribute("open", "");
+    expect(await menu.evaluate((el) => el.contains(document.activeElement))).toBe(true);
+    await page.keyboard.press("Escape");
+    await expect(menu).toBeHidden();
+    await expect(button).toBeFocused();
+  });
+
+  test("choosing a link closes the menu and reaches its target", async ({ page }) => {
+    await page.goto("/");
+    await page.locator("[data-menu-open]").click();
+    await page.locator("#menu .menu-list a").first().click();
+    await expect(page.locator("#menu")).toBeHidden();
+    expect(new URL(page.url()).hash).toBe("#get-help");
+  });
+
+  test("menu links and controls are at least 44px tall", async ({ page }) => {
+    await page.goto("/");
+    await page.locator("[data-menu-open]").click();
+    for (const el of await page.locator("#menu a, #menu button").all()) {
+      const box = await el.boundingBox();
+      expect(box!.height).toBeGreaterThanOrEqual(43.5);
+    }
+  });
+
+  test("open menu has no accessibility violations", async ({ page }) => {
+    await page.goto("/");
+    await page.locator("[data-menu-open]").click();
+    const results = await new AxeBuilder({ page })
+      .include("#menu")
+      .withTags(["wcag2a", "wcag2aa"])
+      .analyze();
+    expect(results.violations.map((v) => v.id)).toEqual([]);
+  });
+});
+
 test.describe("get involved tabs", () => {
   test("first tab is selected and other panels are hidden", async ({ page }) => {
     await page.goto("/");
@@ -230,6 +273,12 @@ test.describe("get involved tabs", () => {
 
 test.describe("without JavaScript", () => {
   test.use({ javaScriptEnabled: false });
+
+  test("navigation links are visible inline", async ({ page }) => {
+    await page.goto("/");
+    await expect(page.locator(".site-header .inline-nav a").first()).toBeVisible();
+    await expect(page.locator("[data-menu-open]")).toBeHidden();
+  });
 
   test("all involvement options are visible", async ({ page }) => {
     await page.goto("/");

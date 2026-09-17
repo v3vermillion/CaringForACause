@@ -137,3 +137,9 @@ Short records of the technical choices behind this site, so anyone taking it ove
 **Decision:** The programs section opens with one compact tile per program (photo, name, a three-to-five-word label) that jumps to that program; a scroll strip on phones, four across on desktop. The Get help card is the page's one dark card so families can't miss it. Program rows put the photo above the text on phones with a shorter 3:2 crop, and alternate photo sides on desktop.
 
 **Why:** The section was four identical heading-text-photo blocks, about four phone screens long with no way to scan it. The tiles show the whole offering in one glance and let people jump; the varied rows are easier to read; the shorter phone crops cut the section's length. Labels are drawn from her published program descriptions, not invented.
+
+## 21. Header: one row, a corner wedge, and a full-screen menu
+
+**Decision:** On phones the header is a single row: mark and name, Donate, and a diagonal purple wedge cut into the top-right corner that opens the menu. The menu is a native `<dialog>` (modal, focus-trapped, Escape closes, focus returns to the button): dark, typographic, "Help me" first in crimson, one-line detail under each link, Donate and contact details at the bottom. Wide screens keep the inline links and also get the wedge. Without JavaScript the inline links show on every screen.
+
+**Why:** The old two-row header plus the preview notice took about 160 px of the first screen. The single row saves a third of that and gives the brand a distinctive mark that isn't a template default. "Help me" first in the menu matches the hero: the site's job is to route people, and families come first.

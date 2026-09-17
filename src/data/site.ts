@@ -182,7 +182,7 @@ export const hero = {
   subhead: `A volunteer-run nonprofit helping families in ${claim(facts.serviceArea)} since ${claim(facts.founded)}.`,
   doors: {
     getHelp: {
-      title: "I need help",
+      title: "Help me",
       body: "Holiday meals and gifts, monthly diapers, and school supplies.",
       href: "/#get-help",
     },
