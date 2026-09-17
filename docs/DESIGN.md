@@ -22,6 +22,12 @@ Paper (`--paper`) and lilac sections stay as they are: clean, high contrast, no 
 
 "Neon" here means light, not color. The glow is always the element's own color bleeding softly into the dark, never a different color and never on text. The hairline gradient is the only place three colors meet, and it is 1 px wide. If something looks like a nightclub, it's over the line.
 
+## The mark on dark
+
+The hero uses `logo-mark-night.png`, a version of her heart-and-hands mark recolored for the night background: the ring lit from the top-left, the hands with a soft vertical gradient so they separate from the ring, the red fill lit from its center and falling into shadow at the edges, and the white outlines softened toward lavender. Shapes are unchanged. It carries a faint purple glow. The original flat mark stays on light backgrounds (header, link preview).
+
+"Help me" sits in the open red space above the fingertips, about 36% down the heart where the clear width is about half the heart, sized in container units so it holds that position at every size.
+
 ## Photos
 
 - Her own photos only. Never stock, never AI-generated, never presented as something they aren't.
@@ -39,7 +45,7 @@ One orchestrated moment: the hero photos crossfade (six seconds each). Everythin
 
 ## Type
 
-- **Lobster** (her logo's lettering) for the wordmark and her tagline only. Never for body text or buttons.
+- **Lobster** (her logo's lettering) for the wordmark, her tagline, and the "Help me" signal only. Never for body text or other buttons.
 - **Bricolage Grotesque** for anything that should be read as a voice: doors, headings, menu.
 - **Atkinson Hyperlegible Next** for anything that should be read as information.
 - The page's first words are always a choice: "Help me" / "I want to help."
