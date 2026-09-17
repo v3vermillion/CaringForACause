@@ -1,24 +1,29 @@
 ---
 import { Image } from "astro:assets";
 import mark from "../assets/brand/logo-mark.png";
-import { links, org } from "../data/site";
+import { show } from "../data/facts.ts";
+import { facts, links, org } from "../data/site";
 
 const nav = [
-  { label: "Programs", href: "/#programs" },
-  { label: "Get help", href: "/#get-help" },
-  { label: "Get involved", href: "/#get-involved" },
-  { label: "About", href: "/#about" },
+  { label: "Help me", href: "/#get-help", detail: "Meals, gifts, diapers, school supplies" },
+  { label: "Programs", href: "/#programs", detail: "What we do, all year" },
+  { label: "Get involved", href: "/#get-involved", detail: "Sponsor, donate, volunteer, partner" },
+  { label: "About", href: "/#about", detail: "Meet Tamara" },
 ];
 const donateHref = links.donate ?? "/#donate";
+const phone = show(facts.phone);
+const email = show(facts.email);
 ---
 
-<header class="site-header">
-  <div class="wrap bar">
+<header class="site-header" data-header>
+  <div class="bar">
     <a class="brand" href="/">
       <Image src={mark} alt="" width={40} height={40} densities={[1, 2, 3]} loading="eager" />
       <span>{org.shortName}</span>
     </a>
-    <nav aria-label="Main">
+
+    <!-- Inline links show on wide screens, and everywhere without JavaScript. -->
+    <nav class="inline-nav" aria-label="Main">
       <ul>
         {nav.map((item) => (
           <li>
@@ -27,11 +32,95 @@ const donateHref = links.donate ?? "/#donate";
         ))}
       </ul>
     </nav>
+
     <a class="button button--crimson donate" href={donateHref}>
       Donate
     </a>
+
+    <!-- The corner wedge: the menu's home. -->
+    <button
+      class="menu-button"
+      type="button"
+      data-menu-open
+      aria-haspopup="dialog"
+      aria-controls="menu"
+      hidden
+    >
+      <span class="lines" aria-hidden="true">
+        <i></i>
+        <i></i>
+        <i></i>
+      </span>
+      <span class="visually-hidden">Open menu</span>
+    </button>
   </div>
 </header>
+
+<dialog id="menu" class="menu" aria-labelledby="menu-title">
+  <div class="menu-inner">
+    <div class="menu-top">
+      <p id="menu-title" class="menu-brand">
+        {org.name}
+      </p>
+      <button class="menu-close" type="button" data-menu-close>
+        <span aria-hidden="true">×</span>
+        <span class="visually-hidden">Close menu</span>
+      </button>
+    </div>
+
+    <nav aria-label="Menu">
+      <ol class="menu-list">
+        {nav.map((item, i) => (
+          <li style={`--n: ${i};`}>
+            <a href={item.href} data-menu-close>
+              <span class="menu-label">{item.label}</span>
+              <span class="menu-detail">{item.detail}</span>
+            </a>
+          </li>
+        ))}
+      </ol>
+    </nav>
+
+    <div class="menu-foot">
+      <a class="button button--crimson" href={donateHref} data-menu-close>
+        Donate
+      </a>
+      <p>
+        <a href={phone.href}>{phone.display}</a>
+        <a href={`mailto:${email}`}>{email}</a>
+      </p>
+    </div>
+  </div>
+</dialog>
+
+<script>
+  const header = document.querySelector<HTMLElement>("[data-header]");
+  const menu = document.getElementById("menu") as HTMLDialogElement | null;
+  const openButton = document.querySelector<HTMLButtonElement>("[data-menu-open]");
+
+  if (header && menu && openButton && typeof menu.showModal === "function") {
+    header.classList.add("has-menu");
+    openButton.hidden = false;
+
+    const open = () => {
+      menu.showModal();
+      document.documentElement.classList.add("menu-open");
+    };
+    const close = () => {
+      if (menu.open) menu.close();
+    };
+    openButton.addEventListener("click", open);
+    menu.querySelectorAll("[data-menu-close]").forEach((el) => el.addEventListener("click", close));
+    // Tap on the backdrop (outside the panel) closes.
+    menu.addEventListener("click", (event) => {
+      if (event.target === menu) close();
+    });
+    menu.addEventListener("close", () => {
+      document.documentElement.classList.remove("menu-open");
+      openButton.focus();
+    });
+  }
+</script>
 
 <style>
   .site-header {
@@ -40,60 +129,58 @@ const donateHref = links.donate ?? "/#donate";
     z-index: 50;
     background: rgb(250 247 253 / 0.96);
     border-bottom: 1px solid var(--rule);
+    -webkit-backdrop-filter: blur(8px);
     backdrop-filter: blur(8px);
   }
 
-  /* Mobile: brand and Donate on row one, nav scrolls on row two. */
   .bar {
     display: flex;
-    flex-wrap: wrap;
     align-items: center;
-    justify-content: space-between;
-    column-gap: 0.75rem;
-    padding-block: 0.4rem;
+    gap: 0.6rem;
+    width: min(100% - 1.25rem, calc(var(--wide) + 1.25rem));
+    margin-inline: auto;
+    padding-left: 0;
+    min-height: 3.75rem;
   }
 
   .brand {
     display: inline-flex;
-    min-height: 44px;
     align-items: center;
-    gap: 0.6rem;
+    gap: 0.55rem;
+    min-height: 44px;
+    min-width: 0;
+    margin-right: auto;
+    padding-left: 0.05rem;
     color: var(--ink);
     font-family: var(--font-display);
-    min-width: 0;
     font-weight: 750;
-    font-size: clamp(1.05rem, 0.6rem + 2.4vw, 1.4rem);
+    font-size: clamp(0.88rem, 0.4rem + 2.2vw, 1.3rem);
     letter-spacing: -0.02em;
     text-decoration: none;
+    white-space: nowrap;
+  }
+
+  .brand :global(img) {
+    width: 2.25rem;
+    height: 2.25rem;
   }
 
   .donate {
-    min-height: 44px;
-    padding-inline: 1rem;
+    min-height: 40px;
+    padding-inline: 0.9rem;
+    font-size: 0.95rem;
   }
 
-  nav {
-    order: 3;
-    flex-basis: 100%;
-    min-width: 0;
-  }
-
-  nav ul {
+  /* Inline links: hidden on phones once the menu is available. */
+  .inline-nav ul {
     display: flex;
     gap: 1.1rem;
-    padding: 0.1rem 0 0;
+    padding: 0;
+    margin: 0;
     list-style: none;
-    overflow-x: auto;
-    scrollbar-width: none;
-    -webkit-overflow-scrolling: touch;
   }
 
-  nav ul::-webkit-scrollbar {
-    display: none;
-  }
-
-  /* 44px tall tap targets (Apple's minimum). */
-  nav a {
+  .inline-nav a {
     display: inline-flex;
     align-items: center;
     min-height: 44px;
@@ -104,35 +191,246 @@ const donateHref = links.donate ?? "/#donate";
     text-decoration: none;
   }
 
-  nav a:hover {
+  .inline-nav a:hover {
     color: var(--purple);
     text-decoration: underline;
   }
 
-  /* Smallest phones (under 360px): tighten so Donate stays on the first row. */
-  @media (max-width: 22.4rem) {
+  /* Without JavaScript the inline links wrap under the brand row on phones. */
+  .site-header:not(.has-menu) .bar {
+    flex-wrap: wrap;
+  }
+
+  .site-header:not(.has-menu) .inline-nav {
+    order: 3;
+    flex-basis: 100%;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .site-header.has-menu .inline-nav {
+    display: none;
+  }
+
+  /* The wedge: a diagonal cut in the top-right corner. */
+  .menu-button {
+    position: relative;
+    flex: none;
+    align-self: stretch;
+    width: 4.25rem;
+    margin-left: 0.25rem;
+    border: 0;
+    padding: 0 0 0 1.25rem;
+    background: linear-gradient(135deg, var(--purple) 0%, #4a06ab 100%);
+    clip-path: polygon(38% 0, 100% 0, 100% 100%, 0 100%);
+    color: #fff;
+    cursor: pointer;
+  }
+
+  .menu-button[hidden] {
+    display: none;
+  }
+
+  .menu-button:hover {
+    background: linear-gradient(135deg, #6f1de6 0%, var(--purple) 100%);
+  }
+
+  .lines {
+    display: grid;
+    gap: 5px;
+    width: 22px;
+    margin-left: auto;
+    margin-right: 1rem;
+  }
+
+  .lines i {
+    display: block;
+    height: 2px;
+    background: #fff;
+    border-radius: 2px;
+  }
+
+  .lines i:nth-child(2) {
+    width: 70%;
+  }
+
+  @media (min-width: 56rem) {
+    .bar {
+      gap: var(--space-m);
+    }
+    .site-header.has-menu .inline-nav {
+      display: block;
+      margin-left: auto;
+    }
     .brand {
-      font-size: 0.95rem;
+      margin-right: 0;
     }
     .donate {
-      padding-inline: 0.8rem;
-      font-size: 1rem;
+      min-height: 44px;
+      font-size: var(--step-0);
     }
   }
 
-  /* Desktop: one row, brand | nav | Donate. */
-  @media (min-width: 56rem) {
-    nav {
-      order: 0;
-      flex-basis: auto;
-      margin-left: auto;
+  /* The menu: full screen, dark, typographic. */
+  .menu {
+    inset: 0;
+    width: 100%;
+    max-width: none;
+    height: 100%;
+    max-height: none;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: var(--night);
+    color: #fff;
+  }
+
+  .menu::backdrop {
+    background: rgb(27 15 46 / 0.6);
+  }
+
+  .menu[open] {
+    display: grid;
+    animation: menu-in 260ms ease-out;
+  }
+
+  @keyframes menu-in {
+    from {
+      opacity: 0;
+      transform: translateY(-1rem);
     }
-    nav ul {
-      gap: var(--space-m);
-      padding: 0;
+    to {
+      opacity: 1;
+      transform: none;
     }
-    nav a {
-      font-size: var(--step-0);
+  }
+
+  .menu-inner {
+    position: relative;
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+    width: min(100% - 2.5rem, 40rem);
+    height: 100%;
+    margin-inline: auto;
+    padding-block: 0.6rem var(--space-l);
+    background:
+      radial-gradient(90% 60% at 100% 0%, rgb(96 8 215 / 0.45), transparent 60%),
+      radial-gradient(70% 50% at 0% 100%, rgb(186 1 12 / 0.25), transparent 60%);
+  }
+
+  .menu-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 3.75rem;
+  }
+
+  .menu-brand {
+    font-family: var(--font-display);
+    font-weight: 750;
+    font-size: var(--step-0);
+    color: var(--night-soft);
+  }
+
+  .menu-close {
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    border: 1px solid rgb(255 255 255 / 0.3);
+    border-radius: 50%;
+    background: rgb(255 255 255 / 0.08);
+    color: #fff;
+    font-size: 1.6rem;
+    line-height: 1;
+    cursor: pointer;
+  }
+
+  .menu-list {
+    display: grid;
+    align-content: center;
+    gap: 0.25rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    counter-reset: item;
+  }
+
+  .menu-list li {
+    animation: item-in 420ms ease-out both;
+    animation-delay: calc(80ms + var(--n) * 60ms);
+  }
+
+  @keyframes item-in {
+    from {
+      opacity: 0;
+      transform: translateX(-0.75rem);
     }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  .menu-list a {
+    display: grid;
+    gap: 0.1rem;
+    padding: 0.85rem 0;
+    border-bottom: 1px solid rgb(255 255 255 / 0.12);
+    color: #fff;
+    text-decoration: none;
+  }
+
+  .menu-list li:first-child .menu-label {
+    color: #ff8f96;
+  }
+
+  .menu-label {
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: clamp(2rem, 1.4rem + 3vw, 3rem);
+    line-height: 1.05;
+    letter-spacing: -0.03em;
+  }
+
+  .menu-detail {
+    font-size: var(--step--1);
+    color: var(--night-soft);
+  }
+
+  .menu-list a:hover .menu-label {
+    text-decoration: underline;
+    text-underline-offset: 0.12em;
+  }
+
+  .menu-foot {
+    display: grid;
+    gap: var(--space-s);
+    padding-top: var(--space-m);
+  }
+
+  .menu-foot p {
+    display: grid;
+    gap: 0.35rem;
+  }
+
+  .menu-foot p a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    color: var(--night-soft);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .menu[open],
+    .menu-list li {
+      animation: none;
+    }
+  }
+</style>
+
+<style is:global>
+  html.menu-open {
+    overflow: hidden;
   }
 </style>
