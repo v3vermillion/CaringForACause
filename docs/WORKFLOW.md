@@ -28,6 +28,8 @@ See `docs/APPROACH.md` for how decisions are made and `CLAUDE.md` for the rules 
 
 To handle one: confirm the changed files are only `package.json`, `package-lock.json`, or workflow files, wait for the check, then squash-merge and delete the branch. For a major update, read the package's release notes first. If a Dependabot branch falls behind `main`, comment `@dependabot rebase` on the pull request.
 
+Two packages are held at their current major version in `.github/dependabot.yml`: `typescript` (the type checker, `@astrojs/check`, supports TypeScript 5 and 6 only) and `@types/node` (its major must match the Node version in `.nvmrc`). Lift each hold when that constraint changes.
+
 ## When something fails
 
 - **Required check fails:** the change cannot merge. Read the `ci-failure` issue, fix on the same branch, push.
