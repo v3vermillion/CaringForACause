@@ -27,7 +27,7 @@ const description = `${donatePage.intro} ${claim(facts.legalName)} is a ${taxExe
     </section>
 
     <section class="section give" aria-labelledby="give-title">
-      <div class="wrap grid">
+      <div class="wrap">
         <form class="card" data-give novalidate>
           <h2 id="give-title">Choose your gift</h2>
 
@@ -93,20 +93,6 @@ const description = `${donatePage.intro} ${claim(facts.legalName)} is a ${taxExe
             {taxExempt.deductible && " Donations are tax-deductible to the extent allowed by law."}
           </p>
         </form>
-
-        <aside class="other-ways" aria-labelledby="other-title">
-          <h2 id="other-title">{donatePage.otherWays.heading}</h2>
-          <ul>
-            {donatePage.otherWays.items.map((item) => (
-              <li>
-                <a class="way" href={item.href}>
-                  <span class="way-title">{item.title}</span>
-                  <span class="way-body">{item.body}</span>
-                </a>
-              </li>
-            ))}
-          </ul>
-        </aside>
       </div>
     </section>
   </main>
@@ -161,13 +147,8 @@ const description = `${donatePage.intro} ${claim(facts.legalName)} is a ${taxExe
 </script>
 
 <style>
-  .grid {
-    display: grid;
-    gap: var(--space-l);
-    align-items: start;
-  }
-
   .card {
+    max-width: 44rem;
     display: grid;
     gap: var(--space-m);
     padding: var(--space-m);
@@ -228,54 +209,7 @@ const description = `${donatePage.intro} ${claim(facts.legalName)} is a ${taxExe
     color: var(--muted);
   }
 
-  .other-ways h2 {
-    font-size: var(--step-2);
-    margin-bottom: var(--space-s);
-  }
-
-  .other-ways ul {
-    display: grid;
-    gap: 0.75rem;
-    padding: 0;
-    list-style: none;
-  }
-
-  .way {
-    display: grid;
-    gap: 0.2rem;
-    padding: 1rem 1.25rem;
-    border: 1px solid var(--rule);
-    border-radius: var(--r-card);
-    background: #fff;
-    color: var(--ink);
-    text-decoration: none;
-    transition:
-      border-color 150ms ease,
-      transform 150ms ease;
-  }
-
-  .way:hover {
-    border-color: var(--purple);
-    transform: translateY(-2px);
-  }
-
-  .way-title {
-    font-family: var(--font-display);
-    font-weight: 750;
-    font-size: var(--step-0);
-    color: var(--purple);
-  }
-
-  .way-body {
-    font-size: var(--step--1);
-    color: var(--muted);
-  }
-
   @media (min-width: 56rem) {
-    .grid {
-      grid-template-columns: 7fr 5fr;
-      gap: var(--space-xl);
-    }
     .card {
       padding: var(--space-l);
     }

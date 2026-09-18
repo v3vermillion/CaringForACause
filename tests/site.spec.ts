@@ -9,17 +9,6 @@ const expectedSite = process.env.PLAYWRIGHT_BASE_URL
 
 const pages = ["/", "/donate", "/apply"];
 
-// YouTube thumbnails are external; stub them so tests are fast and offline-safe.
-test.beforeEach(async ({ page }) => {
-  await page.route("https://i.ytimg.com/**", (route) =>
-    route.fulfill({
-      status: 200,
-      contentType: "image/svg+xml",
-      body: "<svg xmlns='http://www.w3.org/2000/svg'/>",
-    }),
-  );
-});
-
 test.describe("accessibility", () => {
   for (const path of pages) {
     test(`${path} has no WCAG 2.2 AA violations`, async ({ page }) => {
@@ -73,7 +62,7 @@ test.describe("device compatibility", () => {
       ".checklist summary",
       ".site-footer li a",
       ".door",
-      ".video-link",
+      ".yt-link",
       ".arrow-link",
       ".tile",
       "#contact .card",
@@ -129,7 +118,7 @@ test.describe("device compatibility", () => {
     for (const img of await outside.all()) await loaded(img);
 
     // Photos inside tabs only load once their tab is open
-    for (const id of ["sponsor", "donate", "volunteer", "partner"]) {
+    for (const id of ["sponsor", "volunteer", "partner"]) {
       await page.locator(`#tab-${id}`).click();
       await loaded(page.locator(`#${id} img.photo`));
     }
@@ -573,7 +562,7 @@ test.describe("without JavaScript", () => {
       "href",
       /^https:\/\/www\.youtube\.com\/watch\?v=/,
     );
-    await expect(page.locator(".video-link").first()).toHaveAttribute(
+    await expect(page.locator("#haircuts .yt-link")).toHaveAttribute(
       "href",
       /^https:\/\/www\.youtube\.com\/watch\?v=/,
     );
@@ -594,6 +583,36 @@ test.describe("without JavaScript", () => {
 });
 
 test.describe("videos", () => {
+  test("no image on the site is fetched from YouTube", async ({ page }) => {
+    const external: string[] = [];
+    page.on("request", (request) => {
+      if (/ytimg\.com|youtube\.com/.test(request.url())) external.push(request.url());
+    });
+    await page.goto("/");
+    await page.waitForLoadState("networkidle");
+    expect(external).toEqual([]);
+  });
+
+  test("the haircut video plays in place from its own poster", async ({ page }) => {
+    await page.route("https://www.youtube-nocookie.com/**", (route) =>
+      route.fulfill({ status: 200, contentType: "text/html", body: "<p>player</p>" }),
+    );
+    await page.goto("/");
+    const poster = page.locator("#haircuts .yt-link img");
+    await poster.scrollIntoViewIfNeeded();
+    await expect
+      .poll(() => poster.evaluate((el: HTMLImageElement) => el.complete && el.naturalWidth > 0))
+      .toBe(true);
+    const src = new URL(await poster.evaluate((el: HTMLImageElement) => el.currentSrc));
+    expect(src.origin).toBe(new URL(page.url()).origin);
+    expect(src.pathname).toMatch(/^\/_astro\//);
+    await page.locator("#haircuts .yt-link").click();
+    await expect(page.locator("#haircuts iframe")).toHaveAttribute(
+      "src",
+      /^https:\/\/www\.youtube-nocookie\.com\/embed\//,
+    );
+  });
+
   test("watching her story loads the privacy-friendly player on the page", async ({ page }) => {
     await page.route("https://www.youtube-nocookie.com/**", (route) =>
       route.fulfill({ status: 200, contentType: "text/html", body: "<p>player</p>" }),

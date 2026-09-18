@@ -3,9 +3,7 @@
     "collect": {
       "staticDistDir": "./dist",
       "numberOfRuns": 3,
-      "settings": {
-        "blockedUrlPatterns": ["*i.ytimg.com*"]
-      }
+      "settings": {}
     },
     "assert": {
       "assertions": {

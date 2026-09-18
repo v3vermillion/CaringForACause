@@ -11,33 +11,29 @@ const files = import.meta.glob<{ default: ImageMetadata }>(
   "../assets/photos/*.{jpg,jpeg,png,webp}",
   { eager: true },
 );
-const poster = video.poster ? files[`../assets/photos/${video.poster}`]?.default : undefined;
-if (video.poster && !poster) {
+const poster = files[`../assets/photos/${video.poster}`]?.default;
+if (!poster) {
   throw new Error(`Video poster not found: src/assets/photos/${video.poster}`);
 }
-const remoteThumb = `https://i.ytimg.com/vi/${video.id}/hqdefault.jpg`;
 ---
 
 <!--
-  Loads only a thumbnail until tapped, so pages stay fast and YouTube
-  sets no cookies before a visitor chooses to play. Without JavaScript,
-  the link opens the video on YouTube.
+  Shows a self-hosted poster until tapped, so pages stay fast and YouTube
+  sets no cookies (and serves no images) before a visitor chooses to play.
+  Without JavaScript, the link opens the video on YouTube.
 -->
 <div class="yt" data-yt-id={video.id} data-yt-title={video.title}>
   <a href={watchUrl} class="yt-link">
-    {poster ? (
-      <Picture
-        src={poster}
-        formats={["avif", "webp"]}
-        alt=""
-        widths={[480, 720, 1080].filter((w) => w <= poster.width)}
-        sizes="(min-width: 56rem) 680px, calc(100vw - 2.5rem)"
-        loading="lazy"
-        decoding="async"
-      />
-    ) : (
-      <img src={remoteThumb} alt="" width="480" height="360" loading="lazy" decoding="async" />
-    )}
+    <Picture
+      src={poster}
+      formats={["avif", "webp"]}
+      alt=""
+      widths={[480, 720, 1080].filter((w) => w <= poster.width)}
+      sizes="(min-width: 56rem) 540px, calc(100vw - 2.5rem)"
+      loading="lazy"
+      decoding="async"
+      style={`object-position: ${video.posterFocus ?? "center"};`}
+    />
     <span class="yt-play" aria-hidden="true"></span>
     <span class="visually-hidden">Play video: {video.title}</span>
   </a>
@@ -64,7 +60,7 @@ const remoteThumb = `https://i.ytimg.com/vi/${video.id}/hqdefault.jpg`;
     position: relative;
     aspect-ratio: 16 / 9;
     overflow: hidden;
-    border-radius: 16px;
+    border-radius: var(--r-img);
     background: var(--night);
   }
 

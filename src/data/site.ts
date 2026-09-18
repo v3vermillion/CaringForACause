@@ -19,10 +19,13 @@ export type YouTubeVideo = {
   id: string;
   title: string;
   /**
-   * Optional thumbnail file in src/assets/photos/. Self-hosting it means the
-   * page makes no request to YouTube until someone presses play.
+   * A still from the video or one of her own photos, in src/assets/photos/,
+   * shown until someone presses play. Nothing is fetched from YouTube before
+   * that, and it must honestly show what plays.
    */
-  poster?: string;
+  poster: string;
+  /** Which part of the poster to keep in the 16:9 frame, e.g. "center 30%". */
+  posterFocus?: string;
 };
 
 export type Photo = {
@@ -47,8 +50,9 @@ export type Program = {
   details?: string[];
   /** Optional grouped checklist, shown in a collapsible section. */
   checklist?: { title: string; groups: { heading: string; items: string[] }[] };
-  /** Shown beside the text. When a photo is set, a video becomes a text link. */
+  /** Shown in the program's tile, and beside its text unless a video is set. */
   photo?: Photo;
+  /** A click-to-play player takes the photo's place beside the text. */
   video?: YouTubeVideo;
   /** Set to false to hide a program without deleting it. */
   active: boolean;
@@ -63,7 +67,6 @@ export type InvolvementTab = {
   /** When `href` is null, the button emails us and shows `fallbackLabel`. */
   action: { label: string; href: string | null; fallbackLabel: string };
   photo?: Photo;
-  video?: YouTubeVideo;
 };
 
 /**
@@ -181,7 +184,7 @@ export const hero = {
       focus: "center 30%",
     },
   ] satisfies Photo[],
-  subhead: `A volunteer-run nonprofit helping families in ${claim(facts.serviceArea)} since ${claim(facts.founded)}.`,
+  subhead: `A nonprofit helping families in ${claim(facts.serviceArea)} since ${claim(facts.founded)}.`,
   /** The two doors. Families first; giving second. */
   doors: {
     getHelp: {
@@ -301,26 +304,6 @@ export const donatePage = {
   emailLabel: "Donate by email",
   emailNote:
     "Online payments open once our secure giving page is set up. Until then, choose an amount and the button below opens an email to us; we'll arrange it with you directly.",
-  otherWays: {
-    heading: "Other ways to give",
-    items: [
-      {
-        title: "Sponsor a family",
-        body: "Fill a family's holiday wish list, provide a meal, or both.",
-        href: "/#sponsor",
-      },
-      {
-        title: "Donate items",
-        body: "Diapers, and hygiene and school supplies from our back-to-school list.",
-        href: "/#back-to-school",
-      },
-      {
-        title: "Partner with us",
-        body: "Businesses, churches, and organizations can partner on a program.",
-        href: "/#partner",
-      },
-    ],
-  },
 };
 
 /** The contact section on the home page. */
@@ -436,7 +419,12 @@ export const programs: Program[] = [
       alt: "A boy gets a free haircut from a volunteer stylist",
       focus: "center 30%",
     },
-    video: { id: "Z5USx1xFF58", title: "Free haircut and styles outreach program" },
+    video: {
+      id: "Z5USx1xFF58",
+      title: "Free haircut and styles outreach program",
+      poster: "stylist-haircut.jpg",
+      posterFocus: "center 35%",
+    },
     active: true,
   },
   {
@@ -471,23 +459,16 @@ export const getInvolved = {
         alt: "Children holding shopping bags during a holiday shopping trip",
         focus: "center 60%",
       },
-      video: { id: "02gc0dPLET0", title: "Holiday sponsors and volunteers needed" },
     },
     {
       id: "donate",
       label: "Donate",
       heading: "Donate money or items",
+      /** The short version: /donate is the destination, so this says one thing and hands off. */
       body: [
         "Donations help provide diapers, holiday meals, gifts, and school supplies for local families.",
-        `${claim(facts.legalName)} is a ${claim(facts.taxExempt).section} nonprofit (EIN ${claim(facts.ein)}), so donations are tax-deductible.`,
       ],
       action: { label: "Donate", href: "/donate", fallbackLabel: "Donate" },
-      photo: {
-        file: "families-banner.jpg",
-        alt: "Families and children in front of a Caring for a Cause banner",
-        focus: "center 55%",
-      },
-      video: { id: "xUVUOB-w94Q", title: "Donations and volunteers needed" },
     },
     {
       id: "volunteer",
@@ -548,6 +529,8 @@ export const about = {
   video: {
     id: "7smWzJwY9kA",
     title: "Do More: Tamara Long-Ajimati provides supportive services to families in need",
+    poster: "tamara-portrait.jpg",
+    posterFocus: "center 25%",
   } satisfies YouTubeVideo,
 };
 

@@ -54,7 +54,7 @@ Three pages. The home page is the route map; the two doors lead to their own pag
 │  │                [Call] Email us →      │    │
 │  └───────────────────────────────────────┘    │
 │  Holiday Assistance · Diaper Drive ·          │  alternating rows,
-│  Back-to-School ▸ list · Free Haircuts ▸ video│  video poster buttons
+│  Back-to-School ▸ list · Free Haircuts ▸ player│  one click-to-play video
 ├───────────────────────────────────────────────┤
 │ GET INVOLVED (lilac)                          │
 │  [Sponsor] [Donate] [Volunteer] [Partner]     │  tabs
@@ -123,6 +123,7 @@ Ask these in the follow-up after she sees the preview. Every one has a safe defa
 6. Holiday dates and application windows for this season.
 7. Does she serve Hamilton County, Indianapolis (Marion County), or both? This affects wording and grant eligibility.
 8. Does she want a donation page (Zeffy, free) and an online family application set up in her name?
+9. Is the organization volunteer-run? The banner no longer says so until she confirms it.
 
 ## Milestones
 
