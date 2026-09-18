@@ -15,9 +15,13 @@ import Base from "../layouts/Base.astro";
 <Base>
   <SiteHeader />
   <main id="main">
-    <Hero />
-    <TrustFacts />
-    <SeasonalBanner />
+    <!-- On desktop these three fill the first screen: the banner takes the
+         slack so the season strip ends exactly at the fold. -->
+    <div class="first-screen">
+      <Hero />
+      <TrustFacts />
+      <SeasonalBanner />
+    </div>
     <Programs />
     <GetInvolved />
     <About />
@@ -26,3 +30,19 @@ import Base from "../layouts/Base.astro";
   </main>
   <SiteFooter />
 </Base>
+
+<style>
+  /* Desktop only: phones and tablets stay content-sized (no viewport-height
+     units there; see docs/DESIGN.md). Browser bars don't collapse on desktop,
+     so 100vh is stable. */
+  @media (min-width: 56rem) {
+    .first-screen {
+      display: flex;
+      flex-direction: column;
+      min-height: calc(100vh - var(--top-chrome));
+    }
+    .first-screen > :global(.hero) {
+      flex: 1;
+    }
+  }
+</style>

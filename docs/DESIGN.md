@@ -35,9 +35,27 @@ Nothing else is drawn. The mark is not a container for buttons.
 - Crops keep faces in the top third (each banner photo has a `focus` point in `src/data/site.ts`). The words start just under the header on every screen, the phone veil is heavier at the top, and both doors fit the first screen on an iPhone 15 and a 1366 × 768 laptop. On desktop the banner's photo occupies the right side at close to its native 720 px width and the veil hides its left edge.
 - Every image is served at its rendered size or larger on a 2× screen (`sizes` and `widths` are set per placement).
 
-## Stability on phones
+## Stability on phones, a full first screen on desktop
 
-Nothing is sized with viewport-height units (`vh`, `svh`, `dvh`, `lvh`). On phones the address bar collapses as you scroll, the viewport height changes, and anything tied to it resizes, which makes photos look like they zoom while scrolling. Sections are sized by their content and photos by aspect ratio. The publish gate rejects builds that use these units, and a browser test resizes the viewport and checks the first screen holds still.
+On phones and tablets nothing is sized with viewport-height units (`vh`, `svh`, `dvh`, `lvh`). The address bar collapses as you scroll, the viewport height changes, and anything tied to it resizes, which makes photos look like they zoom while scrolling. Sections are sized by their content and photos by aspect ratio, and a browser test resizes a phone viewport and checks the first screen holds still.
+
+On desktop (56rem and up) the browser's bars don't collapse, so the home page's first screen is the one place a plain `vh` is used: the banner, the trust facts, and the season strip together fill the screen below the header (`src/pages/index.astro`). The banner is one composition scaled to the screen: every size in it is a multiple of `--u`, one pixel of the reference layout (a 1280 × 800 screen), between three quarters and double. Change the banner by changing the reference numbers in `src/components/Hero.astro`; never add a size there that isn't in `--u`, or it will drift between screens. The content column is 90% of the screen at every size (`--wide`, `--gutter`), so the left edge everything shares is 5% in on every device. The publish gate allows plain `vh` only inside a `min-width` media block of at least 56rem and rejects every other viewport-height unit.
+
+## The first screen by device
+
+Three device classes, each with a promise a browser test checks on every device in the matrix at its own screen size (`tests/site.spec.ts`, "this device's first screen keeps its promise"):
+
+| Class   | Width        | The first screen                                                                                                                                                                                                                             |
+| ------- | ------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Phone   | under 576px  | The 393px-wide reference layout (an iPhone 15) scaled by screen width: her lettering just under the header, the sentence, both doors stacked, all on the first screen. Every phone shows the same picture; never sized by the screen height. |
+| Tablet  | 576 to 895px | The 768px-wide reference layout (an iPad mini in portrait) scaled by screen width: the same banner with the doors side by side.                                                                                                              |
+| Desktop | 896px and up | The 1280 × 800 reference layout scaled by screen height, then the trust facts and the season strip, ending exactly at the fold. Tablets in landscape are desktop.                                                                            |
+
+The mechanism is the same in every class: one reference pixel (`--rp` for phones and tablets, set in `src/styles/global.css`; `--u` for desktop, set in the banner) and every size in the header, the banner, and the two strips a multiple of it. Phones and tablets scale by width because a phone's height changes as its address bar collapses; the phone scale stops growing at 1.15 (about 450px, the largest phone), so a wider window keeps the largest phone layout in a left-aligned column. Desktop scales by height because there the bars are fixed and the first screen must end at the strip, bounded by the width too so a tall portrait screen (an iPad Pro 12.9 upright) keeps the three-line headline. The floors are the 44px tap targets: the header's name and Donate button and the season strip's link never drop below 44px, so on phones narrower than 393px and tablets narrower than 768px those are a few pixels (up to about 8px at 320px) taller than pure scale. The desktop header does not scale; it is fixed chrome, 61px tall.
+
+Because every size derives from the screen, browser zoom does not scale the banner's text linearly: zooming in narrows the CSS viewport, which moves the page into the next class down (a zoomed desktop becomes the tablet layout, then the phone layout), and the text grows in those steps. Nothing is lost at 200%; it is the phone banner. Body text elsewhere on the page stays in rem and zooms normally.
+
+When editing the banner or the strips: change the reference numbers, never add a size that isn't a multiple of the class's reference pixel, or it will drift between devices. Two browser tests guard this on every push: one compares the banner's composition, line breaks included, between devices of each class; the other checks each device in the matrix, at its own screen size, against its class's promise. Run `npm run test` and look at the device screenshots before sending anything.
 
 ## Motion
 

@@ -138,38 +138,42 @@ const { items, donate, help } = navigation;
     backdrop-filter: blur(10px);
   }
 
+  /* On phones and tablets the header scales with the class like the banner:
+     every size is a multiple of --rp (see docs/DESIGN.md), with the 44px tap
+     targets as floors. On desktop --rp is 1px and these are fixed sizes; the
+     bar's 60px plus its border is --header-h, which the desktop banner uses. */
   .bar {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
-    min-height: 3.75rem;
+    gap: calc(8 * var(--rp));
+    min-height: calc(60 * var(--rp));
   }
 
   .brand {
     display: inline-flex;
     align-items: center;
-    gap: 0.55rem;
-    min-height: 44px;
+    gap: calc(8.8 * var(--rp));
+    min-height: max(44px, calc(44 * var(--rp)));
     min-width: 0;
     margin-right: auto;
     color: var(--ink);
     font-family: var(--font-display);
     font-weight: 750;
-    font-size: clamp(0.95rem, 0.6rem + 1.6vw, 1.25rem);
+    font-size: calc(15.9 * var(--rp));
     letter-spacing: -0.02em;
     text-decoration: none;
     white-space: nowrap;
   }
 
   .brand :global(.brand-icon) {
-    width: 2rem;
+    width: calc(32 * var(--rp));
     flex: none;
   }
 
   .donate {
-    min-height: 42px;
-    padding-inline: 1rem;
-    font-size: 0.95rem;
+    min-height: max(44px, calc(42 * var(--rp)));
+    padding: calc(11.2 * var(--rp)) calc(16 * var(--rp));
+    font-size: calc(15.2 * var(--rp));
   }
 
   /* Inline links: hidden on phones once the menu is available. */
@@ -221,10 +225,10 @@ const { items, donate, help } = navigation;
     position: relative;
     flex: none;
     align-self: stretch;
-    width: 4.25rem;
+    width: calc(68 * var(--rp));
     margin-right: calc(-1 * var(--gutter));
     border: 0;
-    padding: 0 0 0 1.25rem;
+    padding: 0 0 0 calc(20 * var(--rp));
     background: linear-gradient(135deg, var(--purple) 0%, var(--purple-deep) 100%);
     clip-path: polygon(38% 0, 100% 0, 100% 100%, 0 100%);
     color: #fff;
@@ -241,21 +245,28 @@ const { items, donate, help } = navigation;
 
   .lines {
     display: grid;
-    gap: 5px;
-    width: 22px;
+    gap: calc(5 * var(--rp));
+    width: calc(22 * var(--rp));
     margin-left: auto;
-    margin-right: 1.1rem;
+    margin-right: calc(17.6 * var(--rp));
   }
 
   .lines i {
     display: block;
-    height: 2px;
+    height: max(2px, calc(2 * var(--rp)));
     background: #fff;
     border-radius: 2px;
   }
 
   .lines i:nth-child(2) {
     width: 70%;
+  }
+
+  /* Tablets: the name at the 768px reference's size. */
+  @media (min-width: 36rem) {
+    .brand {
+      font-size: calc(20 * var(--rp));
+    }
   }
 
   @media (min-width: 56rem) {
@@ -316,7 +327,7 @@ const { items, donate, help } = navigation;
   .menu-inner {
     display: grid;
     grid-template-rows: auto 1fr;
-    width: min(100% - 2 * var(--gutter), 40rem);
+    width: min(100% - 2 * var(--gutter), var(--wide)); /* the same column as the header */
     height: 100%;
     margin-inline: auto;
     padding-block: 0.6rem var(--space-m);

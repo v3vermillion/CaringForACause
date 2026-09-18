@@ -37,6 +37,40 @@ const PLACEHOLDERS = [
 ];
 
 /**
+ * Every viewport-height unit in the CSS that is not a plain `vh` inside a
+ * `@media (min-width: …)` block of at least 56rem (896px), the desktop layout,
+ * where the browser's bars don't collapse. Media blocks are found by matching
+ * braces.
+ */
+export const DESKTOP_MIN_WIDTH_PX = 896;
+
+export function viewportUnitsOutsideDesktop(html) {
+  const desktopRanges = [];
+  const media = /@media[^{]*\bmin-width\s*:\s*([0-9.]+)(rem|em|px)[^{]*\{/g;
+  let m;
+  while ((m = media.exec(html))) {
+    const px = parseFloat(m[1]) * (m[2] === "px" ? 1 : 16);
+    if (px < DESKTOP_MIN_WIDTH_PX) continue;
+    let depth = 1;
+    let i = m.index + m[0].length;
+    while (i < html.length && depth > 0) {
+      if (html[i] === "{") depth++;
+      else if (html[i] === "}") depth--;
+      i++;
+    }
+    desktopRanges.push([m.index, i]);
+  }
+  const found = [];
+  const unit = /[0-9.]+(?:[sdl]?vh)\b/g;
+  while ((m = unit.exec(html))) {
+    const plainVh = !/[sdl]vh$/.test(m[0]);
+    const inDesktop = desktopRanges.some(([a, b]) => m.index > a && m.index < b);
+    if (!(plainVh && inDesktop)) found.push(m[0]);
+  }
+  return found;
+}
+
+/**
  * @param {string} dist  Path to the built site.
  * @param {{ allowIndexing: boolean }} options
  * @returns {string[]} Problems found. Empty means the build may publish.
@@ -182,7 +216,9 @@ export function validateBuild(dist, { allowIndexing }) {
 
     // Viewport-height units (vh, svh, dvh, lvh) make phone layouts resize as the
     // browser's address bar collapses, which looks like photos zooming on scroll.
-    const cssUnits = raw.match(/[0-9.]+(?:[sdl]?vh)\b/g) ?? [];
+    // Plain vh is allowed only inside a min-width media block (desktop layouts,
+    // where the browser's bars don't collapse); every other use is blocked.
+    const cssUnits = viewportUnitsOutsideDesktop(raw);
     if (cssUnits.length > 0)
       fail(
         `${name}: viewport-height units in CSS cause scroll zoom on phones: ${[...new Set(cssUnits)].join(", ")}`,

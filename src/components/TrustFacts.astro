@@ -9,7 +9,8 @@ const items = [
 ];
 ---
 
-<!-- Proof in one line, on the same night ground as the banner. -->
+<!-- Proof in one line, on the same night ground as the banner. Its height on
+     desktop is part of --strips-h (src/styles/global.css); keep them in step. -->
 <section class="facts on-dark" aria-label="About our organization">
   <div class="wrap">
     <ul>
@@ -27,28 +28,31 @@ const items = [
     border-bottom: 1px solid rgb(255 255 255 / 0.1);
   }
 
+  /* Sized in the class's reference pixel (--rp) so every phone and every
+     tablet shows the same strip; on desktop --rp is 1px. */
   ul {
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
-    gap: 0.5rem 0;
-    padding: var(--space-s) 0;
+    gap: calc(8 * var(--rp)) 0;
+    padding: calc(16 * var(--rp)) 0;
     margin: 0;
     list-style: none;
   }
 
   li {
     position: relative;
-    padding-inline: var(--space-m);
+    padding-inline: calc(24 * var(--rp));
     font-family: var(--font-display);
     font-weight: 600;
-    font-size: var(--step--1);
+    font-size: calc(14.4 * var(--rp));
     color: var(--night-soft);
     text-align: center;
   }
 
-  /* Hairline dividers between items, only when they share a row. */
-  @media (min-width: 48rem) {
+  /* Hairline dividers between items, only on desktop where the three share
+     one row; on phones and tablets they wrap, and a divider would float. */
+  @media (min-width: 56rem) {
     li + li::before {
       content: "";
       position: absolute;

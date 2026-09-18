@@ -17,36 +17,49 @@ import { seasonalBanner } from "../data/site";
 )}
 
 <style>
-  /* A quiet strip on lilac: the season's one ask, never louder than the banner above. */
+  /* A quiet strip on lilac: the season's one ask, never louder than the banner
+     above. Its height on desktop is part of --strips-h (src/styles/global.css). */
   .banner {
     background: var(--lilac);
     border-bottom: 1px solid var(--rule);
   }
 
+  /* Sized in the class's reference pixel (--rp) so every phone and every
+     tablet shows the same strip; on desktop --rp is 1px. */
   .inner {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
     justify-content: space-between;
-    gap: 0 var(--space-m);
-    padding-block: 0.6rem;
+    gap: 0 calc(24 * var(--rp));
+    padding-block: calc(9.6 * var(--rp));
   }
 
   p {
     display: flex;
     align-items: center;
-    gap: 0.6rem;
+    gap: calc(9.6 * var(--rp));
     max-width: none;
     font-family: var(--font-display);
     font-weight: 700;
-    font-size: var(--step-0);
+    font-size: calc(18 * var(--rp));
     line-height: 1.3;
+  }
+
+  /* The link's tap target never drops below 44px, but the strip's height
+     stays in scale: below 44px of scale the extra target height hangs
+     outside the row (a negative block margin), so the strip is the same
+     picture on every phone and tablet. */
+  .inner :global(.arrow-link) {
+    min-height: max(44px, calc(44 * var(--rp)));
+    margin-block: calc((44 * var(--rp) - max(44px, 44 * var(--rp))) / 2);
+    font-size: calc(18 * var(--rp));
   }
 
   .dot {
     flex: none;
-    width: 0.55rem;
-    height: 0.55rem;
+    width: calc(8.8 * var(--rp));
+    height: calc(8.8 * var(--rp));
     border-radius: 50%;
     background: var(--purple);
   }

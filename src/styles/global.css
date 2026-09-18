@@ -41,8 +41,43 @@
   --r-img: 14px;
 
   --measure: 62ch;
-  --wide: 72rem;
-  --gutter: 1.25rem;
+  /* The content column is 90% of the screen at every size, so the left edge
+     everything shares is always 5% in, whatever the device. */
+  --wide: 90vw;
+  --gutter: 5vw;
+
+  /* One reference pixel per device class (see docs/DESIGN.md, "The first screen
+     by device"). Phones scale the 393px-wide reference layout, tablets the
+     768px-wide one, both by screen width, which does not change when a phone's
+     address bar collapses. Desktop keeps 1px here: its banner scales by height
+     with its own --u, and the strips under it keep their natural size. */
+  --rp: min(calc(100vw / 393), 1.15px); /* stops growing past the largest phone (about 450px) */
+
+  /* What sits above the first screen: the header, plus the preview notice
+     while indexing is off (html.preview). The desktop banner fills the rest. */
+  --header-h: calc(3.75rem + 1px);
+  --notice-h: calc(1.753rem + 1px);
+  --top-chrome: var(--header-h);
+  /* The two strips under the banner on desktop, each one line: the trust
+     facts (1rem padding twice, a 0.9rem line at 1.6, two borders) and the
+     season strip (0.6rem padding twice, a 44px link, one border). */
+  --strips-h: calc(2rem + 1.44rem + 2px + 1.2rem + 44px + 1px);
+}
+
+html.preview {
+  --top-chrome: calc(var(--header-h) + var(--notice-h));
+}
+
+@media (min-width: 36rem) {
+  :root {
+    --rp: calc(100vw / 768);
+  }
+}
+
+@media (min-width: 56rem) {
+  :root {
+    --rp: 1px;
+  }
 }
 
 *,
