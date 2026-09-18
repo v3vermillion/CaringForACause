@@ -165,17 +165,19 @@ export const hero = {
    * Real event photos shown behind the banner, crossfading slowly. Order
    * matters: the first one is what people with reduced motion see. Use
    * photos with faces near the top, since the bottom is covered by text.
+   * `focus` is the point kept in frame when the photo is cropped (desktop
+   * crops the top and bottom; phones show the full height).
    */
   montage: [
     {
       file: "holiday-gift-bags.jpg",
       alt: "",
-      focus: "center 22%",
+      focus: "center 18%",
     },
     {
       file: "haircut-boy.jpg",
       alt: "",
-      focus: "center 20%",
+      focus: "center 10%",
     },
     {
       file: "families-banner.jpg",
@@ -185,7 +187,7 @@ export const hero = {
     {
       file: "holiday-shopping.jpg",
       alt: "",
-      focus: "center 30%",
+      focus: "center 22%",
     },
   ] satisfies Photo[],
   /**

@@ -86,7 +86,9 @@ const cycle = slides.length * 7;
     isolation: isolate;
     overflow: hidden;
     background: var(--night);
-    padding-block: clamp(8rem, 6rem + 9vw, 14rem) var(--space-l);
+    /* Phones: her lettering sits just under the header so both doors fit on
+       the first screen of an iPhone Safari viewport (a test checks). */
+    padding-block: var(--space-m) var(--space-l);
   }
 
   .montage {
@@ -138,13 +140,14 @@ const cycle = slides.length * 7;
     }
   }
 
-  /* The veil: photos stay bright at the top, the words sit on night at the bottom. */
+  /* The veil. On phones the words start at the top, so the top is veiled
+     enough for her lettering and tagline to read over every photo. */
   .scrim {
     position: absolute;
     inset: 0;
     z-index: -1;
     background:
-      linear-gradient(180deg, rgb(27 15 46 / 0.35) 0%, rgb(27 15 46 / 0.55) 35%, #1b0f2e 78%),
+      linear-gradient(180deg, rgb(27 15 46 / 0.5) 0%, rgb(27 15 46 / 0.65) 35%, #1b0f2e 78%),
       linear-gradient(90deg, rgb(27 15 46 / 0.35), transparent 60%);
   }
 
@@ -266,17 +269,27 @@ const cycle = slides.length * 7;
   }
 
   @media (min-width: 36rem) {
+    /* Wider screens have the height to spare: the photo stays bright above the
+       words, which sit on night at the bottom. */
+    .hero {
+      padding-block: clamp(8rem, 6rem + 9vw, 14rem) var(--space-l);
+    }
+    .scrim {
+      background:
+        linear-gradient(180deg, rgb(27 15 46 / 0.35) 0%, rgb(27 15 46 / 0.55) 35%, #1b0f2e 78%),
+        linear-gradient(90deg, rgb(27 15 46 / 0.35), transparent 60%);
+    }
     .doors {
       grid-template-columns: 1fr 1fr;
     }
   }
 
   @media (min-width: 56rem) {
+    /* The words start 3rem under the header so both doors fit a 1366 × 768
+       laptop screen (a test checks); the doors' glow has the room below. */
     .hero {
-      padding-block: clamp(6rem, 3rem + 6vw, 8rem) var(--space-xl);
+      padding-block: 3rem;
       min-height: 40rem;
-      display: grid;
-      align-items: center;
     }
     /* Her photos sit on the right at close to their native size; night takes the
        left, and the veil hides the photo's edge. */

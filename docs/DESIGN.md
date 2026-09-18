@@ -32,7 +32,7 @@ Nothing else is drawn. The mark is not a container for buttons.
 - Her own photos only. Never stock, never AI-generated, never presented as something they aren't.
 - The banner is the one place words sit on photos, and only under a night veil heavy enough that white text stays above 7:1. Everywhere else, photos sit in framed panels and text sits beside or below them.
 - Photos are slightly desaturated (0.85) on night so they belong to the purple world, and untouched in light sections.
-- Crops keep faces in the top third on phones. On desktop the banner's photo occupies the right side at close to its native 720 px width and the veil hides its left edge.
+- Crops keep faces in the top third (each banner photo has a `focus` point in `src/data/site.ts`). The words start just under the header on every screen, the phone veil is heavier at the top, and both doors fit the first screen on an iPhone 15 and a 1366 × 768 laptop. On desktop the banner's photo occupies the right side at close to its native 720 px width and the veil hides its left edge.
 - Every image is served at its rendered size or larger on a 2× screen (`sizes` and `widths` are set per placement).
 
 ## Stability on phones

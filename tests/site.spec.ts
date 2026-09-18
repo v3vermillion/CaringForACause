@@ -180,7 +180,19 @@ test.describe("scrolling stability", () => {
     await page.setViewportSize({ width: 393, height: 660 });
     await page.goto("/");
     const help = await page.locator(".door--help").boundingBox();
+    const give = await page.locator(".door--give").boundingBox();
     expect(help!.y + help!.height).toBeLessThanOrEqual(660);
+    expect(give!.y + give!.height).toBeLessThanOrEqual(660);
+  });
+
+  test("both doors fit on a 1366 × 768 laptop screen", async ({ page }) => {
+    // The most common desktop size, with about 110px of browser chrome.
+    await page.setViewportSize({ width: 1366, height: 657 });
+    await page.goto("/");
+    const help = await page.locator(".door--help").boundingBox();
+    const give = await page.locator(".door--give").boundingBox();
+    expect(help!.y + help!.height).toBeLessThanOrEqual(657);
+    expect(give!.y + give!.height).toBeLessThanOrEqual(657);
   });
 });
 
