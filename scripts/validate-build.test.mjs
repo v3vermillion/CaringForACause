@@ -104,6 +104,25 @@ describe("publish gate", () => {
     expectError(dir, /viewport-height units/i);
   });
 
+  it("blocks plain vh outside a desktop media block", () => {
+    const dir = brokenBuild("index.html", (h) => h.replace("</style>", ".x{height:100vh}</style>"));
+    expectError(dir, /viewport-height units/i);
+  });
+
+  it("blocks vh inside a phone media block", () => {
+    const dir = brokenBuild("index.html", (h) =>
+      h.replace("</style>", "@media (min-width:30rem){.x{height:100vh}}</style>"),
+    );
+    expectError(dir, /viewport-height units/i);
+  });
+
+  it("blocks svh and dvh even inside a desktop media block", () => {
+    const dir = brokenBuild("index.html", (h) =>
+      h.replace("</style>", "@media (min-width:56rem){.x{height:100dvh}}</style>"),
+    );
+    expectError(dir, /viewport-height units/i);
+  });
+
   it("blocks missing security headers", () => {
     const dir = brokenBuild("_headers", (h) => h.replace(/Content-Security-Policy:.*\n/, ""));
     expectError(dir, /missing Content-Security-Policy/);

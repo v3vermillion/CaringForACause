@@ -176,12 +176,175 @@ test.describe("scrolling stability", () => {
     expect(after).toEqual(before);
   });
 
-  test("both doors fit on an iPhone 15 Safari screen", async ({ page }) => {
-    await page.setViewportSize({ width: 393, height: 660 });
+  // Every device in the matrix, at its own screen size, gets the first screen
+  // its class promises (see docs/DESIGN.md, "The first screen by device").
+  test("this device's first screen keeps its promise", async ({ page }) => {
+    await page.goto("/");
+    const m = await page.evaluate(() => {
+      const r = (sel: string) => document.querySelector(sel)?.getBoundingClientRect() ?? null;
+      const header = r(".site-header")!;
+      return {
+        width: innerWidth,
+        height: innerHeight,
+        wordsUnderHeader: r(".hero .brand-wordmark")!.top - header.bottom,
+        helpBottom: r(".door--help")!.bottom,
+        giveBottom: r(".door--give")!.bottom,
+        sideBySide: r(".door--help")!.top === r(".door--give")!.top,
+        stripBottom: r("aside.banner")?.bottom ?? null,
+      };
+    });
+    if (m.width >= 896) {
+      // Desktop: the scaled banner (the words sit about 45 reference pixels
+      // under the header, at most double), and the strip ends the first screen.
+      expect(m.wordsUnderHeader).toBeLessThan(90);
+      expect(m.sideBySide).toBe(true);
+      if (m.stripBottom !== null) expect(Math.abs(m.stripBottom - m.height)).toBeLessThanOrEqual(2);
+    } else if (m.width >= 576) {
+      // Tablets: the phone's words beside the photo, both doors on screen, and
+      // the strip ends the first screen.
+      expect(m.helpBottom).toBeLessThanOrEqual(m.height);
+      expect(m.giveBottom).toBeLessThanOrEqual(m.height);
+      expect(m.sideBySide).toBe(false);
+      if (m.stripBottom !== null) expect(Math.abs(m.stripBottom - m.height)).toBeLessThanOrEqual(2);
+    } else {
+      // Phones: the words start just under the header and both doors fit.
+      expect(m.wordsUnderHeader).toBeLessThanOrEqual(32);
+      expect(m.helpBottom).toBeLessThanOrEqual(m.height);
+      expect(m.giveBottom).toBeLessThanOrEqual(m.height);
+      expect(m.sideBySide).toBe(false);
+    }
+  });
+
+  for (const [name, width, height] of [
+    ["iPhone 12 mini", 375, 629],
+    ["iPhone 15", 393, 660],
+  ] as const) {
+    test(`both doors fit on an ${name} Safari screen`, async ({ page }) => {
+      await page.setViewportSize({ width, height });
+      await page.goto("/");
+      const help = await page.locator(".door--help").boundingBox();
+      const give = await page.locator(".door--give").boundingBox();
+      expect(help!.y + help!.height).toBeLessThanOrEqual(height);
+      expect(give!.y + give!.height).toBeLessThanOrEqual(height);
+    });
+  }
+
+  test("both doors fit on a 1366 × 768 laptop screen", async ({ page }) => {
+    // The most common desktop size, with about 110px of browser chrome.
+    await page.setViewportSize({ width: 1366, height: 657 });
     await page.goto("/");
     const help = await page.locator(".door--help").boundingBox();
-    expect(help!.y + help!.height).toBeLessThanOrEqual(660);
+    const give = await page.locator(".door--give").boundingBox();
+    expect(help!.y + help!.height).toBeLessThanOrEqual(657);
+    expect(give!.y + give!.height).toBeLessThanOrEqual(657);
   });
+
+  // On desktop the banner, the trust facts, and the season strip fill the
+  // first screen exactly, whatever the screen height (see decision 39).
+  for (const [width, height] of [
+    [1024, 768], // an iPad in landscape
+    [1024, 1366], // an iPad Pro 12.9 upright: tall, so the width bounds the scale
+    [1280, 800],
+    [1366, 657],
+    [1536, 730],
+    [1920, 950],
+  ]) {
+    test(`the first screen ends with the season strip at ${width} × ${height}`, async ({
+      page,
+    }) => {
+      await page.setViewportSize({ width, height });
+      await page.goto("/");
+      const strip = page.locator("aside.banner");
+      if ((await strip.count()) === 0) return; // the strip is optional content
+      const box = await strip.boundingBox();
+      expect(Math.abs(box!.y + box!.height - height)).toBeLessThanOrEqual(2);
+      const give = await page.locator(".door--give").boundingBox();
+      expect(give!.y + give!.height).toBeLessThan(box!.y);
+    });
+  }
+
+  // Each device class shows one composition: every size in the banner is a
+  // multiple of the class's reference pixel (phones and tablets by screen
+  // width, desktop by screen height), so two devices of a class show the same
+  // picture, line breaks included. Compared as shares of the banner's height.
+  const shape = async (page: import("@playwright/test").Page, width: number, height: number) => {
+    await page.setViewportSize({ width, height });
+    await page.goto("/");
+    return page.evaluate(() => {
+      const r = (sel: string) => document.querySelector(sel)!.getBoundingClientRect();
+      const lines = (sel: string) =>
+        Math.round(
+          r(sel).height / parseFloat(getComputedStyle(document.querySelector(sel)!).lineHeight),
+        );
+      // Shares of the text block, not the banner: on desktop the banner can
+      // have extra room around the block (a tall portrait screen), and the
+      // composition is the block.
+      const hero = r(".hero .content");
+      const share = (b: DOMRect) => [(b.top - hero.top) / hero.height, b.height / hero.height];
+      return {
+        wordmark: share(r(".hero .brand-wordmark")),
+        h1: share(r(".hero h1")),
+        doors: share(r(".doors")),
+        left: r(".hero .brand-wordmark").left / innerWidth,
+        lines: [lines(".hero h1"), lines(".hero .sub"), lines(".door--help .door-body")],
+        // The header as a share of the text block's height, and its name's size.
+        header: r(".site-header").height / hero.height,
+        name: parseFloat(getComputedStyle(document.querySelector(".site-header .brand")!).fontSize),
+      };
+    });
+  };
+  for (const [cls, reference, others] of [
+    [
+      "phone",
+      [393, 659],
+      [
+        [360, 780],
+        [440, 763],
+        [540, 720],
+      ],
+    ],
+    [
+      "tablet",
+      [768, 1024],
+      [
+        [712, 1138],
+        [834, 1194],
+      ],
+    ],
+    [
+      "desktop",
+      [1280, 800],
+      [
+        [1366, 657],
+        [1920, 950],
+        [1024, 1366],
+      ],
+    ],
+  ] as const) {
+    test(`every ${cls} shows the same banner composition`, async ({ page }) => {
+      const ref = await shape(page, reference[0], reference[1]);
+      for (const [width, height] of others) {
+        const other = await shape(page, width, height);
+        for (const key of ["wordmark", "h1", "doors"] as const) {
+          expect(other[key][0], `${key} top at ${width}`).toBeCloseTo(ref[key][0], 2);
+          expect(other[key][1], `${key} height at ${width}`).toBeCloseTo(ref[key][1], 2);
+        }
+        expect(other.left, `left edge at ${width}`).toBeCloseTo(ref.left, 2);
+        expect(other.lines, `line breaks at ${width}`).toEqual(ref.lines);
+        if (cls !== "desktop") {
+          // Phones and tablets scale the header with the width; the name's
+          // size must scale with it exactly (bounded on phones past 450px).
+          const scale = (w: number) => (cls === "phone" ? Math.min(w / 393, 1.15) : w / 768);
+          expect(other.header, `header at ${width}`).toBeCloseTo(ref.header, 2);
+          // Within half a pixel: Firefox rounds computed font sizes.
+          expect(other.name / scale(width), `name size at ${width}`).toBeCloseTo(
+            ref.name / scale(reference[0]),
+            0,
+          );
+        }
+      }
+    });
+  }
 });
 
 test.describe("layout", () => {

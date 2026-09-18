@@ -22,7 +22,7 @@ const cycle = slides.length * 7;
 
 <!--
   The banner: her photos, her lettering, one sentence, two doors.
-  Nothing here is sized with viewport-height units (see docs/DESIGN.md).
+  On desktop it fills the first screen (see src/pages/index.astro and docs/DESIGN.md).
 -->
 <section class="hero on-dark" aria-labelledby="hero-title">
   <div class="montage" aria-hidden="true" data-montage style={`--cycle: ${cycle}s;`}>
@@ -81,12 +81,20 @@ const cycle = slides.length * 7;
 </script>
 
 <style>
+  /*
+    Phones and tablets: the same words, scaled by the screen width. Every size
+    below is a multiple of --rp, one pixel of the 393px-wide phone reference;
+    on tablets --rp is larger so the same column is 56% of the screen, with
+    the photo beside it. Nothing here is sized by the screen height: on phones
+    it changes as the address bar collapses. Desktop has its own block at the
+    end.
+  */
   .hero {
     position: relative;
     isolation: isolate;
     overflow: hidden;
     background: var(--night);
-    padding-block: clamp(8rem, 6rem + 9vw, 14rem) var(--space-l);
+    padding-block: calc(24 * var(--rp)) calc(40 * var(--rp));
   }
 
   .montage {
@@ -138,46 +146,48 @@ const cycle = slides.length * 7;
     }
   }
 
-  /* The veil: photos stay bright at the top, the words sit on night at the bottom. */
+  /* The veil. The words start at the top, so the top is veiled enough for her
+     lettering and tagline to read over every photo. */
   .scrim {
     position: absolute;
     inset: 0;
     z-index: -1;
     background:
-      linear-gradient(180deg, rgb(27 15 46 / 0.35) 0%, rgb(27 15 46 / 0.55) 35%, #1b0f2e 78%),
+      linear-gradient(180deg, rgb(27 15 46 / 0.5) 0%, rgb(27 15 46 / 0.65) 35%, #1b0f2e 78%),
       linear-gradient(90deg, rgb(27 15 46 / 0.35), transparent 60%);
   }
 
   .content {
     display: grid;
     gap: 0;
-    max-width: 38rem;
+    max-width: calc(353.7 * var(--rp)); /* the reference column; stops with the scale */
   }
 
+  /* Her lettering fills the column on a phone. */
   .content :global(.wordmark) {
-    width: min(100%, 30rem);
+    width: 100%;
     color: #fff;
     filter: drop-shadow(0 6px 24px rgb(0 0 0 / 0.45));
   }
 
   .tagline {
-    margin-top: 0.75rem;
+    margin-top: calc(12 * var(--rp));
     font-family: var(--font-display);
     font-weight: 600;
-    font-size: var(--step-0);
+    font-size: calc(18 * var(--rp));
     color: var(--night-soft);
   }
 
   h1 {
-    margin-top: var(--space-m);
-    font-size: clamp(1.75rem, 1.2rem + 2.6vw, 3.1rem);
+    margin-top: calc(24 * var(--rp));
+    font-size: calc(29.4 * var(--rp));
     line-height: 1.05;
     color: #fff;
   }
 
   .sub {
-    margin-top: 0.75rem;
-    font-size: var(--step-0);
+    margin-top: calc(12 * var(--rp));
+    font-size: calc(18 * var(--rp));
     line-height: 1.5;
     color: #e3daf6;
   }
@@ -186,18 +196,18 @@ const cycle = slides.length * 7;
   .doors {
     display: grid;
     grid-auto-rows: 1fr; /* stacked or side by side, the doors stay the same size */
-    gap: 0.75rem;
-    margin-top: var(--space-m);
+    gap: calc(12 * var(--rp));
+    margin-top: calc(24 * var(--rp));
   }
 
   .door {
     position: relative;
     display: grid;
     align-content: center;
-    gap: 0.2rem;
-    min-height: 5.25rem;
-    padding: 0.9rem 3rem 0.9rem 1.25rem;
-    border-radius: var(--r-card);
+    gap: calc(3.2 * var(--rp));
+    min-height: calc(84 * var(--rp));
+    padding: calc(14.4 * var(--rp)) calc(48 * var(--rp)) calc(14.4 * var(--rp)) calc(20 * var(--rp));
+    border-radius: calc(20 * var(--rp));
     color: #fff;
     text-decoration: none;
     transition:
@@ -209,12 +219,12 @@ const cycle = slides.length * 7;
   .door::after {
     content: "";
     position: absolute;
-    right: 1.1rem;
+    right: calc(17.6 * var(--rp));
     top: 50%;
-    width: 0.7rem;
-    height: 0.7rem;
-    border-right: 3px solid currentColor;
-    border-top: 3px solid currentColor;
+    width: calc(11.2 * var(--rp));
+    height: calc(11.2 * var(--rp));
+    border-right: calc(3 * var(--rp)) solid currentColor;
+    border-top: calc(3 * var(--rp)) solid currentColor;
     transform: translateY(-50%) rotate(45deg);
     transition: transform 150ms ease;
   }
@@ -229,14 +239,14 @@ const cycle = slides.length * 7;
 
   .door-title {
     font-family: var(--font-display);
-    font-size: var(--step-2);
+    font-size: calc(25.5 * var(--rp));
     font-weight: 800;
     letter-spacing: -0.02em;
     line-height: 1.05;
   }
 
   .door-body {
-    font-size: var(--step--1);
+    font-size: calc(14.4 * var(--rp));
     line-height: 1.35;
     opacity: 0.92;
   }
@@ -265,44 +275,119 @@ const cycle = slides.length * 7;
     background: rgb(255 255 255 / 0.17);
   }
 
+  /* Tablets in portrait: the phone's words, unchanged, in a column 56% of the
+     screen (--rp does that), her photo on the right as on desktop, and the
+     banner filling the first screen down to the season strip
+     (src/pages/index.astro). The photo's edge and the veil are measured from
+     the text column, as on desktop. */
   @media (min-width: 36rem) {
-    .doors {
-      grid-template-columns: 1fr 1fr;
-    }
-  }
-
-  @media (min-width: 56rem) {
     .hero {
-      padding-block: clamp(6rem, 3rem + 6vw, 8rem) var(--space-xl);
-      min-height: 40rem;
+      --wrap-left: calc((100% - min(100% - 2 * var(--gutter), var(--wide))) / 2);
       display: grid;
-      align-items: center;
+      align-content: center;
     }
-    /* Her photos sit on the right at close to their native size; night takes the
-       left, and the veil hides the photo's edge. */
     .montage {
-      left: 22%;
+      left: calc(var(--wrap-left) + 134 * var(--rp));
     }
     .scrim {
       background:
         linear-gradient(
           90deg,
-          #1b0f2e 0%,
-          #1b0f2e 30%,
-          rgb(27 15 46 / 0.75) 48%,
-          rgb(27 15 46 / 0.2) 70%,
+          #1b0f2e 0,
+          #1b0f2e calc(var(--wrap-left) + 196 * var(--rp)),
+          rgb(27 15 46 / 0.75) calc(var(--wrap-left) + 338 * var(--rp)),
+          rgb(27 15 46 / 0.2) calc(var(--wrap-left) + 511 * var(--rp)),
+          rgb(27 15 46 / 0.15) 100%
+        ),
+        linear-gradient(180deg, rgb(27 15 46 / 0.2) 0%, transparent 40%, rgb(27 15 46 / 0.85) 100%);
+    }
+  }
+
+  @media (min-width: 56rem) {
+    /* Desktop: one composition at every screen size. The banner fills the
+       first screen (src/pages/index.astro), and every size in it is a multiple
+       of --u, one pixel of the reference layout (a 1280 × 800 screen, where
+       the banner is 589px tall). Taller screens scale it up, shorter ones
+       down, so the picture is the same on every computer. The width bounds
+       it too (a portrait screen such as an iPad Pro 12.9 upright is tall but
+       narrow), so the text column never outgrows its 45% of the screen and
+       the headline keeps its three lines. Below three quarters the type would
+       get too small, so the scale stops there and the season strip drops just
+       under the fold instead. */
+    .hero {
+      --u: clamp(
+        0.75px,
+        min(calc((100vh - var(--top-chrome) - var(--strips-h)) / 589), calc(100vw / 1280)),
+        2px
+      );
+      /* Where the text column starts: the .wrap's left edge. */
+      --wrap-left: calc((100% - min(100% - 2 * var(--gutter), var(--wide))) / 2);
+      display: grid;
+      align-content: center;
+      /* A few reference pixels of slack under the doors absorb font rounding
+         differences between browsers, so the strip never slips under the fold. */
+      padding-block: calc(40 * var(--u)) calc(36 * var(--u));
+    }
+    /* Her photos sit to the right of the words; night takes the left, and the
+       veil hides the photo's edge. Both are measured from the text column so
+       the words always sit on the same part of the veil. */
+    .montage {
+      left: calc(var(--wrap-left) + 218 * var(--u));
+    }
+    .scrim {
+      background:
+        linear-gradient(
+          90deg,
+          #1b0f2e 0,
+          #1b0f2e calc(var(--wrap-left) + 320 * var(--u)),
+          rgb(27 15 46 / 0.75) calc(var(--wrap-left) + 550 * var(--u)),
+          rgb(27 15 46 / 0.2) calc(var(--wrap-left) + 832 * var(--u)),
           rgb(27 15 46 / 0.15) 100%
         ),
         linear-gradient(180deg, rgb(27 15 46 / 0.2) 0%, transparent 40%, rgb(27 15 46 / 0.85) 100%);
     }
     .content {
-      max-width: 36rem;
+      max-width: calc(576 * var(--u));
+    }
+    .doors {
+      grid-template-columns: 1fr 1fr;
     }
     .content :global(.wordmark) {
-      width: min(100%, 32rem);
+      width: min(100%, calc(512 * var(--u)));
+    }
+    .tagline {
+      margin-top: calc(12 * var(--u));
+      font-size: calc(18 * var(--u));
     }
     h1 {
-      font-size: clamp(2.2rem, 1.4rem + 2.2vw, 3.2rem);
+      margin-top: calc(24 * var(--u));
+      font-size: calc(50.5 * var(--u));
+    }
+    .sub {
+      margin-top: calc(12 * var(--u));
+      font-size: calc(18 * var(--u));
+    }
+    .doors {
+      gap: calc(12 * var(--u));
+      margin-top: calc(24 * var(--u));
+    }
+    .door {
+      gap: calc(3.2 * var(--u));
+      min-height: calc(84 * var(--u));
+      padding: calc(14.4 * var(--u)) calc(48 * var(--u)) calc(14.4 * var(--u)) calc(20 * var(--u));
+      border-radius: calc(20 * var(--u));
+    }
+    .door::after {
+      right: calc(17.6 * var(--u));
+      width: calc(11.2 * var(--u));
+      height: calc(11.2 * var(--u));
+      border-width: calc(3 * var(--u));
+    }
+    .door-title {
+      font-size: calc(30.4 * var(--u));
+    }
+    .door-body {
+      font-size: calc(14.4 * var(--u));
     }
   }
 </style>

@@ -72,7 +72,7 @@ When Tamara confirms a detail, change it to `orgPublished(...)` with her confirm
 
 ## Quality checks
 
-**What blocks publishing:** Cloudflare runs `npm run build`, which fails, and publishes nothing, if the type check or `scripts/validate-build.mjs` finds a problem on any page (home, `/donate`, `/apply`, 404): missing files, broken in-page links or images, missing alt text, placeholder text, a wrong or missing link-preview image, invalid structured data, viewport-height units, missing security headers, or search indexing that doesn't match its setting (indexing is only ever allowed on the production domain). The last good deployment stays live.
+**What blocks publishing:** Cloudflare runs `npm run build`, which fails, and publishes nothing, if the type check or `scripts/validate-build.mjs` finds a problem on any page (home, `/donate`, `/apply`, 404): missing files, broken in-page links or images, missing alt text, placeholder text, a wrong or missing link-preview image, invalid structured data, viewport-height units outside the tablet and desktop layouts, missing security headers, or search indexing that doesn't match its setting (indexing is only ever allowed on the production domain). The last good deployment stays live.
 
 **What GitHub Actions checks** on every push and pull request. The browser-test check is required by the `main` ruleset, so nothing reaches `main` (and therefore Cloudflare) without passing it. Lighthouse reports results but is not required, because scores vary slightly between runs.
 
