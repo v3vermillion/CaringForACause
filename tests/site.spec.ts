@@ -410,6 +410,23 @@ test.describe("get involved tabs", () => {
   });
 });
 
+test.describe("one home per fact", () => {
+  // On the first screen each fact appears once: the tagline under the
+  // wordmark, the service area in the headline, the founding year in the
+  // trust strip. The subhead says what the organization is.
+  test("the banner and trust strip do not repeat each other", async ({ page }) => {
+    await page.goto("/");
+    const hero = await page.locator(".hero").innerText();
+    expect(hero.match(/Central Indiana/g)?.length ?? 0).toBe(1);
+    expect(hero).not.toMatch(/\b2015\b/);
+    const facts = await page.locator(".facts").innerText();
+    expect(facts).toMatch(/2015/);
+    expect(facts).not.toMatch(/Central Indiana/);
+    const body = await page.locator("body").innerText();
+    expect(body.match(/Together we can\./g)?.length ?? 0).toBe(1);
+  });
+});
+
 test.describe("honest buttons", () => {
   // Until the payment page and sign-up forms exist in her name, buttons open
   // an email draft, and every such button says so. No button promises a

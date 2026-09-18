@@ -158,7 +158,7 @@ export const seasonalBanner = {
 };
 
 export const hero = {
-  /** Her own tagline, from her website. Shown as the caption under the photos. */
+  /** Her own tagline, from her website. Its one home is under the wordmark. */
   tagline: "Together we can.",
   headline: "Holiday meals, gifts, and diapers for Central Indiana families",
   /**
@@ -188,7 +188,12 @@ export const hero = {
       focus: "center 30%",
     },
   ] satisfies Photo[],
-  subhead: `A nonprofit helping families in ${claim(facts.serviceArea)} since ${claim(facts.founded)}.`,
+  /**
+   * What the organization is, from her mission statement. The headline names
+   * the service area and the trust strip has the year, so neither is repeated.
+   * The city is still unconfirmed (see facts.city), so it stays out of here.
+   */
+  subhead: "A nonprofit for families facing financial hardship.",
   /** The two doors. Families first; giving second. */
   doors: {
     getHelp: {
@@ -198,7 +203,7 @@ export const hero = {
     },
     donate: {
       title: "Donate",
-      body: "Give once or monthly to families in Central Indiana.",
+      body: "Give once or monthly to local families.",
       href: "/donate",
     },
   },
@@ -521,8 +526,6 @@ export const about = {
     `${claim(facts.founder)} founded ${org.shortName} in ${claim(facts.founded)} to support families in ${claim(facts.serviceArea)} who are facing financial hardship.`,
     "Part-time volunteers help run every program, and the organization has grown thanks to the helping hands of this community.",
   ],
-  /** Her tagline, as the caption on the portrait. */
-  tagline: hero.tagline,
   /** A still from her "Do More" feature, cropped to leave out the program's caption. */
   portrait: {
     file: "tamara-portrait.jpg",
