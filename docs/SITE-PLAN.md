@@ -35,8 +35,9 @@ Three pages. The home page is the route map; the two doors lead to their own pag
 
 ```
 ┌───────────────────────────────────────────────┐
-│ Header: mark + name   About · Our programs ·  │  sticky; phone: mark, name,
-│         Get involved ▾ · Contact   [Donate]   │  Donate, corner-wedge menu
+│ Header: mark + name   About · Programs ·      │  sticky; phone: mark, name,
+│         Get involved · Contact   [Donate]     │  Donate, corner-wedge menu:
+│                                               │  Help me · the four · Donate
 ├───────────────────────────────────────────────┤
 │ BANNER (her photos, crossfading, night veil)  │
 │  her wordmark · Together we can.              │

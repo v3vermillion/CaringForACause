@@ -239,3 +239,9 @@ Short records of the technical choices behind this site, so anyone taking it ove
 **Decision:** The traced `mark.svg` and `wordmark.svg` are run through svgo at integer precision after tracing (the command is in `docs/DESIGN.md` and at the end of the tracing script). The mark went from 29 kB to 7 kB and the wordmark from 26 kB to 8 kB; the home document, which inlines the mark three times and the wordmark twice, went from 218 kB to 115 kB.
 
 **Why:** The Lighthouse budget (performance at or above 0.95 on the home page) was being met by a hair: median 0.93 to 0.95 depending on the runner, because 139 kB of inline SVG had to arrive before the first paint. One decimal of precision on a 1,718-unit canvas is invisible at 3 rem, and the lettering at 32 rem shows no change either. With the smaller files the page scores 0.97 on every local run, first paint drops from 1.8 s to 1.35 s on simulated 4G, and the budget stops depending on the runner.
+
+## 38. One navigation map
+
+**Decision:** The header and the phone menu draw the same four links: About, Programs, Get involved, Contact. The desktop header shows them inline with the Donate button and no dropdown; "Get involved" scrolls to the section, whose tabs are the four ways to help. The phone menu is one list: Help me first (in the signal colour), the four sections, Donate last, and nothing else. The one-line descriptions, the sub-items, and the phone and email are gone from the menu; contact details live in the Contact section it links to. This supersedes the dropdown and menu groups of decision 28 and the menu's details, doors, and contact line of decision 21.
+
+**Why:** The desktop dropdown listed five items and the phone menu thirteen, for a page with four sections and two doors. Two maps of the same small site make it feel bigger and harder than it is. One list a visitor can hold in their head, with the two doors at either end, is the whole site.

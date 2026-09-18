@@ -274,23 +274,16 @@ test.describe("navigation", () => {
     }
   });
 
-  test("the desktop Get involved dropdown opens, closes with Escape, and lists four options", async ({
-    page,
-    isMobile,
-  }) => {
-    test.skip(isMobile, "the dropdown only shows on wide screens");
+  test("the desktop header is five plain links and no dropdown", async ({ page, isMobile }) => {
+    test.skip(isMobile, "the inline links only show on wide screens");
     await page.setViewportSize({ width: 1280, height: 900 });
     await page.goto("/");
-    const button = page.locator("[data-submenu-button]");
-    await expect(button).toBeVisible();
-    await button.click();
-    await expect(button).toHaveAttribute("aria-expanded", "true");
-    const links = page.locator("[data-submenu] a");
-    await expect(links).toHaveCount(5);
-    await expect(links.last()).toHaveAttribute("href", "/donate");
-    await page.keyboard.press("Escape");
-    await expect(button).toHaveAttribute("aria-expanded", "false");
-    await expect(button).toBeFocused();
+    const links = page.locator(".site-header .inline-nav a");
+    await expect(links).toHaveText(["About", "Programs", "Get involved", "Contact"]);
+    await expect(page.locator(".site-header button:not([data-menu-open])")).toHaveCount(0);
+    await page.getByRole("link", { name: "Get involved", exact: true }).first().click();
+    expect(new URL(page.url()).hash).toBe("#get-involved");
+    await expect(page.locator("#get-involved")).toBeInViewport();
   });
 });
 
@@ -313,7 +306,7 @@ test.describe("menu", () => {
     await expect(button).toBeFocused();
   });
 
-  test("lists About, Our programs, Get involved with its options, and Contact", async ({
+  test("lists Help me, the four sections, and Donate, and nothing else", async ({
     page,
     isMobile,
   }) => {
@@ -321,25 +314,24 @@ test.describe("menu", () => {
     await page.goto("/");
     await page.locator("[data-menu-open]").click();
     await expect(page.locator("#menu .menu-label")).toHaveText([
+      "Help me",
       "About",
-      "Our programs",
+      "Programs",
       "Get involved",
       "Contact",
-    ]);
-    await expect(page.locator("#menu .menu-sub a")).toHaveText([
-      "Sponsor a family",
-      "Volunteer",
-      "Partner",
       "Donate",
     ]);
-    await expect(page.locator("#menu .menu-doors a")).toHaveText(["Help me", "Donate"]);
+    await expect(page.locator("#menu a")).toHaveCount(6);
+    await expect(page.locator("#menu a").first()).toHaveAttribute("href", "/apply");
+    await expect(page.locator("#menu a").last()).toHaveAttribute("href", "/donate");
+    await expect(page.locator("#menu a[href^='tel:'], #menu a[href^='mailto:']")).toHaveCount(0);
   });
 
   test("choosing a link closes the menu and reaches its target", async ({ page, isMobile }) => {
     test.skip(!isMobile, "the menu button only shows on phones");
     await page.goto("/");
     await page.locator("[data-menu-open]").click();
-    await page.locator("#menu .menu-list a").first().click();
+    await page.locator("#menu .menu-list a", { hasText: "About" }).click();
     await expect(page.locator("#menu")).toBeHidden();
     expect(new URL(page.url()).hash).toBe("#about");
   });
@@ -590,14 +582,12 @@ test.describe("application page", () => {
 test.describe("without JavaScript", () => {
   test.use({ javaScriptEnabled: false });
 
-  test("navigation links are visible inline, including the Get involved options", async ({
-    page,
-  }) => {
+  test("navigation links are visible inline", async ({ page }) => {
     await page.goto("/");
-    await expect(page.locator(".site-header .inline-nav a").first()).toBeVisible();
-    await expect(
-      page.locator(".site-header [data-submenu] li:not(.submenu-parent) a").first(),
-    ).toBeVisible();
+    const links = page.locator(".site-header .inline-nav a");
+    await expect(links).toHaveCount(4);
+    await expect(links.first()).toBeVisible();
+    await expect(links.last()).toBeVisible();
     await expect(page.locator("[data-menu-open]")).toBeHidden();
   });
 
