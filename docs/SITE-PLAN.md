@@ -19,7 +19,7 @@ The site is delivered to Tamara as a finished gift. Contact with her is kept to 
 | Holiday sponsors        | How to sponsor a family, right now                      | Seasonal banner → Sponsor tab           |
 | Donors                  | A way to give, proof it's a real nonprofit              | Donate button → Donate tab, trust facts |
 | Volunteers and stylists | How to sign up                                          | Get involved → Volunteer or Partner tab |
-| Funders and press       | Who runs it, mission, EIN                               | About, footer                           |
+| Funders and press       | Who runs it, mission, EIN                               | About, trust strip                      |
 
 ## Grouping logic
 
@@ -68,7 +68,7 @@ Three pages. The home page is the route map; the two doors lead to their own pag
 ├───────────────────────────────────────────────┤
 │ FOOTER (night): mark + wordmark · Never give  │
 │ up. · phone · email · Facebook · legal name,  │
-│ city, EIN and deductibility, copyright        │
+│ city, copyright                               │
 └───────────────────────────────────────────────┘
 
 /apply    Help me: four steps (about you · household · what you need ·

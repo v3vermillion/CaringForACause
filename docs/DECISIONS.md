@@ -215,3 +215,9 @@ Short records of the technical choices behind this site, so anyone taking it ove
 **Decision:** The site shows two videos: her story in About and the haircut program in its own row, both as click-to-play players with a self-hosted poster (a still from the video or one of her own photos of that program), loading YouTube's player only when tapped. The Sponsor and Donate tabs' video cards are gone, and no image on the site is fetched from YouTube; the content-security policy no longer allows it, and a test watches for it. The Donate tab is the short version: heading, one sentence, the Donate button. `/donate` is the destination: choose a gift, donate, done; its "Other ways to give" cards are gone. The banner's subhead no longer says "volunteer-run"; that is an open question for Tamara.
 
 **Why:** YouTube-hosted thumbnails were the broken images on the page, and a poster must honestly show what plays. The two removed videos were asks the page already makes in text, and a video is not what a donor needs at the moment of deciding. The tab and `/donate` had formed a loop (tab → page → "other ways" → tabs); one link out and one destination ends it. "Volunteer-run" is a claim no source confirms.
+
+## 34. The footer does not repeat the EIN
+
+**Decision:** The footer's legal record is the legal name, city and service area, and the copyright line. The 501(c)(3) status, EIN, and deductibility sentence appear where a donor decides: the trust strip on the home page and the donation card on `/donate`. Structured data still carries the EIN on every page.
+
+**Why:** On `/donate` the footer sat about two hundred pixels below the donation card and repeated its last paragraph word for word. Saying it once, at the point of decision, reads as care; saying it twice reads as boilerplate.
