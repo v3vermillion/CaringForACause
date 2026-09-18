@@ -336,9 +336,10 @@ test.describe("scrolling stability", () => {
           // size must scale with it exactly (bounded on phones past 450px).
           const scale = (w: number) => (cls === "phone" ? Math.min(w / 393, 1.15) : w / 768);
           expect(other.header, `header at ${width}`).toBeCloseTo(ref.header, 2);
+          // Within half a pixel: Firefox rounds computed font sizes.
           expect(other.name / scale(width), `name size at ${width}`).toBeCloseTo(
             ref.name / scale(reference[0]),
-            1,
+            0,
           );
         }
       }
