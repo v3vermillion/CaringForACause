@@ -203,3 +203,9 @@ Short records of the technical choices behind this site, so anyone taking it ove
 **Decision:** The footer is her marks, "Never give up.", phone, email, Facebook, and the legal record (legal name, city and service area, 501(c)(3) status with EIN and the deductibility line, copyright). The "Programs" and "Get involved" link columns and the repeated Help me / Donate buttons are gone.
 
 **Why:** Those columns listed the same eight items a visitor had just scrolled past as jump tiles, full rows, and tabs, and the doors already appear in the banner, the menu, and the Contact section. A third listing at the end of the page is noise, not navigation.
+
+## 32. One word for giving
+
+**Decision:** Every entrance to giving and every action button that gives is labeled "Donate": the header pill, the banner door, the Get involved tab and its button, and the primary button on `/donate`, which reads "Donate by email" until `links.donate` exists and "Donate" after. The link under the banner doors is gone; the banner is two doors and nothing else. The season strip's button leads to the Sponsor tab and says exactly that. The four ways to help are laid out in one place, Get involved. On `/donate` the prose keeps its own voice ("Give to families in Central Indiana", "Choose your gift", "Other ways to give"), and the sentence explaining that online payments open once the giving page exists now sits above the button, so tapping it is an informed choice.
+
+**Why:** Six entrances with three different words ("Donate", "Give online", "Sponsor a family, volunteer, or partner") made a donor hesitate about whether they led to the same place. Headings are not wayfinding; by the time someone reads them they have arrived, so flattening every "give" to "donate" would cost her voice without buying clarity.
