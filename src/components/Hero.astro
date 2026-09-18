@@ -82,12 +82,12 @@ const cycle = slides.length * 7;
 
 <style>
   /*
-    Phones and tablets: one composition per class, scaled by the screen width.
-    Every size below is a multiple of --rp, one pixel of the class's reference
-    layout (a 393px-wide phone; a 768px-wide tablet), so every phone shows the
-    same picture as every other phone, and every tablet as every other tablet.
-    Nothing here is sized by the screen height: on phones it changes as the
-    address bar collapses. Desktop has its own block at the end.
+    Phones and tablets: the same words, scaled by the screen width. Every size
+    below is a multiple of --rp, one pixel of the 393px-wide phone reference;
+    on tablets --rp is larger so the same column is 56% of the screen, with
+    the photo beside it. Nothing here is sized by the screen height: on phones
+    it changes as the address bar collapses. Desktop has its own block at the
+    end.
   */
   .hero {
     position: relative;
@@ -275,23 +275,31 @@ const cycle = slides.length * 7;
     background: rgb(255 255 255 / 0.17);
   }
 
-  /* Tablets: the same banner with the doors side by side, the lettering and
-     headline at the 768px reference's sizes. */
+  /* Tablets in portrait: the phone's words, unchanged, in a column 56% of the
+     screen (--rp does that), her photo on the right as on desktop, and the
+     banner filling the first screen down to the season strip
+     (src/pages/index.astro). The photo's edge and the veil are measured from
+     the text column, as on desktop. */
   @media (min-width: 36rem) {
-    .content {
-      max-width: calc(608 * var(--rp));
+    .hero {
+      --wrap-left: calc((100% - min(100% - 2 * var(--gutter), var(--wide))) / 2);
+      display: grid;
+      align-content: center;
     }
-    .content :global(.wordmark) {
-      width: calc(480 * var(--rp));
+    .montage {
+      left: calc(var(--wrap-left) + 134 * var(--rp));
     }
-    h1 {
-      font-size: calc(39.2 * var(--rp));
-    }
-    .doors {
-      grid-template-columns: 1fr 1fr;
-    }
-    .door-title {
-      font-size: calc(30 * var(--rp));
+    .scrim {
+      background:
+        linear-gradient(
+          90deg,
+          #1b0f2e 0,
+          #1b0f2e calc(var(--wrap-left) + 196 * var(--rp)),
+          rgb(27 15 46 / 0.75) calc(var(--wrap-left) + 338 * var(--rp)),
+          rgb(27 15 46 / 0.2) calc(var(--wrap-left) + 511 * var(--rp)),
+          rgb(27 15 46 / 0.15) 100%
+        ),
+        linear-gradient(180deg, rgb(27 15 46 / 0.2) 0%, transparent 40%, rgb(27 15 46 / 0.85) 100%);
     }
   }
 
@@ -340,6 +348,9 @@ const cycle = slides.length * 7;
     }
     .content {
       max-width: calc(576 * var(--u));
+    }
+    .doors {
+      grid-template-columns: 1fr 1fr;
     }
     .content :global(.wordmark) {
       width: min(100%, calc(512 * var(--u)));

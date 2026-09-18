@@ -32,10 +32,10 @@ import Base from "../layouts/Base.astro";
 </Base>
 
 <style>
-  /* Desktop only: phones and tablets stay content-sized (no viewport-height
-     units there; see docs/DESIGN.md). Browser bars don't collapse on desktop,
-     so 100vh is stable. */
-  @media (min-width: 56rem) {
+  /* Tablets and desktop: phones stay content-sized (no viewport-height units
+     there; see docs/DESIGN.md). A tablet's or desktop browser's bars don't
+     change the height while scrolling, so 100vh is stable. */
+  @media (min-width: 36rem) {
     .first-screen {
       display: flex;
       flex-direction: column;

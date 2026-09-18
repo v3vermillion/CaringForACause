@@ -38,11 +38,11 @@ const PLACEHOLDERS = [
 
 /**
  * Every viewport-height unit in the CSS that is not a plain `vh` inside a
- * `@media (min-width: …)` block of at least 56rem (896px), the desktop layout,
- * where the browser's bars don't collapse. Media blocks are found by matching
- * braces.
+ * `@media (min-width: …)` block of at least 36rem (576px), the tablet and
+ * desktop layouts, where the browser's bars don't change the height while
+ * scrolling. Media blocks are found by matching braces.
  */
-export const DESKTOP_MIN_WIDTH_PX = 896;
+export const DESKTOP_MIN_WIDTH_PX = 576;
 
 export function viewportUnitsOutsideDesktop(html) {
   const desktopRanges = [];
@@ -216,8 +216,8 @@ export function validateBuild(dist, { allowIndexing }) {
 
     // Viewport-height units (vh, svh, dvh, lvh) make phone layouts resize as the
     // browser's address bar collapses, which looks like photos zooming on scroll.
-    // Plain vh is allowed only inside a min-width media block (desktop layouts,
-    // where the browser's bars don't collapse); every other use is blocked.
+    // Plain vh is allowed only inside a min-width media block of 36rem or more
+    // (tablets and desktop, where the bars don't collapse); everything else is blocked.
     const cssUnits = viewportUnitsOutsideDesktop(raw);
     if (cssUnits.length > 0)
       fail(

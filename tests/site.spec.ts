@@ -199,13 +199,19 @@ test.describe("scrolling stability", () => {
       expect(m.wordsUnderHeader).toBeLessThan(90);
       expect(m.sideBySide).toBe(true);
       if (m.stripBottom !== null) expect(Math.abs(m.stripBottom - m.height)).toBeLessThanOrEqual(2);
+    } else if (m.width >= 576) {
+      // Tablets: the phone's words beside the photo, both doors on screen, and
+      // the strip ends the first screen.
+      expect(m.helpBottom).toBeLessThanOrEqual(m.height);
+      expect(m.giveBottom).toBeLessThanOrEqual(m.height);
+      expect(m.sideBySide).toBe(false);
+      if (m.stripBottom !== null) expect(Math.abs(m.stripBottom - m.height)).toBeLessThanOrEqual(2);
     } else {
-      // Phones and tablets: the words start just under the header and both
-      // doors fit; tablets set the doors side by side.
+      // Phones: the words start just under the header and both doors fit.
       expect(m.wordsUnderHeader).toBeLessThanOrEqual(32);
       expect(m.helpBottom).toBeLessThanOrEqual(m.height);
       expect(m.giveBottom).toBeLessThanOrEqual(m.height);
-      expect(m.sideBySide).toBe(m.width >= 576);
+      expect(m.sideBySide).toBe(false);
     }
   });
 
@@ -326,8 +332,8 @@ test.describe("scrolling stability", () => {
         expect(other.left, `left edge at ${width}`).toBeCloseTo(ref.left, 2);
         expect(other.lines, `line breaks at ${width}`).toEqual(ref.lines);
         if (cls !== "desktop") {
-          // Phones and tablets scale the header with the banner; the name's
-          // size must scale with the width exactly (bounded on phones past 450px).
+          // Phones and tablets scale the header with the width; the name's
+          // size must scale with it exactly (bounded on phones past 450px).
           const scale = (w: number) => (cls === "phone" ? Math.min(w / 393, 1.15) : w / 768);
           expect(other.header, `header at ${width}`).toBeCloseTo(ref.header, 2);
           expect(other.name / scale(width), `name size at ${width}`).toBeCloseTo(

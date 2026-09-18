@@ -46,16 +46,21 @@
   --wide: 90vw;
   --gutter: 5vw;
 
-  /* One reference pixel per device class (see docs/DESIGN.md, "The first screen
-     by device"). Phones scale the 393px-wide reference layout, tablets the
-     768px-wide one, both by screen width, which does not change when a phone's
-     address bar collapses. Desktop keeps 1px here: its banner scales by height
-     with its own --u, and the strips under it keep their natural size. */
+  /* Reference pixels per device class (see docs/DESIGN.md, "The first screen
+     by device"), both from the screen width, which does not change when a
+     phone's address bar collapses. --rp sizes the banner's words: on phones
+     one pixel of the 393px-wide reference layout; on tablets the same words
+     scaled so their column is 56% of the screen. --sp sizes the header and the
+     two strips: the phone reference on phones, the 768px-wide tablet reference
+     on tablets, and 1px on desktop, where the banner scales by height (--u). */
   --rp: min(calc(100vw / 393), 1.15px); /* stops growing past the largest phone (about 450px) */
+  --sp: var(--rp);
 
   /* What sits above the first screen: the header, plus the preview notice
      while indexing is off (html.preview). The desktop banner fills the rest. */
-  --header-h: calc(3.75rem + 1px);
+  --header-h: calc(
+    60 * var(--sp) + 1px
+  ); /* the header bar scales with --sp on phones and tablets */
   --notice-h: calc(1.753rem + 1px);
   --top-chrome: var(--header-h);
   /* The two strips under the banner on desktop, each one line: the trust
@@ -70,13 +75,15 @@ html.preview {
 
 @media (min-width: 36rem) {
   :root {
-    --rp: calc(100vw / 768);
+    --rp: calc(100vw / 631.6); /* the phone column (353.7 reference px) as 56% of the screen */
+    --sp: calc(100vw / 768);
   }
 }
 
 @media (min-width: 56rem) {
   :root {
     --rp: 1px;
+    --sp: 1px;
   }
 }
 

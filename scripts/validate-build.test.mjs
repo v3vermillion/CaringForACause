@@ -109,9 +109,9 @@ describe("publish gate", () => {
     expectError(dir, /viewport-height units/i);
   });
 
-  it("blocks vh inside a tablet or phone media block", () => {
+  it("blocks vh inside a phone media block", () => {
     const dir = brokenBuild("index.html", (h) =>
-      h.replace("</style>", "@media (min-width:36rem){.x{height:100vh}}</style>"),
+      h.replace("</style>", "@media (min-width:30rem){.x{height:100vh}}</style>"),
     );
     expectError(dir, /viewport-height units/i);
   });
