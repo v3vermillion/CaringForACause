@@ -70,7 +70,7 @@ Everything the site needs to carry for Caring for a Cause, where each piece live
 The site is organized by what a visitor came to do, not by org chart. Two audiences, two doors, one page each.
 
 ```
-HEADER        mark + name · About · Our programs · Get involved ▾ · Contact · Donate
+HEADER        mark + name · About · Programs · Get involved · Contact · Donate
 BANNER        her photos + wordmark + one sentence + Help me / Donate     who she is, choose your path
 TRUST         since 2015 · 501(c)(3) · Toys for Tots                      proof, in a glance
 SEASON        one line: what's needed now + one link                      urgency, changes each season

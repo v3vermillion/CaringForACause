@@ -10,11 +10,11 @@ Night purple is the world; her real photos are the light in it; crimson is the s
 
 Three materials, each with a job. Use them by job, not by mood.
 
-| Material   | What it is                                                                                                  | Where it's used                                                            | Rules                                                                                           |
-| ---------- | ----------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
-| **Night**  | `--night` #1B0F2E, deepening to `--night-2` #150B26, with at most one soft radial purple glow               | The banner's veil, Get help card, About, page openers, menu, footer        | One glow per surface, never two competing. Text on it is white or `--night-soft`.               |
-| **Glass**  | White at 10% over night, 12–14 px blur, a 1 px white hairline at 35%                                        | The "Donate" door, "Call" and "Donate" buttons on night, the menu's Donate | Only over night. Never more than two glass elements in view.                                    |
-| **Signal** | `--signal` #E2202C with its own soft glow (`0 14px 40px rgb(226 32 44 / .4)`); `--crimson` #BA010C on paper | "Help me" door, "Start an application", the menu's Help me, header Donate  | One signal per screen. It marks the action she most wants taken. It is red, never pink or rose. |
+| Material   | What it is                                                                                                  | Where it's used                                                           | Rules                                                                                           |
+| ---------- | ----------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
+| **Night**  | `--night` #1B0F2E, deepening to `--night-2` #150B26, with at most one soft radial purple glow               | The banner's veil, Get help card, About, page openers, menu, footer       | One glow per surface, never two competing. Text on it is white or `--night-soft`.               |
+| **Glass**  | White at 10% over night, 12–14 px blur, a 1 px white hairline at 35%                                        | The "Donate" door, "Call" and "Donate" buttons on night                   | Only over night. Never more than two glass elements in view.                                    |
+| **Signal** | `--signal` #E2202C with its own soft glow (`0 14px 40px rgb(226 32 44 / .4)`); `--crimson` #BA010C on paper | "Help me" door, "Start an application", the menu's Help me, header Donate | One signal per screen. It marks the action she most wants taken. It is red, never pink or rose. |
 
 Paper (`--paper`) and lilac sections stay clean: high contrast, no effects. The seasonal strip is lilac, never louder than the banner above it.
 

@@ -210,36 +210,22 @@ export const hero = {
 };
 
 /**
- * Site navigation. The phone menu and the desktop links share this list;
- * an item with `children` becomes a dropdown on desktop and a group of
- * links in the menu.
+ * Site navigation: one map, four sections. The desktop links and the phone
+ * menu share it; the menu adds "Help me" before it and "Donate" after it,
+ * and nothing else (decision 38).
  */
 export type NavItem = {
   id: string;
   label: string;
   href: string;
-  /** One line under the label in the phone menu. */
-  detail: string;
-  children?: { label: string; href: string }[];
 };
 
 export const navigation = {
   items: [
-    { id: "about", label: "About", href: "/#about", detail: "Meet Tamara and the mission" },
-    { id: "programs", label: "Our programs", href: "/#programs", detail: "What we do, all year" },
-    {
-      id: "involved",
-      label: "Get involved",
-      href: "/#get-involved",
-      detail: "Choose how you'd like to help",
-      children: [
-        { label: "Sponsor a family", href: "/#sponsor" },
-        { label: "Volunteer", href: "/#volunteer" },
-        { label: "Partner", href: "/#partner" },
-        { label: "Donate", href: "/donate" },
-      ],
-    },
-    { id: "contact", label: "Contact", href: "/#contact", detail: "Phone, email, Facebook" },
+    { id: "about", label: "About", href: "/#about" },
+    { id: "programs", label: "Programs", href: "/#programs" },
+    { id: "involved", label: "Get involved", href: "/#get-involved" },
+    { id: "contact", label: "Contact", href: "/#contact" },
   ] satisfies NavItem[],
   donate: { label: "Donate", href: "/donate" },
   help: { label: "Help me", href: "/apply" },
