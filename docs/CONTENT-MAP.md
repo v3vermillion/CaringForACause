@@ -79,7 +79,7 @@ GET INVOLVED  4 tabs: Sponsor · Donate · Volunteer · Partner              one
 ABOUT         her portrait + story + "Do More" video on request           why to trust it
 MOMENTS       photo gallery (hidden until 4+ photos)                      the work, unposed
 CONTACT       call · email · Facebook · start an application              reach her
-FOOTER        wordmark · "Never give up." · doors · links · legal · EIN   reach her, verify her
+FOOTER        wordmark · "Never give up." · phone · email · Facebook · legal · EIN   reach her, verify her
 
 /apply        four-step application, sent by email                        families
 /donate       frequency + amount, then the payment page or an email       donors
