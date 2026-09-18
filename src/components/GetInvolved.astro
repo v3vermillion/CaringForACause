@@ -2,8 +2,6 @@
 import { show } from "../data/facts.ts";
 import { facts, getInvolved } from "../data/site";
 import Photo from "./Photo.astro";
-import VideoLink from "./VideoLink.astro";
-import YouTubeLite from "./YouTubeLite.astro";
 
 const { tabs } = getInvolved;
 const mailto = (subject: string) =>
@@ -43,7 +41,7 @@ const mailto = (subject: string) =>
         const label = tab.action.href ? tab.action.label : tab.action.fallbackLabel;
         const external = href.startsWith("http");
         return (
-          <div class="panel" id={tab.id} data-panel>
+          <div class:list={["panel", { "panel--text": !tab.photo }]} id={tab.id} data-panel>
             <div class="stack">
               <h3>{tab.heading}</h3>
               {tab.body.map((line) => (
@@ -59,16 +57,13 @@ const mailto = (subject: string) =>
                   {external && <span class="visually-hidden"> (opens in a new tab)</span>}
                 </a>
               </p>
-              {tab.photo && tab.video && <VideoLink video={tab.video} />}
             </div>
-            {tab.photo ? (
+            {tab.photo && (
               <Photo
                 photo={tab.photo}
                 ratio="4 / 3"
                 sizes="(min-width: 56rem) 520px, calc(100vw - 2.5rem)"
               />
-            ) : (
-              tab.video && <YouTubeLite video={tab.video} />
             )}
           </div>
         );
@@ -233,7 +228,7 @@ const mailto = (subject: string) =>
       margin-inline: 0;
       padding-inline: 0;
     }
-    .panel {
+    .panel:not(.panel--text) {
       grid-template-columns: 1fr 1fr;
       gap: var(--space-l);
       padding: var(--space-l);

@@ -2,7 +2,6 @@
 import { show } from "../data/facts.ts";
 import { facts, getHelp, links, org, programs } from "../data/site";
 import Photo from "./Photo.astro";
-import VideoLink from "./VideoLink.astro";
 import YouTubeLite from "./YouTubeLite.astro";
 
 const active = programs.filter((p) => p.active);
@@ -104,20 +103,19 @@ const applyHref = links.familyApplication ?? getHelp.action.href;
                 </div>
               </details>
             )}
-            {program.photo && program.video && <VideoLink video={program.video} />}
           </div>
-          {program.photo ? (
+          {program.video ? (
             <div class="media">
-              <Photo
-                photo={program.photo}
-                ratio={i === 0 ? "4 / 3" : "3 / 2"}
-                sizes="(min-width: 56rem) 540px, calc(100vw - 2.5rem)"
-              />
+              <YouTubeLite video={program.video} />
             </div>
           ) : (
-            program.video && (
+            program.photo && (
               <div class="media">
-                <YouTubeLite video={program.video} />
+                <Photo
+                  photo={program.photo}
+                  ratio={i === 0 ? "4 / 3" : "3 / 2"}
+                  sizes="(min-width: 56rem) 540px, calc(100vw - 2.5rem)"
+                />
               </div>
             )
           )}

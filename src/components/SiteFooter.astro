@@ -5,7 +5,6 @@ import Brand from "./Brand.astro";
 
 const phone = show(facts.phone);
 const email = show(facts.email);
-const taxExempt = claim(facts.taxExempt);
 
 const year = new Date().getFullYear();
 ---
@@ -13,6 +12,8 @@ const year = new Date().getFullYear();
 <!--
   The end of the page: her marks, her sign-off, how to reach her, and the
   legal record. No section links; a visitor here has just scrolled past them.
+  The EIN and deductibility line live where a donor decides (the trust strip
+  and the donation card), not here.
 -->
 <footer class="site-footer on-dark">
   <div class="wrap">
@@ -46,10 +47,6 @@ const year = new Date().getFullYear();
       <p>
         <strong>{claim(facts.legalName)}</strong>
         {show(facts.city)}. Serving {claim(facts.serviceArea)}.
-      </p>
-      <p>
-        A {taxExempt.section} nonprofit, EIN {claim(facts.ein)}.
-        {taxExempt.deductible && " Donations are tax-deductible to the extent allowed by law."}
       </p>
       <p class="copyright">
         &copy; {year} {claim(facts.legalName)}
@@ -152,7 +149,7 @@ const year = new Date().getFullYear();
       align-items: end;
     }
     .legal {
-      grid-template-columns: 1fr 1fr auto;
+      grid-template-columns: 1fr auto;
       align-items: end;
     }
     .copyright {
