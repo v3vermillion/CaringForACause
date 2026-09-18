@@ -20,7 +20,7 @@ Paper (`--paper`) and lilac sections stay clean: high contrast, no effects. The 
 
 ## Brand marks
 
-Both marks are vector tracings of her logo files, made once by `scripts/brand/trace-brand.py` and kept in `src/assets/brand/`:
+Both marks are vector tracings of her logo files, made once by `scripts/brand/trace-brand.py`, then reduced to integer coordinates with `npx svgo --multipass -p 0 src/assets/brand/*.svg` (a quarter of the traced size, no visible change at any size the site uses), and kept in `src/assets/brand/`:
 
 - **The wordmark** (`wordmark.svg`) is her calligraphic "Caring For A Cause" lettering. It is the first thing on the banner, white over her photos, and appears again in the footer. It inherits `color`, so it is purple on paper if ever needed there.
 - **The heart-and-hands mark** (`mark.svg`) is flat: logo purple ring, crimson heart, violet hands, white keylines. It lives in the header, the menu, the footer, and the favicon. It is never blown up as an illustration.
@@ -30,7 +30,7 @@ Nothing else is drawn. The mark is not a container for buttons.
 ## Photos
 
 - Her own photos only. Never stock, never AI-generated, never presented as something they aren't.
-- The banner is the one place words sit on photos, and only under a night veil heavy enough that white text stays above 7:1. Everywhere else, photos sit in framed panels and text sits beside or below them; the one exception is a small caption pill that overlaps a panel's edge.
+- The banner is the one place words sit on photos, and only under a night veil heavy enough that white text stays above 7:1. Everywhere else, photos sit in framed panels and text sits beside or below them.
 - Photos are slightly desaturated (0.85) on night so they belong to the purple world, and untouched in light sections.
 - Crops keep faces in the top third on phones. On desktop the banner's photo occupies the right side at close to its native 720 px width and the veil hides its left edge.
 - Every image is served at its rendered size or larger on a 2× screen (`sizes` and `widths` are set per placement).
