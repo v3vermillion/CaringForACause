@@ -64,7 +64,11 @@ export type InvolvementTab = {
   label: string;
   heading: string;
   body: string[];
-  /** When `href` is null, the button emails us and shows `fallbackLabel`. */
+  /**
+   * When `href` is null, the button emails us and shows `fallbackLabel`. A
+   * button says what it does: no label promises a form or payment page that
+   * isn't there yet (decision 35). Setting the link in `links` flips the label.
+   */
   action: { label: string; href: string | null; fallbackLabel: string };
   photo?: Photo;
 };
@@ -499,7 +503,7 @@ export const getInvolved = {
       action: {
         label: "Contact us about partnering",
         href: null,
-        fallbackLabel: "Email us about partnering",
+        fallbackLabel: "Email us to partner",
       },
       photo: {
         file: "stylist-haircut.jpg",

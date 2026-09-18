@@ -410,6 +410,42 @@ test.describe("get involved tabs", () => {
   });
 });
 
+test.describe("honest buttons", () => {
+  // Until the payment page and sign-up forms exist in her name, buttons open
+  // an email draft, and every such button says so. No button promises a
+  // system that isn't there yet.
+  for (const path of ["/", "/donate", "/apply"]) {
+    test(`every button on ${path} that opens an email says so`, async ({ page }) => {
+      await page.goto(path);
+      const mailButtons = page.locator('a.button[href^="mailto:"]');
+      const count = await mailButtons.count();
+      for (let i = 0; i < count; i++) {
+        await expect(mailButtons.nth(i)).toHaveText(/email/i);
+      }
+      const otherButtons = page.locator('a.button:not([href^="mailto:"])');
+      const others = await otherButtons.count();
+      for (let i = 0; i < others; i++) {
+        await expect(otherButtons.nth(i)).not.toHaveText(/email us/i);
+      }
+    });
+  }
+
+  test("the sponsor and partner tabs ask for an email until their forms exist", async ({
+    page,
+  }) => {
+    await page.goto("/");
+    await expect(page.locator("#sponsor a.button")).toHaveText("Email us to sponsor");
+    await expect(page.locator("#partner a.button")).toHaveText("Email us to partner");
+    await expect(page.locator("#volunteer a.button")).toHaveAttribute("href", /^https:/);
+    await expect(page.locator("#donate a.button")).toHaveAttribute("href", "/donate");
+  });
+
+  test("sending the application says it goes by email", async ({ page }) => {
+    await page.goto("/apply");
+    await expect(page.locator("[data-send]")).toHaveText(/by email/i);
+  });
+});
+
 test.describe("donation page", () => {
   test("the chosen amount and frequency travel with the giving link", async ({ page }) => {
     await page.goto("/donate");

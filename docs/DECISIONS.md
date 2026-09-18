@@ -221,3 +221,9 @@ Short records of the technical choices behind this site, so anyone taking it ove
 **Decision:** The footer's legal record is the legal name, city and service area, and the copyright line. The 501(c)(3) status, EIN, and deductibility sentence appear where a donor decides: the trust strip on the home page and the donation card on `/donate`. Structured data still carries the EIN on every page.
 
 **Why:** On `/donate` the footer sat about two hundred pixels below the donation card and repeated its last paragraph word for word. Saying it once, at the point of decision, reads as care; saying it twice reads as boilerplate.
+
+## 35. A button says what it does
+
+**Decision:** Until the payment page and the sponsor sign-up exist in her name, every button that opens an email draft says so: "Email us to sponsor", "Email us to volunteer" (if the volunteer form ever goes away), "Email us to partner", "Donate by email" on `/donate`, and "Send my application by email" on `/apply`. Each of those buttons carries a second label that appears only when the matching entry in `links` is set: "Sign up to sponsor", "Fill out the volunteer form", and "Donate" on `/donate`. The Donate tab, the header pill, and the banner door say "Donate" because they lead to `/donate`, a page that exists. A test checks that every email button on the home, donate, and apply pages says "email" and that no other button does.
+
+**Why:** A button that says "Give online" or "Sign up" and then opens a mail app breaks the promise it just made, and a visitor who expected a form may abandon the draft. Naming the email keeps the promise small and true, and the switch is one line in `links` when the accounts are created.
