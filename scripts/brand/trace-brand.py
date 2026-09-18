@@ -103,6 +103,9 @@ out = (
 open(BRAND + "mark.svg", "w").write(out)
 print("mark.svg", len(out), "bytes, viewBox", x0, y0, w, h)
 
+# Afterwards, reduce both files to integer coordinates (a quarter of the size, no
+# visible change): npx svgo --multipass -p 0 src/assets/brand/*.svg
+
 # Rasterize previews for review (cairosvg not present; use PIL by drawing? skip) -> Chromium will render.
 
 # --- Video poster crop ----------------------------------------------------
