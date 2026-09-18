@@ -133,7 +133,7 @@ export const org = {
 } as const;
 
 export const links = {
-  /** Free donation page in her name (e.g. Zeffy). Until set, Donate opens the Donate tab. */
+  /** Payment page in her name (e.g. Zeffy). Until set, /donate arranges gifts by email. */
   donate: null as string | null,
   /** Online family application. Until set, families are asked to call or email. */
   familyApplication: null as string | null,
@@ -195,8 +195,6 @@ export const hero = {
       href: "/donate",
     },
   },
-  /** The quiet third option under the doors. */
-  more: { label: "Sponsor a family, volunteer, or partner with us", href: "/#get-involved" },
 };
 
 /**
@@ -298,10 +296,11 @@ export const donatePage = {
   ],
   /** Shown while `links.donate` is not set: giving is arranged by email. */
   emailSubject: "Donation",
-  continueLabel: "Continue to secure payment",
-  emailLabel: "Email us to give",
+  /** Every entrance to giving says the same word; only the mechanism differs. */
+  continueLabel: "Donate",
+  emailLabel: "Donate by email",
   emailNote:
-    "Online payments open once our secure giving page is set up. Until then, choose an amount and email us; we'll arrange it with you directly.",
+    "Online payments open once our secure giving page is set up. Until then, choose an amount and the button below opens an email to us; we'll arrange it with you directly.",
   otherWays: {
     heading: "Other ways to give",
     items: [
@@ -482,7 +481,7 @@ export const getInvolved = {
         "Donations help provide diapers, holiday meals, gifts, and school supplies for local families.",
         `${claim(facts.legalName)} is a ${claim(facts.taxExempt).section} nonprofit (EIN ${claim(facts.ein)}), so donations are tax-deductible.`,
       ],
-      action: { label: "Give online", href: "/donate", fallbackLabel: "Give online" },
+      action: { label: "Donate", href: "/donate", fallbackLabel: "Donate" },
       photo: {
         file: "families-banner.jpg",
         alt: "Families and children in front of a Caring for a Cause banner",

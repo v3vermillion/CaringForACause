@@ -42,7 +42,6 @@ Three pages. The home page is the route map; the two doors lead to their own pag
 │  her wordmark · Together we can.              │
 │  Headline · subhead                           │
 │  [ Help me ]  [ Donate ]     equal doors      │  → /apply, /donate
-│  Sponsor a family, volunteer, or partner →    │
 ├───────────────────────────────────────────────┤
 │ Trust facts: since 2015 · 501(c)(3) + EIN ·   │  same night ground
 │              Toys for Tots partner            │

@@ -81,10 +81,10 @@ const description = `${donatePage.intro} ${claim(facts.legalName)} is a ${taxExe
             </a>
           ) : (
             <>
+              <p class="note">{donatePage.emailNote}</p>
               <a class="button button--signal go" href={mailto} data-email>
                 {donatePage.emailLabel}
               </a>
-              <p class="note">{donatePage.emailNote}</p>
             </>
           )}
 
