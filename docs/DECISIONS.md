@@ -197,3 +197,9 @@ Short records of the technical choices behind this site, so anyone taking it ove
 **Decision:** `scripts/validate-build.mjs` runs its page checks (title, description, one h1, canonical URL, link preview, indexing, preview notice, structured data, ids and in-page links, alt text, referenced files, placeholders, viewport units) on `index.html`, `donate/index.html`, `apply/index.html`, and `404.html`. Links written as `/#section` are checked against the home page's ids from any page. The browser suite covers the three pages, the dropdown, the menu's contents, the header-to-footer alignment, the door sizes, the phone-fold rule, and both forms end to end.
 
 **Why:** A one-page gate would have let a broken donation page publish.
+
+## 31. The footer carries only what belongs at the end
+
+**Decision:** The footer is her marks, "Never give up.", phone, email, Facebook, and the legal record (legal name, city and service area, 501(c)(3) status with EIN and the deductibility line, copyright). The "Programs" and "Get involved" link columns and the repeated Help me / Donate buttons are gone.
+
+**Why:** Those columns listed the same eight items a visitor had just scrolled past as jump tiles, full rows, and tabs, and the doors already appear in the banner, the menu, and the Contact section. A third listing at the end of the page is noise, not navigation.
