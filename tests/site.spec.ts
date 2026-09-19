@@ -473,6 +473,26 @@ test.describe("the header by device", () => {
 });
 
 test.describe("every page by device", () => {
+  // Text must measure linearly for this test to mean anything: a paragraph
+  // at seven tenths must be seven tenths as wide, or it wraps differently
+  // for a reason that is not the stylesheet's. Chromium on Linux positions
+  // glyphs on whole pixels at scale 1 and fractionally above it, so the
+  // pages are measured at scale 2 (layout is in CSS pixels either way), and
+  // an engine that still rounds is skipped with the reason.
+  test.use({ deviceScaleFactor: 2 });
+  const textScalesLinearly = (page: import("@playwright/test").Page) =>
+    page.evaluate(() => {
+      const probe = document.createElement("span");
+      probe.textContent =
+        "Caring for a Cause Supportive Services Inc. serves Central Indiana families.";
+      probe.style.cssText = "position:absolute;white-space:nowrap;font:400 16px var(--font-body)";
+      document.body.append(probe);
+      const wide = probe.getBoundingClientRect().width;
+      probe.style.fontSize = "11.2px";
+      const narrow = probe.getBoundingClientRect().width;
+      probe.remove();
+      return Math.abs(narrow / wide - 0.7) < 0.002;
+    });
   // Every size on the site is a multiple of its class's reference pixel (the
   // root font follows --sp, docs/DESIGN.md "Every screen by device"), so a
   // page approved on the reference device must be the same picture, scaled,
@@ -609,6 +629,12 @@ test.describe("every page by device", () => {
       // Sets its own viewports, so once per engine is enough.
       test.skip(!testInfo.project.name.startsWith("desktop-"), "runs once per engine");
       test.slow(); // two dozen page loads
+      await page.goto("/");
+      await fontsSettled(page);
+      test.skip(
+        !(await textScalesLinearly(page)),
+        "this engine positions glyphs on whole pixels, so text widths do not scale linearly",
+      );
       const s0 = scale(reference[0]);
       for (const path of [...pages, "/404"]) {
         const ref = await measure(page, reference[0], reference[1], path);
