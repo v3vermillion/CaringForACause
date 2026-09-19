@@ -473,12 +473,16 @@ test.describe("the header by device", () => {
 });
 
 test.describe("every page by device", () => {
-  // Text must measure linearly for this test to mean anything: a paragraph
-  // at seven tenths must be seven tenths as wide, or it wraps differently
-  // for a reason that is not the stylesheet's. Chromium on Linux positions
-  // glyphs on whole pixels at scale 1 and fractionally above it, so the
-  // pages are measured at scale 2 (layout is in CSS pixels either way), and
-  // an engine that still rounds is skipped with the reason.
+  // Layout must scale linearly for this test to mean anything: a paragraph
+  // at seven tenths must be seven tenths as wide and tall, or it wraps or
+  // stacks differently for a reason that is not the stylesheet's. Only
+  // Chromium does, and only above device scale 1 (at scale 1 it positions
+  // glyphs on whole pixels); Firefox rounds line heights and WebKit wraps
+  // small text differently, so on CI they flipped lines the stylesheet did
+  // not. The pages are measured in Chromium at scale 2 (layout is in CSS
+  // pixels either way), with a probe that confirms the text is linear there.
+  // The drift this catches is in the stylesheet, so one exact engine is
+  // enough; the header's pixel comparison runs in all three.
   test.use({ deviceScaleFactor: 2 });
   const textScalesLinearly = (page: import("@playwright/test").Page) =>
     page.evaluate(() => {
@@ -626,8 +630,11 @@ test.describe("every page by device", () => {
   ];
   for (const { cls, reference, others, scale } of classes) {
     test(`every ${cls} shows the same page composition`, async ({ page }, testInfo) => {
-      // Sets its own viewports, so once per engine is enough.
-      test.skip(!testInfo.project.name.startsWith("desktop-"), "runs once per engine");
+      // Sets its own viewports; Chromium only (see above).
+      test.skip(
+        testInfo.project.name !== "desktop-chrome",
+        "layout scales linearly in Chromium only",
+      );
       test.slow(); // two dozen page loads
       await page.goto("/");
       await fontsSettled(page);
