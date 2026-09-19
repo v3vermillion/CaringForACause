@@ -720,7 +720,7 @@ const heard = [
     display: grid;
     gap: 0.4rem;
     padding-top: 0.6rem;
-    border-top: 3px solid var(--rule);
+    border-top: 0.1875rem solid var(--rule);
     font-size: var(--step--1);
     color: var(--muted);
   }
@@ -767,7 +767,7 @@ const heard = [
     gap: var(--space-m);
     margin: 0;
     padding: var(--space-m);
-    border: 1px solid var(--rule);
+    border: var(--hairline) solid var(--rule);
     border-radius: var(--r-card);
     background: #fff;
   }
@@ -895,7 +895,7 @@ const heard = [
     display: flex;
     align-items: flex-start;
     gap: 0.75rem;
-    min-height: 44px;
+    min-height: max(44px, 2.75rem);
     cursor: pointer;
   }
 
@@ -934,7 +934,7 @@ const heard = [
     padding: var(--space-m);
     border-radius: var(--r-card);
     background: #fff;
-    border: 1px solid var(--rule);
+    border: var(--hairline) solid var(--rule);
   }
 
   .done[hidden] {
@@ -945,7 +945,7 @@ const heard = [
     font-size: var(--step-2);
   }
 
-  @media (min-width: 40rem) {
+  @media (min-width: 36rem) {
     .step-title {
       display: block;
     }

@@ -311,12 +311,12 @@ const cycle = slides.length * 7;
        down, so the picture is the same on every computer. The width bounds
        it too (a portrait screen such as an iPad Pro 12.9 upright is tall but
        narrow), so the text column never outgrows its 45% of the screen and
-       the headline keeps its three lines. Below three quarters the type would
+       the headline keeps its three lines. Below seven tenths the type would
        get too small, so the scale stops there and the season strip drops just
        under the fold instead. */
     .hero {
       --u: clamp(
-        0.75px,
+        0.7px,
         min(calc((100vh - var(--top-chrome) - var(--strips-h)) / 589), calc(100vw / 1280)),
         2px
       );

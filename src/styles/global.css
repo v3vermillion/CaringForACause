@@ -21,38 +21,53 @@
   --font-display: "Bricolage Grotesque Variable", "Arial Rounded MT Bold", system-ui, sans-serif;
   --font-body: "Atkinson Hyperlegible Next", system-ui, -apple-system, "Segoe UI", sans-serif;
 
-  /* Type scale (major third, 1.25) on an 18px base for easy reading on phones. */
+  /* Type scale (major third, 1.25) on an 18px base for easy reading on phones.
+     The large steps and the section spacing take one value per device class
+     (set again at 36rem and 56rem below) rather than a viewport-width
+     formula: the root font already follows the class scale, and a vw term
+     would keep growing where that scale stops. Each value is what the old
+     formula gave on the class's reference screen. */
   --step--1: 0.9rem;
   --step-0: 1.125rem;
   --step-1: 1.406rem;
-  --step-2: clamp(1.6rem, 1.3rem + 1.2vw, 1.9rem);
-  --step-3: clamp(1.9rem, 1.4rem + 2vw, 2.75rem);
-  --step-4: clamp(2.25rem, 1.5rem + 3.6vw, 4rem);
+  --step-2: 1.6rem;
+  --step-3: 1.9rem;
+  --step-4: 2.384rem;
 
   --space-xs: 0.5rem;
   --space-s: 1rem;
   --space-m: 1.5rem;
   --space-l: 2.5rem;
-  --space-xl: clamp(3rem, 2rem + 5vw, 6rem);
+  --space-xl: 3.228rem;
 
   /* Three radii: pills, cards, and images. Nothing else. */
   --r-pill: 999px;
-  --r-card: 20px;
-  --r-img: 14px;
+  --r-card: 1.25rem;
+  --r-img: 0.875rem;
+  /* Rules and card edges: one pixel of the class scale, never thinner than a
+     device can draw, so they scale on a 2560px monitor like everything else. */
+  --hairline: max(1px, 0.0625rem);
 
   --measure: 62ch;
-  /* The content column is 90% of the screen at every size, so the left edge
-     everything shares is always 5% in, whatever the device. */
-  --wide: 90vw;
-  --gutter: 5vw;
+  /* The content column is 90% of the class's reference width, scaled, so it
+     is 90% of the screen with a 5% gutter each side on every device. Where
+     the scale stops (a phone-class window wider than about 450px, a desktop
+     wider than 2560px) the column stops with it and sits centred, so the
+     page never reflows inside a class. (Written as plain min()/max(): Chromium
+     computes "100% - 2 * var(--gutter)" as 0 when the gutter nests a calc()
+     around a min().) */
+  --wide: min(90vw, 406.755px); /* 353.7 reference px times the 1.15 cap of --rp */
+  --gutter: max(5vw, 50vw - 203.378px);
 
   /* Reference pixels per device class (see docs/DESIGN.md, "The first screen
      by device"), both from the screen width, which does not change when a
      phone's address bar collapses. --rp sizes the banner's words: on phones
      one pixel of the 393px-wide reference layout; on tablets the same words
      scaled so their column is 56% of the screen. --sp sizes the header and the
-     two strips: the phone reference on phones, the 768px-wide tablet reference
-     on tablets, and 1px on desktop, where the banner scales by height (--u). */
+     two strips, and through the root font size every rem on the site: the
+     phone reference on phones, the 768px-wide tablet reference on tablets, and
+     the 1280px-wide reference on desktop (the desktop banner alone scales by
+     height, --u, so it can end at the season strip). */
   --rp: min(calc(100vw / 393), 1.15px); /* stops growing past the largest phone (about 450px) */
   --sp: var(--rp);
 
@@ -66,7 +81,7 @@
   /* The two strips under the banner on desktop, each one line: the trust
      facts (1rem padding twice, a 0.9rem line at 1.6, two borders) and the
      season strip (0.6rem padding twice, a 44px link, one border). */
-  --strips-h: calc(2rem + 1.44rem + 2px + 1.2rem + 44px + 1px);
+  --strips-h: calc(2rem + 1.44rem + 2px + 1.2rem + max(44px, 44 * var(--sp)) + 1px);
 }
 
 html.preview {
@@ -77,14 +92,36 @@ html.preview {
   :root {
     --rp: calc(100vw / 631.6); /* the phone column (353.7 reference px) as 56% of the screen */
     --sp: calc(100vw / 768);
+    --wide: 90vw;
+    --gutter: 5vw;
+    --step-2: 1.876rem;
+    --step-3: 2.36rem;
+    --step-4: 3.228rem;
+    --space-xl: 4.4rem;
   }
 }
 
 @media (min-width: 56rem) {
   :root {
     --rp: 1px;
-    --sp: 1px;
+    --sp: min(calc(100vw / 1280), 2px); /* stops growing past 2560px */
+    --wide: min(90vw, 2304px); /* 1152 reference px times the 2px cap of --sp */
+    --gutter: max(5vw, 50vw - 1152px);
+    --step-2: 1.9rem;
+    --step-3: 2.75rem;
+    --step-4: 4rem;
+    --space-xl: 6rem;
   }
+}
+
+/* Every rem on the site follows the class scale, so a section approved on the
+   reference device is the same picture, scaled, on every device of its class.
+   There is no floor: a floor would stop the text while the column kept
+   shrinking, and the page would reflow. The smallest root font is at each
+   class's narrowest width (13px on a 320px phone, 12px on a 576px tablet,
+   11.2px in an 896px desktop window), and browser zoom still enlarges it. */
+html {
+  font-size: calc(16 * var(--sp));
 }
 
 *,
@@ -188,7 +225,7 @@ a {
 :focus-visible {
   outline: 3px solid var(--focus);
   outline-offset: 3px;
-  border-radius: 4px;
+  border-radius: 0.25rem;
 }
 
 .wrap {
@@ -254,7 +291,7 @@ a {
   background: var(--purple);
   color: #fff;
   font-weight: 700;
-  border-radius: 8px;
+  border-radius: 0.5rem;
 }
 
 .skip-link:focus {
@@ -267,10 +304,13 @@ a {
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  min-height: 48px;
-  padding: 0.7rem 1.5rem;
+  min-height: max(44px, 3rem);
+  /* The 0.125rem ring of the outline and glass variants is an inset shadow,
+     not a border: a border snaps to whole pixels and would shift the text
+     by a pixel between devices. The padding includes its width. */
+  padding: 0.825rem 1.625rem;
   border-radius: var(--r-pill);
-  border: 2px solid transparent;
+  border: 0;
   font-family: var(--font-display);
   font-weight: 700;
   font-size: var(--step-0);
@@ -279,7 +319,7 @@ a {
   cursor: pointer;
   transition:
     background-color 150ms ease,
-    border-color 150ms ease,
+    box-shadow 150ms ease,
     transform 150ms ease;
 }
 
@@ -319,7 +359,7 @@ a {
 .button--outline {
   background: transparent;
   color: var(--purple);
-  border-color: var(--purple);
+  box-shadow: inset 0 0 0 0.125rem var(--purple);
 }
 
 .button--outline:hover {
@@ -329,7 +369,7 @@ a {
 /* Glass: white over dark ground. Only on night surfaces. */
 .button--glass {
   background: rgb(255 255 255 / 0.1);
-  border-color: rgb(255 255 255 / 0.35);
+  box-shadow: inset 0 0 0 0.125rem rgb(255 255 255 / 0.35);
   color: #fff;
   -webkit-backdrop-filter: blur(12px);
   backdrop-filter: blur(12px);
@@ -337,7 +377,7 @@ a {
 
 .button--glass:hover {
   background: rgb(255 255 255 / 0.18);
-  border-color: rgb(255 255 255 / 0.55);
+  box-shadow: inset 0 0 0 0.125rem rgb(255 255 255 / 0.55);
 }
 
 .button-row {
@@ -351,7 +391,7 @@ a {
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
-  min-height: 44px;
+  min-height: max(44px, 2.75rem);
   font-family: var(--font-display);
   font-weight: 700;
   text-decoration: none;
@@ -392,10 +432,10 @@ a {
 .select,
 .textarea {
   width: 100%;
-  min-height: 52px;
+  min-height: max(44px, 3.25rem);
   padding: 0.7rem 0.9rem;
-  border: 2px solid var(--rule);
-  border-radius: 12px;
+  border: 0.125rem solid var(--rule);
+  border-radius: 0.75rem;
   background: #fff;
   color: var(--ink);
   font: inherit;
@@ -446,16 +486,16 @@ a {
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  min-height: 48px;
-  padding: 0.55rem 1rem;
-  border: 2px solid var(--rule);
+  min-height: max(44px, 3rem);
+  padding: 0.675rem 1.125rem; /* includes the 0.125rem ring below */
   border-radius: var(--r-pill);
   background: #fff;
+  box-shadow: inset 0 0 0 0.125rem var(--rule); /* a ring, not a border: see .button */
   font-family: var(--font-display);
   font-weight: 700;
   cursor: pointer;
   transition:
-    border-color 150ms ease,
+    box-shadow 150ms ease,
     background-color 150ms ease;
 }
 
@@ -471,7 +511,7 @@ a {
 }
 
 .choice:has(input:checked) {
-  border-color: var(--purple);
+  box-shadow: inset 0 0 0 0.125rem var(--purple);
   background: var(--purple);
   color: #fff;
 }
@@ -492,7 +532,7 @@ a {
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
-  min-height: 44px;
+  min-height: max(44px, 2.75rem);
   margin-bottom: var(--space-s);
   color: var(--night-soft);
   font-weight: 700;

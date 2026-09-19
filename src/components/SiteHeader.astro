@@ -188,7 +188,7 @@ const { items, donate, help } = navigation;
   .nav-link {
     display: inline-flex;
     align-items: center;
-    min-height: 44px;
+    min-height: max(44px, 2.75rem);
     padding: 0 0.75rem;
     border-radius: var(--r-pill);
     color: var(--ink);
@@ -267,6 +267,9 @@ const { items, donate, help } = navigation;
     .brand {
       font-size: calc(20 * var(--sp));
     }
+    .menu-label {
+      font-size: 2.448rem;
+    }
   }
 
   @media (min-width: 56rem) {
@@ -284,8 +287,11 @@ const { items, donate, help } = navigation;
       margin-right: 0;
     }
     .donate {
-      min-height: 44px;
+      min-height: max(44px, 2.75rem);
       font-size: 1rem;
+    }
+    .menu-label {
+      font-size: 2.5rem;
     }
   }
 
@@ -362,8 +368,8 @@ const { items, donate, help } = navigation;
     display: grid;
     place-items: center;
     flex: none;
-    width: 44px;
-    height: 44px;
+    width: max(44px, 2.75rem);
+    height: max(44px, 2.75rem);
     border: 1px solid rgb(255 255 255 / 0.3);
     border-radius: 50%;
     background: rgb(255 255 255 / 0.08);
@@ -410,7 +416,7 @@ const { items, donate, help } = navigation;
   .menu-label {
     font-family: var(--font-display);
     font-weight: 800;
-    font-size: clamp(1.75rem, 1.2rem + 2.6vw, 2.5rem);
+    font-size: 1.839rem; /* one value per class, like --step-3 (see the media blocks above) */
     line-height: 1.05;
     letter-spacing: -0.03em;
   }

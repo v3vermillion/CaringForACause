@@ -285,7 +285,8 @@ test.describe("scrolling stability", () => {
         wordmark: share(r(".hero .brand-wordmark")),
         h1: share(r(".hero h1")),
         doors: share(r(".doors")),
-        left: r(".hero .brand-wordmark").left / innerWidth,
+        // Her lettering starts on the header's left edge, on every screen.
+        left: r(".hero .brand-wordmark").left - r(".site-header .brand").left,
         lines: [lines(".hero h1"), lines(".hero .sub"), lines(".door--help .door-body")],
         // The header as a share of the text block's height, and its name's size.
         header: r(".site-header").height / hero.height,
@@ -329,7 +330,8 @@ test.describe("scrolling stability", () => {
           expect(other[key][0], `${key} top at ${width}`).toBeCloseTo(ref[key][0], 2);
           expect(other[key][1], `${key} height at ${width}`).toBeCloseTo(ref[key][1], 2);
         }
-        expect(other.left, `left edge at ${width}`).toBeCloseTo(ref.left, 2);
+        expect(other.left, `left edge at ${width}`).toBeCloseTo(0, 0);
+        expect(ref.left, `left edge at ${reference[0]}`).toBeCloseTo(0, 0);
         expect(other.lines, `line breaks at ${width}`).toEqual(ref.lines);
         if (cls !== "desktop") {
           // Phones and tablets scale the header with the width; the name's
@@ -341,6 +343,204 @@ test.describe("scrolling stability", () => {
             ref.name / scale(reference[0]),
             0,
           );
+        }
+      }
+    });
+  }
+});
+
+test.describe("every page by device", () => {
+  // Every size on the site is a multiple of its class's reference pixel (the
+  // root font follows --sp, docs/DESIGN.md "Every screen by device"), so a
+  // page approved on the reference device must be the same picture, scaled,
+  // on every device of the class: every element at the same place, the same
+  // size, the same font size, wrapping to the same lines. The one exception
+  // is the 44px tap target: a control the scale would make smaller stays 44px,
+  // and everything under it moves down by that much. The first screen of the
+  // home page has its own tests above.
+  type Box = {
+    tag: string;
+    x: number;
+    y: number;
+    w: number;
+    h: number;
+    fs: number;
+    full: boolean; // spans the whole screen (a section's background)
+    top: number;
+    bottom: number;
+    left: number;
+    right: number;
+  };
+  const selector =
+    "section, article, div, form, ul, ol, details, h1, h2, h3, h4, p, li, a, button, summary, label, input, select, textarea, img, svg, [role=tab]";
+  const measure = async (
+    page: import("@playwright/test").Page,
+    width: number,
+    height: number,
+    path: string,
+  ): Promise<Box[]> => {
+    await page.setViewportSize({ width, height });
+    await page.goto(path);
+    await page.evaluate(() => document.fonts.ready);
+    return page.evaluate((selector) => {
+      // Positions are measured from under the home page's first screen, or
+      // from the top of main: the header has its own tests above.
+      const first = document.querySelector(".first-screen");
+      const origin =
+        (first ?? document.querySelector("main"))!.getBoundingClientRect()[
+          first ? "bottom" : "top"
+        ] + scrollY;
+      const left = document.querySelector("main .wrap")!.getBoundingClientRect().left;
+      const boxes: Box[] = [];
+      for (const el of document.querySelectorAll(
+        `main :is(${selector}), footer :is(${selector})`,
+      )) {
+        if (first?.contains(el)) continue;
+        const r = el.getBoundingClientRect();
+        const cs = getComputedStyle(el);
+        if (r.width === 0 || r.height === 0 || cs.visibility === "hidden" || cs.opacity === "0") {
+          continue;
+        }
+        boxes.push({
+          tag:
+            el.tagName.toLowerCase() +
+            (el.textContent ? ` "${el.textContent.trim().slice(0, 20)}"` : ""),
+          x: r.left - left,
+          y: r.top + scrollY - origin,
+          w: r.width,
+          h: r.height,
+          fs: parseFloat(cs.fontSize),
+          full: r.width >= innerWidth - 1,
+          top: r.top + scrollY,
+          bottom: r.bottom + scrollY,
+          left: r.left,
+          right: r.right,
+        });
+      }
+      return boxes;
+    }, selector);
+  };
+  // The length of the union of vertical intervals, so a row of floored
+  // controls counts once.
+  const unionHeight = (boxes: Box[]) => {
+    const sorted = boxes.map((b) => [b.top, b.bottom]).sort((a, b) => a[0] - b[0]);
+    let total = 0;
+    let end = -Infinity;
+    for (const [top, bottom] of sorted) {
+      if (bottom <= end) continue;
+      total += bottom - Math.max(top, end);
+      end = bottom;
+    }
+    return total;
+  };
+  const inside = (outer: Box, inner: Box) =>
+    outer !== inner &&
+    outer.top <= inner.top + 0.5 &&
+    outer.bottom >= inner.bottom - 0.5 &&
+    outer.left <= inner.left + 0.5 &&
+    outer.right >= inner.right - 0.5;
+  const tolerance = 2; // reference pixels
+  const area = (b: Box) => b.w * b.h;
+  const classes: {
+    cls: string;
+    reference: [number, number];
+    others: [number, number][];
+    scale: (width: number) => number;
+  }[] = [
+    {
+      cls: "phone",
+      reference: [393, 659],
+      others: [
+        [320, 568],
+        [360, 780],
+        [440, 763],
+        [540, 720],
+      ],
+      scale: (w) => Math.min(w / 393, 1.15),
+    },
+    {
+      cls: "tablet",
+      reference: [768, 1024],
+      others: [
+        [576, 900],
+        [712, 1138],
+        [834, 1194],
+      ],
+      scale: (w) => w / 768,
+    },
+    {
+      cls: "desktop",
+      reference: [1280, 800],
+      others: [
+        [896, 700],
+        [1024, 1366],
+        [1366, 657],
+        [1920, 950],
+        [2560, 1300],
+      ],
+      scale: (w) => Math.min(w / 1280, 2),
+    },
+  ];
+  for (const { cls, reference, others, scale } of classes) {
+    test(`every ${cls} shows the same page composition`, async ({ page }, testInfo) => {
+      // Sets its own viewports, so once per engine is enough.
+      test.skip(!testInfo.project.name.startsWith("desktop-"), "runs once per engine");
+      const s0 = scale(reference[0]);
+      for (const path of [...pages, "/404"]) {
+        const ref = await measure(page, reference[0], reference[1], path);
+        for (const [width, height] of others) {
+          const at = `${path} at ${width} × ${height}`;
+          const other = await measure(page, width, height, path);
+          const s = scale(width);
+          expect(
+            other.map((b) => b.tag),
+            `elements on ${at}`,
+          ).toEqual(ref.map((b) => b.tag));
+          // A control at its 44px floor (plus up to a hairline border each
+          // side), which the scale would have made smaller.
+          const floored = other.filter(
+            (b, i) => b.h >= 43.25 && b.h <= 46.5 && (ref[i].h / s0) * s < b.h - 0.5,
+          );
+          // The innermost floored box of each (a details element around its
+          // summary shares its box; the later one in document order is inside).
+          const leaves = floored.filter((b, k) => !floored.some((c, m) => m > k && inside(b, c)));
+          const growth = (subset: Box[]) =>
+            unionHeight(subset) / s - unionHeight(subset.map((b) => ref[other.indexOf(b)])) / s0;
+          const problems: string[] = [];
+          other.forEach((b, i) => {
+            const a = ref[i];
+            const check = (key: "x" | "y" | "w" | "h" | "fs", allowance: number) => {
+              const want = a[key] / s0;
+              const got = b[key] / s;
+              // Hairlines round to whole pixels and photos to whole rows, so
+              // the position far down a page may be off by a fraction of a
+              // percent; nothing else is allowed.
+              const slack = key === "y" ? Math.abs(want) * 0.0005 : 0;
+              if (Math.abs(want - got) > tolerance + allowance + slack) {
+                problems.push(
+                  `${b.tag} ${key}: ${want.toFixed(1)} expected, ${got.toFixed(1)} at ${width}`,
+                );
+              }
+            };
+            // A full-bleed box follows the screen, not the column, which on
+            // a phone-class window past 450px is narrower than the screen.
+            if (!b.full) {
+              check("x", 0);
+              check("w", 0);
+            }
+            check("fs", 0);
+            // Height: a floored control is exempt; a box around floored
+            // controls may grow by their growth.
+            if (!floored.includes(b)) check("h", growth(leaves.filter((c) => inside(b, c))));
+            // Position: everything under a floored control moves down by its
+            // growth, and anything sharing a box with one (a heading centred
+            // beside a stack of buttons) may move by the growth inside that box.
+            const box = other
+              .filter((c) => inside(c, b) && leaves.some((leaf) => inside(c, leaf)))
+              .sort((c, d) => area(c) - area(d))[0];
+            check("y", growth(leaves.filter((c) => c.top < b.bottom || (box && inside(box, c)))));
+          });
+          expect(problems, `composition on ${at}`).toEqual([]);
         }
       }
     });

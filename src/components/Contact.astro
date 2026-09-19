@@ -73,9 +73,9 @@ const email = show(facts.email);
   .card {
     display: grid;
     gap: 0.2rem;
-    min-height: 44px;
+    min-height: max(44px, 2.75rem);
     padding: 1rem 1.25rem;
-    border: 1px solid var(--rule);
+    border: var(--hairline) solid var(--rule);
     border-radius: var(--r-card);
     background: #fff;
     color: var(--ink);
@@ -124,7 +124,7 @@ const email = show(facts.email);
     border-color: var(--signal);
   }
 
-  @media (min-width: 40rem) {
+  @media (min-width: 36rem) {
     .cards {
       grid-template-columns: 1fr 1fr;
     }
