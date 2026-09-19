@@ -269,3 +269,28 @@ Short records of the technical choices behind this site, so anyone taking it ove
 **Decision:** The application form is shown from the first paint for visitors with JavaScript, by a one-line inline script in the page head that marks the document (`html.js`) before anything is painted, with the form hidden only under `html:not(.js)`; it is no longer revealed by the page's own script. Every font face the first paint uses is preloaded, the bold body face and the header's one-glyph face included, not only the two largest.
 
 **Why:** Lighthouse in CI measured a cumulative layout shift of 0.21 on the application page, three runs alike, on a commit that changed no page: the page's module script, which un-hid the form, ran after the first paint on that runner, and the footer jumped down by the form's height. The same race reproduced locally one run in three. A face that is not preloaded is requested only when layout first needs it, which on a slow machine is after the first paint too, and every bold label would move when it arrived. Both are the same rule: what the first paint shows must be the final layout. The form's no-JavaScript path (the noscript note) is unchanged, and Lighthouse now measures a shift of zero on every page in four runs of four.
+
+## 43. The footer carries the map and the one action
+
+**Decision:** The footer is three groups, side by side on desktop and stacked on a phone, with no rules between them. Her marks come first. On desktop they stack rather than sitting in a row: the heart hovers the footer's top left corner, half a gutter in from the left edge and the same distance down from the top, clear of both rather than flush to either, and lifted above the line the column heads start on so it reads as the region's anchor rather than as the first item in a row of three, and her lettering tucks up into the heart's point at the same left edge, where it has the whole column to itself instead of the leftover beside the heart. The two marks touch rather than sitting apart, so they read as one lockup. The column's width is her lettering's width, which is what makes the Donate button centred in the column and centred under her name the same thing. The button carries the banner door's own signal treatment, and "Never give up." sits under it. On a phone the marks stay in a row, where the lockup already fills the screen. "Explore" lists the same five entrances the header and the phone menu draw: Help me, About, Programs, Get involved, Contact, each with a chevron. "Connect with us" keeps the phone, email and Facebook rows. Each column head carries a short rule in the divider's gradient. The legal record stays a single colophon line.
+
+The two lists hold their 44px floor under `(pointer: coarse)` rather than at every width; a row is 2.75rem otherwise, which is 44px at the reference width and scales with the class.
+
+**Why:** This reverses decision 31, which took the link columns out. That decision was right about the columns as they were: two lists of the same eight items, duplicating the jump tiles and the tabs a visitor had just scrolled past. What goes back is different. It is one list, the same five entrances as every other navigation on the site (decision 38), so a visitor who has read to the end can move without scrolling back up, and the page's one action is there where the decision gets made rather than only at the top. The vertical rules of the second reference are left out: three groups with their own heads already read as three groups, and rules would box them. On the floor: eight rows each pinned to 44px made the footer 52 scaled pixels taller in an 896px window than the same layout at 1280, which the composition test caught; Apple's 44px is a minimum for fingers, so holding it where the pointer is coarse keeps the target on every touch device and lets the rows scale with the class everywhere else. It also tightens them, which is closer to the references' texture.
+
+## 44. The footer takes the bottom of the screen
+
+**Decision:** The page fills the window and the footer sits at the bottom of
+it: `html` is 100% tall, `body` is at least that and lays its children out in
+a column, and the footer takes the leftover space above it with
+`margin-top: auto`. The height is a percentage, not a viewport unit, so the
+publish gate's ban on those still holds. A browser test opens every page in a
+window taller than it needs and checks that nothing shows under the footer.
+
+**Why:** A page shorter than the window ended partway down it and left a band
+of paper below the dark footer, which read as the page having failed to load
+the rest. The 404 in a tall window showed 360 pixels of it. Pushing the footer
+down changes nothing on a page that already fills the screen: every element on
+every page measured identically before and after. The composition test
+measures each page at its natural height for the same reason it exists, since
+the distance the footer is pushed is a different number in every window.

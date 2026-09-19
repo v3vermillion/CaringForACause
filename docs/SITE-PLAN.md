@@ -67,9 +67,11 @@ Three pages. The home page is the route map; the two doors lead to their own pag
 ├───────────────────────────────────────────────┤
 │ CONTACT: Call · Email · Facebook · Need help? │  #contact
 ├───────────────────────────────────────────────┤
-│ FOOTER (night): mark + wordmark · Never give  │
-│ up. · phone · email · Facebook · legal name,  │
-│ city, copyright                               │
+│ FOOTER (night): mark over wordmark · [Donate] │
+│ Never give up.    Explore: Help me · About ·  │
+│ Programs · Get involved · Contact             │
+│ Connect with us: phone · email · Facebook     │
+│ legal name · city · copyright                 │
 └───────────────────────────────────────────────┘
 
 /apply    Help me: four steps (about you · household · what you need ·
