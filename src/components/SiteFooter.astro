@@ -67,7 +67,7 @@ const year = new Date().getFullYear();
     display: grid;
     gap: var(--space-l);
     padding-bottom: var(--space-l);
-    border-bottom: 1px solid rgb(255 255 255 / 0.12);
+    border-bottom: var(--hairline) solid rgb(255 255 255 / 0.12);
   }
 
   .identity {
@@ -112,7 +112,7 @@ const year = new Date().getFullYear();
   .contact a {
     display: inline-flex;
     align-items: center;
-    min-height: 44px;
+    min-height: max(44px, 2.75rem);
     color: #fff;
     font-family: var(--font-display);
     font-weight: 700;

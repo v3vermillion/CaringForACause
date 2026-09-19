@@ -162,11 +162,11 @@ const applyHref = links.familyApplication ?? getHelp.action.href;
     align-items: center;
     gap: 0.85rem;
     height: 100%;
-    min-height: 44px;
+    min-height: max(44px, 2.75rem);
     padding: 0.75rem;
     border-radius: var(--r-card);
     background: #fff;
-    border: 1px solid var(--rule);
+    border: var(--hairline) solid var(--rule);
     color: var(--ink);
     text-decoration: none;
     transition:
@@ -185,7 +185,7 @@ const applyHref = links.familyApplication ?? getHelp.action.href;
     flex: none;
     width: 4.5rem;
     height: 4.5rem;
-    border-radius: 10px;
+    border-radius: 0.625rem;
   }
 
   .tile-text {
@@ -244,7 +244,7 @@ const applyHref = links.familyApplication ?? getHelp.action.href;
     display: grid;
     gap: var(--space-m);
     padding-top: var(--space-l);
-    border-top: 1px solid var(--rule);
+    border-top: var(--hairline) solid var(--rule);
   }
 
   .row:first-child {
@@ -293,7 +293,7 @@ const applyHref = links.familyApplication ?? getHelp.action.href;
     font-family: var(--font-display);
     font-weight: 700;
     color: var(--purple);
-    min-height: 44px;
+    min-height: max(44px, 2.75rem);
     display: flex;
     align-items: center;
     gap: 0.5rem;
@@ -308,8 +308,8 @@ const applyHref = links.familyApplication ?? getHelp.action.href;
     content: "";
     width: 0.5rem;
     height: 0.5rem;
-    border-right: 2.5px solid currentColor;
-    border-bottom: 2.5px solid currentColor;
+    border-right: 0.15625rem solid currentColor;
+    border-bottom: 0.15625rem solid currentColor;
     transform: rotate(-45deg);
     transition: transform 150ms ease;
   }
@@ -334,7 +334,7 @@ const applyHref = links.familyApplication ?? getHelp.action.href;
     padding-left: 1.2rem;
   }
 
-  @media (min-width: 40rem) {
+  @media (min-width: 36rem) {
     .tiles li {
       flex-basis: min(46%, 17rem);
     }
