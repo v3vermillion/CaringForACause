@@ -1,17 +1,21 @@
 ---
 import { claim, show } from "../data/facts.ts";
-import { facts, org } from "../data/site";
+import { facts, navigation, org } from "../data/site";
 import Brand from "./Brand.astro";
 
 const phone = show(facts.phone);
 const email = show(facts.email);
 
+/** The same map the header and the phone menu draw (decision 38). */
+const explore = [navigation.help, ...navigation.items];
+const { donate } = navigation;
+
 const year = new Date().getFullYear();
 ---
 
 <!--
-  The end of the page: her marks, her sign-off, how to reach her, and the
-  legal record. No section links; a visitor here has just scrolled past them.
+  The end of the page: her marks, the one action, her sign-off, the same
+  navigation map the header draws, how to reach her, and the legal record.
   The EIN and deductibility line live where a donor decides (the trust strip
   and the donation card), not here.
 -->
@@ -23,56 +27,131 @@ const year = new Date().getFullYear();
           <Brand kind="mark" class="mark" label="" />
           <Brand kind="wordmark" class="wordmark" label="" />
         </a>
+        <a class="button button--signal donate" href={donate.href}>
+          {donate.label}
+          <svg class="chev" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <path d="m9 5 7 7-7 7"></path>
+          </svg>
+        </a>
         <p class="sign-off">{org.signOff}</p>
       </div>
 
-      <ul class="contact" aria-label="Contact">
-        <li>
-          <a href={phone.href}>{phone.display}</a>
-        </li>
-        <li>
-          <a class="email" href={`mailto:${email}`}>
-            {email}
-          </a>
-        </li>
-        <li>
-          <a href={show(facts.facebook)} target="_blank" rel="noopener">
-            Facebook<span class="visually-hidden"> (opens in a new tab)</span>
-          </a>
-        </li>
-      </ul>
+      <nav class="col" aria-labelledby="explore-title">
+        <h2 id="explore-title" class="col-title eyebrow">
+          Explore
+        </h2>
+        <ul class="links">
+          {explore.map((item) => (
+            <li>
+              <a href={item.href}>
+                <span>{item.label}</span>
+                <svg class="chev" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                  <path d="m9 5 7 7-7 7"></path>
+                </svg>
+              </a>
+            </li>
+          ))}
+        </ul>
+      </nav>
+
+      <section class="col" aria-labelledby="connect-title">
+        <h2 id="connect-title" class="col-title eyebrow">
+          Connect with us
+        </h2>
+        <ul class="contact">
+          <li>
+            <a href={phone.href}>
+              <!-- A handset in the footer's own accent, the violet of the
+                   divider and the column rules, so the drawn marks belong to
+                   each other rather than to the body copy. -->
+              <svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                <path d="M8.6 3.8 10 7.1a1.3 1.3 0 0 1-.4 1.5l-1.4 1a12.4 12.4 0 0 0 5.2 5.2l1-1.4a1.3 1.3 0 0 1 1.5-.4l3.3 1.4a1.3 1.3 0 0 1 .8 1.4l-.4 2.2a1.6 1.6 0 0 1-1.7 1.3A16.3 16.3 0 0 1 3.8 5.1 1.6 1.6 0 0 1 5.1 3.4l2.2-.4a1.3 1.3 0 0 1 1.3.8Z"></path>
+              </svg>
+              <span class="value">{phone.display}</span>
+            </a>
+          </li>
+          <li>
+            <a href={`mailto:${email}`}>
+              <svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                <rect x="2.8" y="5.2" width="18.4" height="13.6" rx="2.4"></rect>
+                <path d="m3.6 7 7.3 5.3a2 2 0 0 0 2.2 0L20.4 7"></path>
+              </svg>
+              <span class="value">{email}</span>
+            </a>
+          </li>
+          <li>
+            <a href={show(facts.facebook)} target="_blank" rel="noopener">
+              <svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                <rect x="3.2" y="3.2" width="17.6" height="17.6" rx="4.4"></rect>
+                <path d="M15 7.6h-1.6a2.2 2.2 0 0 0-2.2 2.2v10.9M9 12.6h5"></path>
+              </svg>
+              <span class="value">
+                Facebook<span class="visually-hidden"> (opens in a new tab)</span>
+              </span>
+            </a>
+          </li>
+        </ul>
+      </section>
     </div>
 
     <div class="legal">
-      <p>
-        <strong>{claim(facts.legalName)}</strong>
-        {show(facts.city)}. Serving {claim(facts.serviceArea)}.
+      <p class="name">{claim(facts.legalName)}</p>
+      <p class="where">
+        {show(facts.city)} &middot; Serving {claim(facts.serviceArea)}
       </p>
-      <p class="copyright">
-        &copy; {year} {claim(facts.legalName)}
-      </p>
+      <p class="copyright">&copy; {year}</p>
     </div>
   </div>
 </footer>
 
 <style>
   .site-footer {
+    /* The lockup's own width, stated once: the mark, the gap and the
+       lettering. The grid track, the centred stack and the wordmark all read
+       it, so the three cannot drift apart. The brand SVGs are viewBox-only,
+       so none of this can be measured from content. */
+    --lockup: calc(3rem + 1rem + 16rem);
+    --accent: rgb(138 91 255);
     background:
       radial-gradient(60% 50% at 0% 0%, rgb(96 8 215 / 0.3), transparent 60%), var(--night-2);
     color: var(--night-soft);
     padding-block: var(--space-xl) var(--space-m);
   }
 
+  /* The divider carries the brand across the footer: purple out of the glow
+     at the top left, through crimson, fading to nothing. */
   .top {
+    position: relative;
     display: grid;
     gap: var(--space-l);
     padding-bottom: var(--space-l);
-    border-bottom: var(--hairline) solid rgb(255 255 255 / 0.12);
   }
 
+  .top::after {
+    content: "";
+    position: absolute;
+    inset: auto 0 0;
+    height: var(--hairline);
+    background: linear-gradient(
+      90deg,
+      rgb(96 8 215 / 0) 0%,
+      rgb(138 91 255 / 0.95) 16%,
+      rgb(226 32 44 / 0.6) 54%,
+      rgb(255 255 255 / 0.14) 100%
+    );
+    box-shadow:
+      0 0 1.25rem rgb(96 8 215 / 0.55),
+      0 0 3rem rgb(226 32 44 / 0.18);
+  }
+
+  /* Her marks, the one action, her sign-off: one centred stack. */
+  /* As wide as her lettering, not as wide as the column, so "centred" below
+     means centred under her name. */
   .identity {
     display: grid;
     gap: var(--space-m);
+    width: var(--lockup);
+    max-width: 100%;
   }
 
   .brand {
@@ -92,15 +171,65 @@ const year = new Date().getFullYear();
     width: min(100%, 16rem);
   }
 
+  /* The one action in the footer, in the banner door's own signal treatment
+     so the two read as the same button at two sizes. */
+  .donate {
+    justify-self: center;
+    min-width: 11rem;
+    background: linear-gradient(135deg, #ef2f3a 0%, var(--signal) 28%, #8e0009 100%);
+    /* Held close to the pill: a wider bloom pools on her sign-off below. */
+    box-shadow:
+      0 0.5rem 1.5rem rgb(226 32 44 / 0.32),
+      0 0 0 var(--hairline) rgb(255 255 255 / 0.18) inset;
+  }
+
+  .donate:hover {
+    background: linear-gradient(135deg, #ff4550 0%, #e8303c 28%, #a3000a 100%);
+    box-shadow:
+      0 0.625rem 1.875rem rgb(226 32 44 / 0.42),
+      0 0 0 var(--hairline) rgb(255 255 255 / 0.25) inset;
+  }
+
+  .donate .chev {
+    width: 1.1em;
+    height: 1.1em;
+    margin-right: -0.25rem;
+  }
+
+  /* Her phrase closes the column: the same face, light and small, so her
+     lettering stays the loudest thing down here. */
   .sign-off {
+    margin-top: 0.4rem;
+    text-align: center;
     font-family: var(--font-display);
-    font-size: var(--step-3);
-    font-weight: 800;
-    line-height: 1;
-    letter-spacing: -0.03em;
+    font-size: var(--step-1);
+    font-weight: 300;
+    line-height: 1.2;
+    letter-spacing: 0.01em;
     color: #fff;
   }
 
+  /* Column heads: the site's eyebrow, with a short rule in the divider's
+     gradient so the two columns read as a pair. */
+  .col-title {
+    position: relative;
+    margin-bottom: 0.9rem;
+    padding-bottom: 0.55rem;
+    font-size: var(--step-0);
+  }
+
+  .col-title::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 2rem;
+    height: 0.125rem;
+    border-radius: var(--r-pill);
+    background: linear-gradient(90deg, var(--accent) 0%, var(--signal) 100%);
+  }
+
+  .links,
   .contact {
     display: grid;
     padding: 0;
@@ -108,23 +237,76 @@ const year = new Date().getFullYear();
     list-style: none;
   }
 
-  /* 44px tall tap targets (Apple's minimum). */
+  .links a,
   .contact a {
-    display: inline-flex;
+    display: flex;
     align-items: center;
-    min-height: max(44px, 2.75rem);
+    min-height: 2.75rem;
     color: #fff;
     font-family: var(--font-display);
-    font-weight: 700;
+    font-weight: 600;
     text-decoration: none;
   }
 
-  .contact a:hover {
+  /* Apple's 44px is a minimum for fingers, so it is held where the pointer is
+     coarse rather than at every width. A row is otherwise 2.75rem, which is
+     44px at the class's reference width and scales with the class: pinning
+     eight rows to 44px in a narrow desktop window made the footer taller than
+     the same layout scaled, and every desktop is one composition. */
+  @media (pointer: coarse) {
+    .links a,
+    .contact a {
+      min-height: 44px;
+    }
+  }
+
+  .links a {
+    justify-content: flex-start;
+    gap: 0.6rem;
+  }
+
+  .links .chev {
+    width: 1.25rem;
+    height: 1.25rem;
+    flex: none;
+  }
+
+  .contact a {
+    gap: 0.7rem;
+  }
+
+  .chev,
+  .icon {
+    fill: none;
+    stroke: var(--accent);
+    stroke-width: 1.5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  .donate .chev {
+    stroke: currentColor;
+    stroke-width: 2.4;
+  }
+
+  .icon {
+    width: 1.5rem;
+    height: 1.5rem;
+    flex: none;
+  }
+
+  .value {
+    overflow-wrap: anywhere;
+  }
+
+  .links a:hover span,
+  .contact a:hover .value {
     text-decoration: underline;
   }
 
-  .email {
-    overflow-wrap: anywhere;
+  .links a:hover .chev,
+  .contact a:hover .icon {
+    stroke: #fff;
   }
 
   .legal {
@@ -134,27 +316,113 @@ const year = new Date().getFullYear();
     font-size: var(--step--1);
   }
 
-  .legal strong {
-    display: block;
-    color: #fff;
+  /* The legal record is a record, not prose: it keeps its own line rather
+     than wrapping at the reading measure. */
+  .legal p {
+    max-width: none;
   }
 
-  .copyright {
-    margin-top: 0.5rem;
+  .legal .name {
+    color: #fff;
+    font-weight: 700;
   }
 
   @media (min-width: 56rem) {
-    .top {
-      grid-template-columns: 1fr auto;
-      align-items: end;
+    .site-footer {
+      /* Stacked here, so the value is her lettering's width alone. The grid
+         track and the lettering both read it, which is what makes "centred in
+         the column" and "centred under her name" the same thing. */
+      --lockup: 26rem;
+      /* The references leave about as much air under the record as above the
+         marks; the old value left it crowding the bottom edge. */
+      padding-block: var(--space-xl) var(--space-xl);
     }
+
+    /* Three groups, no rules between them: her marks and the one action, the
+       map, and how to reach her. The first column is the lockup's own width
+       (4.5 + 1.5 + 23), stated rather than measured: the wordmark is a
+       viewBox-only SVG, so an auto column would size it from its 300px
+       default. The two text columns start at the same line so their heads
+       sit level; the shorter identity column centres against them. */
+    .top {
+      grid-template-columns: var(--lockup) auto auto;
+      justify-content: space-between;
+      align-items: start;
+      gap: var(--space-l);
+    }
+
+    /* Lifted above the line the two column heads start on. The heart is the
+       footer's corner mark, so it reads as anchoring the region rather than
+       as the first item in a row of three. */
+    .identity {
+      align-self: start;
+      margin-top: -2.5rem;
+      gap: 1.15rem;
+    }
+
+    /* The marks stack here rather than sitting in a row: the heart takes the
+       footer's top left corner, and her lettering drops below it at the same
+       left edge, where it has the whole column to itself instead of the
+       leftover beside the heart. Because the lettering now spans the column,
+       "centred in the column" below is centred under her name. */
+    .brand {
+      display: grid;
+      justify-items: start;
+      gap: 0;
+    }
+    /* Nudged toward the corner it anchors, and out of the lockup's left edge
+       so her lettering keeps the page's gutter line. The offset is drawn, not
+       laid out, so nothing below it moves and it scales with the class. */
+    .brand :global(.mark) {
+      position: relative;
+      top: -1.5rem;
+      left: -2rem;
+      width: 7.65rem;
+    }
+    /* Pulled up into the heart's point, which the script's own rising C
+       leaves room for. The two marks read as one lockup at this size; a gap
+       between them read as two separate things stacked. */
+    .brand :global(.wordmark) {
+      width: 100%;
+      margin-top: -0.75rem;
+    }
+
+    /* One step up, so the 44px tap floor reads as a row rather than as air:
+       44 against 22.5 is the references' ratio, 44 against 18 is not. */
+    .links a,
+    .contact a {
+      font-size: var(--step-1);
+    }
+
+    /* The column is sized by its widest label here, so the chevrons line up
+       on its right edge. */
+    .links a {
+      justify-content: space-between;
+      gap: 1.5rem;
+    }
+
+    /* One line, three parts, one separator between each: even by
+       construction. A justified bar across the full width would set up a
+       centre axis that 43, 46 and 6 characters cannot satisfy. */
     .legal {
-      grid-template-columns: 1fr auto;
-      align-items: end;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: baseline;
+      gap: 0;
+      padding-top: var(--space-l);
     }
     .copyright {
-      margin-top: 0;
-      text-align: right;
+      margin-left: auto;
+    }
+    /* One separator, and only where it belongs: between the name and the
+       place. The notice is anchored to the right edge, not run on. */
+    .legal .where::before {
+      content: "·";
+      /* The empty alternative text keeps a screen reader from announcing the
+         dot; engines without the syntax fall back to the line above. */
+      content: "·" / "";
+      margin-inline: 0.7rem;
+      opacity: 0.55;
     }
   }
 </style>

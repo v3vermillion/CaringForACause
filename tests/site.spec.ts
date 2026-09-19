@@ -99,7 +99,7 @@ test.describe("device compatibility", () => {
     await page.goto("/");
     await expect(page.locator(".site-header .brand svg")).toHaveCount(1);
     await expect(page.locator(".hero svg.brand-wordmark")).toHaveCount(1);
-    await expect(page.locator(".site-footer svg")).toHaveCount(2);
+    await expect(page.locator(".site-footer .brand svg")).toHaveCount(2);
   });
 
   test("the banner photo and every photo load in a supported format", async ({ page }) => {
@@ -530,6 +530,11 @@ test.describe("every page by device", () => {
     await page.goto(path);
     await fontsSettled(page);
     return page.evaluate((selector) => {
+      // The footer takes the bottom of the screen on a page shorter than the
+      // window, which is a different distance on every window height. This
+      // test is about the composition, so it measures the page at its
+      // natural height and lets the sticky-footer test cover the rest.
+      document.body.style.minHeight = "0";
       // Positions are measured from under the home page's first screen, or
       // from the top of main: the header has its own tests above.
       const first = document.querySelector(".first-screen");
@@ -805,6 +810,41 @@ test.describe("navigation", () => {
     expect(new URL(page.url()).hash).toBe("#get-involved");
     await expect(page.locator("#get-involved")).toBeInViewport();
   });
+
+  test("the footer draws the same map, with Donate as its one action", async ({ page }) => {
+    await page.goto("/");
+    await expect(page.locator(".site-footer nav a")).toHaveText([
+      "Help me",
+      "About",
+      "Programs",
+      "Get involved",
+      "Contact",
+    ]);
+    const donate = page.locator(".site-footer .donate");
+    await expect(donate).toHaveText("Donate");
+    await expect(donate).toHaveAttribute("href", "/donate");
+    // The one action is centred under her lettering, not left with the lockup.
+    const lockup = (await page.locator(".site-footer .brand").boundingBox())!;
+    const wordmark = (await page.locator(".site-footer svg.brand-wordmark").boundingBox())!;
+    const button = (await donate.boundingBox())!;
+    const inkCentre = (lockup.x + wordmark.x + wordmark.width) / 2;
+    expect(Math.abs(button.x + button.width / 2 - inkCentre)).toBeLessThan(20);
+  });
+
+  // A page shorter than the window used to end partway down it, leaving a
+  // band of paper under the dark footer. The footer now takes the bottom of
+  // the screen however short the page is.
+  for (const path of ["/", "/donate", "/apply", "/404"]) {
+    test(`no paper shows under the footer on ${path} in a tall window`, async ({ page }) => {
+      await page.setViewportSize({ width: 1280, height: 2000 });
+      await page.goto(path);
+      const gap = await page.evaluate(() => {
+        const footer = document.querySelector(".site-footer")!.getBoundingClientRect();
+        return window.innerHeight - (footer.bottom + window.scrollY);
+      });
+      expect(gap).toBeLessThanOrEqual(1);
+    });
+  }
 });
 
 test.describe("menu", () => {
