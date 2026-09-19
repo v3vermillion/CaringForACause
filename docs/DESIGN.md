@@ -27,6 +27,10 @@ Both marks are vector tracings of her logo files, made once by `scripts/brand/tr
 
 Nothing else is drawn. The mark is not a container for buttons.
 
+## The header
+
+The bar is the one place the brand's own artwork frames the page: a light lavender lens with a sweep of her logo's violet and crimson bands painted behind its left end (an inline SVG in `src/components/SiteHeader.astro`, decorative and hidden from assistive technology), the heart-and-hands mark with a white glow, her name, the Donate pill (a deep crimson gradient with a pale ring and a pink glow, painted by a pseudo-element inside a 44px link), and on phones and tablets the wedge in the top-right corner, deep purple with a lighter violet band and a crimson hairline along its cut. It was rebuilt from her banner artwork rather than from the site's flat materials, so it is the one surface that layers gradients and glows; nothing else on the site does. Every size in it is a multiple of `--sp`, so it is the same bar on every device of a class; only the sweep's length follows the bar's height, so on a wide screen it sits in the left end. The letter f in the name is the one glyph from another face (`public/fonts/brand-f.woff2`, an Inter subset with only that letter, under the OFL), because her artwork's f is straight-stemmed where Bricolage's hooks; every other glyph is Bricolage.
+
 ## Photos
 
 - Her own photos only. Never stock, never AI-generated, never presented as something they aren't.
@@ -89,7 +93,7 @@ Three radii and nothing else: pills (`--r-pill`) for buttons, chips and tabs; ca
 
 ## Decoration
 
-Decoration must come from her: the heart-and-hands mark, the diagonal cut (from the header wedge), the caption pill with her tagline. The diagonal is the site's one geometric motif and may reappear as a section edge or a divider. Nothing generic (blobs, sparkles, confetti) is added to fill space.
+Decoration must come from her: the heart-and-hands mark, the diagonal cut (from the header wedge), the header's sweep of her logo's bands, the caption pill with her tagline. The diagonal is the site's one geometric motif and may reappear as a section edge or a divider. Nothing generic (blobs, sparkles, confetti) is added to fill space.
 
 ## Words
 
