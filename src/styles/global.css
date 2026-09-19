@@ -73,9 +73,10 @@
 
   /* What sits above the first screen: the header, plus the preview notice
      while indexing is off (html.preview). The desktop banner fills the rest. */
-  --header-h: calc(
-    60 * var(--sp) + 1px
-  ); /* the header bar scales with --sp on phones and tablets */
+  /* The header bar scales with --sp; its Donate link is a 44px tap target,
+     so the bar can never be shorter than that (a desktop window narrower
+     than about 940px). Plus the 1px rule under it. */
+  --header-h: calc(max(60 * var(--sp), 44px) + 1px);
   --notice-h: calc(1.753rem + 1px);
   --top-chrome: var(--header-h);
   /* The two strips under the banner on desktop, each one line: the trust

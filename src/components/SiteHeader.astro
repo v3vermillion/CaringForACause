@@ -432,10 +432,26 @@ const { items, donate, help } = navigation;
     isolation: isolate;
     overflow: hidden;
     border-bottom: 1px solid rgb(150 118 224 / 0.35);
+    /* The violet and pink glow sits under the Donate pill, so it is placed
+       from the right edge in reference pixels (the pill's right edge is 76
+       reference px from it beside the wedge, 64 on desktop), not in percent
+       of the bar, which would leave it stranded mid-bar on a wide screen. */
     background:
-      radial-gradient(7% 30% at 79% 100%, rgb(180 145 250 / 0.9), transparent 100%),
-      radial-gradient(16% 34% at 68% 84%, rgb(240 140 200 / 0.5), transparent 100%),
-      radial-gradient(22% 60% at 76% 50%, rgb(255 190 225 / 0.4), transparent 75%),
+      radial-gradient(
+        calc(27.5 * var(--sp)) calc(18 * var(--sp)) at calc(100% - 83 * var(--sp)) 100%,
+        rgb(180 145 250 / 0.9),
+        transparent 100%
+      ),
+      radial-gradient(
+        calc(63 * var(--sp)) calc(20 * var(--sp)) at calc(100% - 126 * var(--sp)) 84%,
+        rgb(240 140 200 / 0.5),
+        transparent 100%
+      ),
+      radial-gradient(
+        calc(86 * var(--sp)) calc(36 * var(--sp)) at calc(100% - 94 * var(--sp)) 50%,
+        rgb(255 190 225 / 0.4),
+        transparent 75%
+      ),
       linear-gradient(
         180deg,
         #e1d5fd 0%,
@@ -465,7 +481,7 @@ const { items, donate, help } = navigation;
     display: flex;
     align-items: center;
     gap: calc(8 * var(--sp));
-    min-height: calc(60 * var(--sp));
+    min-height: max(44px, calc(60 * var(--sp))); /* --header-h, less the rule */
   }
 
   .brand {

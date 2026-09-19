@@ -349,6 +349,115 @@ test.describe("scrolling stability", () => {
   }
 });
 
+test.describe("the header by device", () => {
+  // The header is painted, not only laid out: a sweep of her logo's bands,
+  // a glow under the Donate pill, the wedge's hairlines. Its geometry is
+  // checked above; this checks the picture. On every page, the bar on each
+  // device of a class, scaled to the class reference's size, must match the
+  // reference bar pixel for pixel, within what text antialiasing at another
+  // scale changes. A background placed in percent of the bar (a glow that
+  // stays mid-bar while the pill moves) or a size not in --sp fails here.
+  const bar = async (
+    page: import("@playwright/test").Page,
+    width: number,
+    height: number,
+    path: string,
+  ) => {
+    await page.setViewportSize({ width, height });
+    await page.goto(path);
+    await page.evaluate(() => document.fonts.ready);
+    const box = (await page.locator(".site-header").boundingBox())!;
+    const png = await page.screenshot({
+      clip: { x: 0, y: box.y, width, height: Math.round(box.height) },
+      scale: "css",
+      animations: "disabled",
+    });
+    return "data:image/png;base64," + png.toString("base64");
+  };
+  for (const { cls, reference, others } of [
+    // Phones up to the 450px cap: past it the bar is wider than the column
+    // (docs/DESIGN.md), so it is not the same picture and is not compared.
+    {
+      cls: "phone",
+      reference: [393, 659],
+      others: [
+        [320, 568],
+        [360, 780],
+        [440, 763],
+      ],
+    },
+    {
+      cls: "tablet",
+      reference: [768, 1024],
+      others: [
+        [576, 900],
+        [712, 1138],
+        [895, 1200],
+      ],
+    },
+    {
+      cls: "desktop",
+      reference: [1280, 800],
+      others: [
+        [896, 700],
+        [1024, 1366],
+        [1366, 657],
+        [1920, 950],
+        [2560, 1300],
+      ],
+    },
+  ] as const) {
+    test(`the header is the same picture on every ${cls}`, async ({ page }, testInfo) => {
+      test.skip(!testInfo.project.name.startsWith("desktop-"), "runs once per engine");
+      for (const path of [...pages, "/404"]) {
+        const ref = await bar(page, reference[0], reference[1], path);
+        for (const [width, height] of others) {
+          const other = await bar(page, width, height, path);
+          const result = await page.evaluate(
+            async ([a, b, w, h]) => {
+              const load = (src: string) =>
+                new Promise<HTMLImageElement>((resolve) => {
+                  const img = new Image();
+                  img.onload = () => resolve(img);
+                  img.src = src;
+                });
+              const [ia, ib] = await Promise.all([load(a), load(b)]);
+              const pixels = (img: HTMLImageElement) => {
+                const canvas = document.createElement("canvas");
+                canvas.width = w;
+                canvas.height = h;
+                const ctx = canvas.getContext("2d")!;
+                ctx.imageSmoothingQuality = "high";
+                ctx.drawImage(img, 0, 0, w, h);
+                return ctx.getImageData(0, 0, w, h).data;
+              };
+              const pa = pixels(ia);
+              const pb = pixels(ib);
+              let differing = 0;
+              let sum = 0;
+              for (let i = 0; i < pa.length; i += 4) {
+                const d =
+                  Math.abs(pa[i] - pb[i]) +
+                  Math.abs(pa[i + 1] - pb[i + 1]) +
+                  Math.abs(pa[i + 2] - pb[i + 2]);
+                sum += d;
+                if (d > 96) differing++;
+              }
+              const n = pa.length / 4;
+              return { differing: (differing / n) * 100, mean: sum / n / 3 };
+            },
+            [ref, other, reference[0], 60] as const,
+          );
+          // Antialiasing at another scale moves 3 to 7% of the pixels by a
+          // little; a moved or missing part moves far more, by a lot.
+          expect(result.differing, `pixels differing on ${path} at ${width}`).toBeLessThan(12);
+          expect(result.mean, `mean difference on ${path} at ${width}`).toBeLessThan(12);
+        }
+      }
+    });
+  }
+});
+
 test.describe("every page by device", () => {
   // Every size on the site is a multiple of its class's reference pixel (the
   // root font follows --sp, docs/DESIGN.md "Every screen by device"), so a
