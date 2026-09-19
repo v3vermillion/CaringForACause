@@ -70,7 +70,7 @@ const heard = [
             </p>
           </noscript>
 
-          <form class="apply" data-apply novalidate hidden>
+          <form class="apply" data-apply novalidate>
             <ol class="progress" aria-label="Steps">
               {applyPage.steps.map((step, i) => (
                 <li data-progress={step.id} aria-current={i === 0 ? "step" : undefined}>
@@ -439,7 +439,6 @@ const heard = [
 <script>
   const form = document.querySelector<HTMLFormElement>("[data-apply]");
   if (form) {
-    form.hidden = false;
     const email = form
       .closest("main")!
       .querySelector<HTMLAnchorElement>("a[href^='mailto:']")!.href;
@@ -701,7 +700,12 @@ const heard = [
     gap: var(--space-m);
   }
 
-  .apply[hidden] {
+  /* The form needs JavaScript. It is shown from the first paint when the
+     page's head has marked the document (html.js, src/layouts/Base.astro),
+     rather than revealed by this page's script: that arrived after the
+     first paint on a slow machine and moved the footer (a layout shift of
+     0.21). Without JavaScript the noscript note above stands in for it. */
+  html:not(.js) .apply {
     display: none;
   }
 

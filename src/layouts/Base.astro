@@ -6,6 +6,7 @@ import "../styles/global.css";
 import PreviewNotice from "../components/PreviewNotice.astro";
 import displayFont from "@fontsource-variable/bricolage-grotesque/files/bricolage-grotesque-latin-wght-normal.woff2?url";
 import bodyFont from "@fontsource/atkinson-hyperlegible-next/files/atkinson-hyperlegible-next-latin-400-normal.woff2?url";
+import bodyBoldFont from "@fontsource/atkinson-hyperlegible-next/files/atkinson-hyperlegible-next-latin-700-normal.woff2?url";
 import { assertLaunchReady, claim, pendingFacts, show } from "../data/facts.ts";
 import { facts, org } from "../data/site";
 
@@ -91,8 +92,13 @@ const structuredData = {
         fetchpriority="high"
       />
     )}
+    <!-- Every face the first paint uses, so text is never painted in a
+         fallback and moved when the face arrives (a layout shift on every
+         bold label of the application form when the runner was slow). -->
     <link rel="preload" href={displayFont} as="font" type="font/woff2" crossorigin />
     <link rel="preload" href={bodyFont} as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href={bodyBoldFont} as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="/fonts/brand-f.woff2" as="font" type="font/woff2" crossorigin />
     <link rel="canonical" href={canonical} />
     <meta name="theme-color" content="#1b0f2e" />
     <meta name="version" content={version} />
@@ -116,6 +122,12 @@ const structuredData = {
     <meta name="twitter:title" content={title} />
     <meta name="twitter:description" content={description} />
     <script is:inline type="application/ld+json" set:html={JSON.stringify(structuredData)}></script>
+    <!-- Marks the document before anything is painted, so a page can show
+         its JavaScript-only parts from the first paint instead of revealing
+         them later and moving what is below (the application form). -->
+    <script is:inline>
+      document.documentElement.classList.add("js");
+    </script>
   </head>
   <body>
     <a class="skip-link" href="#main">
