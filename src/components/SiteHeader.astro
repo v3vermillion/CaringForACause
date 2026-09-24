@@ -346,7 +346,13 @@ const { items, donate, help } = navigation;
   doors at either end. Nothing else lives here; contact details are in the
   Contact section it links to.
 -->
-<dialog id="menu" class="menu on-dark" aria-labelledby="menu-title" tabindex="-1">
+<dialog
+  id="menu"
+  class="menu on-dark"
+  aria-labelledby="menu-title"
+  tabindex="-1"
+  style={`--menu-rows: ${items.length + 2};`}
+>
   <div class="menu-art" aria-hidden="true">
     <svg class="menu-ribbon" viewBox="440 0 412 300" focusable="false">
       <defs>
@@ -925,6 +931,7 @@ const { items, donate, help } = navigation;
   .menu {
     --menu-safe-top: env(safe-area-inset-top, 0px);
     --menu-row: 4.55rem;
+    --mark-w: 10.3288rem;
     inset: 0;
     width: 100%;
     max-width: none;
@@ -991,8 +998,44 @@ const { items, donate, help } = navigation;
     position: absolute;
     right: -0.1889rem;
     bottom: 0.9762rem;
-    width: 10.3288rem;
+    width: var(--mark-w);
     opacity: 1;
+  }
+
+  /*
+   * Portrait phones. The reference is a full-screen phone; in a phone
+   * browser the toolbars take about a fifth of that height, and the list
+   * ran down into the mark. So the rows share what is left once the mark
+   * has its corner: they tighten from 4.55rem toward 3.9rem (type, mark and
+   * everything above the list stay as they are), and the mark may dip up to
+   * 1rem past the bottom edge, as it already does past the right. On a
+   * screen tall enough for the reference nothing moves. 0.9173 is the
+   * mark's height over its width; 8.7102rem is the panel padding, brand row
+   * and gap above the list.
+   */
+  @media (max-width: 35.99rem) and (orientation: portrait) {
+    .menu {
+      --list-start: calc(var(--menu-safe-top) + 8.7102rem);
+      --mark-h: calc(var(--mark-w) * 0.9173);
+      --mark-gap: 1rem;
+    }
+    /* Older browsers without dynamic viewport units keep the fixed rows. */
+    @supports (height: 100dvh) {
+      .menu {
+        --menu-row: clamp(
+          3.9rem,
+          (100dvh - var(--list-start) - var(--mark-gap) - var(--mark-h) + 1rem) / var(--menu-rows),
+          4.55rem
+        );
+      }
+    }
+    .menu-art :global(.menu-watermark) {
+      bottom: min(
+        0.9762rem,
+        100% - var(--list-start) - var(--menu-rows) * var(--menu-row) - var(--mark-gap) -
+          var(--mark-h)
+      );
+    }
   }
 
   .menu-art :global(.menu-watermark path[fill="#6008d7"]) {
@@ -1318,8 +1361,8 @@ const { items, donate, help } = navigation;
     .menu-waves {
       width: min(100%, 32rem * var(--k));
     }
-    .menu-art :global(.menu-watermark) {
-      width: calc(10.3288rem * var(--k));
+    .menu {
+      --mark-w: calc(10.3288rem * var(--k));
     }
   }
 
