@@ -19,7 +19,9 @@ jobs:
     permissions:
       contents: read
       issues: write
-    timeout-minutes: 25
+    # The browser suite alone takes about 20 minutes on a slow runner and the
+    # job has finished at 24; the limit is a hang stop, not a budget.
+    timeout-minutes: 40
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v7
@@ -31,7 +33,19 @@ jobs:
       # The build type-checks and validates dist/ (the same gate Cloudflare runs).
       - run: npm run build
       - run: npm run test:gate
+      # Browsers are ~1 GB and change only with the Playwright version, so they
+      # are cached on that version and only downloaded when it changes; the OS
+      # packages they need are installed either way.
+      - name: Cache Playwright browsers
+        id: browsers
+        uses: actions/cache@v6
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('node_modules/@playwright/test/package.json') }}
       - run: npx playwright install --with-deps chromium webkit firefox
+        if: steps.browsers.outputs.cache-hit != 'true'
+      - run: npx playwright install-deps chromium webkit firefox
+        if: steps.browsers.outputs.cache-hit == 'true'
       - run: npm run test
       # Post failed or flaky tests to a single tracking issue, so problems can be
       # diagnosed without downloading logs or artifacts.
