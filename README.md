@@ -18,7 +18,7 @@ Website for [Caring for a Cause Supportive Services Inc.](https://caring4acauses
 - Hosted on Cloudflare Workers static assets (`wrangler.jsonc`, `public/_headers`)
 - GitHub Actions runs formatting, type checks, the gated build, browser tests on 10 devices, and Lighthouse budgets on every push
 
-Requires Node.js 22.12 or later (see `.nvmrc`).
+Requires Node.js 22.12 or later; `.nvmrc` selects the version CI and Cloudflare use.
 
 ## Quick start
 
@@ -27,14 +27,15 @@ npm ci
 npm run dev        # http://localhost:4321
 ```
 
-| Command           | What it does                                         |
-| ----------------- | ---------------------------------------------------- |
-| `npm run dev`     | Start the local dev server                           |
-| `npm run build`   | Build the site into `dist/`                          |
-| `npm run preview` | Serve the built site locally                         |
-| `npm run check`   | Type-check all files                                 |
-| `npm run format`  | Format all files with Prettier                       |
-| `npm run verify`  | Formatting check, type check, and build (same as CI) |
+| Command           | What it does                                                                                                           |
+| ----------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| `npm run dev`     | Start the local dev server                                                                                             |
+| `npm run build`   | Build the site into `dist/`                                                                                            |
+| `npm run preview` | Serve the built site locally                                                                                           |
+| `npm run check`   | Type-check all files                                                                                                   |
+| `npm run format`  | Format all files with Prettier                                                                                         |
+| `npm run test`    | Browser tests (`tests/site.spec.ts`) on every device                                                                   |
+| `npm run verify`  | Everything CI runs: formatting check, build (type check and publish gate), the gate's own tests, and the browser tests |
 
 ## Editing content
 
@@ -76,7 +77,7 @@ When Tamara confirms a detail, change it to `orgPublished(...)` with her confirm
 
 **What GitHub Actions checks** on every push and pull request. The browser-test check is required by the `main` ruleset, so nothing reaches `main` (and therefore Cloudflare) without passing it. Lighthouse reports results but is not required, because scores vary slightly between runs.
 
-- **Browser tests** (`tests/site.spec.ts`, Playwright): about 70 checks on each of 10 devices across all three browser engines: iPhone SE, 12 mini, 17, and 17 Pro Max, iPad mini, Galaxy S24, Pixel 7, and desktop Safari, Firefox, and Chrome. Every iPhone browser uses WebKit, so the WebKit runs cover iOS. Checks include a WCAG 2.2 AA accessibility scan with axe on all three pages, 44px tap targets, font and image loading, no console errors, no sideways scrolling from 320 to 1440 px, the phone menu, the desktop links and the footer's map, the footer holding the bottom of a tall window, keyboard-accessible tabs, the header-to-footer alignment, the door sizes and the phone fold, the first screen's promise on every device and one composition per device class on every page (every element at the same scaled place and size on the reference screen and the edges of its class, and the header the same picture pixel for pixel), both forms end to end, the no-JavaScript fallbacks, the video player, in-page links, search blocking, metadata, structured data, and the 404 page.
+- **Browser tests** (`tests/site.spec.ts`, Playwright): about 100 checks across 10 devices and all three browser engines: iPhone SE, 12 mini, 17, and 17 Pro Max, iPad mini, Galaxy S24, Pixel 7, and desktop Safari, Firefox, and Chrome. Every iPhone browser uses WebKit, so the WebKit runs cover iOS. A check that runs at the device's own screen size runs on every device; a check that sets its own screen size measures the stylesheet, not the device, and runs once per engine (it shows as skipped on the other devices). Checks include a WCAG 2.2 AA accessibility scan with axe on all three pages, 44px tap targets including the phone menu's button, font and image loading, no console errors, no sideways scrolling from 320 to 1440 px, the phone menu, the desktop links and the footer's map, the footer holding the bottom of a tall window, keyboard-accessible tabs, the header-to-footer alignment, the door sizes and the phone fold, the first screen's promise on every device and one composition per device class on every page (every element at the same scaled place and size on the reference screen and the edges of its class, and the header the same picture pixel for pixel), both forms end to end, the no-JavaScript fallbacks, the video player, in-page links, search blocking, metadata, structured data, and the 404 page. Expected words (the year, the EIN, the menu's labels, her tagline) are read from `src/data/site.ts`, so a content change never needs a test change. A failing check saves a screenshot and a trace in the run's `playwright-report` artifact.
 - **Lighthouse budgets** (`lighthouserc.json`, three runs): performance at least 95, accessibility 100, best practices at least 95, every SEO audit except "is crawlable" (search blocking is intentional on the preview), layout shift under 0.05. Reports are saved as a build artifact, not published.
 
 Measured at setup (Lighthouse, local build): mobile performance 99, desktop 100, accessibility 100, best practices 100, SEO 100 with indexing enabled.
@@ -107,8 +108,8 @@ src/
   components/           One file per page section
   styles/global.css     Design tokens and shared styles
   assets/brand/         Wordmark and mark as SVG, plus the logo files they were traced from
-scripts/brand/          The tracing script that made the SVGs
   assets/photos/        Event photos (metadata stripped)
+scripts/                The publish gate, its tests, the live-site header check, and brand/ (the tracing script that made the SVGs)
 public/                 Icons, sharing image, web manifest, _headers (security and cache rules)
 tests/                  Browser tests
 docs/                   Plan and decisions

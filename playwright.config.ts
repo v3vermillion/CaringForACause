@@ -58,6 +58,9 @@ export default defineConfig({
   use: {
     baseURL: liveUrl ?? "http://127.0.0.1:4321",
     trace: "retain-on-failure",
+    // A failed layout test attaches the page as it looked, readable from the
+    // report or by an agent without opening the trace viewer.
+    screenshot: "only-on-failure",
   },
   projects,
   webServer: liveUrl
