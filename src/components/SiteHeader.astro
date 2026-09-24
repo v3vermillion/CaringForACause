@@ -932,6 +932,7 @@ const { items, donate, help } = navigation;
     --menu-safe-top: env(safe-area-inset-top, 0px);
     --menu-row: 4.55rem;
     --mark-w: 10.3288rem;
+    container-type: size;
     inset: 0;
     width: 100%;
     max-width: none;
@@ -1019,14 +1020,15 @@ const { items, donate, help } = navigation;
       --mark-gap: 1rem;
       --mark-edge: 0.9762rem;
     }
-    /* Older browsers without dynamic viewport units keep the fixed sizes. */
-    @supports (height: 100dvh) {
+    /* Sized against the menu itself (a full-screen size container), never a
+       viewport unit; browsers without container units keep the fixed sizes. */
+    @supports (height: 100cqh) {
       .menu {
         /* Rows first, leaving room for the mark at 90%. */
         --menu-row: clamp(
           3.6rem,
           (
-              100dvh - var(--list-start) - var(--mark-gap) - var(--mark-edge) - 10.3288rem * 0.9 *
+              100cqh - var(--list-start) - var(--mark-gap) - var(--mark-edge) - 10.3288rem * 0.9 *
                 0.9173
             ) /
             var(--menu-rows),
@@ -1036,7 +1038,7 @@ const { items, donate, help } = navigation;
         --mark-w: clamp(
           10.3288rem * 0.9,
           (
-              100dvh - var(--list-start) - var(--menu-rows) * var(--menu-row) - var(--mark-gap) -
+              100cqh - var(--list-start) - var(--menu-rows) * var(--menu-row) - var(--mark-gap) -
                 var(--mark-edge)
             ) /
             0.9173,
