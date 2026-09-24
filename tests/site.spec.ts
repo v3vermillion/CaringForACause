@@ -861,9 +861,30 @@ test.describe("menu", () => {
     await expect(menu).toBeVisible();
     await expect(menu).toHaveAttribute("open", "");
     expect(await menu.evaluate((el) => el.contains(document.activeElement))).toBe(true);
+    // Focus starts on the dialog, not the close button, so no focus ring
+    // is drawn around the X when the menu opens.
+    await expect(menu).toBeFocused();
     await page.keyboard.press("Escape");
     await expect(menu).toBeHidden();
     await expect(button).toBeFocused();
+  });
+
+  test("fills a portrait tablet and keeps the rules clear of the watermark", async ({
+    page,
+    isMobile,
+    viewport,
+  }) => {
+    test.skip(
+      !isMobile || !viewport || viewport.width < 576 || viewport.height < 768,
+      "portrait tablets only",
+    );
+    await page.goto("/");
+    await page.locator("[data-menu-open]").click();
+    const list = await page.locator("#menu .menu-list").boundingBox();
+    const mark = await page.locator("#menu .menu-watermark").boundingBox();
+    expect(list && mark).toBeTruthy();
+    expect(list!.y + list!.height).toBeGreaterThan(viewport!.height * 0.65);
+    expect(list!.y + list!.height).toBeLessThan(mark!.y);
   });
 
   test("lists Help me, the four sections, and Donate, and nothing else", async ({

@@ -346,7 +346,13 @@ const { items, donate, help } = navigation;
   doors at either end. Nothing else lives here; contact details are in the
   Contact section it links to.
 -->
-<dialog id="menu" class="menu on-dark" aria-labelledby="menu-title">
+<dialog
+  id="menu"
+  class="menu on-dark"
+  aria-labelledby="menu-title"
+  tabindex="-1"
+  style={`--menu-rows: ${items.length + 2};`}
+>
   <div class="menu-art" aria-hidden="true">
     <svg class="menu-ribbon" viewBox="440 0 412 300" focusable="false">
       <defs>
@@ -553,8 +559,12 @@ const { items, donate, help } = navigation;
     header.classList.add("has-menu");
     openButton.hidden = false;
 
+    // showModal() focuses the close button, and Safari then draws its
+    // keyboard ring on a tap. Start focus on the dialog itself instead; Tab
+    // still reaches the button first.
     const open = () => {
       menu.showModal();
+      menu.focus({ preventScroll: true });
       document.documentElement.classList.add("menu-open");
     };
     const close = () => {
@@ -921,6 +931,8 @@ const { items, donate, help } = navigation;
   .menu {
     --menu-safe-top: env(safe-area-inset-top, 0px);
     --menu-row: 4.55rem;
+    --mark-w: 10.3288rem;
+    container-type: size;
     inset: 0;
     width: 100%;
     max-width: none;
@@ -935,6 +947,10 @@ const { items, donate, help } = navigation;
       radial-gradient(70% 34% at 100% 20%, rgb(52 10 110 / 0.5), transparent 70%),
       radial-gradient(60% 14% at 0% 81%, rgb(140 10 40 / 0.45), transparent 75%),
       linear-gradient(90deg, #05041a 0%, #09051e 40%, #10061f 70%, #140628 100%);
+  }
+
+  .menu:focus {
+    outline: none;
   }
 
   .menu::backdrop {
@@ -983,8 +999,65 @@ const { items, donate, help } = navigation;
     position: absolute;
     right: -0.1889rem;
     bottom: 0.9762rem;
-    width: 10.3288rem;
+    width: var(--mark-w);
     opacity: 1;
+  }
+
+  /*
+   * Portrait phones. The reference is a full-screen phone; in a phone
+   * browser the toolbars take about a fifth of that height, and the list
+   * ran down into the mark. On a shorter screen the rows tighten from
+   * 4.55rem toward 3.6rem and the mark eases down to 90% of its size, so the
+   * whole mark sits in its corner a small gap below the last rule. Type and
+   * everything above the list stay as they are, and on a screen tall enough
+   * for the reference nothing moves. 0.9173 is the mark's height over its
+   * width; 8.7102rem is the panel padding, brand row and gap above the list.
+   */
+  @media (max-width: 35.99rem) and (orientation: portrait) {
+    .menu {
+      --list-start: calc(var(--menu-safe-top) + 8.7102rem);
+      --mark-h: calc(var(--mark-w) * 0.9173);
+      --mark-gap: 1rem;
+      --mark-edge: 0.9762rem;
+    }
+    /* Sized against the menu itself (a full-screen size container), never a
+       viewport unit; browsers without container units keep the fixed sizes. */
+    @supports (height: 100cqh) {
+      .menu {
+        /* Rows first, leaving room for the mark at 90%. */
+        --menu-row: clamp(
+          3.6rem,
+          (
+              100cqh - var(--list-start) - var(--mark-gap) - var(--mark-edge) - 10.3288rem * 0.9 *
+                0.9173
+            ) /
+            var(--menu-rows),
+          4.55rem
+        );
+        /* Then the mark takes what is left, up to its full size. */
+        --mark-w: clamp(
+          10.3288rem * 0.9,
+          (
+              100cqh - var(--list-start) - var(--menu-rows) * var(--menu-row) - var(--mark-gap) -
+                var(--mark-edge)
+            ) /
+            0.9173,
+          10.3288rem
+        );
+      }
+    }
+    /* As the mark eases smaller it also comes in off the right edge, so a
+       reduced mark sits wholly on screen; at full size it keeps the
+       reference's slight bleed. Only if a screen is shorter than all of
+       that does the mark move down. */
+    .menu-art :global(.menu-watermark) {
+      right: calc(-0.1889rem + (10.3288rem - var(--mark-w)) * 0.76);
+      bottom: min(
+        var(--mark-edge),
+        100% - var(--list-start) - var(--menu-rows) * var(--menu-row) - var(--mark-gap) -
+          var(--mark-h)
+      );
+    }
   }
 
   .menu-art :global(.menu-watermark path[fill="#6008d7"]) {
@@ -1040,7 +1113,8 @@ const { items, donate, help } = navigation;
     font-size: 1.2911rem;
     font-weight: 400;
     line-height: 1.1;
-    letter-spacing: -0.02em;
+    letter-spacing: 0.01em;
+    word-spacing: 0.04em;
     color: #fff;
   }
 
@@ -1048,7 +1122,8 @@ const { items, donate, help } = navigation;
     font-size: 0.9384rem;
     font-weight: 400;
     line-height: 1.2;
-    letter-spacing: 0.09em;
+    letter-spacing: 0.11em;
+    word-spacing: 0.06em;
     color: #b8a6f2;
   }
 
@@ -1093,9 +1168,11 @@ const { items, donate, help } = navigation;
     outline: none;
   }
 
+  /* Offset 0 keeps the ring inside the button's margin, so the scrolling
+     panel does not clip it at the screen edge. */
   .menu-close:focus-visible {
     outline: 0.126rem solid #fff;
-    outline-offset: 0.1889rem;
+    outline-offset: 0;
   }
 
   .menu-inner > nav {
@@ -1232,6 +1309,83 @@ const { items, donate, help } = navigation;
   .menu-list > li > a:focus-visible {
     outline: 0.126rem solid #fff;
     outline-offset: -0.126rem;
+  }
+
+  /* Portrait tablets: the root font follows the 768px tablet reference, so
+     the phone menu would fill only the top half of the screen. Scale the
+     menu's own sizes by --k instead. Only a tall tablet-width screen
+     qualifies: phones in landscape, short windows, and desktop (which has no
+     menu) keep the sizes above. */
+  @media (min-width: 36rem) and (max-width: 55.99rem) and (min-height: 48rem) {
+    .menu {
+      --k: 1.3;
+      --menu-row: calc(4.55rem * var(--k));
+    }
+    .menu-inner {
+      padding-top: calc(var(--menu-safe-top) + 2.6641rem * var(--k));
+    }
+    .menu-top {
+      min-height: calc(3.7788rem * var(--k));
+    }
+    .menu-brand {
+      gap: calc(0.6298rem * var(--k));
+    }
+    .menu-brand :global(.menu-icon) {
+      width: calc(3.2561rem * var(--k));
+    }
+    .menu-brand-text {
+      gap: calc(0.3842rem * var(--k));
+    }
+    .menu-brand-name {
+      font-size: calc(1.2911rem * var(--k));
+    }
+    .menu-brand-sub {
+      font-size: calc(0.9384rem * var(--k));
+    }
+    .menu-close {
+      width: max(44px, 2.7712rem * var(--k));
+      height: max(44px, 2.7712rem * var(--k));
+    }
+    .menu-close::before {
+      inset: calc(0.063rem * var(--k));
+      border-width: calc(0.126rem * var(--k));
+    }
+    .menu-close svg {
+      width: calc(1.0707rem * var(--k));
+      height: calc(1.0707rem * var(--k));
+    }
+    .menu-inner > nav {
+      margin-top: calc(2.2673rem * var(--k));
+    }
+    .menu-list > li > a {
+      padding: 0 calc(0.6613rem * var(--k)) 0 calc(1.7194rem * var(--k));
+    }
+    .menu-label {
+      top: calc(-0.1134rem * var(--k));
+      font-size: calc(1.8138rem * var(--k));
+    }
+    .menu-help .menu-label {
+      font-size: calc(1.8894rem * var(--k));
+    }
+    .menu-chevron {
+      top: calc(0.1008rem * var(--k));
+      width: calc(0.6739rem * var(--k));
+      height: calc(1.1462rem * var(--k));
+    }
+    .menu-help > a::before {
+      top: calc(0.9132rem * var(--k));
+      bottom: calc(0.781rem * var(--k));
+      width: calc(0.3149rem * var(--k));
+    }
+    .menu-ribbon {
+      width: calc(11.8782rem * var(--k));
+    }
+    .menu-waves {
+      width: min(100%, 32rem * var(--k));
+    }
+    .menu {
+      --mark-w: calc(10.3288rem * var(--k));
+    }
   }
 
   @media (prefers-reduced-motion: reduce) {
