@@ -861,6 +861,9 @@ test.describe("menu", () => {
     await expect(menu).toBeVisible();
     await expect(menu).toHaveAttribute("open", "");
     expect(await menu.evaluate((el) => el.contains(document.activeElement))).toBe(true);
+    // Focus starts on the dialog, not the close button, so no focus ring
+    // is drawn around the X when the menu opens.
+    await expect(menu).toBeFocused();
     await page.keyboard.press("Escape");
     await expect(menu).toBeHidden();
     await expect(button).toBeFocused();

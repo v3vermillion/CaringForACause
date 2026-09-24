@@ -346,7 +346,7 @@ const { items, donate, help } = navigation;
   doors at either end. Nothing else lives here; contact details are in the
   Contact section it links to.
 -->
-<dialog id="menu" class="menu on-dark" aria-labelledby="menu-title">
+<dialog id="menu" class="menu on-dark" aria-labelledby="menu-title" tabindex="-1">
   <div class="menu-art" aria-hidden="true">
     <svg class="menu-ribbon" viewBox="440 0 412 300" focusable="false">
       <defs>
@@ -553,8 +553,12 @@ const { items, donate, help } = navigation;
     header.classList.add("has-menu");
     openButton.hidden = false;
 
+    // showModal() focuses the close button, and Safari then draws its
+    // keyboard ring on a tap. Start focus on the dialog itself instead; Tab
+    // still reaches the button first.
     const open = () => {
       menu.showModal();
+      menu.focus({ preventScroll: true });
       document.documentElement.classList.add("menu-open");
     };
     const close = () => {
@@ -937,6 +941,10 @@ const { items, donate, help } = navigation;
       linear-gradient(90deg, #05041a 0%, #09051e 40%, #10061f 70%, #140628 100%);
   }
 
+  .menu:focus {
+    outline: none;
+  }
+
   .menu::backdrop {
     background: rgb(5 4 26 / 0.7);
   }
@@ -1040,7 +1048,8 @@ const { items, donate, help } = navigation;
     font-size: 1.2911rem;
     font-weight: 400;
     line-height: 1.1;
-    letter-spacing: -0.02em;
+    letter-spacing: 0.01em;
+    word-spacing: 0.04em;
     color: #fff;
   }
 
@@ -1048,7 +1057,8 @@ const { items, donate, help } = navigation;
     font-size: 0.9384rem;
     font-weight: 400;
     line-height: 1.2;
-    letter-spacing: 0.09em;
+    letter-spacing: 0.11em;
+    word-spacing: 0.06em;
     color: #b8a6f2;
   }
 
@@ -1093,9 +1103,11 @@ const { items, donate, help } = navigation;
     outline: none;
   }
 
+  /* Offset 0 keeps the ring inside the button's margin, so the scrolling
+     panel does not clip it at the screen edge. */
   .menu-close:focus-visible {
     outline: 0.126rem solid #fff;
-    outline-offset: 0.1889rem;
+    outline-offset: 0;
   }
 
   .menu-inner > nav {
