@@ -347,19 +347,172 @@ const { items, donate, help } = navigation;
   Contact section it links to.
 -->
 <dialog id="menu" class="menu on-dark" aria-labelledby="menu-title">
+  <div class="menu-art" aria-hidden="true">
+    <svg class="menu-ribbon" viewBox="440 0 412 300" focusable="false">
+      <defs>
+        <linearGradient id="mr-above" x1="0" y1="0" x2="1" y2="0.3">
+          <stop offset="0" stop-color="#1c0832" />
+          <stop offset="0.45" stop-color="#2e0a40" />
+          <stop offset="1" stop-color="#5e0d58" />
+        </linearGradient>
+        <linearGradient id="mr-band" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0" stop-color="#6a1466" stop-opacity="0" />
+          <stop offset="0.5" stop-color="#7a1268" stop-opacity="0.7" />
+          <stop offset="1" stop-color="#a8187c" />
+        </linearGradient>
+        <linearGradient id="mr-line" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0" stop-color="#5a38e0" stop-opacity="0.5" />
+          <stop offset="0.45" stop-color="#9a2eb8" />
+          <stop offset="1" stop-color="#f062c4" />
+        </linearGradient>
+        <radialGradient id="mr-below" cx="1" cy="0.75" r="0.9">
+          <stop offset="0" stop-color="#2a0a64" />
+          <stop offset="0.6" stop-color="#1c0848" stop-opacity="0.6" />
+          <stop offset="1" stop-color="#140630" stop-opacity="0" />
+        </radialGradient>
+        <filter id="mr-soft" x="-40%" y="-60%" width="180%" height="220%">
+          <feGaussianBlur stdDeviation="3" />
+        </filter>
+        <filter id="mr-glow" x="-10%" y="-40%" width="120%" height="180%">
+          <feGaussianBlur stdDeviation="5" />
+        </filter>
+      </defs>
+      <rect x="440" y="0" width="412" height="300" fill="url(#mr-below)" />
+      <path d="M455,0 C560,45 690,115 852,205 L852,0 Z" fill="url(#mr-above)" />
+      <path
+        d="M590,0 C680,55 760,120 852,152 L852,205 C700,120 600,60 520,22 C540,12 565,5 590,0 Z"
+        fill="url(#mr-band)"
+        filter="url(#mr-soft)"
+      />
+      <path
+        d="M455,0 C560,45 690,115 852,205"
+        fill="none"
+        stroke="url(#mr-line)"
+        stroke-width="8"
+        opacity="0.35"
+        filter="url(#mr-glow)"
+      />
+      <path
+        d="M455,0 C560,45 690,115 852,205"
+        fill="none"
+        stroke="url(#mr-line)"
+        stroke-width="2.6"
+      />
+      <path
+        d="M590,0 C680,55 760,120 852,152"
+        fill="none"
+        stroke="#b02a90"
+        stroke-width="2"
+        opacity="0.55"
+        filter="url(#mr-soft)"
+      />
+    </svg>
+    <svg class="menu-waves" viewBox="0 1440 852 406" focusable="false">
+      <defs>
+        <linearGradient id="mw-low" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="560" y2="0">
+          <stop offset="0" stop-color="#860a22" />
+          <stop offset="0.11" stop-color="#5e0826" />
+          <stop offset="0.22" stop-color="#3e0729" />
+          <stop offset="0.36" stop-color="#2a0630" />
+          <stop offset="0.6" stop-color="#20063a" />
+          <stop offset="1" stop-color="#1c0748" stop-opacity="0" />
+        </linearGradient>
+        <linearGradient id="mw-ab" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="600" y2="0">
+          <stop offset="0" stop-color="#7a0a24" />
+          <stop offset="0.25" stop-color="#6a0a2a" />
+          <stop offset="0.45" stop-color="#420834" />
+          <stop offset="0.7" stop-color="#2c0a5a" />
+          <stop offset="1" stop-color="#2a0a6a" stop-opacity="0" />
+        </linearGradient>
+        <linearGradient id="mw-bc" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="780" y2="0">
+          <stop offset="0" stop-color="#c4163a" />
+          <stop offset="0.15" stop-color="#b41c48" />
+          <stop offset="0.3" stop-color="#9a1a66" />
+          <stop offset="0.45" stop-color="#6c1682" />
+          <stop offset="0.62" stop-color="#3e0e82" />
+          <stop offset="0.85" stop-color="#2c0a72" />
+          <stop offset="1" stop-color="#2a0870" stop-opacity="0" />
+        </linearGradient>
+        <linearGradient id="mw-edge" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="800" y2="0">
+          <stop offset="0" stop-color="#ff4a6a" />
+          <stop offset="0.2" stop-color="#f25a86" />
+          <stop offset="0.4" stop-color="#b0309a" />
+          <stop offset="0.65" stop-color="#5a22b0" />
+          <stop offset="1" stop-color="#3c14a0" stop-opacity="0.2" />
+        </linearGradient>
+        <linearGradient id="mw-ring" x1="0" y1="0" x2="1" y2="0.4">
+          <stop offset="0" stop-color="#220850" />
+          <stop offset="0.6" stop-color="#2c0b66" />
+          <stop offset="1" stop-color="#3e1296" />
+        </linearGradient>
+      </defs>
+      <path
+        d="M0,1448 C120,1470 260,1560 360,1650 C440,1720 500,1790 560,1846 L0,1846 Z"
+        fill="url(#mw-low)"
+      />
+      <path
+        d="M0,1448 C120,1470 260,1560 360,1650 C440,1720 500,1790 560,1846 L780,1846 C680,1830 560,1810 420,1745 C300,1680 150,1580 0,1533 Z"
+        fill="url(#mw-ab)"
+        opacity="0.9"
+      />
+      <path
+        d="M0,1533 C150,1580 300,1680 420,1745 C560,1810 680,1830 780,1846 L440,1846 C380,1805 320,1765 240,1712 C160,1660 80,1625 0,1611 Z"
+        fill="url(#mw-bc)"
+        opacity="0.92"
+      />
+      <path
+        d="M0,1448 C120,1470 260,1560 360,1650 C440,1720 500,1790 560,1846"
+        fill="none"
+        stroke="url(#mw-edge)"
+        stroke-width="9"
+        opacity="0.18"
+      />
+      <path
+        d="M0,1448 C120,1470 260,1560 360,1650 C440,1720 500,1790 560,1846"
+        fill="none"
+        stroke="url(#mw-edge)"
+        stroke-width="2.4"
+      />
+      <path
+        d="M0,1533 C150,1580 300,1680 420,1745 C560,1810 680,1830 780,1846"
+        fill="none"
+        stroke="url(#mw-edge)"
+        stroke-width="9"
+        opacity="0.2"
+      />
+      <path
+        d="M0,1533 C150,1580 300,1680 420,1745 C560,1810 680,1830 780,1846"
+        fill="none"
+        stroke="url(#mw-edge)"
+        stroke-width="2.4"
+      />
+      <path
+        d="M0,1611 C80,1625 160,1660 240,1712 C320,1765 380,1805 440,1846"
+        fill="none"
+        stroke="url(#mw-edge)"
+        stroke-width="1.8"
+        opacity="0.75"
+      />
+    </svg>
+    <Brand kind="mark" class="menu-watermark" label="" />
+  </div>
+
   <div class="menu-inner">
     <div class="menu-top">
       <p id="menu-title" class="menu-brand">
         <Brand kind="mark" class="menu-icon" label="" />
-        <span>{org.name}</span>
+        <span class="menu-brand-text">
+          <span class="menu-brand-name">{org.shortName}</span>
+          <span class="menu-brand-sub">{org.name.replace(org.shortName, "").trim()}</span>
+        </span>
       </p>
       <button class="menu-close" type="button" data-menu-close>
         <svg viewBox="0 0 20 20" width="20" height="20" aria-hidden="true">
           <path
-            d="M4 4l12 12M16 4L4 16"
+            d="M3.5 3.5l13 13M16.5 3.5l-13 13"
             fill="none"
             stroke="currentColor"
-            stroke-width="2.4"
+            stroke-width="2.2"
             stroke-linecap="round"
           />
         </svg>
@@ -369,23 +522,23 @@ const { items, donate, help } = navigation;
 
     <nav aria-label="Menu">
       <ol class="menu-list">
-        <li class="menu-help" style="--n: 0;">
-          <a href={help.href} data-menu-close>
-            <span class="menu-label">{help.label}</span>
-          </a>
-        </li>
-        {items.map((item, i) => (
-          <li style={`--n: ${i + 1};`}>
+        {[help, ...items, donate].map((item, i) => (
+          <li class:list={[i === 0 && "menu-help"]} style={`--n: ${i};`}>
             <a href={item.href} data-menu-close>
               <span class="menu-label">{item.label}</span>
+              <svg class="menu-chevron" viewBox="0 0 10 17" aria-hidden="true">
+                <path
+                  d="M1.5 1.5l7 7-7 7"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.6"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+              </svg>
             </a>
           </li>
         ))}
-        <li style={`--n: ${items.length + 1};`}>
-          <a href={donate.href} data-menu-close>
-            <span class="menu-label">{donate.label}</span>
-          </a>
-        </li>
       </ol>
     </nav>
   </div>
@@ -764,8 +917,10 @@ const { items, donate, help } = navigation;
     }
   }
 
-  /* The menu: full screen, dark, typographic. */
+  /* The menu: full screen, dark, with a serif list and quiet brand art. */
   .menu {
+    --menu-safe-top: env(safe-area-inset-top, 0px);
+    --menu-row: 4.55rem;
     inset: 0;
     width: 100%;
     max-width: none;
@@ -774,17 +929,20 @@ const { items, donate, help } = navigation;
     margin: 0;
     padding: 0;
     border: 0;
+    overflow: hidden;
+    color: #fff;
     background:
-      radial-gradient(80% 50% at 100% 0%, rgb(96 8 215 / 0.45), transparent 60%),
-      radial-gradient(60% 40% at 0% 100%, rgb(226 32 44 / 0.18), transparent 60%), var(--night);
+      radial-gradient(70% 34% at 100% 20%, rgb(52 10 110 / 0.5), transparent 70%),
+      radial-gradient(60% 14% at 0% 81%, rgb(140 10 40 / 0.45), transparent 75%),
+      linear-gradient(90deg, #05041a 0%, #09051e 40%, #10061f 70%, #140628 100%);
   }
 
   .menu::backdrop {
-    background: rgb(27 15 46 / 0.6);
+    background: rgb(5 4 26 / 0.7);
   }
 
   .menu[open] {
-    display: grid;
+    display: block;
     animation: menu-in 260ms ease-out;
   }
 
@@ -799,13 +957,55 @@ const { items, donate, help } = navigation;
     }
   }
 
+  .menu-art {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+
+  .menu-ribbon {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 11.8782rem;
+    height: auto;
+  }
+
+  .menu-waves {
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: min(100%, 32rem);
+    height: auto;
+  }
+
+  .menu-art :global(.menu-watermark) {
+    position: absolute;
+    right: -0.1889rem;
+    bottom: 0.9762rem;
+    width: 10.3288rem;
+    opacity: 1;
+  }
+
+  .menu-art :global(.menu-watermark path[fill="#6008d7"]) {
+    fill: url(#mw-ring);
+  }
+
+  .menu-art :global(.menu-watermark path[fill="#8a5bff"]) {
+    fill: #1f0848;
+  }
+
+  .menu-art :global(.menu-watermark path[fill="#ba010c"]),
+  .menu-art :global(.menu-watermark path[fill="#f4eeff"]) {
+    fill: #0f0628;
+  }
+
   .menu-inner {
-    display: grid;
-    grid-template-rows: auto 1fr;
-    width: min(100% - 2 * var(--gutter), var(--wide)); /* the same column as the header */
+    position: relative;
+    width: min(100% - 2 * 1.184rem, var(--wide));
     height: 100%;
     margin-inline: auto;
-    padding-block: 0.6rem var(--space-m);
+    padding-top: calc(var(--menu-safe-top) + 2.6641rem);
     overflow-y: auto;
   }
 
@@ -813,42 +1013,93 @@ const { items, donate, help } = navigation;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: var(--space-s);
-    min-height: 3.75rem;
+    min-height: 3.7788rem;
   }
 
   .menu-brand {
-    display: inline-flex;
+    display: flex;
     align-items: center;
-    gap: 0.6rem;
-    font-family: var(--font-display);
-    font-weight: 750;
-    font-size: var(--step--1);
-    color: var(--night-soft);
+    gap: 0.6298rem;
+    margin: 0;
     max-width: none;
   }
 
   .menu-brand :global(.menu-icon) {
-    width: 1.75rem;
+    width: 3.2561rem;
     flex: none;
+    filter: drop-shadow(0 0 0.3779rem rgb(120 50 255 / 0.35));
   }
 
+  .menu-brand-text {
+    display: grid;
+    gap: 0.3842rem;
+    font-family: var(--font-menu);
+  }
+
+  .menu-brand-name {
+    font-size: 1.2911rem;
+    font-weight: 400;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    color: #fff;
+  }
+
+  .menu-brand-sub {
+    font-size: 0.9384rem;
+    font-weight: 400;
+    line-height: 1.2;
+    letter-spacing: 0.09em;
+    color: #b8a6f2;
+  }
+
+  /*
+   * 2.7712rem for the thumb; the 2.6452rem ring the design calls for is drawn inside.
+   */
   .menu-close {
+    position: relative;
     display: grid;
     place-items: center;
     flex: none;
-    width: max(44px, 2.75rem);
-    height: max(44px, 2.75rem);
-    border: 1px solid rgb(255 255 255 / 0.3);
+    width: max(44px, 2.7712rem);
+    height: max(44px, 2.7712rem);
+    margin-right: 0.126rem;
+    border: 0;
     border-radius: 50%;
-    background: rgb(255 255 255 / 0.08);
+    background: none;
     color: #fff;
     cursor: pointer;
   }
 
+  .menu-close::before {
+    content: "";
+    position: absolute;
+    inset: 0.063rem;
+    border: 0.126rem solid #ad6dea;
+    border-radius: 50%;
+    background: rgb(28 8 60 / 0.6);
+    box-shadow:
+      0 0 0.5038rem rgb(150 80 255 / 0.45),
+      inset 0 0 0.3779rem rgb(150 80 255 / 0.25);
+  }
+
+  .menu-close svg {
+    position: relative;
+    width: 1.0707rem;
+    height: 1.0707rem;
+  }
+
+  /* No ring on a plain tap; keyboard users still get a clear one. */
+  .menu-close:focus {
+    outline: none;
+  }
+
+  .menu-close:focus-visible {
+    outline: 0.126rem solid #fff;
+    outline-offset: 0.1889rem;
+  }
+
   .menu-inner > nav {
-    display: grid;
-    align-content: center;
+    margin-top: 2.2673rem;
   }
 
   .menu-list {
@@ -859,9 +1110,51 @@ const { items, donate, help } = navigation;
   }
 
   .menu-list > li {
-    border-bottom: 1px solid rgb(255 255 255 / 0.12);
+    position: relative;
     animation: item-in 420ms ease-out both;
     animation-delay: calc(80ms + var(--n) * 60ms);
+  }
+
+  /* Hairline dividers that glow violet to rose, fading at both ends. */
+  .menu-list > li::after {
+    content: "";
+    position: absolute;
+    left: 0.2519rem;
+    right: 0.2519rem;
+    bottom: 0;
+    height: var(--hairline);
+    background: linear-gradient(
+      90deg,
+      rgb(83 50 181 / 0) 0%,
+      #5332b5 20%,
+      #8f4caf 55%,
+      #cf6fae 78%,
+      rgb(207 111 174 / 0) 100%
+    );
+  }
+
+  .menu-list > li.menu-help::after {
+    height: 0.0882rem;
+    background: linear-gradient(
+      90deg,
+      rgb(83 50 181 / 0) 0%,
+      #5332b5 20%,
+      #8f4caf 50%,
+      #ed7a98 75%,
+      rgb(237 80 110 / 0) 100%
+    );
+    box-shadow: 0 0 0.3779rem rgb(240 80 110 / 0.35);
+  }
+
+  .menu-list > li.menu-help::before {
+    content: "";
+    position: absolute;
+    right: 16%;
+    bottom: -0.1889rem;
+    width: 26%;
+    height: 0.4409rem;
+    background: radial-gradient(closest-side, rgb(255 100 120 / 0.4), transparent);
+    pointer-events: none;
   }
 
   @keyframes item-in {
@@ -876,28 +1169,69 @@ const { items, donate, help } = navigation;
   }
 
   .menu-list > li > a {
-    display: block;
-    padding: 0.8rem 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: var(--menu-row);
+    padding: 0 0.6613rem 0 1.7194rem;
     color: #fff;
     text-decoration: none;
   }
 
   .menu-label {
-    font-family: var(--font-display);
-    font-weight: 800;
-    font-size: 1.839rem; /* one value per class, like --step-3 (see the media blocks above) */
-    line-height: 1.05;
-    letter-spacing: -0.045em;
+    font-family: var(--font-menu);
+    font-weight: 430;
+    position: relative;
+    top: -0.1134rem;
+    font-size: 1.8138rem;
+    line-height: 1;
+    letter-spacing: -0.02em;
   }
 
-  /* Help me first, in the signal colour: the site's job is to route people. */
+  .menu-chevron {
+    position: relative;
+    top: 0.1008rem;
+    width: 0.6739rem;
+    height: 1.1462rem;
+    flex: none;
+    color: #b9a3f2;
+  }
+
+  /* Help me leads, marked with a rose-to-violet bar and gradient type. */
+  .menu-help > a::before {
+    content: "";
+    position: absolute;
+    left: 0.2267rem;
+    top: 0.9132rem;
+    bottom: 0.781rem;
+    width: 0.3149rem;
+    border-radius: 0.063rem;
+    background: linear-gradient(180deg, #e8304e 0%, #c52a8a 50%, #6a2ee8 100%);
+  }
+
   .menu-help .menu-label {
-    color: var(--signal);
+    margin-left: -0.0819rem;
+    padding-bottom: 0.2em;
+    margin-bottom: -0.2em;
+    font-size: 1.8894rem;
+    background: linear-gradient(90deg, #b24fe0 0%, #d63f9c 45%, #ee3350 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  .menu-help .menu-chevron {
+    color: #ec3658;
   }
 
   .menu-list > li > a:hover .menu-label {
     text-decoration: underline;
     text-underline-offset: 0.12em;
+  }
+
+  .menu-list > li > a:focus-visible {
+    outline: 0.126rem solid #fff;
+    outline-offset: -0.126rem;
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -918,6 +1252,18 @@ const { items, donate, help } = navigation;
     font-weight: 100 900;
     font-display: swap;
     unicode-range: U+0066;
+  }
+
+  /* Serif for the phone menu: a Literata display cut, Latin only. */
+  @font-face {
+    font-family: "Menu Serif";
+    src: url("/fonts/menu-serif.woff2") format("woff2");
+    font-weight: 300 600;
+    font-display: swap;
+  }
+
+  :root {
+    --font-menu: "Menu Serif", Georgia, "Times New Roman", serif;
   }
 
   html.menu-open {
