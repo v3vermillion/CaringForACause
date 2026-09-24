@@ -1246,6 +1246,83 @@ const { items, donate, help } = navigation;
     outline-offset: -0.126rem;
   }
 
+  /* Portrait tablets: the root font follows the 768px tablet reference, so
+     the phone menu would fill only the top half of the screen. Scale the
+     menu's own sizes by --k instead. Only a tall tablet-width screen
+     qualifies: phones in landscape, short windows, and desktop (which has no
+     menu) keep the sizes above. */
+  @media (min-width: 36rem) and (max-width: 55.99rem) and (min-height: 48rem) {
+    .menu {
+      --k: 1.3;
+      --menu-row: calc(4.55rem * var(--k));
+    }
+    .menu-inner {
+      padding-top: calc(var(--menu-safe-top) + 2.6641rem * var(--k));
+    }
+    .menu-top {
+      min-height: calc(3.7788rem * var(--k));
+    }
+    .menu-brand {
+      gap: calc(0.6298rem * var(--k));
+    }
+    .menu-brand :global(.menu-icon) {
+      width: calc(3.2561rem * var(--k));
+    }
+    .menu-brand-text {
+      gap: calc(0.3842rem * var(--k));
+    }
+    .menu-brand-name {
+      font-size: calc(1.2911rem * var(--k));
+    }
+    .menu-brand-sub {
+      font-size: calc(0.9384rem * var(--k));
+    }
+    .menu-close {
+      width: max(44px, 2.7712rem * var(--k));
+      height: max(44px, 2.7712rem * var(--k));
+    }
+    .menu-close::before {
+      inset: calc(0.063rem * var(--k));
+      border-width: calc(0.126rem * var(--k));
+    }
+    .menu-close svg {
+      width: calc(1.0707rem * var(--k));
+      height: calc(1.0707rem * var(--k));
+    }
+    .menu-inner > nav {
+      margin-top: calc(2.2673rem * var(--k));
+    }
+    .menu-list > li > a {
+      padding: 0 calc(0.6613rem * var(--k)) 0 calc(1.7194rem * var(--k));
+    }
+    .menu-label {
+      top: calc(-0.1134rem * var(--k));
+      font-size: calc(1.8138rem * var(--k));
+    }
+    .menu-help .menu-label {
+      font-size: calc(1.8894rem * var(--k));
+    }
+    .menu-chevron {
+      top: calc(0.1008rem * var(--k));
+      width: calc(0.6739rem * var(--k));
+      height: calc(1.1462rem * var(--k));
+    }
+    .menu-help > a::before {
+      top: calc(0.9132rem * var(--k));
+      bottom: calc(0.781rem * var(--k));
+      width: calc(0.3149rem * var(--k));
+    }
+    .menu-ribbon {
+      width: calc(11.8782rem * var(--k));
+    }
+    .menu-waves {
+      width: min(100%, 32rem * var(--k));
+    }
+    .menu-art :global(.menu-watermark) {
+      width: calc(10.3288rem * var(--k));
+    }
+  }
+
   @media (prefers-reduced-motion: reduce) {
     .menu[open],
     .menu-list > li {

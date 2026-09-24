@@ -869,6 +869,24 @@ test.describe("menu", () => {
     await expect(button).toBeFocused();
   });
 
+  test("fills a portrait tablet and keeps the rules clear of the watermark", async ({
+    page,
+    isMobile,
+    viewport,
+  }) => {
+    test.skip(
+      !isMobile || !viewport || viewport.width < 576 || viewport.height < 768,
+      "portrait tablets only",
+    );
+    await page.goto("/");
+    await page.locator("[data-menu-open]").click();
+    const list = await page.locator("#menu .menu-list").boundingBox();
+    const mark = await page.locator("#menu .menu-watermark").boundingBox();
+    expect(list && mark).toBeTruthy();
+    expect(list!.y + list!.height).toBeGreaterThan(viewport!.height * 0.65);
+    expect(list!.y + list!.height).toBeLessThan(mark!.y);
+  });
+
   test("lists Help me, the four sections, and Donate, and nothing else", async ({
     page,
     isMobile,
