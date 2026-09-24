@@ -1005,33 +1005,53 @@ const { items, donate, help } = navigation;
   /*
    * Portrait phones. The reference is a full-screen phone; in a phone
    * browser the toolbars take about a fifth of that height, and the list
-   * ran down into the mark. So the rows share what is left once the mark
-   * has its corner: they tighten from 4.55rem toward 3.9rem (type, mark and
-   * everything above the list stay as they are), and the mark may dip up to
-   * 1rem past the bottom edge, as it already does past the right. On a
-   * screen tall enough for the reference nothing moves. 0.9173 is the
-   * mark's height over its width; 8.7102rem is the panel padding, brand row
-   * and gap above the list.
+   * ran down into the mark. On a shorter screen the rows tighten from
+   * 4.55rem toward 3.6rem and the mark eases down to 90% of its size, so the
+   * whole mark sits in its corner a small gap below the last rule. Type and
+   * everything above the list stay as they are, and on a screen tall enough
+   * for the reference nothing moves. 0.9173 is the mark's height over its
+   * width; 8.7102rem is the panel padding, brand row and gap above the list.
    */
   @media (max-width: 35.99rem) and (orientation: portrait) {
     .menu {
       --list-start: calc(var(--menu-safe-top) + 8.7102rem);
       --mark-h: calc(var(--mark-w) * 0.9173);
       --mark-gap: 1rem;
+      --mark-edge: 0.9762rem;
     }
-    /* Older browsers without dynamic viewport units keep the fixed rows. */
+    /* Older browsers without dynamic viewport units keep the fixed sizes. */
     @supports (height: 100dvh) {
       .menu {
+        /* Rows first, leaving room for the mark at 90%. */
         --menu-row: clamp(
-          3.9rem,
-          (100dvh - var(--list-start) - var(--mark-gap) - var(--mark-h) + 1rem) / var(--menu-rows),
+          3.6rem,
+          (
+              100dvh - var(--list-start) - var(--mark-gap) - var(--mark-edge) - 10.3288rem * 0.9 *
+                0.9173
+            ) /
+            var(--menu-rows),
           4.55rem
+        );
+        /* Then the mark takes what is left, up to its full size. */
+        --mark-w: clamp(
+          10.3288rem * 0.9,
+          (
+              100dvh - var(--list-start) - var(--menu-rows) * var(--menu-row) - var(--mark-gap) -
+                var(--mark-edge)
+            ) /
+            0.9173,
+          10.3288rem
         );
       }
     }
+    /* As the mark eases smaller it also comes in off the right edge, so a
+       reduced mark sits wholly on screen; at full size it keeps the
+       reference's slight bleed. Only if a screen is shorter than all of
+       that does the mark move down. */
     .menu-art :global(.menu-watermark) {
+      right: calc(-0.1889rem + (10.3288rem - var(--mark-w)) * 0.76);
       bottom: min(
-        0.9762rem,
+        var(--mark-edge),
         100% - var(--list-start) - var(--menu-rows) * var(--menu-row) - var(--mark-gap) -
           var(--mark-h)
       );
