@@ -32,7 +32,9 @@ env:
 jobs:
   check:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    # Up to 20 minutes waiting for Cloudflare, then the full browser suite
+    # (about 20 minutes on a slow runner) and Lighthouse; the last run took 29.
+    timeout-minutes: 45
     steps:
       - uses: actions/checkout@v7
 
@@ -57,7 +59,19 @@ jobs:
           node-version-file: .nvmrc
           cache: npm
       - run: npm ci
+      # Browsers are ~1 GB and change only with the Playwright version, so they
+      # are cached on that version and only downloaded when it changes; the OS
+      # packages they need are installed either way.
+      - name: Cache Playwright browsers
+        id: browsers
+        uses: actions/cache@v6
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('node_modules/@playwright/test/package.json') }}
       - run: npx playwright install --with-deps chromium webkit firefox
+        if: steps.browsers.outputs.cache-hit != 'true'
+      - run: npx playwright install-deps chromium webkit firefox
+        if: steps.browsers.outputs.cache-hit == 'true'
 
       - name: Headers, status codes, and compression
         id: headers

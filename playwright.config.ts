@@ -40,8 +40,17 @@ const projects = matrix
     name,
     use: {
       ...profile,
-      ...(profile.defaultBrowserType === "chromium" && chromiumPath
-        ? { launchOptions: { executablePath: chromiumPath } }
+      ...(profile.defaultBrowserType === "chromium"
+        ? {
+            launchOptions: {
+              // Linux Chromium hints glyphs to whole pixels, so text widths
+              // don't scale linearly and the page-composition guard cannot
+              // run (see its precondition test). Without hinting the widths
+              // are fractional and linear; the layout itself does not change.
+              args: ["--font-render-hinting=none"],
+              ...(chromiumPath ? { executablePath: chromiumPath } : {}),
+            },
+          }
         : {}),
     },
   }));
@@ -58,6 +67,9 @@ export default defineConfig({
   use: {
     baseURL: liveUrl ?? "http://127.0.0.1:4321",
     trace: "retain-on-failure",
+    // A failed layout test attaches the page as it looked, readable from the
+    // report or by an agent without opening the trace viewer.
+    screenshot: "only-on-failure",
   },
   projects,
   webServer: liveUrl
