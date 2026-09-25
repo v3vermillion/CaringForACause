@@ -308,13 +308,19 @@ const mailto = (subject: string) =>
       padding: var(--space-l) 0 var(--space-l) var(--space-l);
     }
     /* The photo takes the row's height (the words set it, with a floor),
-       not its own ratio, so the row is the same on every desktop width. */
-    .panel :global(.photo) {
-      --photo-ratio: auto;
+       not its own: it is laid over its picture element, which contributes
+       nothing but the floor, so the row is the same on every desktop width. */
+    .panel :global(picture) {
+      position: relative;
       order: 0;
       align-self: stretch;
-      height: 100%;
       min-height: 22rem;
+    }
+    .panel :global(.photo) {
+      --photo-ratio: auto;
+      position: absolute;
+      inset: 0;
+      height: 100%;
       border-radius: 0 var(--r-card) var(--r-card) 0;
     }
   }
