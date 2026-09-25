@@ -175,6 +175,9 @@ const year = new Date().getFullYear();
    * them.
    */
   .site-footer {
+    /* The two lists' row heights, one value per class (below). */
+    --row-links: 2.75rem;
+    --row-contact: 2.9rem;
     --line: #b589e6; /* chevrons */
     --violet: #c199ea; /* drawn icons */
     --seal: #c4a2f6; /* the small mark's lines */
@@ -417,24 +420,13 @@ const year = new Date().getFullYear();
   .links a {
     justify-content: space-between;
     gap: 1rem;
-    min-height: 2.75rem;
+    min-height: var(--row-links);
     padding-right: 0.15rem;
   }
 
   .contact a {
     gap: 1.1rem;
-    min-height: 2.9rem;
-  }
-
-  /* Apple's 44px is a minimum for fingers, so it is held where the pointer
-     is coarse rather than at every width: a row is otherwise its reference
-     height and scales with the class, so every screen of a class is one
-     composition (decision 43). */
-  @media (pointer: coarse) {
-    .links a,
-    .contact a {
-      min-height: 44px;
-    }
+    min-height: var(--row-contact);
   }
 
   /* The chevron's ink is 7 by 14 of its 24 box. */
@@ -687,8 +679,11 @@ const year = new Date().getFullYear();
       padding-top: 3rem;
     }
 
+    /* The second track is capped at the room left (a plain 1fr has an auto
+       minimum, and the address row fits it by less than a pixel, which
+       another engine's text metrics could erase and push the column out). */
     .columns {
-      grid-template-columns: 19.04rem 1fr;
+      grid-template-columns: 19.04rem minmax(0, 1fr);
     }
 
     .identity {
@@ -774,8 +769,8 @@ const year = new Date().getFullYear();
     }
 
     .contact a {
-      gap: 1.5rem;
-      min-height: 3.3rem;
+      --row-contact: 3.3rem;
+      gap: 1.3rem;
     }
 
     .icon {
@@ -941,13 +936,12 @@ const year = new Date().getFullYear();
     }
 
     .links a {
-      min-height: 2.75rem;
       padding-right: 2.2rem;
     }
 
     .contact a {
+      --row-contact: 3.55rem;
       gap: 1.57rem;
-      min-height: 3.55rem;
     }
 
     .icon {
@@ -1056,6 +1050,21 @@ const year = new Date().getFullYear();
     .where::before {
       left: 30.15rem;
       top: 50%;
+    }
+  }
+
+  /* Apple's 44px is a minimum for fingers, so it is held where the pointer
+     is coarse rather than at every width: a row is otherwise its reference
+     height and scales with the class, so every screen of a class is one
+     composition (decision 43). Last, so it wins over the class blocks above
+     at the same specificity. */
+  @media (pointer: coarse) {
+    .links a {
+      min-height: max(44px, var(--row-links));
+    }
+
+    .contact a {
+      min-height: max(44px, var(--row-contact));
     }
   }
 </style>
