@@ -170,14 +170,14 @@ export const hero = {
    */
   montage: [
     {
-      file: "holiday-gift-bags.jpg",
-      alt: "",
-      focus: "center 18%",
-    },
-    {
       file: "haircut-boy.jpg",
       alt: "",
       focus: "center 10%",
+    },
+    {
+      file: "holiday-gift-bags.jpg",
+      alt: "",
+      focus: "center 18%",
     },
     {
       file: "families-banner.jpg",
