@@ -966,11 +966,20 @@ test.describe("menu", () => {
 
   test("choosing a link closes the menu and reaches its target", async ({ page, isMobile }) => {
     test.skip(!isMobile, "the menu button only shows on phones");
+    // Reduced motion jumps instantly, which is when a scrolling focus() on
+    // close would undo the jump.
+    await page.emulateMedia({ reducedMotion: "reduce" });
     await page.goto("/");
     await page.locator("[data-menu-open]").click();
     await page.locator("#menu .menu-list a", { hasText: "About" }).click();
     await expect(page.locator("#menu")).toBeHidden();
     expect(new URL(page.url()).hash).toBe("#about");
+    // Returning focus to the menu button must not scroll the page back up
+    // from the section the link just jumped to.
+    await expect(page.locator("[data-menu-open]")).toBeFocused();
+    await expect
+      .poll(() => page.locator("#about").evaluate((el) => el.getBoundingClientRect().top))
+      .toBeLessThan(120);
   });
 
   test("menu links and controls are at least 44px tall", async ({ page, isMobile }) => {

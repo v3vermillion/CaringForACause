@@ -578,7 +578,7 @@ const { items, donate, help } = navigation;
     });
     menu.addEventListener("close", () => {
       document.documentElement.classList.remove("menu-open");
-      openButton.focus();
+      openButton.focus({ preventScroll: true });
     });
   }
 </script>
