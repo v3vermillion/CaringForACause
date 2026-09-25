@@ -140,5 +140,20 @@ const structuredData = {
     <slot />
     <slot name="after" />
     <BrandPaint />
+    <script>
+      // A section link (#contact, /#sponsor) scrolls to its section, then the
+      // fragment leaves the address. Left there it outlived the visit: a
+      // refresh jumped back to that section wherever the reader had scrolled
+      // since, and on a phone Contact is the bottom of the page. Without it a
+      // refresh keeps the reader where they are. It waits a turn so the tabs'
+      // own hash handling (GetInvolved.astro) reads the fragment first.
+      const clearHash = () => {
+        if (location.hash)
+          history.replaceState(history.state, "", location.pathname + location.search);
+      };
+      addEventListener("hashchange", () => setTimeout(clearHash));
+      if (document.readyState === "complete") setTimeout(clearHash);
+      else addEventListener("load", () => setTimeout(clearHash));
+    </script>
   </body>
 </html>
