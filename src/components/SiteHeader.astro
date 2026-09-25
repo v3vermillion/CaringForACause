@@ -6,300 +6,10 @@ const { items, donate, help } = navigation;
 ---
 
 <header class="site-header" data-header>
-  <!-- Decorative light sweep behind the left of the bar: the violet and
-       crimson bands of her logo files, and a white lens toward Donate. -->
-  <svg
-    class="sweep"
-    viewBox="0 0 1400 352"
-    preserveAspectRatio="xMinYMid slice"
-    aria-hidden="true"
-    focusable="false"
-  >
-    <defs>
-      <linearGradient id="sw-top" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="80" y2="72">
-        <stop offset="0" stop-color="#6424da" />
-        <stop offset="1" stop-color="#2a0676" />
-      </linearGradient>
-      <linearGradient id="sw-rib" gradientUnits="userSpaceOnUse" x1="300" y1="0" x2="530" y2="0">
-        <stop offset="0" stop-color="#9f0c5a" stop-opacity="0" />
-        <stop offset="0.25" stop-color="#9f0c5a" />
-        <stop offset="1" stop-color="#b3042c" />
-      </linearGradient>
-      <linearGradient id="sw-bot" gradientUnits="userSpaceOnUse" x1="0" y1="300" x2="330" y2="352">
-        <stop offset="0" stop-color="#b08cf8" />
-        <stop offset="0.35" stop-color="#8a62da" />
-        <stop offset="0.7" stop-color="#5a2fae" />
-        <stop offset="1" stop-color="#3c128c" />
-      </linearGradient>
-      <linearGradient id="sw-ustroke" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="200" y2="0">
-        <stop offset="0" stop-color="#f2a8dc" stop-opacity="0.75" />
-        <stop offset="0.45" stop-color="#e8307a" stop-opacity="0.7" />
-        <stop offset="1" stop-color="#ec1f48" />
-      </linearGradient>
-      <linearGradient id="sw-pstroke" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="360" y2="0">
-        <stop offset="0" stop-color="#f06a9a" stop-opacity="0.15" />
-        <stop offset="0.45" stop-color="#f02a60" stop-opacity="0.7" />
-        <stop offset="1" stop-color="#f5184a" />
-      </linearGradient>
-      <linearGradient id="sw-bandT2" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="300" y2="0">
-        <stop offset="0" stop-color="#ab84fb" />
-        <stop offset="0.5" stop-color="#9468e4" />
-        <stop offset="0.8" stop-color="#6a2cc0" />
-        <stop offset="1" stop-color="#5e22c1" />
-      </linearGradient>
-      <linearGradient id="sw-bandB" gradientUnits="userSpaceOnUse" x1="180" y1="0" x2="400" y2="0">
-        <stop offset="0" stop-color="#b893fb" />
-        <stop offset="0.5" stop-color="#9a7af6" />
-        <stop offset="1" stop-color="#7a2cd0" />
-      </linearGradient>
-      <linearGradient id="sw-wT" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="360" y2="0">
-        <stop offset="0" stop-color="#fff" stop-opacity="0.95" />
-        <stop offset="0.6" stop-color="#fff" stop-opacity="0.6" />
-        <stop offset="1" stop-color="#fff" stop-opacity="0" />
-      </linearGradient>
-      <linearGradient id="sw-wB" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="420" y2="0">
-        <stop offset="0" stop-color="#fff" stop-opacity="0.95" />
-        <stop offset="0.6" stop-color="#fff" stop-opacity="0.8" />
-        <stop offset="1" stop-color="#fff" stop-opacity="0.2" />
-      </linearGradient>
-      <linearGradient id="sw-low" gradientUnits="userSpaceOnUse" x1="0" y1="250" x2="0" y2="352">
-        <stop offset="0" stop-color="#dccdfd" />
-        <stop offset="0.6" stop-color="#d3c1fb" />
-        <stop offset="1" stop-color="#c9b3f8" />
-      </linearGradient>
-      <linearGradient
-        id="sw-lowm-g"
-        gradientUnits="userSpaceOnUse"
-        x1="520"
-        y1="0"
-        x2="1300"
-        y2="0"
-      >
-        <stop offset="0" stop-color="#fff" stop-opacity="0" />
-        <stop offset="0.15" stop-color="#fff" />
-        <stop offset="0.8" stop-color="#fff" />
-        <stop offset="1" stop-color="#fff" stop-opacity="0.2" />
-      </linearGradient>
-      <mask id="sw-lowm" maskUnits="userSpaceOnUse" x="500" y="200" width="820" height="170">
-        <rect x="500" y="200" width="820" height="170" fill="url(#sw-lowm-g)" />
-      </mask>
-      <linearGradient id="sw-t0" gradientUnits="userSpaceOnUse" x1="10" y1="0" x2="150" y2="0">
-        <stop offset="0" stop-color="#b0287e" stop-opacity="0" />
-        <stop offset="1" stop-color="#b0287e" stop-opacity="1" />
-      </linearGradient>
-      <linearGradient id="sw-t1" gradientUnits="userSpaceOnUse" x1="10" y1="0" x2="150" y2="0">
-        <stop offset="0" stop-color="#a0288f" stop-opacity="0" />
-        <stop offset="1" stop-color="#a0288f" stop-opacity="0.95" />
-      </linearGradient>
-      <linearGradient id="sw-t2" gradientUnits="userSpaceOnUse" x1="10" y1="0" x2="150" y2="0">
-        <stop offset="0" stop-color="#93329f" stop-opacity="0" />
-        <stop offset="1" stop-color="#93329f" stop-opacity="0.85" />
-      </linearGradient>
-      <linearGradient id="sw-t3" gradientUnits="userSpaceOnUse" x1="10" y1="0" x2="150" y2="0">
-        <stop offset="0" stop-color="#8741b0" stop-opacity="0" />
-        <stop offset="1" stop-color="#8741b0" stop-opacity="0.7" />
-      </linearGradient>
-      <linearGradient id="sw-t4" gradientUnits="userSpaceOnUse" x1="10" y1="0" x2="150" y2="0">
-        <stop offset="0" stop-color="#8a50c8" stop-opacity="0" />
-        <stop offset="1" stop-color="#8a50c8" stop-opacity="0.5" />
-      </linearGradient>
-      <linearGradient id="sw-b0" gradientUnits="userSpaceOnUse" x1="190" y1="0" x2="270" y2="0">
-        <stop offset="0" stop-color="#ad1a70" stop-opacity="0" />
-        <stop offset="1" stop-color="#ad1a70" stop-opacity="1" />
-      </linearGradient>
-      <linearGradient id="sw-b1" gradientUnits="userSpaceOnUse" x1="190" y1="0" x2="270" y2="0">
-        <stop offset="0" stop-color="#9c3b9c" stop-opacity="0" />
-        <stop offset="1" stop-color="#9c3b9c" stop-opacity="0.95" />
-      </linearGradient>
-      <linearGradient id="sw-b2" gradientUnits="userSpaceOnUse" x1="190" y1="0" x2="270" y2="0">
-        <stop offset="0" stop-color="#9a4ebe" stop-opacity="0" />
-        <stop offset="1" stop-color="#9a4ebe" stop-opacity="0.85" />
-      </linearGradient>
-      <linearGradient id="sw-b3" gradientUnits="userSpaceOnUse" x1="190" y1="0" x2="270" y2="0">
-        <stop offset="0" stop-color="#955cd3" stop-opacity="0" />
-        <stop offset="1" stop-color="#955cd3" stop-opacity="0.7" />
-      </linearGradient>
-      <linearGradient id="sw-b4" gradientUnits="userSpaceOnUse" x1="190" y1="0" x2="270" y2="0">
-        <stop offset="0" stop-color="#9767e8" stop-opacity="0" />
-        <stop offset="1" stop-color="#9767e8" stop-opacity="0.5" />
-      </linearGradient>
-      <filter id="sw-soft" x="-20%" y="-50%" width="140%" height="200%">
-        <feGaussianBlur stdDeviation="3" />
-      </filter>
-      <filter id="sw-hair" x="-20%" y="-50%" width="140%" height="200%">
-        <feGaussianBlur stdDeviation="1.2" />
-      </filter>
-      <filter id="sw-glow" x="-30%" y="-80%" width="160%" height="260%">
-        <feGaussianBlur stdDeviation="22" />
-      </filter>
-    </defs>
-    <!-- white lens -->
-    <ellipse
-      cx="560"
-      cy="172"
-      rx="560"
-      ry="90"
-      fill="#fdfbff"
-      filter="url(#sw-glow)"
-      opacity="0.8"
-    />
-    <!-- lower edge of the light lens, sweeping toward the Donate button -->
-    <path
-      d="M520.0,240.0 C782.1,260.9 1046.1,289.4 1300.0,360.0 L1300,366 L520,366 Z"
-      fill="url(#sw-low)"
-      filter="url(#sw-hair)"
-      mask="url(#sw-lowm)"
-    />
-    <!-- top-left: dark corner, violet band with a white edge, crimson line -->
-    <path
-      d="M-6.0,99.0 C121.7,38.7 260.3,9.8 400.0,-5.0 L560,-8 L560.0,-2.0 C366.7,16.5 164.4,33.0 -6.0,136.0 Z"
-      fill="url(#sw-bandT2)"
-    />
-    <path
-      d="M-6.0,99.0 C121.7,38.7 260.3,9.8 400.0,-5.0"
-      transform="translate(0,4)"
-      fill="none"
-      stroke="url(#sw-t0)"
-      stroke-width="4.6"
-      filter="url(#sw-hair)"
-    />
-    <path
-      d="M-6.0,99.0 C121.7,38.7 260.3,9.8 400.0,-5.0"
-      transform="translate(0,8)"
-      fill="none"
-      stroke="url(#sw-t1)"
-      stroke-width="4.6"
-      filter="url(#sw-hair)"
-    />
-    <path
-      d="M-6.0,99.0 C121.7,38.7 260.3,9.8 400.0,-5.0"
-      transform="translate(0,12)"
-      fill="none"
-      stroke="url(#sw-t2)"
-      stroke-width="4.6"
-      filter="url(#sw-hair)"
-    />
-    <path
-      d="M-6.0,99.0 C121.7,38.7 260.3,9.8 400.0,-5.0"
-      transform="translate(0,16)"
-      fill="none"
-      stroke="url(#sw-t3)"
-      stroke-width="4.6"
-      filter="url(#sw-hair)"
-    />
-    <path
-      d="M-6.0,99.0 C121.7,38.7 260.3,9.8 400.0,-5.0"
-      transform="translate(0,20)"
-      fill="none"
-      stroke="url(#sw-t4)"
-      stroke-width="4.6"
-      filter="url(#sw-hair)"
-    />
-    <path
-      d="M-6.0,136.0 C164.4,33.0 366.7,16.5 560.0,-2.0"
-      fill="none"
-      stroke="url(#sw-wT)"
-      stroke-width="3.5"
-    />
-    <path d="M-6.0,99.0 C121.7,38.7 260.3,9.8 400.0,-5.0 L400,-8 L-6,-8 Z" fill="url(#sw-top)" />
-    <path
-      d="M300.0,7.5 C333.6,5.7 366.8,-0.2 400.0,-5.0 L535,-6 L535.0,-3.0 C466.8,5.6 398.8,18.5 330.0,21.0 Z"
-      fill="url(#sw-rib)"
-    />
-    <path
-      d="M-6.0,99.0 C121.7,38.7 260.3,9.8 400.0,-5.0"
-      fill="none"
-      stroke="url(#sw-ustroke)"
-      stroke-width="7"
-      opacity="0.35"
-      filter="url(#sw-soft)"
-    />
-    <path
-      d="M-6.0,99.0 C121.7,38.7 260.3,9.8 400.0,-5.0"
-      fill="none"
-      stroke="url(#sw-ustroke)"
-      stroke-width="4.5"
-    />
-    <path
-      d="M330.0,21.0 C398.8,18.5 466.8,5.6 535.0,-3.0"
-      fill="none"
-      stroke="#e8081e"
-      stroke-width="3.6"
-    />
-    <!-- bottom-left: violet band with a white edge, purple, crimson line -->
-    <path
-      d="M-6.0,200.0 C182.1,297.1 394.3,324.5 600.0,361.0 L600,366 L420.0,360.0 C275.3,326.8 133.7,282.1 -6.0,232.0 Z"
-      fill="url(#sw-bandB)"
-    />
-    <path
-      d="M-6.0,232.0 C133.7,282.1 275.3,326.8 420.0,360.0"
-      transform="translate(0,-4)"
-      fill="none"
-      stroke="url(#sw-b0)"
-      stroke-width="4.6"
-      filter="url(#sw-hair)"
-    />
-    <path
-      d="M-6.0,232.0 C133.7,282.1 275.3,326.8 420.0,360.0"
-      transform="translate(0,-8)"
-      fill="none"
-      stroke="url(#sw-b1)"
-      stroke-width="4.6"
-      filter="url(#sw-hair)"
-    />
-    <path
-      d="M-6.0,232.0 C133.7,282.1 275.3,326.8 420.0,360.0"
-      transform="translate(0,-12)"
-      fill="none"
-      stroke="url(#sw-b2)"
-      stroke-width="4.6"
-      filter="url(#sw-hair)"
-    />
-    <path
-      d="M-6.0,232.0 C133.7,282.1 275.3,326.8 420.0,360.0"
-      transform="translate(0,-16)"
-      fill="none"
-      stroke="url(#sw-b3)"
-      stroke-width="4.6"
-      filter="url(#sw-hair)"
-    />
-    <path
-      d="M-6.0,232.0 C133.7,282.1 275.3,326.8 420.0,360.0"
-      transform="translate(0,-20)"
-      fill="none"
-      stroke="url(#sw-b4)"
-      stroke-width="4.6"
-      filter="url(#sw-hair)"
-    />
-    <path
-      d="M-6.0,200.0 C182.1,297.1 394.3,324.5 600.0,361.0"
-      fill="none"
-      stroke="url(#sw-wB)"
-      stroke-width="4"
-    />
-    <path
-      d="M-6.0,232.0 C133.7,282.1 275.3,326.8 420.0,360.0 L420,366 L-6,366 Z"
-      fill="url(#sw-bot)"
-    />
-    <path
-      d="M-6.0,232.0 C133.7,282.1 275.3,326.8 420.0,360.0"
-      fill="none"
-      stroke="url(#sw-pstroke)"
-      stroke-width="7"
-      opacity="0.35"
-      filter="url(#sw-soft)"
-    />
-    <path
-      d="M-6.0,232.0 C133.7,282.1 275.3,326.8 420.0,360.0"
-      fill="none"
-      stroke="url(#sw-pstroke)"
-      stroke-width="5.5"
-    />
-  </svg>
   <div class="wrap bar">
     <a class="brand" href="/">
       <Brand kind="mark" class="brand-icon" label="" />
-      <span class="brand-name">{org.shortName}</span>
+      <Brand kind="lockup" class="brand-lockup" label={org.name} />
     </a>
 
     <!-- Inline links on wide screens, and everywhere without JavaScript. -->
@@ -307,7 +17,7 @@ const { items, donate, help } = navigation;
       <ul>
         {items.map((item) => (
           <li>
-            <a class="nav-link" href={item.href}>
+            <a class="nav-link" href={item.href} data-section={item.href.replace("/#", "")}>
               {item.label}
             </a>
           </li>
@@ -317,6 +27,9 @@ const { items, donate, help } = navigation;
 
     <a class="button button--crimson donate" href={donate.href}>
       {donate.label}
+      <svg class="chev" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+        <path d="m9 5 7 7-7 7"></path>
+      </svg>
     </a>
 
     <!-- The corner wedge: the menu's home on phones. -->
@@ -581,65 +294,104 @@ const { items, donate, help } = navigation;
       openButton.focus({ preventScroll: true });
     });
   }
+
+  // The desktop links mark the section on screen: the link whose section
+  // crosses the middle of the window carries aria-current, which draws its
+  // underline. Nothing is marked on the first screen. Without
+  // IntersectionObserver the links simply have no current state.
+  const sectionLinks = Array.from(
+    document.querySelectorAll<HTMLAnchorElement>(".inline-nav a[data-section]"),
+  );
+  if (header && sectionLinks.length && "IntersectionObserver" in window) {
+    const byId = new Map(sectionLinks.map((a) => [a.dataset.section!, a]));
+    const watcher = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (!entry.isIntersecting) continue;
+          const link = byId.get(entry.target.id);
+          if (!link) continue;
+          sectionLinks.forEach((a) => a.removeAttribute("aria-current"));
+          link.setAttribute("aria-current", "location");
+        }
+      },
+      { rootMargin: "-45% 0px -50% 0px" },
+    );
+    byId.forEach((_, id) => {
+      const section = document.getElementById(id);
+      if (section) watcher.observe(section);
+    });
+    // Back at the top, nothing is current.
+    const top = document.querySelector(".hero");
+    if (top) {
+      new IntersectionObserver(
+        ([entry]) => {
+          if (entry?.isIntersecting) sectionLinks.forEach((a) => a.removeAttribute("aria-current"));
+        },
+        { rootMargin: "-45% 0px -50% 0px" },
+      ).observe(top);
+    }
+  }
 </script>
 
 <style>
-  /* The bar is a light lavender lens with the sweep painted behind its left
-     end and a soft violet glow toward the wedge. Its height and every size in
-     it are multiples of --sp (below); the 1px bottom rule is part of
-     --header-h. Nothing here is a fixed pixel except the 44px tap floors. */
+  /* The bar is night, from the owner's reference: her lockup beside the
+     mark, the links, the glossy Donate pill, and on phones the wedge. It is
+     lit the way her artwork lights the footer: a violet glow behind the mark,
+     the pink glow under the Donate pill, and a rule along its bottom edge
+     that runs violet to crimson and fades out to the right. Its height and
+     every size in it are multiples of --sp (below); the 1px rule under it is
+     part of --header-h. Nothing here is a fixed pixel except the 44px tap
+     floors. The glows are placed from the bar's edges in reference pixels,
+     never in percent of the bar (docs/DESIGN.md). */
   .site-header {
+    --focus: #fff; /* the bar is night: keyboard rings are white here */
     position: sticky;
     top: 0;
     z-index: 50;
     isolation: isolate;
     overflow: hidden;
-    border-bottom: 1px solid rgb(150 118 224 / 0.35);
-    /* The violet and pink glow sits under the Donate pill, so it is placed
-       from the right edge in reference pixels (the pill's right edge is 76
-       reference px from it beside the wedge, 64 on desktop), not in percent
-       of the bar, which would leave it stranded mid-bar on a wide screen. */
+    border-bottom: 1px solid transparent; /* the lit rule below is the last row of the bar */
     background:
       radial-gradient(
         calc(27.5 * var(--sp)) calc(18 * var(--sp)) at calc(100% - 83 * var(--sp)) 100%,
-        rgb(180 145 250 / 0.9),
+        rgb(200 120 255 / 0.5),
         transparent 100%
       ),
       radial-gradient(
         calc(63 * var(--sp)) calc(20 * var(--sp)) at calc(100% - 126 * var(--sp)) 84%,
-        rgb(240 140 200 / 0.5),
+        rgb(240 90 170 / 0.28),
         transparent 100%
       ),
       radial-gradient(
-        calc(86 * var(--sp)) calc(36 * var(--sp)) at calc(100% - 94 * var(--sp)) 50%,
-        rgb(255 190 225 / 0.4),
-        transparent 75%
+        calc(120 * var(--sp)) calc(58 * var(--sp)) at calc(var(--gutter) + 18 * var(--sp)) 55%,
+        rgb(120 60 255 / 0.38),
+        transparent 100%
       ),
-      linear-gradient(
-        180deg,
-        #e1d5fd 0%,
-        #f3eefe 22%,
-        #fbf9ff 45%,
-        #faf8ff 78%,
-        #efe8fd 88%,
-        #e2d4fd 100%
-      );
+      linear-gradient(180deg, #200d4c 0%, #190a3e 45%, #140832 100%);
   }
 
-  .sweep {
+  .site-header::after {
+    content: "";
     position: absolute;
-    inset: 0 auto 0 0;
-    z-index: -1;
-    height: 100%;
-    width: auto;
-    aspect-ratio: 1400 / 352;
-    pointer-events: none;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: -1; /* under the wedge, over the bar's paint */
+    height: 1px;
+    background: linear-gradient(
+      90deg,
+      #7a3cf0 0%,
+      #b13ae0 30%,
+      #ee3c86 55%,
+      #ff4a6a 70%,
+      rgb(255 74 106 / 0) 96%
+    );
   }
 
   /* On phones and tablets the header scales with the class like the banner:
-     every size is a multiple of --rp (see docs/DESIGN.md), with the 44px tap
-     targets as floors. On desktop --rp is 1px and these are fixed sizes; the
-     bar's 60px plus its border is --header-h, which the first screen uses. */
+     every size is a multiple of --sp (see docs/DESIGN.md), with the 44px tap
+     targets as floors. On desktop --sp is 1px and these are fixed sizes; the
+     bar's height plus its rule is --header-h, which the first screen uses. */
   .bar {
     display: flex;
     align-items: center;
@@ -647,54 +399,63 @@ const { items, donate, help } = navigation;
     min-height: max(44px, calc(60 * var(--sp))); /* --header-h, less the rule */
   }
 
+  /* Her mark and her lockup, as in the footer, both lit. */
   .brand {
     display: inline-flex;
     align-items: center;
-    gap: calc(5.9 * var(--sp));
+    gap: calc(6 * var(--sp));
     min-height: max(44px, calc(44 * var(--sp)));
     min-width: 0;
     margin-right: auto;
-    color: #0c0433;
-    font-family: var(--font-display);
-    font-weight: 720;
-    font-size: calc(16.6 * var(--sp));
-    letter-spacing: -0.01em;
     text-decoration: none;
-    white-space: nowrap;
-  }
-
-  /* Only the letter f comes from the "Brand f" face (its @font-face is
-     below); every other glyph stays Bricolage. */
-  .brand-name {
-    position: relative;
-    top: calc(1 * var(--sp));
-    font-family: "Brand f", var(--font-display);
   }
 
   .brand :global(.brand-icon) {
-    width: calc(33.6 * var(--sp));
+    width: calc(32 * var(--sp));
     flex: none;
-    filter: drop-shadow(0 0 calc(2 * var(--sp)) #fff)
-      drop-shadow(0 0 calc(6 * var(--sp)) rgb(255 255 255 / 0.95))
-      drop-shadow(0 0 calc(12 * var(--sp)) rgb(230 215 255 / 0.9));
+    filter: drop-shadow(0 0 calc(2 * var(--sp)) rgb(160 100 255 / 0.9))
+      drop-shadow(0 0 calc(8 * var(--sp)) rgb(120 60 255 / 0.55));
+  }
+
+  /* The lockup (decisions 45 and 49) in its lit lavender paint, with the
+     footer's violet glow; its width sets its height (about 4.84 to 1). */
+  .brand :global(.brand-lockup) {
+    width: calc(155 * var(--sp));
+    flex: none;
+    filter: drop-shadow(0 0 calc(5 * var(--sp)) rgb(170 110 255 / 0.45));
   }
 
   /* The Donate pill. The link stays 44px tall for touch; the visible pill
-     (38 reference px) is painted by ::after, centred inside it. */
+     (38 reference px) is painted by ::after, centred inside it. The chevron
+     joins it where there is room (tablets and desktop). */
   .donate {
     --pill: calc(38 * var(--sp));
     --pill-gap: calc((100% - var(--pill)) / 2);
     position: relative;
     isolation: isolate;
     flex: none;
+    gap: calc(2 * var(--sp));
     width: calc(88 * var(--sp));
     min-height: max(44px, calc(44 * var(--sp)));
     padding: 0 0 0 calc(4 * var(--sp));
     font-size: calc(16.3 * var(--sp));
     font-weight: 800;
     letter-spacing: -0.045em;
+    color: #fff;
     background: none;
     box-shadow: none;
+  }
+
+  .donate .chev {
+    display: none;
+    width: 1.15em;
+    height: 1.15em;
+    margin-right: -0.35em;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2.6;
+    stroke-linecap: round;
+    stroke-linejoin: round;
   }
 
   .donate::after {
@@ -741,7 +502,9 @@ const { items, donate, help } = navigation;
     background: linear-gradient(180deg, #b81d24 0%, #950009 100%);
   }
 
-  /* Inline links: hidden on phones once the menu is available. */
+  /* Inline links: hidden on phones once the menu is available. Each link
+     draws a short violet-to-rose underline when hovered, focused, or current
+     (the section on screen, marked by the script above). */
   .inline-nav > ul {
     display: flex;
     gap: 0.25rem;
@@ -751,22 +514,45 @@ const { items, donate, help } = navigation;
   }
 
   .nav-link {
+    position: relative;
     display: inline-flex;
     align-items: center;
     min-height: max(44px, 2.75rem);
     padding: 0 0.75rem;
     border-radius: var(--r-pill);
-    color: var(--ink);
+    color: rgb(255 255 255 / 0.86);
     font-family: var(--font-display);
     font-size: 1rem;
     font-weight: 700;
     white-space: nowrap;
     text-decoration: none;
+    transition: color 150ms ease;
   }
 
-  .nav-link:hover {
-    background: var(--lilac);
-    color: var(--purple);
+  .nav-link::after {
+    content: "";
+    position: absolute;
+    left: 0.75rem;
+    right: 0.75rem;
+    bottom: 0.55rem;
+    height: 0.125rem;
+    border-radius: 0.125rem;
+    background: linear-gradient(90deg, #a06cff, #e0489a);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 180ms ease;
+  }
+
+  .nav-link:hover,
+  .nav-link:focus-visible,
+  .nav-link[aria-current] {
+    color: #fff;
+  }
+
+  .nav-link:hover::after,
+  .nav-link:focus-visible::after,
+  .nav-link[aria-current]::after {
+    transform: scaleX(1);
   }
 
   /* Without JavaScript the inline links wrap under the brand row on phones. */
@@ -785,8 +571,8 @@ const { items, donate, help } = navigation;
     display: none;
   }
 
-  /* The wedge: a diagonal cut in the top-right corner, deep purple, with a
-     lighter violet band and a crimson hairline along the cut and a dark
+  /* The wedge: a diagonal cut in the top-right corner, violet on the night
+     bar, with a lighter band and a crimson hairline along the cut and a dark
      corner in its foot. */
   .menu-button {
     --cut: 42.4%;
@@ -800,12 +586,12 @@ const { items, donate, help } = navigation;
     padding: 0;
     background: linear-gradient(
       180deg,
-      #7c4bca 0,
-      #5016b8 calc(1.5 * var(--sp)),
-      #4611a8 30%,
-      #3a0e94 55%,
-      #320c85 78%,
-      #2e0b7b 100%
+      #9a68f8 0,
+      #6a2ae0 calc(1.5 * var(--sp)),
+      #5a1ecc 30%,
+      #4c16b4 55%,
+      #4212a2 78%,
+      #3c1096 100%
     );
     clip-path: polygon(var(--cut) 0, 100% 0, 100% 100%, 0 100%);
     color: #fff;
@@ -822,11 +608,11 @@ const { items, donate, help } = navigation;
   .edge {
     background: linear-gradient(
       180deg,
-      #b52cf8 0%,
-      #c832f0 30%,
-      #e640d8 55%,
-      #fd3292 78%,
-      #ff2450 100%
+      #c04cff 0%,
+      #d63cf4 30%,
+      #ee44dc 55%,
+      #ff3a98 78%,
+      #ff2a58 100%
     );
     clip-path: polygon(
       var(--cut) 0,
@@ -837,7 +623,7 @@ const { items, donate, help } = navigation;
   }
 
   .band {
-    background: linear-gradient(180deg, #5a16ca 0%, #5c15cc 45%, #6c18c5 70%, #7619b0 100%);
+    background: linear-gradient(180deg, #6e24e6 0%, #7022e4 45%, #8226d8 70%, #8e28c4 100%);
     clip-path: polygon(
       var(--cut) 0,
       calc(var(--cut) + 10 * var(--sp)) 0,
@@ -850,7 +636,7 @@ const { items, donate, help } = navigation;
     content: "";
     position: absolute;
     inset: 0;
-    background: linear-gradient(180deg, #7a34f0 0%, #8a3cf5 60%, #9a2ee0 100%);
+    background: linear-gradient(180deg, #9a58ff 0%, #a862ff 60%, #b64ef4 100%);
     clip-path: polygon(
       calc(var(--cut) + 9.3 * var(--sp)) 0,
       calc(var(--cut) + 10 * var(--sp)) 0,
@@ -860,7 +646,7 @@ const { items, donate, help } = navigation;
   }
 
   .corner {
-    background: linear-gradient(200deg, #1d055a, #17034e);
+    background: linear-gradient(200deg, #1a0650, #12043e);
     clip-path: polygon(
       calc(100% - 34 * var(--sp)) 100%,
       calc(100% - 24 * var(--sp)) calc(100% - 7 * var(--sp)),
@@ -898,19 +684,31 @@ const { items, donate, help } = navigation;
     width: 70%;
   }
 
-  /* Tablets: the name at the 768px reference's size. */
+  /* Tablets: the lockup at the 768px reference's size, and the pill's chevron. */
   @media (min-width: 36rem) {
-    .brand {
-      font-size: calc(20 * var(--sp));
+    .brand :global(.brand-icon) {
+      width: calc(36 * var(--sp));
+    }
+    .brand :global(.brand-lockup) {
+      width: calc(174 * var(--sp));
+    }
+    .donate {
+      width: calc(100 * var(--sp));
+    }
+    .donate .chev {
+      display: block;
     }
     .menu-label {
       font-size: 2.448rem;
     }
   }
 
+  /* Desktop: a taller bar (72 reference px, --header-h) with room for the
+     lockup and the links. */
   @media (min-width: 56rem) {
     .bar {
       gap: var(--space-m);
+      min-height: max(44px, calc(72 * var(--sp)));
     }
     .site-header.has-menu .inline-nav {
       display: block;
@@ -921,6 +719,15 @@ const { items, donate, help } = navigation;
     }
     .brand {
       margin-right: 0;
+    }
+    .brand :global(.brand-icon) {
+      width: calc(48 * var(--sp));
+    }
+    .brand :global(.brand-lockup) {
+      width: calc(212 * var(--sp));
+    }
+    .donate {
+      width: calc(104 * var(--sp));
     }
     .menu-label {
       font-size: 2.5rem;
@@ -1397,17 +1204,6 @@ const { items, donate, help } = navigation;
 </style>
 
 <style is:global>
-  /* Only the letter f of the header's name comes from this face (an Inter
-     subset, public/fonts/brand-f-LICENSE.txt); every other glyph stays
-     Bricolage. */
-  @font-face {
-    font-family: "Brand f";
-    src: url("/fonts/brand-f.woff2") format("woff2");
-    font-weight: 100 900;
-    font-display: swap;
-    unicode-range: U+0066;
-  }
-
   html.menu-open {
     overflow: hidden;
   }

@@ -160,7 +160,13 @@ export const seasonalBanner = {
 export const hero = {
   /** Her own tagline, from her website. Its one home is under the wordmark. */
   tagline: "Together we can.",
-  headline: "Holiday meals, gifts, and diapers for Central Indiana families",
+  /**
+   * The headline is two parts: the lead, in white, and the last line, set in
+   * lavender italic on the banner (decision 50). Keep the service area in the
+   * accent: it is the one place on the first screen that names it.
+   */
+  headline: "Holiday meals, gifts, and diapers",
+  headlineAccent: "for Central Indiana families.",
   /**
    * Real event photos shown behind the banner, crossfading slowly. Order
    * matters: the first one is what people with reduced motion see. Use

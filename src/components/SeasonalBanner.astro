@@ -3,7 +3,7 @@ import { seasonalBanner } from "../data/site";
 ---
 
 {seasonalBanner.active && (
-  <aside class="banner" aria-label="Current need">
+  <aside class="banner on-dark" aria-label="Current need">
     <div class="wrap inner">
       <p>
         <span class="dot" aria-hidden="true" />
@@ -17,11 +17,14 @@ import { seasonalBanner } from "../data/site";
 )}
 
 <style>
-  /* A quiet strip on lilac: the season's one ask, never louder than the banner
-     above. Its height on desktop is part of --strips-h (src/styles/global.css). */
+  /* The season's one ask, on the night band under the banner (decision 50),
+     quieter than the banner above: white words, a lit dot, and the link in
+     lavender. Its height on desktop is part of --strips-h
+     (src/styles/global.css): the bottom border counts, so it stays even
+     though it is invisible where the wave's night meets it. */
   .banner {
-    background: var(--lilac);
-    border-bottom: 1px solid var(--rule);
+    background: var(--night);
+    border-bottom: 1px solid transparent;
   }
 
   /* Sized in the class's reference pixel (--rp) so every phone and every
@@ -44,6 +47,7 @@ import { seasonalBanner } from "../data/site";
     font-weight: 700;
     font-size: calc(18 * var(--sp));
     line-height: 1.3;
+    color: #fff;
   }
 
   /* The link's tap target never drops below 44px, but the strip's height
@@ -54,6 +58,11 @@ import { seasonalBanner } from "../data/site";
     min-height: max(44px, calc(44 * var(--sp)));
     margin-block: calc((44 * var(--sp) - max(44px, 44 * var(--sp))) / 2);
     font-size: calc(18 * var(--sp));
+    color: #d9c8ff;
+  }
+
+  .inner :global(.arrow-link:hover) {
+    color: #fff;
   }
 
   .dot {
@@ -61,6 +70,7 @@ import { seasonalBanner } from "../data/site";
     width: calc(8.8 * var(--sp));
     height: calc(8.8 * var(--sp));
     border-radius: 50%;
-    background: var(--purple);
+    background: linear-gradient(135deg, #ff5a86, #a06cff);
+    box-shadow: 0 0 calc(8 * var(--sp)) rgb(255 90 134 / 0.55);
   }
 </style>

@@ -131,10 +131,12 @@ test.describe("device compatibility", () => {
 
   test("the brand marks are inline vector graphics", async ({ page }) => {
     await page.goto("/");
-    await expect(page.locator(".site-header .brand svg")).toHaveCount(1);
-    await expect(page.locator(".hero svg.brand-lockup")).toHaveCount(1);
-    await expect(page.locator(".hero svg.brand-lockup")).toHaveAccessibleName(org.name);
-    // Both lockups take the shared paint, which is on the page.
+    // The header carries her mark and her lockup; the lockup names the link.
+    await expect(page.locator(".site-header .brand svg")).toHaveCount(2);
+    await expect(page.locator(".site-header svg.brand-lockup")).toHaveCount(1);
+    await expect(page.locator(".site-header svg.brand-lockup")).toHaveAccessibleName(org.name);
+    await expect(page.locator(".hero svg.brand-lockup")).toHaveCount(0);
+    // Both lockups (header and footer) take the shared paint, which is on the page.
     await expect(page.locator("#lockup-script, #lockup-caps")).toHaveCount(2);
     await expect(page.locator('svg.brand-lockup path[fill="url(#lockup-script)"]')).toHaveCount(2);
     await expect(page.locator(".site-footer .brand svg")).toHaveCount(2);
@@ -206,7 +208,7 @@ test.describe("scrolling stability", () => {
         return {
           hero: box(".hero"),
           photo: box(".hero .montage"),
-          wordmark: box(".hero .brand-lockup"),
+          eyebrow: box(".hero .tagline"),
           door: box(".door--help"),
         };
       });
@@ -224,21 +226,33 @@ test.describe("scrolling stability", () => {
     const m = await page.evaluate(() => {
       const r = (sel: string) => document.querySelector(sel)?.getBoundingClientRect() ?? null;
       const header = r(".site-header")!;
+      const lines = (sel: string) =>
+        Math.round(
+          r(sel)!.height / parseFloat(getComputedStyle(document.querySelector(sel)!).lineHeight),
+        );
       return {
         width: innerWidth,
         height: innerHeight,
-        wordsUnderHeader: r(".hero .brand-lockup")!.top - header.bottom,
+        wordsUnderHeader: r(".hero .tagline")!.top - header.bottom,
         helpBottom: r(".door--help")!.bottom,
         giveBottom: r(".door--give")!.bottom,
         sideBySide: r(".door--help")!.top === r(".door--give")!.top,
         stripBottom: r("aside.banner")?.bottom ?? null,
+        // The reference's line breaks: "Holiday meals," / "gifts, and diapers"
+        // / "for Central Indiana" / "families." (decision 50).
+        headline: [lines(".hero h1 .lead"), lines(".hero h1 .accent")],
+        sub: lines(".hero .sub"),
       };
     });
+    // Every class: two doors side by side, the headline's two parts on two
+    // lines each, the sentence on two.
+    expect(m.sideBySide).toBe(true);
+    expect(m.headline).toEqual([2, 2]);
+    expect(m.sub).toBe(2);
     if (m.width >= 896) {
-      // Desktop: the scaled banner (the words sit about 45 reference pixels
-      // under the header, at most double), and the strip ends the first screen.
+      // Desktop: the scaled banner (the words sit 36 reference pixels under
+      // the header, at most double), and the strip ends the first screen.
       expect(m.wordsUnderHeader).toBeLessThan(90);
-      expect(m.sideBySide).toBe(true);
       if (seasonalBanner.active) expect(m.stripBottom, "the season strip").not.toBeNull();
       if (m.stripBottom !== null) expect(Math.abs(m.stripBottom - m.height)).toBeLessThanOrEqual(2);
     } else if (m.width >= 576) {
@@ -246,15 +260,15 @@ test.describe("scrolling stability", () => {
       // the strip ends the first screen.
       expect(m.helpBottom).toBeLessThanOrEqual(m.height);
       expect(m.giveBottom).toBeLessThanOrEqual(m.height);
-      expect(m.sideBySide).toBe(false);
       if (seasonalBanner.active) expect(m.stripBottom, "the season strip").not.toBeNull();
       if (m.stripBottom !== null) expect(Math.abs(m.stripBottom - m.height)).toBeLessThanOrEqual(2);
     } else {
-      // Phones: the words start just under the header and both doors fit.
-      expect(m.wordsUnderHeader).toBeLessThanOrEqual(32);
+      // Phones: a band of her photo above the words (96 reference pixels,
+      // scaled by the width between 320 and 450px) and both doors fit.
+      expect(m.wordsUnderHeader).toBeGreaterThan(70);
+      expect(m.wordsUnderHeader).toBeLessThan(120);
       expect(m.helpBottom).toBeLessThanOrEqual(m.height);
       expect(m.giveBottom).toBeLessThanOrEqual(m.height);
-      expect(m.sideBySide).toBe(false);
     }
   });
 
@@ -331,11 +345,11 @@ test.describe("scrolling stability", () => {
       const hero = r(".hero .content");
       const share = (b: DOMRect) => [(b.top - hero.top) / hero.height, b.height / hero.height];
       return {
-        wordmark: share(r(".hero .brand-lockup")),
+        eyebrow: share(r(".hero .tagline")),
         h1: share(r(".hero h1")),
         doors: share(r(".doors")),
-        // Her lettering starts on the header's left edge, on every screen.
-        left: r(".hero .brand-lockup").left - r(".site-header .brand").left,
+        // The words start on the header's left edge, on every screen.
+        left: r(".hero .content").left - r(".site-header .brand").left,
         lines: [lines(".hero h1"), lines(".hero .sub"), lines(".door--help .door-body")],
         // The header as a share of the text block's height, and its name's size.
         header: r(".site-header").height / hero.height,
@@ -376,7 +390,7 @@ test.describe("scrolling stability", () => {
       const ref = await shape(page, reference[0], reference[1]);
       for (const [width, height] of others) {
         const other = await shape(page, width, height);
-        for (const key of ["wordmark", "h1", "doors"] as const) {
+        for (const key of ["eyebrow", "h1", "doors"] as const) {
           expect(other[key][0], `${key} top at ${width}`).toBeCloseTo(ref[key][0], 2);
           expect(other[key][1], `${key} height at ${width}`).toBeCloseTo(ref[key][1], 2);
         }
@@ -1080,8 +1094,9 @@ test.describe("one home per fact", () => {
     const strip = await page.locator(".facts").innerText();
     expect(times(strip, year), `${year} in the trust strip`).toBe(1);
     expect(times(strip, area), `${area} in the trust strip`).toBe(0);
-    const body = await page.locator("body").innerText();
-    expect(times(body, hero.tagline), `${hero.tagline} on the page`).toBe(1);
+    // The banner sets the tagline in capitals; innerText reports it that way.
+    const body = (await page.locator("body").innerText()).toLowerCase();
+    expect(times(body, hero.tagline.toLowerCase()), `${hero.tagline} on the page`).toBe(1);
   });
 });
 

@@ -82,7 +82,8 @@
      while indexing is off (html.preview). The desktop banner fills the rest. */
   /* The header bar scales with --sp; its Donate link is a 44px tap target,
      so the bar can never be shorter than that (a desktop window narrower
-     than about 940px). Plus the 1px rule under it. */
+     than about 940px). Plus the 1px rule under it. Desktop sets its own,
+     taller bar below. */
   --header-h: calc(max(60 * var(--sp), 44px) + 1px);
   --notice-h: calc(1.753rem + 1px);
   --top-chrome: var(--header-h);
@@ -100,11 +101,20 @@ html.preview {
    300 to 700, with the copyright sign and the bullet the footer's record
    uses (public/fonts/serif-LICENSE.txt). The footer draws it on every page,
    so it is preloaded in the layout like the other faces the page sets
-   (decision 42). */
+   (decision 42). Its italic is the same cut at weight 700 only, for the
+   banner headline's last line (public/fonts/serif-italic-LICENSE.txt). */
 @font-face {
   font-family: "Site Serif";
   src: url("/fonts/serif.woff2") format("woff2");
   font-weight: 300 700;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Site Serif";
+  src: url("/fonts/serif-italic.woff2") format("woff2");
+  font-weight: 700;
+  font-style: italic;
   font-display: swap;
 }
 
@@ -136,6 +146,9 @@ html.preview {
     --sp: min(calc(100vw / 1280), 2px); /* stops growing past 2560px */
     --wide: min(90vw, 2304px); /* 1152 reference px times the 2px cap of --sp */
     --gutter: max(5vw, 50vw - 1152px);
+    /* The desktop bar is 72 reference px (her lockup and the links need the
+       room); the 44px floor still applies in a narrow window. */
+    --header-h: calc(max(72 * var(--sp), 44px) + 1px);
     --step-2: 1.9rem;
     --step-3: 2.75rem;
     --step-4: 4rem;

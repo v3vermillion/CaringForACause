@@ -35,19 +35,22 @@ Three pages. The home page is the route map; the two doors lead to their own pag
 
 ```
 ┌───────────────────────────────────────────────┐
-│ Header: mark + name   About · Programs ·      │  sticky; phone: mark, name,
-│         Get involved · Contact   [Donate]     │  Donate, corner-wedge menu:
+│ Header (night): mark + her lockup   About ·   │  sticky; phone: mark, lockup,
+│   Programs · Get involved · Contact  [Donate] │  Donate, corner-wedge menu:
 │                                               │  Help me · the four · Donate
 ├───────────────────────────────────────────────┤
 │ BANNER (her photos, crossfading, night veil)  │
-│  her lockup · Together we can.                │
-│  Headline · subhead                           │
-│  [ Help me ]  [ Donate ]     equal doors      │  → /apply, /donate
+│  — Together we can. —                         │  eyebrow
+│  Headline (serif, last line lavender italic)  │
+│  subhead                                      │
+│  ( Help me › )  ( Donate › )   equal pills    │  → /apply, /donate
+│  one line under each                          │
+│ ~~~ wave: violet and crimson ribbons ~~~~~~~~ │
 ├───────────────────────────────────────────────┤
-│ Trust facts: since 2015 · 501(c)(3) + EIN ·   │  same night ground
+│ Trust facts: since 2015 · 501(c)(3) + EIN ·   │  night band
 │              Toys for Tots partner            │
-├───────────────────────────────────────────────┤
-│ Seasonal strip (lilac)     Sponsor a family → │  optional
+│ Seasonal strip (night)     Sponsor a family → │  optional
+│ ~~~ wave ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ │
 ├───────────────────────────────────────────────┤
 │ OUR PROGRAMS: jump tiles                      │
 │  ┌ Get help (night) ─────────────────────┐    │  #get-help
@@ -82,7 +85,7 @@ Three pages. The home page is the route map; the two doors lead to their own pag
           (`links.donate`) or an email with the gift written in
 ```
 
-On phones every two-column block stacks, the doors stack under the headline, and the tabs and program tiles scroll sideways inside the page gutter.
+On phones every two-column block stacks, the two doors stay side by side under the headline, and the tabs and program tiles scroll sideways inside the page gutter.
 
 **Deep links:** `/#get-help`, `/#programs`, `/#get-involved`, `/#about`, `/#contact`, each program slug (for example `/#holiday-assistance`), and each tab (`/#sponsor`, `/#donate`, `/#volunteer`, `/#partner`) opens that tab directly.
 
@@ -104,15 +107,16 @@ Brand colors are sampled from the final logo file.
 
 All text pairings pass WCAG AA; most pass AAA.
 
-**Marks:** her lettering and the heart-and-hands mark are inline SVG tracings of her logo files (`src/assets/brand/`, decision 29). Her lockup (the script over "Supportive Services") is on the banner and in the footer, in the same lit lavender; the mark appears in the header, the menu, the footer (lit, and drawn in lines in the record), and the link preview. The menu and the footer sit on the near-black navy of the owner's references rather than on `--night`. The logo's purple measures about 2.2:1 against `--night`, so the full logo is never placed directly on the dark background.
+**Marks:** her lettering and the heart-and-hands mark are inline SVG tracings of her logo files (`src/assets/brand/`, decision 29). Her lockup (the script over "Supportive Services") is in the header and in the footer, in the same lit lavender; the mark appears in the header, the menu, the footer (lit, and drawn in lines in the record), and the link preview. The menu and the footer sit on the near-black navy of the owner's references rather than on `--night`. The logo's purple measures about 2.2:1 against `--night`, so the full logo is never placed directly on the dark background.
 
 **Type:**
 
-- **Bricolage Grotesque** (headings): sturdy, friendly, and distinct from the logo's script.
+- **Bricolage Grotesque** (headings, buttons, labels): sturdy, friendly, and distinct from the logo's script.
+- **Literata** (the banner headline, in bold with one line in bold italic; the phone menu and the footer): the serif of the owner's references.
 - **Atkinson Hyperlegible Next** (body): designed by the Braille Institute for low-vision readers, which suits an audience reading on older phones. Its slashed zero is intentional and keeps phone numbers and the EIN unambiguous.
-- 18px base size, major-third scale. Both fonts are self-hosted, with no third-party requests. Her lettering is the wordmark itself, so no script typeface is loaded.
+- 18px base size, major-third scale. Every font is self-hosted, with no third-party requests. Her lettering is the wordmark itself, so no script typeface is loaded.
 
-**Signature element:** her lockup and the two equal doors over the crossfading photos. Everything else stays quiet: one button shape, three radii, list rows with dividers instead of a grid of identical cards, and no scroll animations.
+**Signature element:** the serif headline with its lavender line and the two equal doors over the crossfading photos, handed to the page by the wave. Everything else stays quiet: one button shape, three radii, list rows with dividers instead of a grid of identical cards, and no scroll animations.
 
 ## Open questions for Tamara
 

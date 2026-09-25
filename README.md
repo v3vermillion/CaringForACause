@@ -14,7 +14,7 @@ Website for [Caring for a Cause Supportive Services Inc.](https://caring4acauses
 ## Stack
 
 - [Astro 7](https://astro.build), static output, TypeScript (strict)
-- Self-hosted fonts: Bricolage Grotesque and Atkinson Hyperlegible Next, plus three small subsets in `public/fonts/` (the header's Inter f, the Literata serif the phone menu and the footer set their words in, and the footer's Assistant sans); her lockup (on the banner and in the footer) and mark are inline SVG (`src/assets/brand/`)
+- Self-hosted fonts: Bricolage Grotesque and Atkinson Hyperlegible Next, plus three small subsets in `public/fonts/` (the Literata serif the banner headline, the phone menu and the footer set their words in, its bold italic for the headline's last line, and the footer's Assistant sans); her lockup (in the header and the footer) and mark are inline SVG (`src/assets/brand/`)
 - Hosted on Cloudflare Workers static assets (`wrangler.jsonc`, `public/_headers`)
 - GitHub Actions runs formatting, type checks, the gated build, browser tests on 10 devices, and Lighthouse budgets on every push
 
@@ -45,7 +45,7 @@ Everything visitors read lives in **`src/data/site.ts`**. Common updates:
 | -------------------------------------------------- | ---------------------------------------------------------------------------- |
 | The strip under the banner                         | `seasonalBanner` (set `active: false` to hide it)                            |
 | Phone, email, Facebook, city                       | `facts`                                                                      |
-| Banner words and the two doors                     | `hero`                                                                       |
+| Banner words (headline in two parts) and the doors | `hero`                                                                       |
 | Menu and header links                              | `navigation`                                                                 |
 | Donation page, online application, sponsor sign-up | `links` (the pages upgrade themselves when a link is set)                    |
 | Donation amounts and wording                       | `donatePage`                                                                 |
@@ -111,7 +111,7 @@ src/
   styles/global.css     Design tokens and shared styles
   assets/brand/         Lockup, wordmark and mark as SVG, plus the logo files they were traced from
   assets/photos/        Event photos (metadata stripped)
-scripts/                The publish gate, its tests, the live-site header check, and brand/ (the tracing script that made the SVGs)
+scripts/                The publish gate, its tests, the live-site header check, and brand/ (the tracing scripts that made the SVGs, and the wave's geometry)
 public/                 Icons, sharing image, web manifest, _headers (security and cache rules)
 tests/                  Browser tests
 docs/                   Plan and decisions
