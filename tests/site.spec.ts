@@ -1047,6 +1047,18 @@ test.describe("get involved tabs", () => {
           setTimeout(() => resolve(window.scrollY === y), 250);
         }),
     );
+  // Back to the top the way a reader gets there, with a key (after a section
+  // link, a browser keeps the page on the section until the reader scrolls;
+  // a script scroll does not count), then by script where the key does not
+  // scroll (a phone has no Home key).
+  const toTop = async (page: import("@playwright/test").Page) => {
+    await settled(page);
+    await page.keyboard.press("Home");
+    await settled(page);
+    await page.evaluate(() => window.scrollTo({ top: 0, behavior: "instant" }));
+    await settled(page);
+    expect(await page.evaluate(() => window.scrollY)).toBe(0);
+  };
 
   // After a section link the fragment stays in the address, and a refresh
   // keeps the reader where they were instead of jumping back to the section
@@ -1056,12 +1068,10 @@ test.describe("get involved tabs", () => {
     await page.locator('a[href="/#contact"]:visible').first().click();
     await expect(page.locator("#contact")).toBeInViewport();
     expect(new URL(page.url()).hash).toBe("#contact");
-    await settled(page);
-    await page.evaluate(() => window.scrollTo({ top: 0, behavior: "instant" }));
-    expect(await page.evaluate(() => window.scrollY)).toBe(0);
+    await toTop(page);
     await page.reload();
     await page.waitForLoadState("load");
-    await page.waitForTimeout(300);
+    await settled(page);
     expect(await page.evaluate(() => window.scrollY)).toBe(0);
     expect(new URL(page.url()).hash).toBe("#contact");
   });
@@ -1080,12 +1090,10 @@ test.describe("get involved tabs", () => {
     await page.goto("/#volunteer");
     await expect(page.locator("#volunteer")).toBeVisible();
     await expect(page.locator("#get-involved")).toBeInViewport();
-    await settled(page);
-    await page.evaluate(() => window.scrollTo({ top: 0, behavior: "instant" }));
-    expect(await page.evaluate(() => window.scrollY)).toBe(0);
+    await toTop(page);
     await page.reload();
     await page.waitForLoadState("load");
-    await page.waitForTimeout(300);
+    await settled(page);
     expect(await page.evaluate(() => window.scrollY)).toBe(0);
     await expect(page.locator("#tab-volunteer")).toHaveAttribute("aria-selected", "true");
     expect(new URL(page.url()).hash).toBe("#volunteer");

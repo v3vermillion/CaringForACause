@@ -335,8 +335,16 @@ The test that checks the Donate is centred under her lettering now measures the 
 
 **Why:** The owner asked for the footer's lettering on the first screen too, so her name reads the same way at the top of the page as at the bottom, with "Supportive Services" beside it from the first view.
 
-## 50. A refresh keeps the reader where they were
+## 50. A page with a section in its address places the reader itself
 
-**Decision:** After a section link (`#contact` from the menu, `/#sponsor` from the season strip), the fragment stays in the address, so the link can be copied and shared, and a refresh keeps the reader where they were. Each page remembers its scroll position in session storage as it is left. On a refresh with a fragment, an inline script at the top of `src/layouts/Base.astro` holds the fragment out of the address before the browser can jump to it. Once the page has loaded, it puts the reader back at their position and returns the fragment to the address. The Get-involved tabs read the held fragment, so a refreshed `/#volunteer` still shows the Volunteer tab, without scrolling. A first visit to a section link, shared, typed or followed from another page, still lands on its section. Back and forward are left to the browser. Without session storage the browser's own behaviour stands.
+**Decision:** When a page opens with a section in its address (`#contact`, `/#volunteer`), an inline script at the top of `src/layouts/Base.astro` places the reader instead of the browser. It holds the section out of the address before the browser can act on it.
 
-**Why:** Browsers treat a refresh with a fragment as a new jump to that section, wherever the reader had scrolled since. On a phone Contact is the last section, so tapping Contact in the menu, scrolling back up and refreshing dropped the page to the bottom. Removing the fragment from the address would also have fixed the refresh, but it would have lost the copyable section link; this keeps both.
+- On a refresh it puts the reader back where they were; each page stores its scroll position in session storage as it is left.
+- On any other arrival (a shared, typed or followed link) it puts the section at the top of the screen at once. For a tab's panel it uses the tab's section.
+- After load the section goes back into the address, so it can still be copied.
+- For a second after load it holds that place against the browser moving the page on its own. It stops as soon as the reader touches, scrolls or types.
+- Back and forward are left to the browser. The Get-involved tabs read the held section, so `/#volunteer` still opens the Volunteer tab. Without session storage a refresh lands on the section, as before.
+
+**Why:** Tapping Contact in the menu, scrolling back up and refreshing dropped a phone to the bottom of the page. Browsers treat a refresh with a section in the address as a new jump to it, wherever the reader has scrolled since. Holding the section out of the address fixed this in Chrome and desktop Safari. Safari on a phone then re-applied a stale position of its own after load, and Safari also scrolls smoothly on arrival and could stop short of the section. Placing the reader directly, and holding the place briefly, gives the same result in every browser. Removing the section from the address would also have fixed the refresh, but it would have lost the copyable link.
+
+The browser tests scroll back to the top with the Home key before refreshing, the way a reader does. After a section link, Chrome keeps the page anchored to the section until the reader scrolls, and a script scroll does not count, so on a slow machine the page drifted back toward the section before the refresh.
