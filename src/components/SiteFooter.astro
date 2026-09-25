@@ -25,7 +25,7 @@ const year = new Date().getFullYear();
       <div class="identity">
         <a class="brand" href="/" aria-label="Caring for a Cause home">
           <Brand kind="mark" class="mark" label="" />
-          <Brand kind="wordmark" class="wordmark" label="" />
+          <Brand kind="lockup" class="wordmark" label="" />
         </a>
         <a class="button button--signal donate" href={donate.href}>
           {donate.label}
@@ -167,8 +167,11 @@ const year = new Date().getFullYear();
     flex: none;
   }
 
+  /* Her lockup carries its own colours; the soft violet bloom is the
+     artwork's glow. */
   .brand :global(.wordmark) {
     width: min(100%, 16rem);
+    filter: drop-shadow(0 0 0.3rem rgb(170 110 255 / 0.4));
   }
 
   /* The one action in the footer, in the banner door's own signal treatment

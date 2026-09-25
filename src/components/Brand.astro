@@ -2,23 +2,26 @@
 /**
  * The heart-and-hands mark and her script wordmark, as inline SVG.
  *
- * Both are vector tracings of her logo files (scripts/brand/trace-brand.py),
- * so they stay sharp at every size. The wordmark inherits `color`, so it is
- * white on night and purple on paper.
+ * All are vector tracings of her logo files (scripts/brand/trace-brand.py,
+ * scripts/brand/trace-lockup.py), so they stay sharp at every size. The
+ * wordmark inherits `color`, so it is white on night and purple on paper; the
+ * lockup (the script over "Supportive Services") carries her artwork's own
+ * lavender-to-magenta gradients and is drawn on night only.
  */
 import Mark from "../assets/brand/mark.svg";
 import Wordmark from "../assets/brand/wordmark.svg";
+import Lockup from "../assets/brand/wordmark-lockup.svg";
 
 type Props = {
-  kind: "mark" | "wordmark";
+  kind: "mark" | "wordmark" | "lockup";
   class?: string;
   /** Accessible name. Empty means decorative (hidden from screen readers). */
   label?: string;
 };
 
 const { kind, class: className, label = "Caring for a Cause" } = Astro.props;
-const Svg = kind === "mark" ? Mark : Wordmark;
-const classes = [kind === "mark" ? "brand-mark" : "brand-wordmark", className];
+const Svg = { mark: Mark, wordmark: Wordmark, lockup: Lockup }[kind];
+const classes = [`brand-${kind}`, className];
 ---
 
 {label ? (
@@ -29,7 +32,8 @@ const classes = [kind === "mark" ? "brand-mark" : "brand-wordmark", className];
 
 <style is:global>
   .brand-mark,
-  .brand-wordmark {
+  .brand-wordmark,
+  .brand-lockup {
     display: block;
     height: auto;
   }

@@ -119,7 +119,7 @@ Contact details, location, and photo permission are tracked as pending facts in 
 Ask these in the follow-up after she sees the preview. Every one has a safe default in place.
 
 1. Which phone number is current? The site uses (317) 886-0724; Idealist lists (317) 358-6450.
-2. Which email should be public? The site uses Caringforacause2015@gmail.com; she also lists Caring4acause2015@gmail.com.
+2. Which email should be public? The site uses caringforacause2015@gmail.com; she also lists Caring4acause2015@gmail.com.
 3. Is the Free Bike Program still running? It is hidden until confirmed.
 4. Which Facebook page is current? Two pages appear in public listings.
 5. Can she share event photos for the hero and gallery?
