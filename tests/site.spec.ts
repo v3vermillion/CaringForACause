@@ -220,6 +220,47 @@ test.describe("scrolling stability", () => {
     expect(after).toEqual(before);
   });
 
+  // The bar's shape (inline links on wide screens, the wedge on phones) is
+  // set by the head's html.js mark, not by the page's script: on a slow load
+  // the page paints before that script runs, and a bar that changed shape
+  // then would move the whole page (decision 55). So the bar must lay out
+  // the same with the page's module scripts removed as with them run.
+  test("the bar has its final shape before the page's script runs", async ({ page }) => {
+    const shape = () =>
+      page.evaluate(() => {
+        const r = (sel: string) => {
+          const b = document.querySelector(sel)?.getBoundingClientRect();
+          return b ? [b.x, b.y, b.width, b.height].map(Math.round) : null;
+        };
+        return {
+          bar: r(".site-header"),
+          brand: r(".site-header .brand"),
+          nav: r(".site-header .inline-nav"),
+          donate: r(".site-header .donate"),
+          wedge: r("[data-menu-open]"),
+          // Only where the page starts: its height changes below the fold
+          // when the involvement tabs take over from the stacked panels.
+          main: r("main")?.slice(0, 2),
+        };
+      });
+    await page.route("**/", async (route) => {
+      const response = await route.fetch();
+      const html = (await response.text()).replace(
+        /<script type="module"[^>]*>[\s\S]*?<\/script>/g,
+        "",
+      );
+      await route.fulfill({ response, body: html, headers: { "content-type": "text/html" } });
+    });
+    await page.goto("/");
+    await fontsSettled(page);
+    expect(await page.evaluate(() => document.querySelector('script[type="module"]'))).toBeNull();
+    const beforeScript = await shape();
+    await page.unroute("**/");
+    await page.goto("/");
+    await fontsSettled(page);
+    expect(await shape()).toEqual(beforeScript);
+  });
+
   // Every device in the matrix, at its own screen size, gets the first screen
   // its class promises (see docs/DESIGN.md, "The first screen by device").
   test("this device's first screen keeps its promise", async ({ page }) => {

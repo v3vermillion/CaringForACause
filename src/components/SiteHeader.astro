@@ -39,7 +39,6 @@ const { items, donate, help } = navigation;
       data-menu-open
       aria-haspopup="dialog"
       aria-controls="menu"
-      hidden
     >
       <span class="band" aria-hidden="true"></span>
       <span class="corner" aria-hidden="true"></span>
@@ -265,10 +264,11 @@ const { items, donate, help } = navigation;
   const menu = document.getElementById("menu") as HTMLDialogElement | null;
   const openButton = document.querySelector<HTMLButtonElement>("[data-menu-open]");
 
+  // The bar's layout (inline links on wide screens, the wedge on phones) is
+  // set by the head's html.js mark before the first paint, not here, so
+  // nothing moves when this script arrives (decision 42). A browser that
+  // cannot open a dialog gets the no-script layout back: the links inline.
   if (header && menu && openButton && typeof menu.showModal === "function") {
-    header.classList.add("has-menu");
-    openButton.hidden = false;
-
     // showModal() focuses the close button, and Safari then draws its
     // keyboard ring on a tap. Start focus on the dialog itself instead; Tab
     // still reaches the button first.
@@ -290,6 +290,8 @@ const { items, donate, help } = navigation;
       document.documentElement.classList.remove("menu-open");
       openButton.focus({ preventScroll: true });
     });
+  } else if (header) {
+    header.classList.add("no-menu");
   }
 
   // The desktop links mark the section on screen: the link whose section
@@ -588,21 +590,30 @@ const { items, donate, help } = navigation;
     transform: scaleX(1);
   }
 
-  /* Without JavaScript the inline links wrap under the brand row on phones. */
-  .site-header:not(.has-menu) .bar {
+  /* Without JavaScript (html:not(.js), set in the page's head before the
+     first paint, src/layouts/Base.astro), or in a browser that cannot open
+     the menu's dialog (.no-menu, set by the script below), the inline
+     links wrap under the brand row on phones. With it, phones and tablets
+     hide them behind the wedge from the first paint; the page's script
+     used to decide this, and on a slow load the bar painted two rows tall
+     and then snapped to one, moving the whole page (decision 55). */
+  html:not(.js) .bar,
+  .site-header.no-menu .bar {
     flex-wrap: wrap;
   }
 
-  .site-header:not(.has-menu) .inline-nav {
+  html:not(.js) .inline-nav,
+  .site-header.no-menu .inline-nav {
     order: 3;
     flex-basis: 100%;
   }
 
-  .site-header:not(.has-menu) .inline-nav > ul {
+  html:not(.js) .inline-nav > ul,
+  .site-header.no-menu .inline-nav > ul {
     flex-wrap: wrap;
   }
 
-  .site-header.has-menu .inline-nav {
+  html.js .site-header:not(.no-menu) .inline-nav {
     display: none;
   }
 
@@ -691,7 +702,8 @@ const { items, donate, help } = navigation;
     );
   }
 
-  .menu-button[hidden] {
+  html:not(.js) .menu-button,
+  .site-header.no-menu .menu-button {
     display: none;
   }
 
@@ -757,11 +769,11 @@ const { items, donate, help } = navigation;
       gap: var(--space-m);
       min-height: max(44px, calc(72 * var(--sp)));
     }
-    .site-header.has-menu .inline-nav {
+    html.js .site-header:not(.no-menu) .inline-nav {
       display: block;
       margin-left: auto;
     }
-    .site-header.has-menu .menu-button {
+    .menu-button {
       display: none;
     }
     .brand {
