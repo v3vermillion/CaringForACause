@@ -289,7 +289,10 @@ const cycle = slides.length * 7;
 
   /* Two doors, equal, side by side: a pill and one line under it. Crimson is
      the signal; the other is an outlined pill. The whole door is the link, so
-     the line under the pill is part of the tap target too. */
+     the line under the pill is part of the tap target too, and the door is
+     never shorter than 44px; the pill itself carries no floor, so it scales
+     with the class like everything else (a floor on it changed the
+     composition on short laptops). */
   .doors {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -312,7 +315,7 @@ const cycle = slides.length * 7;
     align-items: center;
     justify-content: center;
     gap: calc(4 * var(--rp));
-    min-height: max(44px, calc(48 * var(--rp)));
+    min-height: calc(50 * var(--rp));
     padding: 0 calc(10 * var(--rp)) 0 calc(14 * var(--rp));
     border-radius: var(--r-pill);
     font-family: var(--font-display);
@@ -510,24 +513,24 @@ const cycle = slides.length * 7;
       height: max(1px, calc(1 * var(--u)));
     }
     h1 {
-      margin-top: calc(16 * var(--u));
+      margin-top: calc(14 * var(--u));
       font-size: calc(52 * var(--u));
       line-height: 1.05;
     }
     .sub {
-      margin-top: calc(16 * var(--u));
+      margin-top: calc(14 * var(--u));
       font-size: calc(19 * var(--u));
     }
     .doors {
       gap: calc(16 * var(--u));
-      margin-top: calc(26 * var(--u));
+      margin-top: calc(24 * var(--u));
     }
     .door {
       gap: calc(10 * var(--u));
     }
     .door-pill {
       gap: calc(4 * var(--u));
-      min-height: max(44px, calc(50 * var(--u)));
+      min-height: calc(54 * var(--u));
       padding: 0 calc(12 * var(--u)) 0 calc(16 * var(--u));
       font-size: calc(20 * var(--u));
     }
