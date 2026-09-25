@@ -1,7 +1,7 @@
 ---
 import { Picture } from "astro:assets";
 import type { ImageMetadata } from "astro";
-import { hero } from "../data/site";
+import { hero, org } from "../data/site";
 import Brand from "./Brand.astro";
 
 const { doors } = hero;
@@ -47,7 +47,7 @@ const cycle = slides.length * 7;
 
   <div class="wrap">
     <div class="content">
-      <Brand kind="wordmark" class="wordmark" />
+      <Brand kind="lockup" class="wordmark" label={org.name} />
       <p class="tagline">{hero.tagline}</p>
       <h1 id="hero-title">{hero.headline}</h1>
       <p class="sub">{hero.subhead}</p>
@@ -163,15 +163,19 @@ const cycle = slides.length * 7;
     max-width: calc(353.7 * var(--rp)); /* the reference column; stops with the scale */
   }
 
-  /* Her lettering fills the column on a phone. */
+  /* Her lockup, as in the footer (decision 45): the script over "Supportive
+     Services" in its lit lavender, with the footer's violet glow, over a
+     dark shadow that keeps it clear of the photo behind. It fills the column
+     on a phone. The tagline stands a little further off than the lines below
+     it, so the lockup's capitals and her phrase read as two things. */
   .content :global(.wordmark) {
     width: 100%;
-    color: #fff;
-    filter: drop-shadow(0 6px 24px rgb(0 0 0 / 0.45));
+    filter: drop-shadow(0 0 calc(8 * var(--rp)) rgb(170 110 255 / 0.45))
+      drop-shadow(0 6px 24px rgb(0 0 0 / 0.45));
   }
 
   .tagline {
-    margin-top: calc(12 * var(--rp));
+    margin-top: calc(20 * var(--rp));
     font-family: var(--font-display);
     font-weight: 600;
     font-size: calc(18 * var(--rp));
@@ -354,9 +358,11 @@ const cycle = slides.length * 7;
     }
     .content :global(.wordmark) {
       width: min(100%, calc(512 * var(--u)));
+      filter: drop-shadow(0 0 calc(8 * var(--u)) rgb(170 110 255 / 0.45))
+        drop-shadow(0 6px 24px rgb(0 0 0 / 0.45));
     }
     .tagline {
-      margin-top: calc(12 * var(--u));
+      margin-top: calc(20 * var(--u));
       font-size: calc(18 * var(--u));
     }
     h1 {

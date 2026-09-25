@@ -3,6 +3,7 @@ import "@fontsource-variable/bricolage-grotesque/wght.css";
 import "@fontsource/atkinson-hyperlegible-next/400.css";
 import "@fontsource/atkinson-hyperlegible-next/700.css";
 import "../styles/global.css";
+import BrandPaint from "../components/BrandPaint.astro";
 import PreviewNotice from "../components/PreviewNotice.astro";
 import displayFont from "@fontsource-variable/bricolage-grotesque/files/bricolage-grotesque-latin-wght-normal.woff2?url";
 import bodyFont from "@fontsource/atkinson-hyperlegible-next/files/atkinson-hyperlegible-next-latin-400-normal.woff2?url";
@@ -138,5 +139,6 @@ const structuredData = {
     {!allowIndexing && <PreviewNotice />}
     <slot />
     <slot name="after" />
+    <BrandPaint />
   </body>
 </html>

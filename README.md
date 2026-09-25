@@ -14,7 +14,7 @@ Website for [Caring for a Cause Supportive Services Inc.](https://caring4acauses
 ## Stack
 
 - [Astro 7](https://astro.build), static output, TypeScript (strict)
-- Self-hosted fonts: Bricolage Grotesque and Atkinson Hyperlegible Next, plus three small subsets in `public/fonts/` (the header's Inter f, the Literata serif the phone menu and the footer set their words in, and the footer's Assistant sans); her wordmark, footer lockup and mark are inline SVG (`src/assets/brand/`)
+- Self-hosted fonts: Bricolage Grotesque and Atkinson Hyperlegible Next, plus three small subsets in `public/fonts/` (the header's Inter f, the Literata serif the phone menu and the footer set their words in, and the footer's Assistant sans); her lockup (on the banner and in the footer) and mark are inline SVG (`src/assets/brand/`)
 - Hosted on Cloudflare Workers static assets (`wrangler.jsonc`, `public/_headers`)
 - GitHub Actions runs formatting, type checks, the gated build, browser tests on 10 devices, and Lighthouse budgets on every push
 
@@ -109,7 +109,7 @@ src/
   layouts/Base.astro    <head>, fonts, meta tags
   components/           One file per page section
   styles/global.css     Design tokens and shared styles
-  assets/brand/         Wordmark and mark as SVG, plus the logo files they were traced from
+  assets/brand/         Lockup, wordmark and mark as SVG, plus the logo files they were traced from
   assets/photos/        Event photos (metadata stripped)
 scripts/                The publish gate, its tests, the live-site header check, and brand/ (the tracing script that made the SVGs)
 public/                 Icons, sharing image, web manifest, _headers (security and cache rules)

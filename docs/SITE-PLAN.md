@@ -40,7 +40,7 @@ Three pages. The home page is the route map; the two doors lead to their own pag
 │                                               │  Help me · the four · Donate
 ├───────────────────────────────────────────────┤
 │ BANNER (her photos, crossfading, night veil)  │
-│  her wordmark · Together we can.              │
+│  her lockup · Together we can.                │
 │  Headline · subhead                           │
 │  [ Help me ]  [ Donate ]     equal doors      │  → /apply, /donate
 ├───────────────────────────────────────────────┤
@@ -104,7 +104,7 @@ Brand colors are sampled from the final logo file.
 
 All text pairings pass WCAG AA; most pass AAA.
 
-**Marks:** her wordmark and the heart-and-hands mark are inline SVG tracings of her logo files (`src/assets/brand/`, decision 29). The wordmark is white on the banner and lavender in the footer; the mark appears in the header, the menu, the footer (lit, and drawn in lines in the record), and the link preview. The menu and the footer sit on the near-black navy of the owner's references rather than on `--night`. The logo's purple measures about 2.2:1 against `--night`, so the full logo is never placed directly on the dark background.
+**Marks:** her lettering and the heart-and-hands mark are inline SVG tracings of her logo files (`src/assets/brand/`, decision 29). Her lockup (the script over "Supportive Services") is on the banner and in the footer, in the same lit lavender; the mark appears in the header, the menu, the footer (lit, and drawn in lines in the record), and the link preview. The menu and the footer sit on the near-black navy of the owner's references rather than on `--night`. The logo's purple measures about 2.2:1 against `--night`, so the full logo is never placed directly on the dark background.
 
 **Type:**
 
@@ -112,7 +112,7 @@ All text pairings pass WCAG AA; most pass AAA.
 - **Atkinson Hyperlegible Next** (body): designed by the Braille Institute for low-vision readers, which suits an audience reading on older phones. Its slashed zero is intentional and keeps phone numbers and the EIN unambiguous.
 - 18px base size, major-third scale. Both fonts are self-hosted, with no third-party requests. Her lettering is the wordmark itself, so no script typeface is loaded.
 
-**Signature element:** her wordmark and the two equal doors over the crossfading photos. Everything else stays quiet: one button shape, three radii, list rows with dividers instead of a grid of identical cards, and no scroll animations.
+**Signature element:** her lockup and the two equal doors over the crossfading photos. Everything else stays quiet: one button shape, three radii, list rows with dividers instead of a grid of identical cards, and no scroll animations.
 
 ## Open questions for Tamara
 

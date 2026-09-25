@@ -22,7 +22,7 @@ Paper (`--paper`) and lilac sections stay clean: high contrast, no effects. The 
 
 Both marks are vector tracings of her logo files, made once by `scripts/brand/trace-brand.py`, then reduced to integer coordinates with `npx svgo --multipass -p 0 src/assets/brand/*.svg` (a quarter of the traced size, no visible change at any size the site uses), and kept in `src/assets/brand/`:
 
-- **The wordmark** (`wordmark.svg`) is her calligraphic "Caring For A Cause" lettering. It is the first thing on the banner, white over her photos, and appears again in the footer in a lavender light. It inherits `color`, so it is purple on paper if ever needed there.
+- **The lockup** (`wordmark-lockup.svg`) is her script "Caring For A Cause" over "SUPPORTIVE SERVICES" in spaced capitals. It is the first thing on the banner, over her photos, and appears again in the footer, both times in the same lit lavender with a violet glow (decisions 45 and 49). Its paint is rendered once per page (`BrandPaint.astro`). The plain script wordmark (`wordmark.svg`) inherits `color`, so it is purple on paper if ever needed there.
 - **The heart-and-hands mark** (`mark.svg`) is flat: logo purple ring, crimson heart, violet hands, white keylines. It lives in the header, the menu, the footer, and the favicon. It is never blown up as an illustration. Where a reference lights or dims it (the menu's watermark, the footer's lit mark and its line-drawn seal), its four fills are recoloured in CSS and nothing is redrawn. The footer's lettering is her lockup artwork, traced with its own gradients (`wordmark-lockup.svg`, decision 45).
 
 Nothing else is drawn. The mark is not a container for buttons.
