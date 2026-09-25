@@ -36,3 +36,6 @@ report.md
 report-comment.md
 lh-*.json
 smoke.md
+
+# Playwright MCP screenshots and snapshots
+.playwright-mcp/
