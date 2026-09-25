@@ -121,17 +121,22 @@ const mailto = (subject: string) =>
     });
 
     // Links like /#volunteer open the matching tab and scroll to the section.
-    const fromHash = () => {
+    // On a refresh the layout holds the fragment out of the address and puts
+    // the reader back where they were (Base.astro), so the tab opens in place.
+    const fromHash = (scroll = true) => {
       const id = decodeURIComponent(location.hash.slice(1));
       if (panels.some((p) => p.id === id)) {
         select(id);
-        root.closest("section")?.scrollIntoView();
+        if (scroll) root.closest("section")?.scrollIntoView();
         return true;
       }
       return false;
     };
-    if (!fromHash()) select(panels[0]!.id);
-    window.addEventListener("hashchange", fromHash);
+    const held = document.documentElement.dataset.heldHash;
+    const heldId = held ? decodeURIComponent(held.slice(1)) : "";
+    if (panels.some((p) => p.id === heldId)) select(heldId);
+    else if (!fromHash()) select(panels[0]!.id);
+    window.addEventListener("hashchange", () => fromHash());
   });
 </script>
 

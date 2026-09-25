@@ -131,6 +131,43 @@ const structuredData = {
     <script is:inline>
       document.documentElement.classList.add("js");
     </script>
+    <!-- A refresh keeps the reader where they were. After a section link
+         (#contact from the menu, /#sponsor) the fragment stays in the address,
+         so the link can be copied, but on a refresh the browser would jump
+         back to that section wherever the reader had scrolled since (on a
+         phone Contact is the bottom of the page). So each page remembers its
+         scroll position as it is left; on a refresh with a fragment, the
+         fragment is held out of the address before the browser can act on it,
+         and once the page has loaded the reader is put back where they were
+         and the fragment is put back in the address. A first visit to a
+         section link, shared or typed, still lands on its section. The tabs
+         read the held fragment (GetInvolved.astro). -->
+    <script is:inline>
+      (function () {
+        var key = "scroll:" + location.pathname + location.search;
+        addEventListener("pagehide", function () {
+          try {
+            sessionStorage.setItem(key, String(Math.round(scrollY)));
+          } catch (e) {}
+        });
+        try {
+          var nav = performance.getEntriesByType("navigation")[0];
+          var saved = sessionStorage.getItem(key);
+          if (!nav || nav.type !== "reload" || !location.hash || saved === null) return;
+          var hash = location.hash;
+          var root = document.documentElement;
+          history.scrollRestoration = "manual";
+          root.dataset.heldHash = hash;
+          history.replaceState(history.state, "", location.pathname + location.search);
+          addEventListener("load", function () {
+            scrollTo({ top: Number(saved), behavior: "instant" });
+            history.replaceState(history.state, "", location.pathname + location.search + hash);
+            history.scrollRestoration = "auto";
+            delete root.dataset.heldHash;
+          });
+        } catch (e) {}
+      })();
+    </script>
   </head>
   <body>
     <a class="skip-link" href="#main">
@@ -140,20 +177,5 @@ const structuredData = {
     <slot />
     <slot name="after" />
     <BrandPaint />
-    <script>
-      // A section link (#contact, /#sponsor) scrolls to its section, then the
-      // fragment leaves the address. Left there it outlived the visit: a
-      // refresh jumped back to that section wherever the reader had scrolled
-      // since, and on a phone Contact is the bottom of the page. Without it a
-      // refresh keeps the reader where they are. It waits a turn so the tabs'
-      // own hash handling (GetInvolved.astro) reads the fragment first.
-      const clearHash = () => {
-        if (location.hash)
-          history.replaceState(history.state, "", location.pathname + location.search);
-      };
-      addEventListener("hashchange", () => setTimeout(clearHash));
-      if (document.readyState === "complete") setTimeout(clearHash);
-      else addEventListener("load", () => setTimeout(clearHash));
-    </script>
   </body>
 </html>

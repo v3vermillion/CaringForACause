@@ -882,6 +882,7 @@ test.describe("navigation", () => {
     await expect(links).toHaveText(sectionLabels);
     await expect(page.locator(".site-header button:not([data-menu-open])")).toHaveCount(0);
     await page.getByRole("link", { name: "Get involved", exact: true }).first().click();
+    expect(new URL(page.url()).hash).toBe("#get-involved");
     await expect(page.locator("#get-involved")).toBeInViewport();
   });
 
@@ -989,6 +990,7 @@ test.describe("menu", () => {
     await page.locator("[data-menu-open]").click();
     await page.locator("#menu .menu-list a", { hasText: "About" }).click();
     await expect(page.locator("#menu")).toBeHidden();
+    expect(new URL(page.url()).hash).toBe("#about");
     // Returning focus to the menu button must not scroll the page back up
     // from the section the link just jumped to.
     await expect(page.locator("[data-menu-open]")).toBeFocused();
@@ -1036,24 +1038,63 @@ test.describe("get involved tabs", () => {
     expect(await page.evaluate(() => window.scrollY)).toBe(0);
   });
 
-  // A section link's fragment leaves the address once the page is there, so
-  // a refresh keeps the reader where they scrolled to instead of jumping back
-  // to that section (on a phone, Contact is the bottom of the page).
-  test("a refresh after a section link does not jump back to the section", async ({ page }) => {
+  // Section links scroll smoothly; wait until the page has stopped moving.
+  const settled = (page: import("@playwright/test").Page) =>
+    page.waitForFunction(
+      () =>
+        new Promise<boolean>((resolve) => {
+          const y = window.scrollY;
+          setTimeout(() => resolve(window.scrollY === y), 250);
+        }),
+    );
+
+  // After a section link the fragment stays in the address, and a refresh
+  // keeps the reader where they were instead of jumping back to the section
+  // (on a phone, Contact is the bottom of the page). See decision 50.
+  test("a refresh after a section link keeps the reader where they were", async ({ page }) => {
     await page.goto("/");
     await page.locator('a[href="/#contact"]:visible').first().click();
     await expect(page.locator("#contact")).toBeInViewport();
-    await expect.poll(() => new URL(page.url()).hash).toBe("");
+    expect(new URL(page.url()).hash).toBe("#contact");
+    await settled(page);
     await page.evaluate(() => window.scrollTo({ top: 0, behavior: "instant" }));
+    expect(await page.evaluate(() => window.scrollY)).toBe(0);
     await page.reload();
+    await page.waitForLoadState("load");
     await page.waitForTimeout(300);
     expect(await page.evaluate(() => window.scrollY)).toBe(0);
+    expect(new URL(page.url()).hash).toBe("#contact");
   });
 
-  test("a link from another page still lands on its section", async ({ page }) => {
+  test("a refresh on the section a link led to stays there", async ({ page }) => {
+    await page.goto("/");
+    await page.locator('a[href="/#contact"]:visible').first().click();
+    await expect(page.locator("#contact")).toBeInViewport();
+    await settled(page);
+    await page.reload();
+    await page.waitForLoadState("load");
+    await expect(page.locator("#contact")).toBeInViewport();
+  });
+
+  test("a refreshed tab link keeps its tab without jumping", async ({ page }) => {
+    await page.goto("/#volunteer");
+    await expect(page.locator("#volunteer")).toBeVisible();
+    await expect(page.locator("#get-involved")).toBeInViewport();
+    await settled(page);
+    await page.evaluate(() => window.scrollTo({ top: 0, behavior: "instant" }));
+    expect(await page.evaluate(() => window.scrollY)).toBe(0);
+    await page.reload();
+    await page.waitForLoadState("load");
+    await page.waitForTimeout(300);
+    expect(await page.evaluate(() => window.scrollY)).toBe(0);
+    await expect(page.locator("#tab-volunteer")).toHaveAttribute("aria-selected", "true");
+    expect(new URL(page.url()).hash).toBe("#volunteer");
+  });
+
+  test("a section link from another page lands on its section", async ({ page }) => {
     await page.goto("/#contact");
     await expect(page.locator("#contact")).toBeInViewport();
-    await expect.poll(() => new URL(page.url()).hash).toBe("");
+    expect(new URL(page.url()).hash).toBe("#contact");
   });
 
   test("a tab link in the URL opens that tab", async ({ page }) => {
