@@ -14,20 +14,50 @@ const year = new Date().getFullYear();
 ---
 
 <!--
-  The end of the page: her marks, the one action, her sign-off, the same
-  navigation map the header draws, how to reach her, and the legal record.
+  The end of the page, built from the owner's reference picture (decision
+  48): her marks and the one action, the same navigation map the header
+  draws, how to reach her, a glowing rule, and the legal record as one line.
   The EIN and deductibility line live where a donor decides (the trust strip
-  and the donation card), not here.
+  and the donation card), not here. Every size below is rem, so the footer is
+  one picture per device class (decision 40); the desktop numbers are the
+  reference's, converted at 1152 / 949 (the content column over the
+  reference's), the phone and tablet compositions are drawn from them.
 -->
 <footer class="site-footer on-dark">
-  <div class="wrap">
-    <div class="top">
+  <!-- Paint for the lit mark and for the lockup in the reference's tones. -->
+  <svg class="paint" width="0" height="0" aria-hidden="true" focusable="false">
+    <defs>
+      <linearGradient id="ft-script" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#d4b3f7"></stop>
+        <stop offset="0.2" stop-color="#f1e5fe"></stop>
+        <stop offset="0.42" stop-color="#faf1ff"></stop>
+        <stop offset="0.64" stop-color="#e3cdfc"></stop>
+        <stop offset="0.82" stop-color="#bc97ef"></stop>
+        <stop offset="1" stop-color="#9878cc"></stop>
+      </linearGradient>
+      <linearGradient id="ft-caps" x1="0" y1="0" x2="1" y2="0">
+        <stop offset="0" stop-color="#e4cbfb"></stop>
+        <stop offset="1" stop-color="#dabff7"></stop>
+      </linearGradient>
+      <linearGradient id="ft-ring" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#4a1fe8"></stop>
+        <stop offset="1" stop-color="#2a0fc0"></stop>
+      </linearGradient>
+      <linearGradient id="ft-heart" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#e2404c"></stop>
+        <stop offset="1" stop-color="#c8202f"></stop>
+      </linearGradient>
+    </defs>
+  </svg>
+
+  <div class="top">
+    <div class="wrap columns">
       <div class="identity">
-        <a class="brand" href="/" aria-label="Caring for a Cause home">
+        <a class="brand" href="/" aria-label={`${org.name}, home`}>
           <Brand kind="mark" class="mark" label="" />
           <Brand kind="lockup" class="wordmark" label="" />
         </a>
-        <a class="button button--signal donate" href={donate.href}>
+        <a class="button donate" href={donate.href}>
           {donate.label}
           <svg class="chev" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
             <path d="m9 5 7 7-7 7"></path>
@@ -36,8 +66,8 @@ const year = new Date().getFullYear();
         <p class="sign-off">{org.signOff}</p>
       </div>
 
-      <nav class="col" aria-labelledby="explore-title">
-        <h2 id="explore-title" class="col-title eyebrow">
+      <nav class="col col--explore" aria-labelledby="explore-title">
+        <h2 id="explore-title" class="col-title">
           Explore
         </h2>
         <ul class="links">
@@ -54,36 +84,46 @@ const year = new Date().getFullYear();
         </ul>
       </nav>
 
-      <section class="col" aria-labelledby="connect-title">
-        <h2 id="connect-title" class="col-title eyebrow">
+      <section class="col col--connect" aria-labelledby="connect-title">
+        <h2 id="connect-title" class="col-title">
           Connect with us
         </h2>
         <ul class="contact">
           <li>
             <a href={phone.href}>
-              <!-- A handset in the footer's own accent, the violet of the
-                   divider and the column rules, so the drawn marks belong to
-                   each other rather than to the body copy. -->
-              <svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                <path d="M8.6 3.8 10 7.1a1.3 1.3 0 0 1-.4 1.5l-1.4 1a12.4 12.4 0 0 0 5.2 5.2l1-1.4a1.3 1.3 0 0 1 1.5-.4l3.3 1.4a1.3 1.3 0 0 1 .8 1.4l-.4 2.2a1.6 1.6 0 0 1-1.7 1.3A16.3 16.3 0 0 1 3.8 5.1 1.6 1.6 0 0 1 5.1 3.4l2.2-.4a1.3 1.3 0 0 1 1.3.8Z"></path>
+              <svg
+                class="icon icon--phone"
+                viewBox="0 0 24 24"
+                aria-hidden="true"
+                focusable="false"
+              >
+                <path
+                  transform="translate(-2.6 -2.2) scale(1.2)"
+                  d="M8.6 3.8 10 7.1a1.3 1.3 0 0 1-.4 1.5l-1.4 1a12.4 12.4 0 0 0 5.2 5.2l1-1.4a1.3 1.3 0 0 1 1.5-.4l3.3 1.4a1.3 1.3 0 0 1 .8 1.4l-.4 2.2a1.6 1.6 0 0 1-1.7 1.3A16.3 16.3 0 0 1 3.8 5.1 1.6 1.6 0 0 1 5.1 3.4l2.2-.4a1.3 1.3 0 0 1 1.3.8Z"
+                ></path>
               </svg>
-              <span class="value">{phone.display}</span>
+              <span class="value value--phone">{phone.display}</span>
             </a>
           </li>
           <li>
             <a href={`mailto:${email}`}>
-              <svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                <rect x="2.8" y="5.2" width="18.4" height="13.6" rx="2.4"></rect>
-                <path d="m3.6 7 7.3 5.3a2 2 0 0 0 2.2 0L20.4 7"></path>
+              <svg class="icon icon--mail" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                <rect x="1.5" y="3.4" width="21" height="17.2" rx="2.6"></rect>
+                <path d="m2.4 5.6 8.4 6.2a2 2 0 0 0 2.4 0l8.4-6.2"></path>
               </svg>
               <span class="value">{email}</span>
             </a>
           </li>
           <li>
             <a href={show(facts.facebook)} target="_blank" rel="noopener">
-              <svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                <rect x="3.2" y="3.2" width="17.6" height="17.6" rx="4.4"></rect>
-                <path d="M15 7.6h-1.6a2.2 2.2 0 0 0-2.2 2.2v10.9M9 12.6h5"></path>
+              <svg
+                class="icon icon--facebook"
+                viewBox="0 0 24 24"
+                aria-hidden="true"
+                focusable="false"
+              >
+                <rect x="1.5" y="1.5" width="21" height="21" rx="4.2"></rect>
+                <path d="M15.6 6.4h-1.8a2.6 2.6 0 0 0-2.6 2.6V22.5M8.6 12.6h5.6"></path>
               </svg>
               <span class="value">
                 Facebook<span class="visually-hidden"> (opens in a new tab)</span>
@@ -92,151 +132,274 @@ const year = new Date().getFullYear();
           </li>
         </ul>
       </section>
-    </div>
 
-    <div class="legal">
-      <p class="name">{claim(facts.legalName)}</p>
-      <p class="where">
-        {show(facts.city)} &middot; Serving {claim(facts.serviceArea)}
-      </p>
-      <p class="copyright">&copy; {year}</p>
+      <!-- The flare on the rule below: white-pink where the light breaks. -->
+      <span class="flare" aria-hidden="true"></span>
+    </div>
+  </div>
+
+  <div class="rule" aria-hidden="true"></div>
+
+  <div class="record">
+    <div class="wrap legal">
+      <div class="row row--who">
+        <Brand kind="mark" class="seal" label="" />
+        <p class="name">{claim(facts.legalName)}</p>
+      </div>
+      <div class="row row--where">
+        <p class="where">
+          <svg class="pin" viewBox="0 0 24 34" aria-hidden="true" focusable="false">
+            <path d="M12 32.4C12 32.4 1.4 21.2 1.4 12.6a10.6 10.6 0 0 1 21.2 0c0 8.6-10.6 19.8-10.6 19.8Z"></path>
+            <circle cx="12" cy="12.4" r="4"></circle>
+          </svg>
+          <span class="city">{show(facts.city)}</span>
+          <span class="dot"></span>
+          <span class="serving">Serving {claim(facts.serviceArea)}</span>
+        </p>
+        <p class="copyright">
+          <span class="c">&copy;</span> {year}
+        </p>
+      </div>
     </div>
   </div>
 </footer>
 
 <style>
+  /*
+   * Colours are the reference's, sampled: near-black navy under the columns,
+   * a step bluer under the record, lavender light on the lettering and the
+   * lines, and the one crimson on the Donate button. Every size is rem, so
+   * the footer is one picture per device class (decision 40). The desktop
+   * numbers are the reference's, converted at 1152 / 949 (the content column
+   * over the reference's); the phone and tablet compositions are drawn from
+   * them.
+   */
   .site-footer {
-    /* The lockup's own width, stated once: the mark, the gap and the
-       lettering. The grid track, the centred stack and the wordmark all read
-       it, so the three cannot drift apart. The brand SVGs are viewBox-only,
-       so none of this can be measured from content. */
-    --lockup: calc(3rem + 1rem + 16rem);
-    --accent: rgb(138 91 255);
-    background:
-      radial-gradient(60% 50% at 0% 0%, rgb(96 8 215 / 0.3), transparent 60%), var(--night-2);
-    color: var(--night-soft);
-    padding-block: var(--space-xl) var(--space-m);
+    /* The two lists' row heights, one value per class (below). */
+    --row-links: 2.75rem;
+    --row-contact: 2.9rem;
+    --line: #b589e6; /* chevrons */
+    --violet: #c199ea; /* drawn icons */
+    --seal: #c4a2f6; /* the small mark's lines */
+    --divider: rgb(215 205 240 / 0.55); /* the record's short rules */
+    position: relative;
+    color: #fff;
+    background: #06012a;
   }
 
-  /* The divider carries the brand across the footer: purple out of the glow
-     at the top left, through crimson, fading to nothing. */
+  .paint {
+    position: absolute;
+  }
+
+  /* The top: the columns on the darkest ground, lit along its top edge and
+     at its lower corners where the rule's light spills. The glows are sized
+     in rem from the corners they belong to, per class (docs/DESIGN.md, the
+     header's rule for painted decoration). */
   .top {
+    --glow-top-w: 14rem;
+    --glow-top-h: 4rem;
+    --glow-end-w: 7rem;
+    --glow-end-h: 5rem;
+    position: relative;
+    padding-top: 2.6rem;
+    background:
+      radial-gradient(
+        var(--glow-end-w) var(--glow-end-h) at 0 100%,
+        rgb(150 20 80 / 0.3),
+        transparent 100%
+      ),
+      radial-gradient(
+        var(--glow-end-w) var(--glow-end-h) at 100% 100%,
+        rgb(170 30 100 / 0.38),
+        transparent 100%
+      ),
+      linear-gradient(0deg, rgb(40 12 130 / 0.7) 0, rgb(30 8 110 / 0.3) 1rem, transparent 2.2rem),
+      radial-gradient(
+        var(--glow-top-w) var(--glow-top-h) at 100% 0,
+        rgb(175 40 185 / 0.42),
+        transparent 100%
+      ),
+      radial-gradient(
+        var(--glow-top-w) var(--glow-top-h) at 0 0,
+        rgb(105 20 175 / 0.32),
+        transparent 100%
+      ),
+      linear-gradient(
+        180deg,
+        rgb(85 14 140 / 0.22) 0,
+        rgb(50 8 100 / 0.1) 1.8rem,
+        transparent 4.5rem
+      ),
+      #020018;
+  }
+
+  .columns {
     position: relative;
     display: grid;
-    gap: var(--space-l);
-    padding-bottom: var(--space-l);
-  }
-
-  .top::after {
-    content: "";
-    position: absolute;
-    inset: auto 0 0;
-    height: var(--hairline);
-    background: linear-gradient(
-      90deg,
-      rgb(96 8 215 / 0) 0%,
-      rgb(138 91 255 / 0.95) 16%,
-      rgb(226 32 44 / 0.6) 54%,
-      rgb(255 255 255 / 0.14) 100%
-    );
-    box-shadow:
-      0 0 1.25rem rgb(96 8 215 / 0.55),
-      0 0 3rem rgb(226 32 44 / 0.18);
   }
 
   /* Her marks, the one action, her sign-off: one centred stack. */
-  /* As wide as her lettering, not as wide as the column, so "centred" below
-     means centred under her name. */
   .identity {
     display: grid;
-    gap: var(--space-m);
-    width: var(--lockup);
-    max-width: 100%;
+    justify-items: center;
+    padding-bottom: 1.7rem;
   }
 
+  /* The link spans the column so it starts at the page's left edge like the
+     header's brand (a test checks); its marks are centred inside it. */
   .brand {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
+    display: grid;
+    justify-items: center;
+    width: 100%;
     color: #fff;
     text-decoration: none;
   }
 
+  /* The mark is lit: a night ring, a rose heart, violet hands, and a tight
+     blue-violet glow, as the reference paints it. */
   .brand :global(.mark) {
-    width: 3rem;
-    flex: none;
+    width: 5.6rem;
+    filter: drop-shadow(0 0 0.2rem rgb(90 40 255 / 0.9))
+      drop-shadow(0 0 0.55rem rgb(70 30 230 / 0.55));
+  }
+  .brand :global(.mark path[fill="#6008d7"]) {
+    fill: url(#ft-ring);
+  }
+  .brand :global(.mark path[fill="#ba010c"]) {
+    fill: url(#ft-heart);
+  }
+  .brand :global(.mark path[fill="#8a5bff"]) {
+    fill: #5a12f4;
+  }
+  .brand :global(.mark path[fill="#f4eeff"]) {
+    fill: #fbeefe;
   }
 
-  /* Her lockup carries its own colours; the soft violet bloom is the
-     artwork's glow. */
+  /* Her lockup (decision 45), the script over "Supportive Services", in the
+     tones the reference shows it in: the script pale lavender to white,
+     darkening to a muted violet in its tails, the capitals flat lavender
+     (the artwork's own gradients run to magenta, which the reference does
+     not). With a soft glow; it tucks up under the heart's point. */
   .brand :global(.wordmark) {
-    width: min(100%, 16rem);
-    filter: drop-shadow(0 0 0.3rem rgb(170 110 255 / 0.4));
+    width: 22rem;
+    max-width: 100%;
+    margin-top: -0.5rem;
+    filter: drop-shadow(0 0 0.5rem rgb(170 110 255 / 0.45));
+  }
+  .brand :global(.wordmark path[fill="url(#wl-script)"]) {
+    fill: url(#ft-script);
+  }
+  .brand :global(.wordmark path[fill="url(#wl-caps)"]) {
+    fill: url(#ft-caps);
   }
 
-  /* The one action in the footer, in the banner door's own signal treatment
-     so the two read as the same button at two sizes. */
+  /* The one action: a glossy crimson pill, lit along its top rim and
+     darkening to the bottom, in the serif. */
   .donate {
-    justify-self: center;
-    min-width: 11rem;
-    background: linear-gradient(135deg, #ef2f3a 0%, var(--signal) 28%, #8e0009 100%);
-    /* Held close to the pill: a wider bloom pools on her sign-off below. */
+    position: relative;
+    width: 11.4rem;
+    min-height: max(44px, 2.85rem);
+    margin-top: 1.1rem;
+    padding: 0 0 0 0.2rem;
+    gap: 1rem;
+    font-family: var(--font-serif);
+    font-weight: 700;
+    font-size: 1.12rem;
+    letter-spacing: 0.01em;
+    color: #fff;
+    background: linear-gradient(
+      180deg,
+      #d84a66 0%,
+      #dc3a5a 6%,
+      #c72f44 17%,
+      #b12337 30%,
+      #921c25 45%,
+      #78141b 62%,
+      #661217 78%,
+      #6b1019 92%,
+      #7e1522 100%
+    );
     box-shadow:
-      0 0.5rem 1.5rem rgb(226 32 44 / 0.32),
-      0 0 0 var(--hairline) rgb(255 255 255 / 0.18) inset;
+      inset 0 0.07rem 0 rgb(255 130 150 / 0.55),
+      inset 0 -0.07rem 0 rgb(220 90 110 / 0.6),
+      0 0 0.4rem rgb(140 10 45 / 0.9),
+      0 0 1.4rem rgb(220 30 70 / 0.5);
   }
 
   .donate:hover {
-    background: linear-gradient(135deg, #ff4550 0%, #e8303c 28%, #a3000a 100%);
-    box-shadow:
-      0 0.625rem 1.875rem rgb(226 32 44 / 0.42),
-      0 0 0 var(--hairline) rgb(255 255 255 / 0.25) inset;
+    background: linear-gradient(
+      180deg,
+      #e85a76 0%,
+      #ea4668 6%,
+      #d43a50 17%,
+      #bd2c41 30%,
+      #9e222c 45%,
+      #841a22 62%,
+      #72161c 78%,
+      #76141d 92%,
+      #8a1a27 100%
+    );
   }
 
+  /* The chevron's ink is 7 by 14 of its 24 box, so the box is drawn larger
+     and pulled in by its own padding. */
   .donate .chev {
-    width: 1.1em;
-    height: 1.1em;
-    margin-right: -0.25rem;
+    width: 1.27em;
+    height: 1.27em;
+    margin-left: -0.64em;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2.2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
   }
 
-  /* Her phrase closes the column: the same face, light and small, so her
-     lettering stays the loudest thing down here. */
+  /* Her sign-off: the serif, small and tracked open. */
   .sign-off {
-    margin-top: 0.4rem;
+    margin-top: 0.85rem;
+    font-family: var(--font-serif);
+    font-weight: 400;
+    font-size: 0.92rem;
+    line-height: 1;
+    letter-spacing: 0.17em;
     text-align: center;
-    font-family: var(--font-display);
-    font-size: var(--step-1);
-    font-weight: 300;
-    line-height: 1.2;
-    letter-spacing: 0.01em;
-    color: #fff;
+    white-space: nowrap;
+    color: #e7e1fa;
   }
 
-  /* Column heads: the site's eyebrow, with a short rule in the divider's
-     gradient so the two columns read as a pair. */
+  /* Column heads: the serif, bold, with a short rule in lavender, pink and
+     crimson under each. */
+  .col {
+    position: relative;
+    padding-bottom: 1.1rem;
+  }
+
   .col-title {
     position: relative;
-    margin-bottom: 0.9rem;
-    padding-bottom: 0.55rem;
-    font-size: var(--step-0);
+    font-family: var(--font-serif);
+    font-weight: 700;
+    font-size: 1.5rem;
+    line-height: 1;
+    letter-spacing: 0;
+    color: #fbfafe;
   }
 
   .col-title::after {
     content: "";
     position: absolute;
     left: 0;
-    bottom: 0;
-    width: 2rem;
-    height: 0.125rem;
+    top: calc(100% + 0.7rem);
+    width: 3.3rem;
+    height: 0.25rem;
     border-radius: var(--r-pill);
-    background: linear-gradient(90deg, var(--accent) 0%, var(--signal) 100%);
+    background: linear-gradient(90deg, #d5c6f0 0%, #dc95e8 50%, #c4506c 100%);
   }
 
   .links,
   .contact {
     display: grid;
+    margin: 1.6rem 0 0;
     padding: 0;
-    margin: 0;
     list-style: none;
   }
 
@@ -244,67 +407,71 @@ const year = new Date().getFullYear();
   .contact a {
     display: flex;
     align-items: center;
-    min-height: 2.75rem;
-    color: #fff;
-    font-family: var(--font-display);
-    font-weight: 600;
+    color: #f8f7fe;
+    font-family: var(--font-footer);
+    font-weight: 400;
+    font-size: 1.12rem;
+    line-height: 1;
+    letter-spacing: 0;
     text-decoration: none;
-  }
-
-  /* Apple's 44px is a minimum for fingers, so it is held where the pointer is
-     coarse rather than at every width. A row is otherwise 2.75rem, which is
-     44px at the class's reference width and scales with the class: pinning
-     eight rows to 44px in a narrow desktop window made the footer taller than
-     the same layout scaled, and every desktop is one composition. */
-  @media (pointer: coarse) {
-    .links a,
-    .contact a {
-      min-height: 44px;
-    }
+    white-space: nowrap;
   }
 
   .links a {
-    justify-content: flex-start;
-    gap: 0.6rem;
-  }
-
-  .links .chev {
-    width: 1.25rem;
-    height: 1.25rem;
-    flex: none;
+    justify-content: space-between;
+    gap: 1rem;
+    min-height: var(--row-links);
+    padding-right: 0.15rem;
   }
 
   .contact a {
-    gap: 0.7rem;
+    gap: 1.1rem;
+    min-height: var(--row-contact);
   }
 
-  .chev,
-  .icon {
+  /* The chevron's ink is 7 by 14 of its 24 box. */
+  .links .chev {
+    width: 1.6rem;
+    height: 1.6rem;
+    flex: none;
     fill: none;
-    stroke: var(--accent);
-    stroke-width: 1.5;
+    stroke: var(--line);
+    stroke-width: 1.9;
     stroke-linecap: round;
     stroke-linejoin: round;
   }
 
-  .donate .chev {
-    stroke: currentColor;
-    stroke-width: 2.4;
-  }
-
+  /* The icons are drawn to the edges of their box. */
   .icon {
-    width: 1.5rem;
-    height: 1.5rem;
+    width: 1.85rem;
+    height: 1.85rem;
     flex: none;
+    fill: none;
+    stroke: var(--violet);
+    stroke-width: 1.45;
+    stroke-linecap: round;
+    stroke-linejoin: round;
   }
 
-  .value {
-    overflow-wrap: anywhere;
+  .icon--phone {
+    stroke: #d476e9;
+    stroke-width: 1.2;
+  }
+
+  .icon--mail {
+    stroke: #d5b4f6;
+  }
+
+  /* The figures are set a touch open: the face's are narrower than the
+     reference's. */
+  .value--phone {
+    letter-spacing: 0.055em;
   }
 
   .links a:hover span,
   .contact a:hover .value {
     text-decoration: underline;
+    text-underline-offset: 0.15em;
   }
 
   .links a:hover .chev,
@@ -312,120 +479,592 @@ const year = new Date().getFullYear();
     stroke: #fff;
   }
 
-  .legal {
-    display: grid;
-    gap: 0.5rem;
-    padding-top: var(--space-m);
-    font-size: var(--step--1);
+  /* The rule: a hairline lit violet to magenta across the whole width, with
+     a tight bloom, and the flare above where the light breaks white. */
+  .rule {
+    position: relative;
+    z-index: 1;
+    height: max(1px, 0.12rem);
+    background: linear-gradient(
+      90deg,
+      #6f166a 0%,
+      #8c2cd6 5%,
+      #9482f2 13%,
+      #7f3fc4 26%,
+      #c341df 38%,
+      #dc63c4 43%,
+      #e888d6 46%,
+      #ce43ba 53%,
+      #b040e8 60%,
+      #7f4ad8 73%,
+      #a086f4 81%,
+      #c8a0fb 90%,
+      #cf64e8 94%,
+      #a1298b 100%
+    );
+    box-shadow:
+      0 0 0.25rem rgb(220 150 255 / 0.9),
+      0 -0.15rem 0.7rem rgb(130 70 240 / 0.55);
   }
 
-  /* The legal record is a record, not prose: it keeps its own line rather
-     than wrapping at the reading measure. */
+  /* The flare sits on the rule: a low magenta bloom above it and a hot
+     white-pink core along it. Placed from the column's left edge in rem, so
+     it keeps its place under the Explore head on every screen of a class. */
+  .flare {
+    position: absolute;
+    left: 50%;
+    bottom: 0;
+    z-index: 2;
+    width: 13rem;
+    height: 2.2rem;
+    transform: translate(-50%, 50%);
+    pointer-events: none;
+    background: radial-gradient(
+      50% 50% at 50% 50%,
+      rgb(250 150 220 / 0.55) 0%,
+      rgb(235 100 200 / 0.3) 18%,
+      rgb(205 60 175 / 0.14) 40%,
+      rgb(170 40 160 / 0.05) 62%,
+      transparent 80%
+    );
+    -webkit-mask-image: linear-gradient(
+      180deg,
+      #000 0,
+      #000 50%,
+      rgb(0 0 0 / 0.3) 58%,
+      transparent 70%
+    );
+    mask-image: linear-gradient(180deg, #000 0, #000 50%, rgb(0 0 0 / 0.3) 58%, transparent 70%);
+  }
+
+  .flare::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 11rem;
+    height: max(1px, 0.14rem);
+    transform: translate(-50%, -50%);
+    border-radius: var(--r-pill);
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      rgb(255 190 232 / 0.55) 18%,
+      rgb(255 225 243 / 0.95) 40%,
+      #fff5fc 50%,
+      rgb(255 225 243 / 0.95) 60%,
+      rgb(255 190 232 / 0.55) 82%,
+      transparent 100%
+    );
+    box-shadow: 0 0 0.4rem rgb(255 190 235 / 0.8);
+  }
+
+  /* The record: on a step bluer ground, over a faint hairline and a lit
+     lower edge. The hairline's place is the record's own height less the
+     band under it. */
+  .record {
+    --band: 2.6rem;
+    position: relative;
+    padding-bottom: var(--band);
+    background:
+      linear-gradient(0deg, rgb(70 30 170 / 0.14) 0, transparent 2rem),
+      linear-gradient(
+        0deg,
+        transparent 0,
+        transparent var(--band),
+        rgb(130 106 210 / 0.5) var(--band),
+        rgb(130 106 210 / 0.5) calc(var(--band) + var(--hairline)),
+        transparent calc(var(--band) + var(--hairline))
+      ),
+      linear-gradient(0deg, #06012a 0, #06012a var(--band), #03012a var(--band));
+  }
+
+  /* Phones: three centred rows. */
+  .legal {
+    position: relative;
+    display: grid;
+    justify-items: center;
+    gap: 0.85rem;
+    padding: 1.7rem 0 1.5rem;
+    font-family: var(--font-serif);
+    font-weight: 400;
+    font-size: 0.86rem;
+    line-height: 1;
+  }
+
+  .row {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.85rem;
+  }
+
   .legal p {
     max-width: none;
+    white-space: nowrap;
+  }
+
+  /* Her mark drawn in lines: the silhouette and the keylines in lavender,
+     the heart and the hands in the ground's own colour. */
+  .legal :global(.seal) {
+    width: 2.5rem;
+  }
+  .legal :global(.seal path[fill="#6008d7"]),
+  .legal :global(.seal path[fill="#f4eeff"]) {
+    fill: var(--seal);
+  }
+  .legal :global(.seal path[fill="#ba010c"]),
+  .legal :global(.seal path[fill="#8a5bff"]) {
+    fill: #03012a;
   }
 
   .legal .name {
-    color: #fff;
-    font-weight: 700;
+    color: #eae6fb;
   }
 
-  @media (min-width: 56rem) {
-    .site-footer {
-      /* Stacked here, so the value is her lettering's width alone. The grid
-         track and the lettering both read it, which is what makes "centred in
-         the column" and "centred under her name" the same thing. */
-      --lockup: 26rem;
-      /* The references leave about as much air under the record as above the
-         marks; the old value left it crowding the bottom edge. */
-      padding-block: var(--space-xl) var(--space-xl);
-    }
+  .where {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    color: #d7cdf3;
+  }
 
-    /* Three groups, no rules between them: her marks and the one action, the
-       map, and how to reach her. The first column is the lockup's own width
-       (4.5 + 1.5 + 23), stated rather than measured: the wordmark is a
-       viewBox-only SVG, so an auto column would size it from its 300px
-       default. The two text columns start at the same line so their heads
-       sit level; the shorter identity column centres against them. */
+  .where .city {
+    color: #cfbded;
+  }
+
+  .pin {
+    width: 1.2rem;
+    height: 1.7rem;
+    flex: none;
+    fill: none;
+    stroke: #ac76e5;
+    stroke-width: 1.9;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  .dot {
+    width: 0.25rem;
+    height: 0.25rem;
+    flex: none;
+    border-radius: 50%;
+    background: #8a72c4;
+  }
+
+  .copyright {
+    color: #dcd4f1;
+  }
+
+  /* The copyright sign, set larger as the reference draws it. */
+  .copyright .c {
+    position: relative;
+    top: 0.04em;
+    margin-right: 0.16em;
+    font-size: 1.5em;
+    line-height: 0;
+  }
+
+  /*
+   * Tablets: the lockup centred above the two lists, which sit side by side
+   * with the reference's divider between them; the record in two rows, a
+   * short rule inside each.
+   */
+  @media (min-width: 36rem) {
     .top {
-      grid-template-columns: var(--lockup) auto auto;
-      justify-content: space-between;
-      align-items: start;
-      gap: var(--space-l);
+      --glow-top-w: 24rem;
+      --glow-top-h: 5rem;
+      --glow-end-w: 9rem;
+      --glow-end-h: 6rem;
+      padding-top: 3rem;
     }
 
-    /* Lifted above the line the two column heads start on. The heart is the
-       footer's corner mark, so it reads as anchoring the region rather than
-       as the first item in a row of three. */
+    /* The second track is capped at the room left (a plain 1fr has an auto
+       minimum, and the address row fits it by less than a pixel, which
+       another engine's text metrics could erase and push the column out). */
+    .columns {
+      grid-template-columns: 19.04rem minmax(0, 1fr);
+    }
+
     .identity {
-      align-self: start;
-      margin-top: -2.5rem;
-      gap: 1.15rem;
+      grid-column: 1 / -1;
+      padding-bottom: 2.8rem;
     }
 
-    /* The marks stack here rather than sitting in a row: the heart takes the
-       footer's top left corner, and her lettering drops below it at the same
-       left edge, where it has the whole column to itself instead of the
-       leftover beside the heart. Because the lettering now spans the column,
-       "centred in the column" below is centred under her name. */
-    .brand {
-      display: grid;
-      justify-items: start;
-      gap: 0;
-    }
-    /* Nudged toward the corner it anchors, and out of the lockup's left edge
-       so her lettering keeps the page's gutter line. The offset is drawn, not
-       laid out, so nothing below it moves and it scales with the class. */
     .brand :global(.mark) {
-      position: relative;
-      top: -1.5rem;
-      left: -2rem;
-      width: 7.65rem;
-    }
-    /* Pulled up into the heart's point, which the script's own rising C
-       leaves room for. The two marks read as one lockup at this size; a gap
-       between them read as two separate things stacked. */
-    .brand :global(.wordmark) {
-      width: 100%;
-      margin-top: -0.75rem;
+      width: 6.4rem;
     }
 
-    /* One step up, so the 44px tap floor reads as a row rather than as air:
-       44 against 22.5 is the references' ratio, 44 against 18 is not. */
+    .brand :global(.wordmark) {
+      width: 25rem;
+      margin-top: -0.7rem;
+    }
+
+    .donate {
+      width: 13rem;
+      min-height: max(44px, 3.2rem);
+      margin-top: 1.25rem;
+      font-size: 1.26rem;
+    }
+
+    .sign-off {
+      margin-top: 0.95rem;
+      font-size: 1.02rem;
+    }
+
+    .col {
+      padding-bottom: 2.4rem;
+    }
+
+    .col--connect {
+      padding-left: 2.5rem;
+    }
+
+    /* The divider: a hairline that brightens in over its first quarter and
+       fades out above the rule, the reference's profile. */
+    .col--connect::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: -0.6rem;
+      bottom: 0.4rem;
+      width: var(--hairline);
+      background: linear-gradient(
+        180deg,
+        transparent 0%,
+        rgb(224 220 240 / 0.45) 8%,
+        rgb(224 220 240 / 0.8) 17%,
+        #e0dcf0 25%,
+        #e0dcf0 42%,
+        rgb(224 220 240 / 0.87) 54%,
+        rgb(224 220 240 / 0.76) 71%,
+        rgb(224 220 240 / 0.5) 87%,
+        rgb(224 220 240 / 0.2) 96%,
+        transparent 100%
+      );
+    }
+
+    .col-title {
+      font-size: 1.7rem;
+    }
+
+    .col-title::after {
+      top: calc(100% + 0.85rem);
+      width: 3.8rem;
+      height: 0.28rem;
+    }
+
+    .links,
+    .contact {
+      margin-top: 2rem;
+    }
+
     .links a,
     .contact a {
-      font-size: var(--step-1);
+      font-size: 1.3rem;
     }
 
-    /* The column is sized by its widest label here, so the chevrons line up
-       on its right edge. */
     .links a {
-      justify-content: space-between;
-      gap: 1.5rem;
+      padding-right: 2.8rem;
     }
 
-    /* One line, three parts, one separator between each: even by
-       construction. A justified bar across the full width would set up a
-       centre axis that 43, 46 and 6 characters cannot satisfy. */
+    .contact a {
+      --row-contact: 3.3rem;
+      gap: 1.3rem;
+    }
+
+    .icon {
+      width: 2.3rem;
+      height: 2.3rem;
+    }
+
+    .flare {
+      left: 19.04rem;
+      width: 15rem;
+      height: 2.5rem;
+    }
+
+    .record {
+      --band: 2.8rem;
+    }
+
     .legal {
-      display: flex;
-      flex-wrap: wrap;
-      align-items: baseline;
+      gap: 1rem;
+      padding: 1.9rem 0 1.7rem;
+      font-size: 1rem;
+    }
+
+    .row {
+      flex-direction: row;
+      justify-content: center;
       gap: 0;
-      padding-top: var(--space-l);
     }
+
+    .legal :global(.seal) {
+      width: 2.8rem;
+    }
+
+    .legal .name,
     .copyright {
-      margin-left: auto;
+      display: flex;
+      align-items: center;
     }
-    /* One separator, and only where it belongs: between the name and the
-       place. The notice is anchored to the right edge, not run on. */
-    .legal .where::before {
-      content: "·";
-      /* The empty alternative text keeps a screen reader from announcing the
-         dot; engines without the syntax fall back to the line above. */
-      content: "·" / "";
-      margin-inline: 0.7rem;
-      opacity: 0.55;
+
+    /* The short rule between the two parts of each row. */
+    .legal .name::before,
+    .copyright::before {
+      content: "";
+      display: block;
+      flex: none;
+      width: var(--hairline);
+      height: 2.35rem;
+      margin: 0 1.7rem;
+      background: var(--divider);
+    }
+
+    .where {
+      gap: 0.9rem;
+    }
+
+    .pin {
+      width: 1.5rem;
+      height: 2.12rem;
+    }
+  }
+
+  /*
+   * Desktop: the reference. Three columns over one row, everything placed
+   * from the reference's measurements.
+   */
+  @media (min-width: 56rem) {
+    .top {
+      --glow-top-w: 40rem;
+      --glow-top-h: 6.5rem;
+      --glow-end-w: 12rem;
+      --glow-end-h: 7rem;
+      padding-top: 0;
+    }
+
+    .columns {
+      grid-template-columns: 29.13rem 19.04rem 23.82rem;
+      align-items: start;
+      min-height: 24.51rem;
+    }
+
+    /* The lockup's axis is 12 reference px left of the column's centre, as
+       the reference has it, hence the right padding. */
+    .identity {
+      grid-column: 1;
+      padding: 4.37rem 0.75rem 0 0;
+    }
+
+    .brand :global(.mark) {
+      width: 6.96rem;
+    }
+
+    /* The lockup at the reference's width, its script's top where the
+       reference has it. */
+    .brand :global(.wordmark) {
+      width: 27.2rem;
+      margin-top: -0.92rem;
+    }
+
+    .donate {
+      width: 13.88rem;
+      min-height: max(44px, 3.41rem);
+      margin-top: 1.46rem;
+      font-size: 1.35rem;
+    }
+
+    .sign-off {
+      margin-top: 0.69rem;
+      font-size: 1.1rem;
+    }
+
+    .col {
+      padding: 5.61rem 0 0 2.5rem;
+    }
+
+    .col::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 4.9rem;
+      bottom: auto;
+      height: 18.3rem;
+      width: var(--hairline);
+      background: linear-gradient(
+        180deg,
+        transparent 0%,
+        rgb(224 220 240 / 0.45) 8%,
+        rgb(224 220 240 / 0.8) 17%,
+        #e0dcf0 25%,
+        #e0dcf0 42%,
+        rgb(224 220 240 / 0.87) 54%,
+        rgb(224 220 240 / 0.76) 71%,
+        rgb(224 220 240 / 0.5) 87%,
+        rgb(224 220 240 / 0.2) 96%,
+        transparent 100%
+      );
+    }
+
+    .col-title {
+      font-size: 1.871rem;
+    }
+
+    .col-title::after {
+      top: calc(100% + 0.95rem);
+      width: 4.06rem;
+      height: 0.3rem;
+    }
+
+    /* The Explore rows are 2.75rem (44px on the reference screen, the tap
+       floor) against the reference's 2.56rem, centred on the same middle
+       row; the Connect rows are the reference's 3.55rem. */
+    .links {
+      margin-top: 1.48rem;
+      padding-left: 0.16rem;
+    }
+
+    .contact {
+      margin-top: 2.47rem;
+    }
+
+    .links a,
+    .contact a {
+      font-size: 1.367rem;
+    }
+
+    .links a {
+      padding-right: 2.2rem;
+    }
+
+    .contact a {
+      --row-contact: 3.55rem;
+      gap: 1.57rem;
+    }
+
+    .icon {
+      width: 2.6rem;
+      height: 2.6rem;
+    }
+
+    .flare {
+      left: 31.94rem;
+      width: 20rem;
+      height: 2.4rem;
+    }
+
+    .record {
+      --band: 3.35rem;
+      height: 9.25rem;
+      padding: 0;
+    }
+
+    /* One line: each part placed at the reference's x, so the picture holds
+       whatever a face renders a word at. */
+    .legal {
+      display: block;
+      height: 5.9rem;
+      padding: 0;
+      font-size: 1.04rem;
+    }
+
+    .row {
+      display: contents;
+    }
+
+    .row > *,
+    .legal :global(.seal) {
+      position: absolute;
+      top: 3rem;
+      transform: translateY(-50%);
+    }
+
+    .legal :global(.seal) {
+      left: 0;
+      width: 2.96rem;
+    }
+
+    .legal .name {
+      left: 6.9rem;
+    }
+
+    .legal .name,
+    .copyright {
+      display: block;
+    }
+
+    .legal .name::before,
+    .copyright::before {
+      display: none;
+    }
+
+    .where {
+      left: 34.9rem;
+      gap: 0;
+    }
+
+    .where .city {
+      margin-left: 1rem;
+    }
+
+    .where .dot {
+      margin-left: 1.17rem;
+    }
+
+    .where .serving {
+      margin-left: 1.35rem;
+    }
+
+    .copyright {
+      right: 0;
+    }
+
+    .pin {
+      width: 1.67rem;
+      height: 2.36rem;
+    }
+
+    /* Three short rules between the parts. */
+    .legal::before,
+    .legal::after,
+    .where::before {
+      content: "";
+      position: absolute;
+      top: 3rem;
+      width: var(--hairline);
+      height: 2.35rem;
+      transform: translateY(-50%);
+      background: var(--divider);
+    }
+
+    .legal::before {
+      left: 4.78rem;
+    }
+
+    .legal::after {
+      left: 31.41rem;
+    }
+
+    .where::before {
+      left: 30.15rem;
+      top: 50%;
+    }
+  }
+
+  /* Apple's 44px is a minimum for fingers, so it is held where the pointer
+     is coarse rather than at every width: a row is otherwise its reference
+     height and scales with the class, so every screen of a class is one
+     composition (decision 43). Last, so it wins over the class blocks above
+     at the same specificity. */
+  @media (pointer: coarse) {
+    .links a {
+      min-height: max(44px, var(--row-links));
+    }
+
+    .contact a {
+      min-height: max(44px, var(--row-contact));
     }
   }
 </style>

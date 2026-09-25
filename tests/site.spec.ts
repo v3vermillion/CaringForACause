@@ -879,10 +879,11 @@ test.describe("navigation", () => {
     await expect(donate).toHaveText(navigation.donate.label);
     await expect(donate).toHaveAttribute("href", navigation.donate.href);
     // The one action is centred under her lettering, not left with the lockup.
-    const lockup = (await page.locator(".site-footer .brand").boundingBox())!;
+    // The lettering is centred inside a link that spans its column, so its
+    // own box is the measure (the link's edge is the page's).
     const wordmark = (await page.locator(".site-footer .brand svg.wordmark").boundingBox())!;
     const button = (await donate.boundingBox())!;
-    const inkCentre = (lockup.x + wordmark.x + wordmark.width) / 2;
+    const inkCentre = wordmark.x + wordmark.width / 2;
     expect(Math.abs(button.x + button.width / 2 - inkCentre)).toBeLessThan(20);
   });
 
