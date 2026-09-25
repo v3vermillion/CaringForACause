@@ -141,6 +141,18 @@ const mailto = (subject: string) =>
 </script>
 
 <style>
+  /* The section's top edge is the site's diagonal (the wedge's cut, rising
+     to the right), cut out of the paper above it; the lilac is lit by a soft
+     violet glow at its top right, sized in rem from that corner. */
+  #get-involved {
+    --cut: 3rem;
+    margin-top: calc(-1 * var(--cut));
+    padding-top: calc(var(--space-xl) + var(--cut));
+    clip-path: polygon(0 var(--cut), 100% 0, 100% 100%, 0 100%);
+    background:
+      radial-gradient(40rem 22rem at 100% 0, rgb(200 170 255 / 0.4), transparent 70%), var(--lilac);
+  }
+
   .head {
     margin-bottom: var(--space-l);
   }
@@ -204,6 +216,9 @@ const mailto = (subject: string) =>
     padding: var(--space-m);
     background: #fff;
     border-radius: var(--r-card);
+    box-shadow:
+      0 0 0 var(--hairline) rgb(96 8 215 / 0.08),
+      0 1.5rem 3rem rgb(27 15 46 / 0.07);
   }
 
   /* Without JavaScript, panels stack with space between them. */
@@ -220,8 +235,14 @@ const mailto = (subject: string) =>
   }
 
   .panel h3 {
-    font-size: var(--step-3);
+    font-size: calc(var(--step-3) * 0.85);
     color: var(--ink);
+  }
+
+  .panel :global(.photo) {
+    box-shadow:
+      0 0 0 var(--hairline) rgb(96 8 215 / 0.1),
+      0 1.5rem 3rem rgb(27 15 46 / 0.1);
   }
 
   .panel p {

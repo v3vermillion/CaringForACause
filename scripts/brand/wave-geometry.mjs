@@ -58,6 +58,7 @@ export function waveA() {
   const v = (x) => smooth(x, 0, 24, 1000, 11); // violet band thickness
   const c = (x) => smooth(x, 0, 30, 700, 0); // crimson band, fading out to the right
   return {
+    above: above(edge, () => 0),
     night: below(edge, (x) => v(x) + c(x)),
     violet: strip(edge, () => 0, v),
     violetLit: strip(

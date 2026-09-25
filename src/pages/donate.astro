@@ -1,6 +1,7 @@
 ---
 import SiteFooter from "../components/SiteFooter.astro";
 import SiteHeader from "../components/SiteHeader.astro";
+import Wave from "../components/Wave.astro";
 import Base from "../layouts/Base.astro";
 import { claim, show } from "../data/facts.ts";
 import { donatePage, facts, links, org } from "../data/site";
@@ -24,6 +25,7 @@ const description = `${donatePage.intro} ${claim(facts.legalName)} is a ${taxExe
         <h1>{donatePage.heading}</h1>
         <p class="lede">{donatePage.intro}</p>
       </div>
+      <Wave kind="into-paper" id="wp" class="page-wave" />
     </section>
 
     <section class="section give" aria-labelledby="give-title">

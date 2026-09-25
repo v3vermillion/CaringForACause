@@ -1,6 +1,7 @@
 ---
 import SiteFooter from "../components/SiteFooter.astro";
 import SiteHeader from "../components/SiteHeader.astro";
+import Wave from "../components/Wave.astro";
 import Base from "../layouts/Base.astro";
 import { claim, show } from "../data/facts.ts";
 import { applyPage, facts, getHelp, links, org, programs } from "../data/site";
@@ -40,6 +41,7 @@ const heard = [
           <a href={`mailto:${email}`}>{email}</a>.
         </p>
       </div>
+      <Wave kind="into-paper" id="wp" class="page-wave" />
     </section>
 
     <section class="section" aria-labelledby="form-title">

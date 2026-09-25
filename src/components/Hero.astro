@@ -82,7 +82,7 @@ const cycle = slides.length * 7;
     </div>
   </div>
 
-  <Wave kind="into-night" class="hero-wave" />
+  <Wave kind="into-night" id="wa" class="hero-wave" />
 </section>
 
 <script>
@@ -561,6 +561,26 @@ const cycle = slides.length * 7;
       box-shadow:
         0 0 0 max(1px, calc(1.5 * var(--u))) #fff inset,
         0 0 calc(22 * var(--u)) rgb(170 110 255 / 0.35);
+    }
+  }
+
+  /* As the banner scrolls away, her photo moves at three quarters of the
+     page's speed (a scroll-driven animation, so the main thread never runs
+     it): at the top of the page nothing is moved, so the first screen is
+     what it is; browsers without the timeline show the photo still. */
+  @supports (animation-timeline: view()) {
+    @media (prefers-reduced-motion: no-preference) {
+      .montage {
+        animation: hero-parallax linear both;
+        animation-timeline: view();
+        animation-range: exit 0% exit 100%;
+      }
+    }
+  }
+
+  @keyframes hero-parallax {
+    to {
+      transform: translateY(24%);
     }
   }
 

@@ -1,6 +1,7 @@
 ---
 import { show } from "../data/facts.ts";
 import { facts, getHelp, links, org, programs } from "../data/site";
+import Brand from "./Brand.astro";
 import Photo from "./Photo.astro";
 import Wave from "./Wave.astro";
 import YouTubeLite from "./YouTubeLite.astro";
@@ -13,8 +14,11 @@ const applyHref = links.familyApplication ?? getHelp.action.href;
 
 <section id="programs" class="section" aria-labelledby="programs-title">
   <!-- The wave lifts the night band off the page: night above, paper below. -->
-  <Wave kind="into-paper" class="wave-in" />
+  <Wave kind="into-paper" id="wb" class="wave-in" />
   <div class="wrap">
+    <!-- Her mark as a faint watermark beside the opener, as the reference
+         draws it: her flat mark in one lavender tone, nothing redrawn. -->
+    <Brand kind="mark" class="watermark" label="" />
     <header class="intro">
       <span class="eyebrow">Our programs</span>
       <h2 id="programs-title">What we do, all year</h2>
@@ -129,13 +133,31 @@ const applyHref = links.familyApplication ?? getHelp.action.href;
 </section>
 
 <style>
-  /* The section starts under the wave from the night band (5.25rem, the
-     phone's 84 reference px; 5.75rem on desktop), so its top padding is the
-     wave plus the usual section space. */
+  /* The section starts under the wave from the night band (--wave-h), so its
+     top padding is the wave plus the usual section space. */
   #programs {
-    --wave-h: 5.25rem;
     position: relative;
+    overflow: hidden; /* the watermark bleeds past the column */
     padding-top: calc(var(--wave-h) + var(--space-xl));
+  }
+
+  #programs > .wrap {
+    position: relative;
+  }
+
+  /* Placed from the column's edge in rem, so it sits at the same place on
+     every device of a class. */
+  #programs :global(.watermark) {
+    position: absolute;
+    top: -1.5rem;
+    right: -2rem;
+    width: 21rem;
+    opacity: 0.06;
+    pointer-events: none;
+  }
+
+  #programs :global(.watermark path) {
+    fill: var(--purple);
   }
 
   #programs :global(.wave-in) {
@@ -280,8 +302,16 @@ const applyHref = links.familyApplication ?? getHelp.action.href;
     order: 0;
   }
 
+  /* A program's name is a step under the section's title. */
   .row h3 {
-    font-size: var(--step-3);
+    font-size: calc(var(--step-3) * 0.85);
+  }
+
+  /* Photos sit in framed panels: a hairline ring and a soft shadow. */
+  .media :global(.photo) {
+    box-shadow:
+      0 0 0 var(--hairline) rgb(96 8 215 / 0.1),
+      0 1.5rem 3rem rgb(27 15 46 / 0.1);
   }
 
   .summary {
@@ -361,8 +391,10 @@ const applyHref = links.familyApplication ?? getHelp.action.href;
   }
 
   @media (min-width: 56rem) {
-    #programs {
-      --wave-h: 5.75rem;
+    #programs :global(.watermark) {
+      top: 0;
+      right: -3rem;
+      width: 26rem;
     }
     .tiles ul {
       display: grid;

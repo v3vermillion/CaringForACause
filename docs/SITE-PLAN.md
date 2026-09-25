@@ -52,7 +52,8 @@ Three pages. The home page is the route map; the two doors lead to their own pag
 │ Seasonal strip (night)     Sponsor a family → │  optional
 │ ~~~ wave ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ │
 ├───────────────────────────────────────────────┤
-│ OUR PROGRAMS: jump tiles                      │
+│ OUR PROGRAMS (paper, her mark as a watermark) │
+│  jump tiles                                   │
 │  ┌ Get help (night) ─────────────────────┐    │  #get-help
 │  │ who can apply  [Start an application] │    │
 │  │                [Call] Email us →      │    │
@@ -60,11 +61,13 @@ Three pages. The home page is the route map; the two doors lead to their own pag
 │  Holiday Assistance · Diaper Drive ·          │  alternating rows,
 │  Back-to-School ▸ list · Free Haircuts ▸ player│  one click-to-play video
 ├───────────────────────────────────────────────┤
+│ ╱ diagonal edge ╱                             │
 │ GET INVOLVED (lilac)                          │
 │  [Sponsor] [Donate] [Volunteer] [Partner]     │  tabs
-├───────────────────────────────────────────────┤
-│ ABOUT (night): portrait · Meet Tamara ·       │  video loads on request
+│ ~~~ wave ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ │
+│ ABOUT (night, lit): portrait · Meet Tamara ·  │  video loads on request
 │               [▶ Watch her story]             │
+│ ~~~ wave ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ │
 ├───────────────────────────────────────────────┤
 │ Gallery strip (hidden until 4+ photos)        │
 ├───────────────────────────────────────────────┤
@@ -79,10 +82,12 @@ Three pages. The home page is the route map; the two doors lead to their own pag
 │ serving area │ © year                         │
 └───────────────────────────────────────────────┘
 
-/apply    Help me: four steps (about you · household · what you need ·
-          review and send), sent by email, one row per child
-/donate   Donate: frequency and amount, then the payment page
-          (`links.donate`) or an email with the gift written in
+/apply    Help me: a night opener ending in the wave, then four steps
+          (about you · household · what you need · review and send),
+          sent by email, one row per child
+/donate   Donate: a night opener ending in the wave, then frequency and
+          amount, then the payment page (`links.donate`) or an email
+          with the gift written in
 ```
 
 On phones every two-column block stacks, the two doors stay side by side under the headline, and the tabs and program tiles scroll sideways inside the page gutter.

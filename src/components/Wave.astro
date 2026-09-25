@@ -2,20 +2,33 @@
 /**
  * The wave: two ribbons, violet over crimson, sweeping across the page where
  * one surface hands over to the next, from the owner's reference for the
- * transition under the banner. "into-night" cuts the banner's photo and lands
- * on the night band under it; "into-paper" lifts the night band off the
- * Programs section. The geometry is drawn once in a 1000 by 100 box and
- * stretched to the box it is given (the parent sets its width and height in
- * the class's reference pixel), so the ribbons cross every screen edge to
- * edge. Decorative: hidden from assistive technology.
+ * transition under the banner (decision 51). "into-night" descends to the
+ * right and lands on night: under the banner it cuts the photo (nothing
+ * above), and above the About section it carries the lilac of the section
+ * before it. "into-paper" climbs to the right and lifts night off paper.
+ * The geometry is drawn once in a 1000 by 100 box and stretched to the box
+ * it is given (the parent sets its width and height in the class's
+ * reference pixel), so the ribbons cross every screen edge to edge.
+ * Decorative: hidden from assistive technology.
+ *
+ * Every copy on a page needs its own id prefix, because the gradients are
+ * referenced by id and a page repeats no id (a test checks).
  *
  * The path data is generated (a base edge as two cubic Bézier segments; each
  * band is that edge and the edge pushed down by a tapering thickness) by
  * scripts/brand/wave-geometry.mjs. Regenerate rather than edit by hand.
  */
-type Props = { kind: "into-night" | "into-paper"; class?: string };
-const { kind, class: className } = Astro.props;
+type Props = {
+  kind: "into-night" | "into-paper";
+  /** Unique on the page: the prefix of the gradient ids. */
+  id: string;
+  /** The surface above the ribbons, as a CSS colour; none means transparent (the photo shows). */
+  above?: string;
+  class?: string;
+};
+const { kind, id, above, class: className } = Astro.props;
 const A = {
+  above: "M0,0L1000,0L1000,46C860,62 700,70 520,66C330,62 180,30 0,26Z",
   night: "M0,80C180,78 330,99 520,88C700,83.8 860,73.7 1000,57L1000,100L0,100Z",
   violet:
     "M0,26C180,30 330,62 520,66C700,70 860,62 1000,46L1000,57C860,73.7 700,83.8 520,83.1C330,82.7 180,52.9 0,50Z",
@@ -61,53 +74,54 @@ const B = {
     focusable="false"
   >
     <defs>
-      <linearGradient id="wa-violet" x1="0" x2="1" y1="0" y2="0">
+      <linearGradient id={`${id}-violet`} x1="0" x2="1" y1="0" y2="0">
         <stop offset="0" stop-color="#a468ff" />
         <stop offset="0.45" stop-color="#6f32dc" />
         <stop offset="1" stop-color="#40169e" />
       </linearGradient>
-      <linearGradient id="wa-violet-lit" x1="0" x2="1" y1="0" y2="0">
+      <linearGradient id={`${id}-violet-lit`} x1="0" x2="1" y1="0" y2="0">
         <stop offset="0" stop-color="#d7bcff" stop-opacity="0.55" />
         <stop offset="0.5" stop-color="#b98cff" stop-opacity="0.35" />
         <stop offset="1" stop-color="#8e5cf0" stop-opacity="0.2" />
       </linearGradient>
-      <linearGradient id="wa-crimson" x1="0" x2="1" y1="0" y2="0">
+      <linearGradient id={`${id}-crimson`} x1="0" x2="1" y1="0" y2="0">
         <stop offset="0" stop-color="#f0304a" />
         <stop offset="0.3" stop-color="#d4143c" />
         <stop offset="0.55" stop-color="#9c0c48" />
         <stop offset="0.74" stop-color="#5a0a48" stop-opacity="0" />
       </linearGradient>
-      <linearGradient id="wa-crimson-lit" x1="0" x2="1" y1="0" y2="0">
+      <linearGradient id={`${id}-crimson-lit`} x1="0" x2="1" y1="0" y2="0">
         <stop offset="0" stop-color="#ff9aa8" stop-opacity="0.6" />
         <stop offset="0.5" stop-color="#ff6e92" stop-opacity="0.25" />
         <stop offset="0.72" stop-color="#ff6e92" stop-opacity="0" />
       </linearGradient>
-      <linearGradient id="wa-edge" x1="0" x2="1" y1="0" y2="0">
+      <linearGradient id={`${id}-edge`} x1="0" x2="1" y1="0" y2="0">
         <stop offset="0" stop-color="#fff0fb" />
         <stop offset="0.5" stop-color="#f0c2ff" />
         <stop offset="1" stop-color="#b48cff" stop-opacity="0.8" />
       </linearGradient>
-      <linearGradient id="wa-seam" x1="0" x2="1" y1="0" y2="0">
+      <linearGradient id={`${id}-seam`} x1="0" x2="1" y1="0" y2="0">
         <stop offset="0" stop-color="#ffa3b8" />
         <stop offset="0.55" stop-color="#ff6a90" stop-opacity="0.55" />
         <stop offset="0.75" stop-color="#ff6a90" stop-opacity="0" />
       </linearGradient>
-      <filter id="wa-glow" x="-5%" y="-50%" width="110%" height="200%">
+      <filter id={`${id}-glow`} x="-5%" y="-50%" width="110%" height="200%">
         <feGaussianBlur stdDeviation="2.6" />
       </filter>
-      <filter id="wa-spill" x="-5%" y="-60%" width="110%" height="220%">
+      <filter id={`${id}-spill`} x="-5%" y="-60%" width="110%" height="220%">
         <feGaussianBlur stdDeviation="5" />
       </filter>
     </defs>
+    {above && <path d={A.above} fill={above} />}
     <path d={A.night} fill="#1b0f2e" />
-    <path d={A.crimson} fill="#ff2d6e" opacity="0.4" filter="url(#wa-spill)" />
-    <path d={A.violet} fill="url(#wa-violet)" />
-    <path d={A.violetLit} fill="url(#wa-violet-lit)" />
-    <path d={A.crimson} fill="url(#wa-crimson)" />
-    <path d={A.crimsonLit} fill="url(#wa-crimson-lit)" />
-    <path d={A.glowTop} fill="url(#wa-edge)" opacity="0.32" filter="url(#wa-glow)" />
-    <path d={A.edgeTop} fill="url(#wa-edge)" />
-    <path d={A.edgeMid} fill="url(#wa-seam)" />
+    <path d={A.crimson} fill="#ff2d6e" opacity="0.4" filter={`url(#${id}-spill)`} />
+    <path d={A.violet} fill={`url(#${id}-violet)`} />
+    <path d={A.violetLit} fill={`url(#${id}-violet-lit)`} />
+    <path d={A.crimson} fill={`url(#${id}-crimson)`} />
+    <path d={A.crimsonLit} fill={`url(#${id}-crimson-lit)`} />
+    <path d={A.glowTop} fill={`url(#${id}-edge)`} opacity="0.32" filter={`url(#${id}-glow)`} />
+    <path d={A.edgeTop} fill={`url(#${id}-edge)`} />
+    <path d={A.edgeMid} fill={`url(#${id}-seam)`} />
   </svg>
 ) : (
   <svg
@@ -118,54 +132,54 @@ const B = {
     focusable="false"
   >
     <defs>
-      <linearGradient id="wb-violet" x1="0" x2="1" y1="0" y2="0">
+      <linearGradient id={`${id}-violet`} x1="0" x2="1" y1="0" y2="0">
         <stop offset="0" stop-color="#40169e" />
         <stop offset="0.5" stop-color="#6f32dc" />
         <stop offset="1" stop-color="#a468ff" />
       </linearGradient>
-      <linearGradient id="wb-violet-lit" x1="0" x2="1" y1="0" y2="0">
+      <linearGradient id={`${id}-violet-lit`} x1="0" x2="1" y1="0" y2="0">
         <stop offset="0" stop-color="#8e5cf0" stop-opacity="0.2" />
         <stop offset="0.5" stop-color="#b98cff" stop-opacity="0.35" />
         <stop offset="1" stop-color="#d7bcff" stop-opacity="0.55" />
       </linearGradient>
-      <linearGradient id="wb-crimson" x1="0" x2="1" y1="0" y2="0">
+      <linearGradient id={`${id}-crimson`} x1="0" x2="1" y1="0" y2="0">
         <stop offset="0.26" stop-color="#5a0a48" stop-opacity="0" />
         <stop offset="0.45" stop-color="#9c0c48" />
         <stop offset="0.7" stop-color="#d4143c" />
         <stop offset="1" stop-color="#f0304a" />
       </linearGradient>
-      <linearGradient id="wb-crimson-lit" x1="0" x2="1" y1="0" y2="0">
+      <linearGradient id={`${id}-crimson-lit`} x1="0" x2="1" y1="0" y2="0">
         <stop offset="0.28" stop-color="#ff6e92" stop-opacity="0" />
         <stop offset="0.5" stop-color="#ff6e92" stop-opacity="0.25" />
         <stop offset="1" stop-color="#ff9aa8" stop-opacity="0.6" />
       </linearGradient>
-      <linearGradient id="wb-edge" x1="0" x2="1" y1="0" y2="0">
+      <linearGradient id={`${id}-edge`} x1="0" x2="1" y1="0" y2="0">
         <stop offset="0" stop-color="#b48cff" stop-opacity="0.8" />
         <stop offset="0.5" stop-color="#f0c2ff" />
         <stop offset="1" stop-color="#fff0fb" />
       </linearGradient>
-      <linearGradient id="wb-seam" x1="0" x2="1" y1="0" y2="0">
+      <linearGradient id={`${id}-seam`} x1="0" x2="1" y1="0" y2="0">
         <stop offset="0.25" stop-color="#ff6a90" stop-opacity="0" />
         <stop offset="0.45" stop-color="#ff6a90" stop-opacity="0.55" />
         <stop offset="1" stop-color="#ffa3b8" />
       </linearGradient>
-      <filter id="wb-glow" x="-5%" y="-50%" width="110%" height="200%">
+      <filter id={`${id}-glow`} x="-5%" y="-50%" width="110%" height="200%">
         <feGaussianBlur stdDeviation="2.6" />
       </filter>
-      <filter id="wb-spill" x="-5%" y="-60%" width="110%" height="220%">
+      <filter id={`${id}-spill`} x="-5%" y="-60%" width="110%" height="220%">
         <feGaussianBlur stdDeviation="5" />
       </filter>
     </defs>
-    <path d={B.night} fill="#1b0f2e" />
+    <path d={B.night} fill={above ?? "#1b0f2e"} />
     <path d={B.paper} fill="#faf7fd" />
-    <path d={B.crimson} fill="#ff2d6e" opacity="0.3" filter="url(#wb-spill)" />
-    <path d={B.violet} fill="url(#wb-violet)" />
-    <path d={B.violetLit} fill="url(#wb-violet-lit)" />
-    <path d={B.crimson} fill="url(#wb-crimson)" />
-    <path d={B.crimsonLit} fill="url(#wb-crimson-lit)" />
-    <path d={B.glowTop} fill="url(#wb-edge)" opacity="0.32" filter="url(#wb-glow)" />
-    <path d={B.edgeTop} fill="url(#wb-edge)" />
-    <path d={B.edgeMid} fill="url(#wb-seam)" />
+    <path d={B.crimson} fill="#ff2d6e" opacity="0.3" filter={`url(#${id}-spill)`} />
+    <path d={B.violet} fill={`url(#${id}-violet)`} />
+    <path d={B.violetLit} fill={`url(#${id}-violet-lit)`} />
+    <path d={B.crimson} fill={`url(#${id}-crimson)`} />
+    <path d={B.crimsonLit} fill={`url(#${id}-crimson-lit)`} />
+    <path d={B.glowTop} fill={`url(#${id}-edge)`} opacity="0.32" filter={`url(#${id}-glow)`} />
+    <path d={B.edgeTop} fill={`url(#${id}-edge)`} />
+    <path d={B.edgeMid} fill={`url(#${id}-seam)`} />
   </svg>
 )}
 
