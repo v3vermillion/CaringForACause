@@ -22,6 +22,12 @@ work), `docs/DECISIONS.md` (why things are the way they are),
   another.
 - Run `npm run verify` before proposing a change. First time:
   `npx playwright install chromium webkit firefox`.
+- Look before you run the suite. The `playwright` MCP server in `.mcp.json`
+  opens a headless Chromium: after any change that can move pixels, start
+  `npm run preview`, screenshot `/` (and the page you changed) at 390, 768,
+  and 1280 wide, and compare with the owner's references in `docs/reference/`
+  and with the page before the change. Fix what you can see first; the tests
+  are for what you can't.
 - Don't change `PUBLIC_ALLOW_INDEXING`, `PUBLIC_SITE_URL`, secrets, or
   Cloudflare settings unless asked.
 - Update README and `docs/DECISIONS.md` in the same change when behavior
