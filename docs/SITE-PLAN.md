@@ -119,7 +119,7 @@ All text pairings pass WCAG AA; most pass AAA.
 - **Bricolage Grotesque** (headings, buttons, labels): sturdy, friendly, and distinct from the logo's script.
 - **Literata** (the banner headline, in bold with one line in bold italic; the phone menu and the footer): the serif of the owner's references.
 - **Atkinson Hyperlegible Next** (body): designed by the Braille Institute for low-vision readers, which suits an audience reading on older phones. Its slashed zero is intentional and keeps phone numbers and the EIN unambiguous.
-- 18px base size, major-third scale. Every font is self-hosted, with no third-party requests. Her lettering is the wordmark itself, so no script typeface is loaded.
+- 18px base size, major-third scale, with the lede step and the larger steps set per device class so a phone's title stands clear of its lede. Every font is self-hosted, with no third-party requests. Her lettering is the wordmark itself, so no script typeface is loaded.
 
 **Signature element:** the serif headline with its lavender line and the two equal doors over the crossfading photos, handed to the page by the wave. Everything else stays quiet: one button shape, three radii, list rows with dividers instead of a grid of identical cards, and no scroll animations.
 

@@ -130,8 +130,8 @@ const watchUrl = `https://www.youtube.com/watch?v=${about.video.id}`;
   .portrait :global(.portrait-photo) {
     border-radius: var(--r-card);
     box-shadow:
-      0 30px 80px rgb(0 0 0 / 0.45),
-      0 0 0 1px rgb(255 255 255 / 0.14);
+      0 1.875rem 5rem rgb(0 0 0 / 0.45),
+      0 0 0 var(--hairline) rgb(255 255 255 / 0.14);
   }
 
   .copy p {
@@ -163,7 +163,7 @@ const watchUrl = `https://www.youtube.com/watch?v=${about.video.id}`;
     overflow: hidden;
     border-radius: var(--r-card);
     background: #000;
-    box-shadow: 0 30px 80px rgb(0 0 0 / 0.45);
+    box-shadow: 0 1.875rem 5rem rgb(0 0 0 / 0.45);
   }
 
   .frame :global(iframe) {
@@ -174,9 +174,16 @@ const watchUrl = `https://www.youtube.com/watch?v=${about.video.id}`;
     border: 0;
   }
 
-  @media (min-width: 56rem) {
+  /* From tablets up her portrait stands beside her story. */
+  @media (min-width: 36rem) {
     .grid {
       grid-template-columns: 5fr 7fr;
+      gap: var(--space-l);
+    }
+  }
+
+  @media (min-width: 56rem) {
+    .grid {
       gap: var(--space-xl);
     }
   }

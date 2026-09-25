@@ -120,8 +120,8 @@ const applyHref = links.familyApplication ?? getHelp.action.href;
               <div class="media">
                 <Photo
                   photo={program.photo}
-                  ratio={i === 0 ? "4 / 3" : "3 / 2"}
-                  sizes="(min-width: 56rem) 540px, calc(100vw - 2.5rem)"
+                  ratio={`var(--photo-ratio, ${i === 0 ? "4 / 3" : "3 / 2"})`}
+                  sizes="(min-width: 56rem) 480px, (min-width: 36rem) 40vw, calc(100vw - 2.5rem)"
                 />
               </div>
             )
@@ -244,6 +244,7 @@ const applyHref = links.familyApplication ?? getHelp.action.href;
     font-size: var(--step-0);
     line-height: 1.15;
     letter-spacing: -0.01em;
+    text-wrap: balance;
   }
 
   .tile-label {
@@ -262,8 +263,9 @@ const applyHref = links.familyApplication ?? getHelp.action.href;
       radial-gradient(70% 60% at 100% 0%, rgb(96 8 215 / 0.35), transparent 60%), var(--night);
   }
 
+  /* A step under the section's title, like a program's name. */
   .get-help h3 {
-    font-size: var(--step-3);
+    font-size: calc(var(--step-3) * 0.85);
     color: #fff;
   }
 
@@ -321,17 +323,21 @@ const applyHref = links.familyApplication ?? getHelp.action.href;
     line-height: 1.45;
   }
 
+  /* Who the program serves, in ink under a small tracked label: the one
+     line a family scans for. */
   .for {
     display: grid;
-    gap: 0.15rem;
-    color: var(--muted);
+    gap: 0.3rem;
+    color: var(--ink);
   }
 
   .for-label {
     font-family: var(--font-display);
-    font-size: var(--step--1);
+    font-size: 0.75rem;
     font-weight: 700;
-    color: var(--ink);
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--purple);
   }
 
   .details {
@@ -392,6 +398,27 @@ const applyHref = links.familyApplication ?? getHelp.action.href;
     }
   }
 
+  /* From tablets up the photo stands beside the words as a portrait, the
+     photos' own shape (they are phone pictures, 3 by 4), so no head is
+     cropped and the row reads as a spread; sides alternate. */
+  @media (min-width: 36rem) {
+    .row.has-media {
+      grid-template-columns: 7fr 5fr;
+      gap: var(--space-l);
+      align-items: center;
+    }
+    .media {
+      --photo-ratio: 4 / 5;
+    }
+    .copy,
+    .media {
+      order: 0;
+    }
+    .row.has-media:nth-child(even) .media {
+      order: -1;
+    }
+  }
+
   @media (min-width: 56rem) {
     #programs :global(.watermark) {
       top: 0;
@@ -419,16 +446,7 @@ const applyHref = links.familyApplication ?? getHelp.action.href;
       justify-content: center;
     }
     .row.has-media {
-      grid-template-columns: 1fr 1fr;
       gap: var(--space-xl);
-      align-items: center;
-    }
-    .copy,
-    .media {
-      order: 0;
-    }
-    .row.has-media:nth-child(even) .media {
-      order: -1;
     }
     .groups {
       grid-template-columns: 1fr 1fr;

@@ -47,7 +47,7 @@ const mailto = (subject: string) =>
               {tab.body.map((line) => (
                 <p>{line}</p>
               ))}
-              <p>
+              <p class="action">
                 <a
                   class="button button--purple"
                   href={href}
@@ -61,8 +61,8 @@ const mailto = (subject: string) =>
             {tab.photo && (
               <Photo
                 photo={tab.photo}
-                ratio="4 / 3"
-                sizes="(min-width: 56rem) 520px, calc(100vw - 2.5rem)"
+                ratio="var(--photo-ratio, 3 / 2)"
+                sizes="(min-width: 56rem) 560px, 90vw"
               />
             )}
           </div>
@@ -86,6 +86,9 @@ const mailto = (subject: string) =>
     });
     tablist.hidden = false;
     root.classList.add("is-enhanced");
+    // Panels ease in only once the page has painted: a panel that is on
+    // screen at load appears at once, where it is.
+    requestAnimationFrame(() => requestAnimationFrame(() => root.classList.add("is-live")));
 
     const select = (id: string, focus = false) => {
       tabs.forEach((tab) => {
@@ -168,6 +171,7 @@ const mailto = (subject: string) =>
     padding: 0.25rem var(--gutter) 0.75rem;
     margin: 0 calc(-1 * var(--gutter));
     overflow-x: auto;
+    scroll-snap-type: x proximity;
     scroll-padding-inline: var(--gutter);
     scrollbar-width: none;
   }
@@ -187,15 +191,17 @@ const mailto = (subject: string) =>
     border: 0;
     border-radius: var(--r-pill);
     background: #fff;
-    box-shadow: 0 0 0 1px var(--rule);
+    box-shadow: 0 0 0 var(--hairline) var(--rule);
     color: var(--ink);
     font: inherit;
     font-family: var(--font-display);
     font-weight: 700;
     white-space: nowrap;
+    scroll-snap-align: start;
     cursor: pointer;
     transition:
       background-color 150ms ease,
+      box-shadow 150ms ease,
       color 150ms ease;
   }
 
@@ -205,7 +211,7 @@ const mailto = (subject: string) =>
 
   [role="tab"][aria-selected="true"] {
     background: var(--purple);
-    box-shadow: none;
+    box-shadow: 0 0 0 var(--hairline) var(--purple);
     color: #fff;
   }
 
@@ -216,9 +222,41 @@ const mailto = (subject: string) =>
     padding: var(--space-m);
     background: #fff;
     border-radius: var(--r-card);
+    overflow: hidden;
     box-shadow:
       0 0 0 var(--hairline) rgb(96 8 215 / 0.08),
       0 1.5rem 3rem rgb(27 15 46 / 0.07);
+  }
+
+  /* A chosen panel arrives with a short ease rather than a cut (only after
+     the page has painted, so nothing on screen at load moves); in browsers
+     without @starting-style it simply appears. */
+  .is-live .panel {
+    transition:
+      opacity 220ms ease,
+      translate 220ms ease;
+  }
+
+  @starting-style {
+    .is-live .panel {
+      opacity: 0;
+      translate: 0 0.5rem;
+    }
+  }
+
+  /* On phones and tablets the photo leads, edge to edge at the top of the
+     card, and the words and the button follow it. */
+  .panel:not(.panel--text) {
+    padding: 0 0 var(--space-m);
+  }
+
+  .panel:not(.panel--text) > .stack {
+    padding-inline: var(--space-m);
+  }
+
+  .panel :global(.photo) {
+    order: -1;
+    border-radius: var(--r-card) var(--r-card) 0 0;
   }
 
   /* Without JavaScript, panels stack with space between them. */
@@ -239,10 +277,13 @@ const mailto = (subject: string) =>
     color: var(--ink);
   }
 
-  .panel :global(.photo) {
-    box-shadow:
-      0 0 0 var(--hairline) rgb(96 8 215 / 0.1),
-      0 1.5rem 3rem rgb(27 15 46 / 0.1);
+  /* The button holds its 44px floor where the scale would make it smaller;
+     the extra hangs outside its paragraph (a negative block margin, as the
+     season strip's link does), so the panel, and the photo stretched to it,
+     stay the same picture at every desktop width. */
+  .panel .action {
+    margin-top: calc(var(--space-s) + (3rem - max(44px, 3rem)) / 2);
+    margin-bottom: calc((3rem - max(44px, 3rem)) / 2);
   }
 
   .panel p {
@@ -254,23 +295,27 @@ const mailto = (subject: string) =>
       margin-inline: 0;
       padding-inline: 0;
     }
-    /* The photo takes the panel's right half edge to edge, as an editorial
-       spread; the words keep the panel's padding. */
+    /* On desktop the photo takes the panel's right half edge to edge, as an
+       editorial spread; the words keep the panel's padding. */
     .panel:not(.panel--text) {
       grid-template-columns: 1fr 1fr;
       gap: var(--space-l);
-      padding: 0 0 0 var(--space-l);
+      padding: 0;
       align-items: stretch;
     }
     .panel:not(.panel--text) > .stack {
       align-self: center;
-      padding-block: var(--space-l);
+      padding: var(--space-l) 0 var(--space-l) var(--space-l);
     }
+    /* The photo takes the row's height (the words set it, with a floor),
+       not its own ratio, so the row is the same on every desktop width. */
     .panel :global(.photo) {
+      --photo-ratio: auto;
+      order: 0;
+      align-self: stretch;
       height: 100%;
       min-height: 22rem;
       border-radius: 0 var(--r-card) var(--r-card) 0;
-      box-shadow: none;
     }
   }
 </style>

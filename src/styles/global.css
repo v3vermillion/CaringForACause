@@ -36,9 +36,9 @@
      formula gave on the class's reference screen. */
   --step--1: 0.9rem;
   --step-0: 1.125rem;
-  --step-1: 1.406rem;
+  --step-1: 1.25rem; /* the lede and summaries: a phone's section title is 1.7 times it */
   --step-2: 1.6rem;
-  --step-3: 1.9rem;
+  --step-3: 2.1rem; /* the banner headline's 33 reference px */
   --step-4: 2.384rem;
 
   --space-xs: 0.5rem;
@@ -136,6 +136,7 @@ html.preview {
     --sp: calc(100vw / 768);
     --wide: 90vw;
     --gutter: 5vw;
+    --step-1: 1.32rem;
     --step-2: 1.876rem;
     --step-3: 2.36rem;
     --step-4: 3.228rem;
@@ -151,6 +152,7 @@ html.preview {
     --sp: min(calc(100vw / 1280), 1.25px);
     --wide: min(90vw, 1440px); /* 1152 reference px times the 1.25px cap of --sp */
     --gutter: max(5vw, 50vw - 720px);
+    --step-1: 1.406rem;
     /* The desktop bar is 72 reference px (her lockup and the links need the
        room); the 44px floor still applies in a narrow window. */
     --header-h: calc(max(72 * var(--sp), 44px) + 1px);
@@ -306,9 +308,11 @@ a {
   color: #fff;
 }
 
+/* The states the composition tests cannot measure (focus, hover, blur) are
+   in rem too, with a 2px floor on the ring, so they scale with the class. */
 :focus-visible {
-  outline: 3px solid var(--focus);
-  outline-offset: 3px;
+  outline: max(2px, 0.1875rem) solid var(--focus);
+  outline-offset: 0.1875rem;
   border-radius: 0.25rem;
 }
 
@@ -367,6 +371,7 @@ a {
 }
 
 .lede {
+  max-width: 48ch;
   font-size: var(--step-1);
   line-height: 1.45;
   color: var(--muted);
@@ -488,8 +493,8 @@ a {
   background: rgb(255 255 255 / 0.1);
   box-shadow: inset 0 0 0 0.125rem rgb(255 255 255 / 0.35);
   color: #fff;
-  -webkit-backdrop-filter: blur(12px);
-  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(0.75rem);
+  backdrop-filter: blur(0.75rem);
 }
 
 .button--glass:hover {
@@ -577,7 +582,7 @@ a {
 .textarea:focus {
   border-color: var(--purple);
   outline: none;
-  box-shadow: 0 0 0 3px rgb(96 8 215 / 0.2);
+  box-shadow: 0 0 0 0.1875rem rgb(96 8 215 / 0.2);
 }
 
 .input[aria-invalid="true"],
@@ -634,8 +639,8 @@ a {
 }
 
 .choice:has(input:focus-visible) {
-  outline: 3px solid var(--focus);
-  outline-offset: 3px;
+  outline: max(2px, 0.1875rem) solid var(--focus);
+  outline-offset: 0.1875rem;
 }
 
 /* Page openers for the donation and application pages: night, lit like the

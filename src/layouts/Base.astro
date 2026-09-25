@@ -136,6 +136,16 @@ const structuredData = {
     <meta name="twitter:title" content={title} />
     <meta name="twitter:description" content={description} />
     <script is:inline type="application/ld+json" set:html={JSON.stringify(structuredData)}></script>
+    <!-- The two doors' pages are fetched and rendered when a visitor shows
+         intent (a hover or a touch on their link), so the change of page
+         is immediate; browsers without speculation rules ignore this. -->
+    <script is:inline type="speculationrules">
+      {
+        "prerender": [
+          { "where": { "href_matches": ["/donate", "/apply"] }, "eagerness": "moderate" }
+        ]
+      }
+    </script>
     <!-- Marks the document before anything is painted, so a page can show
          its JavaScript-only parts from the first paint instead of revealing
          them later and moving what is below (the application form). -->
