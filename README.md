@@ -86,6 +86,8 @@ When a browser test fails or only passes on retry, CI posts a summary to an open
 
 To run the browser tests locally the first time: `npx playwright install chromium webkit firefox`. To run one engine: `PW_ENGINES=chromium npm run test`.
 
+Claude Code gets a headless Chromium of its own through `.mcp.json` (Playwright MCP) so it can screenshot the preview and look at a change before testing it; the owner's reference screens live in `docs/reference/`. See `CLAUDE.md`.
+
 **Supported browsers** are listed in the `browserslist` field of `package.json` (iOS and Safari 15+, plus current Chrome, Firefox, Edge, and Samsung Internet). Lightning CSS adds vendor prefixes for them at build time. Automated WebKit runs approximate Safari; check the live preview on a real iPhone before sending it.
 
 **Branch rules:** a GitHub ruleset on `main` (requires GitHub Pro for this private repository) blocks direct and force pushes, allows only squash-merged pull requests, and requires the **Format, types, build, and browser tests (10 devices, 3 engines)** check with the branch up to date. The bypass list is empty. See `docs/WORKFLOW.md`.
