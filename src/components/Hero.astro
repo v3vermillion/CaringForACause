@@ -491,7 +491,10 @@ const cycle = slides.length * 7;
     .hero {
       --u: clamp(
         0.7px,
-        min(calc((100vh - var(--top-chrome) - var(--strips-h)) / 577), calc(100vw / 1280)),
+        min(
+          calc((var(--first-screen-vh, 100vh) - var(--top-chrome) - var(--strips-h)) / 577),
+          calc(100vw / 1280)
+        ),
         1.25px
       );
       --wave-h: calc(92 * var(--u));
