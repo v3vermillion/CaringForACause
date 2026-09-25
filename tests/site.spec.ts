@@ -1,7 +1,7 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test } from "@playwright/test";
 import { claim } from "../src/data/facts";
-import { facts, hero, navigation, seasonalBanner } from "../src/data/site";
+import { facts, hero, navigation, org, seasonalBanner } from "../src/data/site";
 
 // The content the tests expect comes from the content file, so a content
 // edit (a confirmed year, a renamed section) never needs a test edit. The
@@ -57,6 +57,19 @@ test.describe("accessibility", () => {
     const missing = await page.locator("img:not([alt])").count();
     expect(missing).toBe(0);
   });
+
+  // Her lockup is drawn twice on the home page (banner and footer); its paint
+  // is rendered once per page, so no gradient id is repeated.
+  for (const path of [...pages, "/404"]) {
+    test(`${path} repeats no id`, async ({ page }) => {
+      await page.goto(path);
+      const repeated = await page.evaluate(() => {
+        const ids = [...document.querySelectorAll("[id]")].map((el) => el.id);
+        return ids.filter((id, i) => ids.indexOf(id) !== i);
+      });
+      expect(repeated).toEqual([]);
+    });
+  }
 });
 
 test.describe("device compatibility", () => {
@@ -119,7 +132,11 @@ test.describe("device compatibility", () => {
   test("the brand marks are inline vector graphics", async ({ page }) => {
     await page.goto("/");
     await expect(page.locator(".site-header .brand svg")).toHaveCount(1);
-    await expect(page.locator(".hero svg.brand-wordmark")).toHaveCount(1);
+    await expect(page.locator(".hero svg.brand-lockup")).toHaveCount(1);
+    await expect(page.locator(".hero svg.brand-lockup")).toHaveAccessibleName(org.name);
+    // Both lockups take the shared paint, which is on the page.
+    await expect(page.locator("#lockup-script, #lockup-caps")).toHaveCount(2);
+    await expect(page.locator('svg.brand-lockup path[fill="url(#lockup-script)"]')).toHaveCount(2);
     await expect(page.locator(".site-footer .brand svg")).toHaveCount(2);
   });
 
@@ -189,7 +206,7 @@ test.describe("scrolling stability", () => {
         return {
           hero: box(".hero"),
           photo: box(".hero .montage"),
-          wordmark: box(".hero .brand-wordmark"),
+          wordmark: box(".hero .brand-lockup"),
           door: box(".door--help"),
         };
       });
@@ -210,7 +227,7 @@ test.describe("scrolling stability", () => {
       return {
         width: innerWidth,
         height: innerHeight,
-        wordsUnderHeader: r(".hero .brand-wordmark")!.top - header.bottom,
+        wordsUnderHeader: r(".hero .brand-lockup")!.top - header.bottom,
         helpBottom: r(".door--help")!.bottom,
         giveBottom: r(".door--give")!.bottom,
         sideBySide: r(".door--help")!.top === r(".door--give")!.top,
@@ -314,11 +331,11 @@ test.describe("scrolling stability", () => {
       const hero = r(".hero .content");
       const share = (b: DOMRect) => [(b.top - hero.top) / hero.height, b.height / hero.height];
       return {
-        wordmark: share(r(".hero .brand-wordmark")),
+        wordmark: share(r(".hero .brand-lockup")),
         h1: share(r(".hero h1")),
         doors: share(r(".doors")),
         // Her lettering starts on the header's left edge, on every screen.
-        left: r(".hero .brand-wordmark").left - r(".site-header .brand").left,
+        left: r(".hero .brand-lockup").left - r(".site-header .brand").left,
         lines: [lines(".hero h1"), lines(".hero .sub"), lines(".door--help .door-body")],
         // The header as a share of the text block's height, and its name's size.
         header: r(".site-header").height / hero.height,
@@ -966,11 +983,20 @@ test.describe("menu", () => {
 
   test("choosing a link closes the menu and reaches its target", async ({ page, isMobile }) => {
     test.skip(!isMobile, "the menu button only shows on phones");
+    // Reduced motion jumps instantly, which is when a scrolling focus() on
+    // close would undo the jump.
+    await page.emulateMedia({ reducedMotion: "reduce" });
     await page.goto("/");
     await page.locator("[data-menu-open]").click();
     await page.locator("#menu .menu-list a", { hasText: "About" }).click();
     await expect(page.locator("#menu")).toBeHidden();
     expect(new URL(page.url()).hash).toBe("#about");
+    // Returning focus to the menu button must not scroll the page back up
+    // from the section the link just jumped to.
+    await expect(page.locator("[data-menu-open]")).toBeFocused();
+    await expect
+      .poll(() => page.locator("#about").evaluate((el) => el.getBoundingClientRect().top))
+      .toBeLessThan(120);
   });
 
   test("menu links and controls are at least 44px tall", async ({ page, isMobile }) => {

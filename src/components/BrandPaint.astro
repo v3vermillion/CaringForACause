@@ -1,0 +1,33 @@
+---
+/**
+ * The paint her lockup is drawn in (Brand.astro, kind "lockup"), in the tones
+ * the owner's footer reference shows it in on night: the script pale lavender
+ * to white, darkening to a muted violet in its tails, the capitals flat
+ * lavender. The layout renders this once per page, so every copy of the lockup
+ * on a page (the banner's and the footer's) shares one set of gradients and no
+ * id repeats.
+ */
+---
+
+<svg class="brand-paint" width="0" height="0" aria-hidden="true" focusable="false">
+  <defs>
+    <linearGradient id="lockup-script" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#d4b3f7"></stop>
+      <stop offset="0.2" stop-color="#f1e5fe"></stop>
+      <stop offset="0.42" stop-color="#faf1ff"></stop>
+      <stop offset="0.64" stop-color="#e3cdfc"></stop>
+      <stop offset="0.82" stop-color="#bc97ef"></stop>
+      <stop offset="1" stop-color="#9878cc"></stop>
+    </linearGradient>
+    <linearGradient id="lockup-caps" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#e4cbfb"></stop>
+      <stop offset="1" stop-color="#dabff7"></stop>
+    </linearGradient>
+  </defs>
+</svg>
+
+<style>
+  .brand-paint {
+    position: absolute;
+  }
+</style>

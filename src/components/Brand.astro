@@ -5,12 +5,14 @@
  * All are vector tracings of her logo files (scripts/brand/trace-brand.py,
  * scripts/brand/trace-lockup.py), so they stay sharp at every size. The
  * wordmark inherits `color`, so it is white on night and purple on paper; the
- * lockup (the script over "Supportive Services") carries her artwork's own
- * lavender-to-magenta gradients and is drawn on night only.
+ * lockup (the script over "Supportive Services") is drawn on night only, in the
+ * paint the layout renders once per page (BrandPaint.astro). Its file keeps the
+ * artwork's own gradients so it previews on its own; here they are swapped for
+ * that paint, so two copies on one page repeat no id.
  */
 import Mark from "../assets/brand/mark.svg";
 import Wordmark from "../assets/brand/wordmark.svg";
-import Lockup from "../assets/brand/wordmark-lockup.svg";
+import lockupFile from "../assets/brand/wordmark-lockup.svg?raw";
 
 type Props = {
   kind: "mark" | "wordmark" | "lockup";
@@ -20,14 +22,27 @@ type Props = {
 };
 
 const { kind, class: className, label = "Caring for a Cause" } = Astro.props;
-const Svg = { mark: Mark, wordmark: Wordmark, lockup: Lockup }[kind];
 const classes = [`brand-${kind}`, className];
+const a11y = label
+  ? ({ role: "img", "aria-label": label } as const)
+  : ({ "aria-hidden": "true", focusable: "false" } as const);
+
+const lockupPaths = lockupFile
+  .replace(/^[\s\S]*<\/defs>/, "")
+  .replace(/<\/svg>\s*$/, "")
+  .replaceAll("url(#wl-script)", "url(#lockup-script)")
+  .replaceAll("url(#wl-caps)", "url(#lockup-caps)");
+const lockupViewBox = lockupFile.match(/viewBox="([^"]+)"/)?.[1];
+if (!lockupViewBox || !lockupPaths.includes("url(#lockup-script)") || lockupPaths.includes("wl-")) {
+  throw new Error("wordmark-lockup.svg no longer has the shape Brand.astro expects");
+}
+const Svg = kind === "mark" ? Mark : Wordmark;
 ---
 
-{label ? (
-  <Svg class:list={classes} role="img" aria-label={label} />
+{kind === "lockup" ? (
+  <svg viewBox={lockupViewBox} class:list={classes} {...a11y} set:html={lockupPaths} />
 ) : (
-  <Svg class:list={classes} aria-hidden="true" focusable="false" />
+  <Svg class:list={classes} {...a11y} />
 )}
 
 <style is:global>

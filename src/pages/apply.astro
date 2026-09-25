@@ -617,7 +617,7 @@ const heard = [
       progress.forEach((item, i) => {
         if (i === index) item.setAttribute("aria-current", "step");
         else item.removeAttribute("aria-current");
-        item.classList.toggle("done", i < index);
+        item.classList.toggle("passed", i < index);
       });
       back.hidden = index === 0;
       next.hidden = index === steps.length - 1;
@@ -730,7 +730,7 @@ const heard = [
   }
 
   .progress li[aria-current],
-  .progress li.done {
+  .progress li.passed {
     border-top-color: var(--purple);
   }
 
@@ -753,7 +753,7 @@ const heard = [
   }
 
   .progress li[aria-current] .num,
-  .progress li.done .num {
+  .progress li.passed .num {
     background: var(--purple);
     color: #fff;
   }
@@ -930,6 +930,14 @@ const heard = [
 
   .nav [hidden] {
     display: none;
+  }
+
+  /* On a phone, Back and the long Send label don't fit on one row: let Send
+     take the whole second row instead of sitting stranded at the right. */
+  @media (max-width: 35.99rem) {
+    .nav [data-send] {
+      flex-grow: 1;
+    }
   }
 
   .done {
