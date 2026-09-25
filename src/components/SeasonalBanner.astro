@@ -40,7 +40,7 @@ import { seasonalBanner } from "../data/site";
 
   p {
     display: flex;
-    align-items: center;
+    align-items: start;
     gap: calc(9.6 * var(--sp));
     max-width: none;
     font-family: var(--font-display);
@@ -65,10 +65,12 @@ import { seasonalBanner } from "../data/site";
     color: #fff;
   }
 
+  /* The dot marks the first line: centred on its line height. */
   .dot {
     flex: none;
     width: calc(8.8 * var(--sp));
     height: calc(8.8 * var(--sp));
+    margin-top: calc((1.3 * 18 * var(--sp) - 8.8 * var(--sp)) / 2);
     border-radius: 50%;
     background: linear-gradient(135deg, #ff5a86, #a06cff);
     box-shadow: 0 0 calc(8 * var(--sp)) rgb(255 90 134 / 0.55);

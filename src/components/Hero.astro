@@ -48,6 +48,7 @@ const cycle = slides.length * 7;
       </div>
     ))}
   </div>
+  <div class="tint"></div>
   <div class="scrim"></div>
 
   <div class="wrap">
@@ -190,10 +191,23 @@ const cycle = slides.length * 7;
     }
   }
 
-  /* The veil. On a phone the photo shows through the band above the words,
-     and the words read over a veil that deepens toward the doors; the wave
-     takes over at the bottom, so the veil never reaches solid night and the
-     photo is still there above the ribbon. */
+  /* A violet grade over the photo, multiplied in, so its shadows go violet
+     and it belongs to the night as the reference's photo does. */
+  .tint {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: #7a3ae0;
+    mix-blend-mode: multiply;
+    opacity: 0.3;
+  }
+
+  /* The veil. On a phone the photo shows through the band above the words;
+     by the row the eyebrow sits on (about 17% down) it is night at four
+     fifths, so every line of text reads over it whichever photo is behind
+     (the eyebrow's lavender measured under 4.5:1 over the lightest photo
+     before). The wave takes over at the bottom, so the veil never reaches
+     solid night and the photo is still there above the ribbon. */
   .scrim {
     position: absolute;
     inset: 0;
@@ -201,10 +215,10 @@ const cycle = slides.length * 7;
     background:
       linear-gradient(
         180deg,
-        rgb(27 15 46 / 0.18) 0%,
-        rgb(27 15 46 / 0.36) 15%,
-        rgb(27 15 46 / 0.7) 36%,
-        rgb(27 15 46 / 0.84) 58%,
+        rgb(27 15 46 / 0.16) 0%,
+        rgb(27 15 46 / 0.3) 10%,
+        rgb(27 15 46 / 0.8) 17%,
+        rgb(27 15 46 / 0.86) 45%,
         rgb(27 15 46 / 0.82) 100%
       ),
       linear-gradient(90deg, rgb(27 15 46 / 0.3), transparent 60%);
@@ -226,12 +240,12 @@ const cycle = slides.length * 7;
     max-width: none;
     font-family: var(--font-display);
     font-weight: 600;
-    font-size: calc(12 * var(--rp));
+    font-size: calc(13 * var(--rp));
     line-height: calc(16 * var(--rp));
-    letter-spacing: 0.26em;
+    letter-spacing: 0.22em;
     text-transform: uppercase;
-    color: #cdbcf5;
-    text-shadow: 0 1px 12px rgb(27 15 46 / 0.6);
+    color: #d4c6f8;
+    text-shadow: 0 max(1px, calc(1 * var(--rp))) calc(12 * var(--rp)) rgb(27 15 46 / 0.7);
   }
 
   .tagline::before,
@@ -240,7 +254,13 @@ const cycle = slides.length * 7;
     flex: none;
     width: calc(36 * var(--rp));
     height: max(1px, calc(1 * var(--rp)));
-    background: rgb(205 188 245 / 0.75);
+    background: rgb(212 198 248 / 0.75);
+  }
+
+  /* The tracking is added after the last letter too; take it back so the
+     two rules stand the same distance from the words. */
+  .tagline::after {
+    margin-left: -0.22em;
   }
 
   /* The headline in the serif: the lead in white, the last line in lavender
@@ -255,7 +275,7 @@ const cycle = slides.length * 7;
     letter-spacing: -0.012em;
     text-wrap: wrap;
     color: #fff;
-    text-shadow: 0 2px 24px rgb(27 15 46 / 0.55);
+    text-shadow: 0 max(1px, calc(2 * var(--rp))) calc(24 * var(--rp)) rgb(27 15 46 / 0.55);
   }
 
   h1 .lead,
@@ -281,10 +301,10 @@ const cycle = slides.length * 7;
   .sub {
     margin-top: calc(12 * var(--rp));
     max-width: 15em;
-    font-size: calc(17 * var(--rp));
+    font-size: calc(18 * var(--rp));
     line-height: 1.45;
     color: #ece4fb;
-    text-shadow: 0 1px 14px rgb(27 15 46 / 0.6);
+    text-shadow: 0 max(1px, calc(1 * var(--rp))) calc(14 * var(--rp)) rgb(27 15 46 / 0.6);
   }
 
   /* Two doors, equal, side by side: a pill and one line under it. Crimson is
@@ -310,13 +330,15 @@ const cycle = slides.length * 7;
     text-decoration: none;
   }
 
+  /* The label sits to the left with the chevron after it, as the reference
+     sets it, so the pills range with the lines above and below them. */
   .door-pill {
     display: inline-flex;
     align-items: center;
-    justify-content: center;
-    gap: calc(4 * var(--rp));
+    justify-content: flex-start;
+    gap: calc(8 * var(--rp));
     min-height: calc(50 * var(--rp));
-    padding: 0 calc(10 * var(--rp)) 0 calc(14 * var(--rp));
+    padding: 0 calc(14 * var(--rp)) 0 calc(24 * var(--rp));
     border-radius: var(--r-pill);
     font-family: var(--font-display);
     font-size: calc(18 * var(--rp));
@@ -354,18 +376,23 @@ const cycle = slides.length * 7;
     transform: translateX(3px);
   }
 
+  /* The line under each pill balances its lines, so neither door ends in a
+     word on its own. */
   .door-body {
-    font-size: calc(13.5 * var(--rp));
+    font-size: calc(15 * var(--rp));
     line-height: 1.4;
+    text-wrap: balance;
     color: #e6ddf8;
-    text-shadow: 0 1px 12px rgb(27 15 46 / 0.6);
+    text-shadow: 0 max(1px, calc(1 * var(--rp))) calc(12 * var(--rp)) rgb(27 15 46 / 0.6);
   }
 
-  /* The signal: a glossy crimson pill, lit along its top rim, with its glow. */
+  /* The signal: a glossy crimson pill, lit along its top rim, with its glow.
+     The sheen is thin and the gradient starts at the signal itself, so the
+     white label reads at 4.5:1 on every part of the pill. */
   .door--help .door-pill {
     background:
-      linear-gradient(180deg, rgb(255 255 255 / 0.22), rgb(255 255 255 / 0) 55%),
-      linear-gradient(135deg, #f2384a 0%, var(--signal) 45%, #b0101c 100%);
+      linear-gradient(180deg, rgb(255 255 255 / 0.12), rgb(255 255 255 / 0) 30%),
+      linear-gradient(135deg, var(--signal) 0%, #d1141f 55%, #a80c17 100%);
     box-shadow:
       0 0 0 max(1px, calc(1 * var(--rp))) rgb(255 255 255 / 0.22) inset,
       0 calc(10 * var(--rp)) calc(30 * var(--rp)) rgb(226 32 44 / 0.42),
@@ -385,8 +412,8 @@ const cycle = slides.length * 7;
     box-shadow:
       0 0 0 max(1px, calc(1.5 * var(--rp))) rgb(226 214 255 / 0.85) inset,
       0 0 calc(18 * var(--rp)) rgb(170 110 255 / 0.2);
-    -webkit-backdrop-filter: blur(10px);
-    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(calc(10 * var(--rp)));
+    backdrop-filter: blur(calc(10 * var(--rp)));
   }
 
   .door--give:hover .door-pill {
@@ -459,12 +486,13 @@ const cycle = slides.length * 7;
        narrow), so the text column never outgrows its 45% of the screen and
        the headline keeps its four lines. Below seven tenths the type would
        get too small, so the scale stops there and the season strip drops just
-       under the fold instead. */
+       under the fold instead; above 1.25 (a 1600px screen) it stops with the
+       rest of the site (decision 53), and the photo fills the room left. */
     .hero {
       --u: clamp(
         0.7px,
         min(calc((100vh - var(--top-chrome) - var(--strips-h)) / 577), calc(100vw / 1280)),
-        2px
+        1.25px
       );
       --wave-h: calc(92 * var(--u));
       /* Where the text column starts: the .wrap's left edge. */
@@ -506,6 +534,7 @@ const cycle = slides.length * 7;
       gap: calc(14 * var(--u));
       font-size: calc(13 * var(--u));
       line-height: calc(16 * var(--u));
+      text-shadow: 0 max(1px, calc(1 * var(--u))) calc(12 * var(--u)) rgb(27 15 46 / 0.7);
     }
     .tagline::before,
     .tagline::after {
@@ -516,10 +545,12 @@ const cycle = slides.length * 7;
       margin-top: calc(14 * var(--u));
       font-size: calc(52 * var(--u));
       line-height: 1.05;
+      text-shadow: 0 max(1px, calc(2 * var(--u))) calc(24 * var(--u)) rgb(27 15 46 / 0.55);
     }
     .sub {
       margin-top: calc(14 * var(--u));
       font-size: calc(19 * var(--u));
+      text-shadow: 0 max(1px, calc(1 * var(--u))) calc(14 * var(--u)) rgb(27 15 46 / 0.6);
     }
     .doors {
       gap: calc(16 * var(--u));
@@ -529,9 +560,9 @@ const cycle = slides.length * 7;
       gap: calc(10 * var(--u));
     }
     .door-pill {
-      gap: calc(4 * var(--u));
+      gap: calc(8 * var(--u));
       min-height: calc(54 * var(--u));
-      padding: 0 calc(12 * var(--u)) 0 calc(16 * var(--u));
+      padding: 0 calc(16 * var(--u)) 0 calc(28 * var(--u));
       font-size: calc(20 * var(--u));
     }
     .door-title {
@@ -539,6 +570,11 @@ const cycle = slides.length * 7;
     }
     .door-body {
       font-size: calc(15 * var(--u));
+      text-shadow: 0 max(1px, calc(1 * var(--u))) calc(12 * var(--u)) rgb(27 15 46 / 0.6);
+    }
+    .door--give .door-pill {
+      -webkit-backdrop-filter: blur(calc(10 * var(--u)));
+      backdrop-filter: blur(calc(10 * var(--u)));
     }
     .door--help .door-pill {
       box-shadow:

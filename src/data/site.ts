@@ -158,7 +158,7 @@ export const seasonalBanner = {
 };
 
 export const hero = {
-  /** Her own tagline, from her website. Its one home is under the wordmark. */
+  /** Her own tagline, from her website. Its one home is the banner's eyebrow, above the headline. */
   tagline: "Together we can.",
   /**
    * The headline is two parts: the lead, in white, and the last line, set in

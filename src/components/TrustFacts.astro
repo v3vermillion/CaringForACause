@@ -26,9 +26,10 @@ const items = [
 <style>
   .facts {
     background: var(--night);
-    /* The top edge meets the wave's night: no visible seam. */
+    /* Both edges are invisible: the band under the banner is one surface
+       between the two waves. The borders keep --strips-h's arithmetic. */
     border-top: 1px solid transparent;
-    border-bottom: 1px solid rgb(150 118 224 / 0.22);
+    border-bottom: 1px solid transparent;
   }
 
   /* Sized in the class's reference pixel (--rp) so every phone and every

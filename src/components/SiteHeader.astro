@@ -220,10 +220,7 @@ const { items, donate, help } = navigation;
     <div class="menu-top">
       <p id="menu-title" class="menu-brand">
         <Brand kind="mark" class="menu-icon" label="" />
-        <span class="menu-brand-text">
-          <span class="menu-brand-name">{org.shortName}</span>
-          <span class="menu-brand-sub">{org.name.replace(org.shortName, "").trim()}</span>
-        </span>
+        <Brand kind="lockup" class="menu-lockup" label={org.name} />
       </p>
       <button class="menu-close" type="button" data-menu-close>
         <svg viewBox="0 0 20 20" width="20" height="20" aria-hidden="true">
@@ -350,7 +347,18 @@ const { items, donate, help } = navigation;
     z-index: 50;
     isolation: isolate;
     overflow: hidden;
-    border-bottom: 1px solid transparent; /* the lit rule below is the last row of the bar */
+    /* The 1px rule of --header-h is the lit rule itself: the border row,
+       painted with the gradient, runs the whole width under the wedge too. */
+    border-bottom: 1px solid transparent;
+    border-image: linear-gradient(
+        90deg,
+        #7a3cf0 0%,
+        #b13ae0 30%,
+        #ee3c86 55%,
+        #ff4a6a 70%,
+        rgb(255 74 106 / 0) 100%
+      )
+      1;
     background:
       radial-gradient(
         calc(27.5 * var(--sp)) calc(18 * var(--sp)) at calc(100% - 83 * var(--sp)) 100%,
@@ -370,22 +378,10 @@ const { items, donate, help } = navigation;
       linear-gradient(180deg, #200d4c 0%, #190a3e 45%, #140832 100%);
   }
 
-  .site-header::after {
-    content: "";
-    position: absolute;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    z-index: -1; /* under the wedge, over the bar's paint */
-    height: 1px;
-    background: linear-gradient(
-      90deg,
-      #7a3cf0 0%,
-      #b13ae0 30%,
-      #ee3c86 55%,
-      #ff4a6a 70%,
-      rgb(255 74 106 / 0) 96%
-    );
+  /* Keyboard rings sit inside the bar, which clips at its edge on a narrow
+     phone; a ring at the default offset would lose its top and bottom. */
+  .site-header :focus-visible {
+    outline-offset: -2px;
   }
 
   /* On phones and tablets the header scales with the class like the banner:
@@ -469,7 +465,7 @@ const { items, donate, help } = navigation;
       linear-gradient(180deg, #d4262a 0%, #b41d22 16%, #a91a20 40%, #9b1119 72%, #8f0914 100%);
     box-shadow:
       0 0 0 calc(0.5 * var(--sp)) #f0222e,
-      0 0 0 calc(1.3 * var(--sp)) rgb(255 238 246 / 0.95),
+      0 0 0 calc(1.3 * var(--sp)) rgb(255 225 240 / 0.45),
       0 calc(1.2 * var(--sp)) calc(1.5 * var(--sp)) calc(0.3 * var(--sp)) rgb(240 50 140 / 0.6),
       0 calc(3 * var(--sp)) calc(6 * var(--sp)) calc(1.5 * var(--sp)) rgb(236 60 140 / 0.55),
       0 0 calc(13 * var(--sp)) calc(3 * var(--sp)) rgb(245 150 215 / 0.45),
@@ -563,8 +559,10 @@ const { items, donate, help } = navigation;
   .site-header:not(.has-menu) .inline-nav {
     order: 3;
     flex-basis: 100%;
-    overflow-x: auto;
-    scrollbar-width: none;
+  }
+
+  .site-header:not(.has-menu) .inline-nav > ul {
+    flex-wrap: wrap;
   }
 
   .site-header.has-menu .inline-nav {
@@ -658,6 +656,18 @@ const { items, donate, help } = navigation;
 
   .menu-button[hidden] {
     display: none;
+  }
+
+  /* The wedge's clip-path clips an outline with everything else, so the
+     keyboard ring is drawn around the lines inside the cut instead. */
+  .menu-button:focus-visible {
+    outline: none;
+  }
+
+  .menu-button:focus-visible .lines {
+    outline: 3px solid #fff;
+    outline-offset: calc(8 * var(--sp));
+    border-radius: calc(4 * var(--sp));
   }
 
   .menu-button:hover {
@@ -910,28 +920,11 @@ const { items, donate, help } = navigation;
     filter: drop-shadow(0 0 0.3779rem rgb(120 50 255 / 0.35));
   }
 
-  .menu-brand-text {
-    display: grid;
-    gap: 0.3842rem;
-    font-family: var(--font-serif);
-  }
-
-  .menu-brand-name {
-    font-size: 1.2911rem;
-    font-weight: 400;
-    line-height: 1.1;
-    letter-spacing: 0.01em;
-    word-spacing: 0.04em;
-    color: #fff;
-  }
-
-  .menu-brand-sub {
-    font-size: 0.9384rem;
-    font-weight: 400;
-    line-height: 1.2;
-    letter-spacing: 0.11em;
-    word-spacing: 0.06em;
-    color: #b8a6f2;
+  /* Her lockup, as in the bar, in the same lit paint and glow. */
+  .menu-brand :global(.menu-lockup) {
+    width: 11.5rem;
+    flex: none;
+    filter: drop-shadow(0 0 0.3rem rgb(170 110 255 / 0.45));
   }
 
   /*
@@ -1140,14 +1133,8 @@ const { items, donate, help } = navigation;
     .menu-brand :global(.menu-icon) {
       width: calc(3.2561rem * var(--k));
     }
-    .menu-brand-text {
-      gap: calc(0.3842rem * var(--k));
-    }
-    .menu-brand-name {
-      font-size: calc(1.2911rem * var(--k));
-    }
-    .menu-brand-sub {
-      font-size: calc(0.9384rem * var(--k));
+    .menu-brand :global(.menu-lockup) {
+      width: calc(11.5rem * var(--k));
     }
     .menu-close {
       width: max(44px, 2.7712rem * var(--k));

@@ -136,9 +136,10 @@ test.describe("device compatibility", () => {
     await expect(page.locator(".site-header svg.brand-lockup")).toHaveCount(1);
     await expect(page.locator(".site-header svg.brand-lockup")).toHaveAccessibleName(org.name);
     await expect(page.locator(".hero svg.brand-lockup")).toHaveCount(0);
-    // Both lockups (header and footer) take the shared paint, which is on the page.
+    // Every lockup (the bar, the phone menu, the footer) takes the shared
+    // paint, which is on the page once.
     await expect(page.locator("#lockup-script, #lockup-caps")).toHaveCount(2);
-    await expect(page.locator('svg.brand-lockup path[fill="url(#lockup-script)"]')).toHaveCount(2);
+    await expect(page.locator('svg.brand-lockup path[fill="url(#lockup-script)"]')).toHaveCount(3);
     await expect(page.locator(".site-footer .brand svg")).toHaveCount(2);
   });
 
@@ -223,6 +224,7 @@ test.describe("scrolling stability", () => {
   // its class promises (see docs/DESIGN.md, "The first screen by device").
   test("this device's first screen keeps its promise", async ({ page }) => {
     await page.goto("/");
+    await fontsSettled(page);
     const m = await page.evaluate(() => {
       const r = (sel: string) => document.querySelector(sel)?.getBoundingClientRect() ?? null;
       const header = r(".site-header")!;
@@ -333,6 +335,7 @@ test.describe("scrolling stability", () => {
   const shape = async (page: import("@playwright/test").Page, width: number, height: number) => {
     await page.setViewportSize({ width, height });
     await page.goto("/");
+    await fontsSettled(page);
     return page.evaluate(() => {
       const r = (sel: string) => document.querySelector(sel)!.getBoundingClientRect();
       const lines = (sel: string) =>
@@ -351,9 +354,9 @@ test.describe("scrolling stability", () => {
         // The words start on the header's left edge, on every screen.
         left: r(".hero .content").left - r(".site-header .brand").left,
         lines: [lines(".hero h1"), lines(".hero .sub"), lines(".door--help .door-body")],
-        // The header as a share of the text block's height, and its name's size.
+        // The header as a share of the text block's height, and her lockup's width in it.
         header: r(".site-header").height / hero.height,
-        name: parseFloat(getComputedStyle(document.querySelector(".site-header .brand")!).fontSize),
+        lockup: r(".site-header .brand-lockup").width,
       };
     });
   };
@@ -398,13 +401,13 @@ test.describe("scrolling stability", () => {
         expect(ref.left, `left edge at ${reference[0]}`).toBeCloseTo(0, 0);
         expect(other.lines, `line breaks at ${width}`).toEqual(ref.lines);
         if (cls !== "desktop") {
-          // Phones and tablets scale the header with the width; the name's
-          // size must scale with it exactly (bounded on phones past 450px).
+          // Phones and tablets scale the header with the width; the lockup
+          // must scale with it exactly (bounded on phones past 450px).
           const scale = (w: number) => (cls === "phone" ? Math.min(w / 393, 1.15) : w / 768);
           expect(other.header, `header at ${width}`).toBeCloseTo(ref.header, 2);
-          // Within half a pixel: Firefox rounds computed font sizes.
-          expect(other.name / scale(width), `name size at ${width}`).toBeCloseTo(
-            ref.name / scale(reference[0]),
+          // Within half a pixel of the reference's width.
+          expect(other.lockup / scale(width), `lockup width at ${width}`).toBeCloseTo(
+            ref.lockup / scale(reference[0]),
             0,
           );
         }
@@ -449,8 +452,9 @@ test.describe("the header by device", () => {
     return "data:image/png;base64," + png.toString("base64");
   };
   for (const { cls, reference, others } of [
-    // Phones up to the 450px cap: past it the bar is wider than the column
-    // (docs/DESIGN.md), so it is not the same picture and is not compared.
+    // Phones up to the 450px cap and desktops up to the 1600px cap: past
+    // them the bar is wider than the column (docs/DESIGN.md), so it is not
+    // the same picture and is not compared.
     {
       cls: "phone",
       reference: [393, 659],
@@ -476,8 +480,7 @@ test.describe("the header by device", () => {
         [896, 700],
         [1024, 1366],
         [1366, 657],
-        [1920, 950],
-        [2560, 1300],
+        [1600, 900],
       ],
     },
   ] as const) {
@@ -692,10 +695,11 @@ test.describe("every page by device", () => {
         [896, 700],
         [1024, 1366],
         [1366, 657],
+        [1600, 900],
         [1920, 950],
         [2560, 1300],
       ],
-      scale: (w) => Math.min(w / 1280, 2),
+      scale: (w) => Math.min(w / 1280, 1.25),
     },
   ];
   // The guard's precondition as one test of its own: if a browser update
@@ -1147,9 +1151,9 @@ test.describe("get involved tabs", () => {
 });
 
 test.describe("one home per fact", () => {
-  // On the first screen each fact appears once: the tagline under the
-  // wordmark, the service area in the headline, the founding year in the
-  // trust strip. The subhead says what the organization is.
+  // On the first screen each fact appears once: the tagline as the banner's
+  // eyebrow, the service area in the headline's last line, the founding year
+  // in the trust strip. The subhead says what the organization is.
   test("the banner and trust strip do not repeat each other", async ({ page }) => {
     await page.goto("/");
     const area = claim(facts.serviceArea);
