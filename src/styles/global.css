@@ -20,6 +20,13 @@
 
   --font-display: "Bricolage Grotesque Variable", "Arial Rounded MT Bold", system-ui, sans-serif;
   --font-body: "Atkinson Hyperlegible Next", system-ui, -apple-system, "Segoe UI", sans-serif;
+  /* The serif of the two surfaces built from the owner's references, the
+     phone menu and the footer (decisions 44 and 47): the Literata subset
+     declared below. */
+  --font-serif: "Site Serif", Georgia, "Times New Roman", serif;
+  /* The footer's sans: an Assistant subset, the closest open face to the one
+     the owner's reference sets its links and contact details in (decision 47). */
+  --font-footer: "Footer Sans", "Source Sans 3", "Segoe UI", system-ui, sans-serif;
 
   /* Type scale (major third, 1.25) on an 18px base for easy reading on phones.
      The large steps and the section spacing take one value per device class
@@ -87,6 +94,27 @@
 
 html.preview {
   --top-chrome: calc(var(--header-h) + var(--notice-h));
+}
+
+/* The serif: a Literata display cut (optical size 72), Latin only, weights
+   300 to 700, with the copyright sign and the bullet the footer's record
+   uses (public/fonts/serif-LICENSE.txt). The footer draws it on every page,
+   so it is preloaded in the layout like the other faces the page sets
+   (decision 42). */
+@font-face {
+  font-family: "Site Serif";
+  src: url("/fonts/serif.woff2") format("woff2");
+  font-weight: 300 700;
+  font-display: swap;
+}
+
+/* The footer's sans: Assistant Regular, printable ASCII only, 7 KB
+   (public/fonts/footer-sans-LICENSE.txt). */
+@font-face {
+  font-family: "Footer Sans";
+  src: url("/fonts/footer-sans.woff2") format("woff2");
+  font-weight: 400;
+  font-display: swap;
 }
 
 @media (min-width: 36rem) {

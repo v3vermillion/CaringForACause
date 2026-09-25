@@ -10,11 +10,11 @@ Night purple is the world; her real photos are the light in it; crimson is the s
 
 Three materials, each with a job. Use them by job, not by mood.
 
-| Material   | What it is                                                                                                  | Where it's used                                                                                | Rules                                                                                           |
-| ---------- | ----------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
-| **Night**  | `--night` #1B0F2E, deepening to `--night-2` #150B26, with at most one soft radial purple glow               | The banner's veil, Get help card, About, page openers, menu, footer                            | One glow per surface, never two competing. Text on it is white or `--night-soft`.               |
-| **Glass**  | White at 10% over night, 12–14 px blur, a 1 px white hairline at 35%                                        | The "Donate" door, "Call" and "Donate" buttons on night                                        | Only over night. Never more than two glass elements in view.                                    |
-| **Signal** | `--signal` #E2202C with its own soft glow (`0 14px 40px rgb(226 32 44 / .4)`); `--crimson` #BA010C on paper | "Help me" door, "Start an application", the menu's Help me, header Donate, the footer's Donate | One signal per screen. It marks the action she most wants taken. It is red, never pink or rose. |
+| Material   | What it is                                                                                                  | Where it's used                                                                                | Rules                                                                                                                                                                                                             |
+| ---------- | ----------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Night**  | `--night` #1B0F2E, deepening to `--night-2` #150B26, with at most one soft radial purple glow               | The banner's veil, Get help card, About, page openers                                          | One glow per surface, never two competing. Text on it is white or `--night-soft`. The menu and the footer are darker, the near-black of the owner's references, and lit as they paint them (decisions 44 and 47). |
+| **Glass**  | White at 10% over night, 12–14 px blur, a 1 px white hairline at 35%                                        | The "Donate" door, "Call" and "Donate" buttons on night                                        | Only over night. Never more than two glass elements in view.                                                                                                                                                      |
+| **Signal** | `--signal` #E2202C with its own soft glow (`0 14px 40px rgb(226 32 44 / .4)`); `--crimson` #BA010C on paper | "Help me" door, "Start an application", the menu's Help me, header Donate, the footer's Donate | One signal per screen. It marks the action she most wants taken. It is red, never pink or rose.                                                                                                                   |
 
 Paper (`--paper`) and lilac sections stay clean: high contrast, no effects. The seasonal strip is lilac, never louder than the banner above it.
 
@@ -22,14 +22,18 @@ Paper (`--paper`) and lilac sections stay clean: high contrast, no effects. The 
 
 Both marks are vector tracings of her logo files, made once by `scripts/brand/trace-brand.py`, then reduced to integer coordinates with `npx svgo --multipass -p 0 src/assets/brand/*.svg` (a quarter of the traced size, no visible change at any size the site uses), and kept in `src/assets/brand/`:
 
-- **The wordmark** (`wordmark.svg`) is her calligraphic "Caring For A Cause" lettering. It is the first thing on the banner, white over her photos, and appears again in the footer. It inherits `color`, so it is purple on paper if ever needed there.
-- **The heart-and-hands mark** (`mark.svg`) is flat: logo purple ring, crimson heart, violet hands, white keylines. It lives in the header, the menu, the footer, and the favicon. It is never blown up as an illustration.
+- **The wordmark** (`wordmark.svg`) is her calligraphic "Caring For A Cause" lettering. It is the first thing on the banner, white over her photos, and appears again in the footer in a lavender light. It inherits `color`, so it is purple on paper if ever needed there.
+- **The heart-and-hands mark** (`mark.svg`) is flat: logo purple ring, crimson heart, violet hands, white keylines. It lives in the header, the menu, the footer, and the favicon. It is never blown up as an illustration. Where a reference lights or dims it (the menu's watermark, the footer's lit mark and its line-drawn seal), its four fills are recoloured in CSS and nothing is redrawn.
 
 Nothing else is drawn. The mark is not a container for buttons.
 
 ## The header
 
 The bar is the one place the brand's own artwork frames the page: a light lavender lens with a sweep of her logo's violet and crimson bands painted behind its left end (an inline SVG in `src/components/SiteHeader.astro`, decorative and hidden from assistive technology), the heart-and-hands mark with a white glow, her name, the Donate pill (a deep crimson gradient with a pale ring and a pink glow, painted by a pseudo-element inside a 44px link), and on phones and tablets the wedge in the top-right corner, deep purple with a lighter violet band and a crimson hairline along its cut. It was rebuilt from her banner artwork rather than from the site's flat materials, so it is the one surface that layers gradients and glows; nothing else on the site does. Every size in it is a multiple of `--sp`, so it is the same bar on every device of a class; only the sweep's length follows the bar's height, so on a wide screen it sits in the left end. The glow under the Donate pill is placed from the bar's right edge in reference pixels, not in percent of the bar: a percent position is a different place on every width, and the glow was stranded mid-bar on tablets and desktops. The rule for any painted decoration: position and size it from the element it belongs to, in the class's reference pixels, never in percent of a box whose width varies inside the class. A browser test screenshots the bar on every page at the reference device and the edges of each class, scales each to the reference's size, and requires the pictures to match pixel for pixel within what antialiasing at another scale changes ("the header is the same picture on every phone/tablet/desktop"); that is what catches a stranded background, which the geometry tests cannot see. The letter f in the name is the one glyph from another face (`public/fonts/brand-f.woff2`, an Inter subset with only that letter, under the OFL), because her artwork's f is straight-stemmed where Bricolage's hooks; every other glyph is Bricolage.
+
+## The footer
+
+The footer is the second surface built from the owner's own picture (decision 47), and it follows the header's rules. On desktop it is the reference: her lit mark over her lettering and the tracked caps line, the glossy Donate pill and her sign-off, centred in the first column; Explore and Connect with us behind hairline dividers, their heads in the bold serif over a short lavender-to-crimson rule; a rule lit violet to magenta across the whole width, flaring white-pink where the Explore column starts; and the record as one line, her mark drawn in lavender lines, the legal name, a pin with the city and the service area, the copyright. Every desktop size is the reference's, converted to rem at the content column's width, so the picture fills the page's column and starts at the page's left edge like every section. Phones stack the parts in one column and tablets centre the lockup over the two lists; all three are one picture per class. The glows are sized in rem from the corners they belong to, per class, never in percent of the width. The serif is the menu's Literata; the sans of the links and contact details is a small Assistant subset, chosen by measuring the reference's words against 38 open faces. The caps line is the site's one tracked-out all-caps text, from her artwork.
 
 ## Photos
 
@@ -80,12 +84,13 @@ One orchestrated moment: the banner photos crossfade (seven seconds each). Every
 
 ## Type
 
-- **Bricolage Grotesque** for anything that should be read as a voice: the headline, doors, headings, labels, buttons, menu.
+- **Bricolage Grotesque** for anything that should be read as a voice: the headline, doors, headings, labels, buttons.
 - **Atkinson Hyperlegible Next** for anything that should be read as information.
-- Her lettering is the wordmark itself, so no script typeface is loaded. Her phrases ("Together we can.", "Never give up.") are set in Bricolage.
+- **Literata** (a display-size subset, `public/fonts/serif.woff2`) for the two surfaces built from her references, the phone menu and the footer, and **Assistant** (`public/fonts/footer-sans.woff2`) for the footer's links and contact details, the closest open face to the reference's.
+- Her lettering is the wordmark itself, so no script typeface is loaded. Her phrases are set in Bricolage ("Together we can.") and, in the footer, the serif ("Never give up.").
 - The page's first words are her name, then one sentence that says what she does, then a choice: "Help me" / "Donate."
 - Section openers are always the same: a small purple label, a heading, one lede line.
-- Sentence case everywhere. No all-caps labels, no tracked-out eyebrows.
+- Sentence case everywhere. No all-caps labels, no tracked-out eyebrows. The one exception is the footer's "Supportive Services", tracked wide under her lettering as her artwork sets it.
 
 ## Shape
 
