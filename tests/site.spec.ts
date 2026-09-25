@@ -1,5 +1,22 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test } from "@playwright/test";
+import { claim } from "../src/data/facts";
+import { facts, hero, navigation, seasonalBanner } from "../src/data/site";
+
+// The content the tests expect comes from the content file, so a content
+// edit (a confirmed year, a renamed section) never needs a test edit. The
+// tests still check where and how each value appears.
+const sectionLabels = navigation.items.map((item) => item.label);
+
+// A test that sets its own viewport measures the stylesheet, not the device,
+// so it runs once per engine, on that engine's desktop project. The device
+// projects keep every test that runs at the device's own screen size. This
+// holds while the only pointer-dependent rule is the footer's 44px rows
+// (vertical, not measured by these tests); a rule on (pointer) or (hover)
+// that changes the first screen or a width would need its test on a phone
+// project again.
+const oncePerEngine = (testInfo: import("@playwright/test").TestInfo) =>
+  test.skip(!testInfo.project.name.startsWith("desktop-"), "runs once per engine");
 
 // The site address the build should report: the deployed URL when testing a
 // live site, otherwise the production domain used by local and CI builds.
@@ -33,6 +50,8 @@ test.describe("accessibility", () => {
     await expect(page.getByRole("link", { name: "Skip to content" })).toBeFocused();
   });
 
+  // Kept beside axe on purpose: axe skips hidden elements, so photos inside
+  // the closed involvement panels are only checked here.
   test("every image has alt text", async ({ page }) => {
     await page.goto("/");
     const missing = await page.locator("img:not([alt])").count();
@@ -56,7 +75,7 @@ test.describe("device compatibility", () => {
     const selectors = [
       ".brand",
       ".site-header nav a",
-      ".site-header nav button",
+      "[data-menu-open]",
       ".button",
       "[role=tab]",
       ".checklist summary",
@@ -68,6 +87,8 @@ test.describe("device compatibility", () => {
       "#contact .card",
     ];
     for (const selector of selectors) {
+      // A renamed class would otherwise drop out of this check silently.
+      expect(await page.locator(selector).count(), `${selector} is on the page`).toBeGreaterThan(0);
       for (const el of await page.locator(selector).all()) {
         if (!(await el.isVisible())) continue;
         const box = await el.boundingBox();
@@ -153,7 +174,10 @@ test.describe("scrolling stability", () => {
   // On phones the browser's address bar collapses as you scroll, which changes
   // the viewport height. Nothing on the first screen may resize when that
   // happens, or photos appear to zoom while scrolling.
-  test("the first screen does not resize when the browser bars collapse", async ({ page }) => {
+  test("the first screen does not resize when the browser bars collapse", async ({
+    page,
+  }, testInfo) => {
+    oncePerEngine(testInfo);
     await page.setViewportSize({ width: 390, height: 664 });
     await page.goto("/");
     const measure = () =>
@@ -198,6 +222,7 @@ test.describe("scrolling stability", () => {
       // under the header, at most double), and the strip ends the first screen.
       expect(m.wordsUnderHeader).toBeLessThan(90);
       expect(m.sideBySide).toBe(true);
+      if (seasonalBanner.active) expect(m.stripBottom, "the season strip").not.toBeNull();
       if (m.stripBottom !== null) expect(Math.abs(m.stripBottom - m.height)).toBeLessThanOrEqual(2);
     } else if (m.width >= 576) {
       // Tablets: the phone's words beside the photo, both doors on screen, and
@@ -205,6 +230,7 @@ test.describe("scrolling stability", () => {
       expect(m.helpBottom).toBeLessThanOrEqual(m.height);
       expect(m.giveBottom).toBeLessThanOrEqual(m.height);
       expect(m.sideBySide).toBe(false);
+      if (seasonalBanner.active) expect(m.stripBottom, "the season strip").not.toBeNull();
       if (m.stripBottom !== null) expect(Math.abs(m.stripBottom - m.height)).toBeLessThanOrEqual(2);
     } else {
       // Phones: the words start just under the header and both doors fit.
@@ -219,7 +245,8 @@ test.describe("scrolling stability", () => {
     ["iPhone 12 mini", 375, 629],
     ["iPhone 15", 393, 660],
   ] as const) {
-    test(`both doors fit on an ${name} Safari screen`, async ({ page }) => {
+    test(`both doors fit on an ${name} Safari screen`, async ({ page }, testInfo) => {
+      oncePerEngine(testInfo);
       await page.setViewportSize({ width, height });
       await page.goto("/");
       const help = await page.locator(".door--help").boundingBox();
@@ -229,7 +256,8 @@ test.describe("scrolling stability", () => {
     });
   }
 
-  test("both doors fit on a 1366 × 768 laptop screen", async ({ page }) => {
+  test("both doors fit on a 1366 × 768 laptop screen", async ({ page }, testInfo) => {
+    oncePerEngine(testInfo);
     // The most common desktop size, with about 110px of browser chrome.
     await page.setViewportSize({ width: 1366, height: 657 });
     await page.goto("/");
@@ -251,11 +279,15 @@ test.describe("scrolling stability", () => {
   ]) {
     test(`the first screen ends with the season strip at ${width} × ${height}`, async ({
       page,
-    }) => {
+    }, testInfo) => {
+      oncePerEngine(testInfo);
+      // The strip is seasonal content: off, the test is skipped and says so
+      // instead of passing with nothing measured.
+      test.skip(!seasonalBanner.active, "the season strip is off this season");
       await page.setViewportSize({ width, height });
       await page.goto("/");
       const strip = page.locator("aside.banner");
-      if ((await strip.count()) === 0) return; // the strip is optional content
+      await expect(strip).toHaveCount(1);
       const box = await strip.boundingBox();
       expect(Math.abs(box!.y + box!.height - height)).toBeLessThanOrEqual(2);
       const give = await page.locator(".door--give").boundingBox();
@@ -322,7 +354,8 @@ test.describe("scrolling stability", () => {
       ],
     ],
   ] as const) {
-    test(`every ${cls} shows the same banner composition`, async ({ page }) => {
+    test(`every ${cls} shows the same banner composition`, async ({ page }, testInfo) => {
+      oncePerEngine(testInfo);
       const ref = await shape(page, reference[0], reference[1]);
       for (const [width, height] of others) {
         const other = await shape(page, width, height);
@@ -420,9 +453,10 @@ test.describe("the header by device", () => {
     test(`the header is the same picture on every ${cls}`, async ({ page }, testInfo) => {
       test.skip(!testInfo.project.name.startsWith("desktop-"), "runs once per engine");
       test.slow(); // a dozen page loads and screenshots
-      // The bar is one component on every page; the home page and one inner
-      // page (with the preview notice above the bar) cover it.
-      for (const path of ["/", "/donate"]) {
+      // The bar is one component from the layout on every page, and the
+      // preview notice sits above it on every page too, so the home page is
+      // the whole picture; a second page would repeat the same screenshots.
+      for (const path of ["/"]) {
         const ref = await bar(page, reference[0], reference[1], path);
         for (const [width, height] of others) {
           const other = await bar(page, width, height, path);
@@ -633,6 +667,25 @@ test.describe("every page by device", () => {
       scale: (w) => Math.min(w / 1280, 2),
     },
   ];
+  // The guard's precondition as one test of its own: if a browser update
+  // stops positioning text linearly, this fails with a message that says the
+  // page-composition guard is off, instead of the guard skipping quietly
+  // (docs/APPROACH.md, 4). It surfaces on the Playwright update that caused it.
+  test("Chromium still positions text linearly, so the page-composition guard is live", async ({
+    page,
+  }, testInfo) => {
+    test.skip(
+      testInfo.project.name !== "desktop-chrome",
+      "layout scales linearly in Chromium only",
+    );
+    await page.goto("/");
+    await fontsSettled(page);
+    expect(
+      await textScalesLinearly(page),
+      "text widths no longer scale linearly in this Chromium: the page-composition tests below are skipping, not passing",
+    ).toBe(true);
+  });
+
   for (const { cls, reference, others, scale } of classes) {
     test(`every ${cls} shows the same page composition`, async ({ page }, testInfo) => {
       // Sets its own viewports; Chromium only (see above).
@@ -643,6 +696,7 @@ test.describe("every page by device", () => {
       test.slow(); // two dozen page loads
       await page.goto("/");
       await fontsSettled(page);
+      // The precondition has its own test above; here it only skips cleanly.
       test.skip(
         !(await textScalesLinearly(page)),
         "this engine positions glyphs on whole pixels, so text widths do not scale linearly",
@@ -710,7 +764,11 @@ test.describe("every page by device", () => {
 });
 
 test.describe("layout", () => {
-  for (const width of [320, 360, 390, 430, 768, 1024, 1280, 1440]) {
+  // Widths no device in the matrix has (the matrix covers 360, 375, 402, 412,
+  // 440, 768, and 1280 at each device's own size, above). This stays on every
+  // project: the footer holds 44px rows only for a coarse pointer, so a
+  // phone project and a desktop project are not the same page at one width.
+  for (const width of [320, 390, 430, 1024, 1440]) {
     test(`no horizontal scrolling at ${width}px`, async ({ page }) => {
       await page.setViewportSize({ width, height: 900 });
       await page.goto("/");
@@ -804,7 +862,7 @@ test.describe("navigation", () => {
     await page.setViewportSize({ width: 1280, height: 900 });
     await page.goto("/");
     const links = page.locator(".site-header .inline-nav a");
-    await expect(links).toHaveText(["About", "Programs", "Get involved", "Contact"]);
+    await expect(links).toHaveText(sectionLabels);
     await expect(page.locator(".site-header button:not([data-menu-open])")).toHaveCount(0);
     await page.getByRole("link", { name: "Get involved", exact: true }).first().click();
     expect(new URL(page.url()).hash).toBe("#get-involved");
@@ -814,15 +872,12 @@ test.describe("navigation", () => {
   test("the footer draws the same map, with Donate as its one action", async ({ page }) => {
     await page.goto("/");
     await expect(page.locator(".site-footer nav a")).toHaveText([
-      "Help me",
-      "About",
-      "Programs",
-      "Get involved",
-      "Contact",
+      navigation.help.label,
+      ...sectionLabels,
     ]);
     const donate = page.locator(".site-footer .donate");
-    await expect(donate).toHaveText("Donate");
-    await expect(donate).toHaveAttribute("href", "/donate");
+    await expect(donate).toHaveText(navigation.donate.label);
+    await expect(donate).toHaveAttribute("href", navigation.donate.href);
     // The one action is centred under her lettering, not left with the lockup.
     const lockup = (await page.locator(".site-footer .brand").boundingBox())!;
     const wordmark = (await page.locator(".site-footer .brand svg.wordmark").boundingBox())!;
@@ -835,7 +890,10 @@ test.describe("navigation", () => {
   // band of paper under the dark footer. The footer now takes the bottom of
   // the screen however short the page is.
   for (const path of ["/", "/donate", "/apply", "/404"]) {
-    test(`no paper shows under the footer on ${path} in a tall window`, async ({ page }) => {
+    test(`no paper shows under the footer on ${path} in a tall window`, async ({
+      page,
+    }, testInfo) => {
+      oncePerEngine(testInfo);
       await page.setViewportSize({ width: 1280, height: 2000 });
       await page.goto(path);
       const gap = await page.evaluate(() => {
@@ -895,16 +953,13 @@ test.describe("menu", () => {
     await page.goto("/");
     await page.locator("[data-menu-open]").click();
     await expect(page.locator("#menu .menu-label")).toHaveText([
-      "Help me",
-      "About",
-      "Programs",
-      "Get involved",
-      "Contact",
-      "Donate",
+      navigation.help.label,
+      ...sectionLabels,
+      navigation.donate.label,
     ]);
-    await expect(page.locator("#menu a")).toHaveCount(6);
-    await expect(page.locator("#menu a").first()).toHaveAttribute("href", "/apply");
-    await expect(page.locator("#menu a").last()).toHaveAttribute("href", "/donate");
+    await expect(page.locator("#menu a")).toHaveCount(sectionLabels.length + 2);
+    await expect(page.locator("#menu a").first()).toHaveAttribute("href", navigation.help.href);
+    await expect(page.locator("#menu a").last()).toHaveAttribute("href", navigation.donate.href);
     await expect(page.locator("#menu a[href^='tel:'], #menu a[href^='mailto:']")).toHaveCount(0);
   });
 
@@ -989,14 +1044,17 @@ test.describe("one home per fact", () => {
   // trust strip. The subhead says what the organization is.
   test("the banner and trust strip do not repeat each other", async ({ page }) => {
     await page.goto("/");
-    const hero = await page.locator(".hero").innerText();
-    expect(hero.match(/Central Indiana/g)?.length ?? 0).toBe(1);
-    expect(hero).not.toMatch(/\b2015\b/);
-    const facts = await page.locator(".facts").innerText();
-    expect(facts).toMatch(/2015/);
-    expect(facts).not.toMatch(/Central Indiana/);
+    const area = claim(facts.serviceArea);
+    const year = String(claim(facts.founded));
+    const times = (text: string, part: string) => text.split(part).length - 1;
+    const banner = await page.locator(".hero").innerText();
+    expect(times(banner, area), `${area} in the banner`).toBe(1);
+    expect(times(banner, year), `${year} in the banner`).toBe(0);
+    const strip = await page.locator(".facts").innerText();
+    expect(times(strip, year), `${year} in the trust strip`).toBe(1);
+    expect(times(strip, area), `${area} in the trust strip`).toBe(0);
     const body = await page.locator("body").innerText();
-    expect(body.match(/Together we can\./g)?.length ?? 0).toBe(1);
+    expect(times(body, hero.tagline), `${hero.tagline} on the page`).toBe(1);
   });
 });
 
@@ -1059,8 +1117,8 @@ test.describe("donation page", () => {
 
   test("states the nonprofit's EIN and tax status", async ({ page }) => {
     await page.goto("/donate");
-    await expect(page.locator(".tax")).toContainText("47-4917287");
-    await expect(page.locator(".tax")).toContainText("501(c)(3)");
+    await expect(page.locator(".tax")).toContainText(claim(facts.ein));
+    await expect(page.locator(".tax")).toContainText(claim(facts.taxExempt).section);
   });
 });
 
@@ -1323,7 +1381,7 @@ test.describe("search and sharing", () => {
     const raw = await page.locator('script[type="application/ld+json"]').textContent();
     const data = JSON.parse(raw!);
     expect(data["@type"]).toBe("NGO");
-    expect(data.taxID).toBe("47-4917287");
+    expect(data.taxID).toBe(claim(facts.ein));
     expect(data.nonprofitStatus).toBe("Nonprofit501c3");
     expect(data.url).toBe(expectedSite);
   });
