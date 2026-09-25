@@ -254,10 +254,23 @@ const mailto = (subject: string) =>
       margin-inline: 0;
       padding-inline: 0;
     }
+    /* The photo takes the panel's right half edge to edge, as an editorial
+       spread; the words keep the panel's padding. */
     .panel:not(.panel--text) {
       grid-template-columns: 1fr 1fr;
       gap: var(--space-l);
-      padding: var(--space-l);
+      padding: 0 0 0 var(--space-l);
+      align-items: stretch;
+    }
+    .panel:not(.panel--text) > .stack {
+      align-self: center;
+      padding-block: var(--space-l);
+    }
+    .panel :global(.photo) {
+      height: 100%;
+      min-height: 22rem;
+      border-radius: 0 var(--r-card) var(--r-card) 0;
+      box-shadow: none;
     }
   }
 </style>

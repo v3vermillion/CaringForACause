@@ -384,6 +384,27 @@ const { items, donate, help } = navigation;
     outline-offset: -2px;
   }
 
+  /* As the page scrolls under the bar, the bar takes a shadow so it reads
+     as lifted off the light sections; at the top of the page there is none.
+     Scroll-driven, so the compositor runs it and no script is needed;
+     browsers without the timeline show no shadow. */
+  @supports (animation-timeline: scroll()) {
+    .site-header {
+      animation: bar-lift linear both;
+      animation-timeline: scroll(root);
+      animation-range: 0 8rem;
+    }
+  }
+
+  @keyframes bar-lift {
+    from {
+      box-shadow: 0 0.5rem 1.5rem rgb(27 15 46 / 0);
+    }
+    to {
+      box-shadow: 0 0.5rem 1.5rem rgb(27 15 46 / 0.35);
+    }
+  }
+
   /* On phones and tablets the header scales with the class like the banner:
      every size is a multiple of --sp (see docs/DESIGN.md), with the 44px tap
      targets as floors. On desktop --sp is 1px and these are fixed sizes; the
