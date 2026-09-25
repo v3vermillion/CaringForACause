@@ -131,6 +131,81 @@ const structuredData = {
     <script is:inline>
       document.documentElement.classList.add("js");
     </script>
+    <!-- Where a page opens when its address has a section in it (#contact,
+         /#volunteer). The page places the reader itself rather than leaving it
+         to the browser, because browsers disagree: on a refresh they jump back
+         to the section wherever the reader had scrolled since (on a phone
+         Contact is the bottom of the page), Safari on a phone then re-applies
+         a stale position of its own, and Safari scrolls smoothly on arrival
+         and can stop short. So the section is held out of the address before
+         the browser can act on it; a refresh puts the reader back where they
+         were (each page remembers its position as it is left), and any other
+         arrival lands on the section at once. Then the section goes back into
+         the address, so it can still be copied. For a moment after load the
+         place is held against the browser moving the page on its own, until
+         the reader touches, scrolls or types. Back and forward are left to the
+         browser. The tabs read the held section (GetInvolved.astro). -->
+    <script is:inline>
+      (function () {
+        var root = document.documentElement;
+        var key = "scroll:" + location.pathname + location.search;
+        var managed = false;
+        addEventListener("pagehide", function () {
+          try {
+            sessionStorage.setItem(key, String(Math.round(scrollY)));
+            if (managed) history.scrollRestoration = "auto";
+          } catch (e) {}
+        });
+        try {
+          var hash = location.hash;
+          var nav = performance.getEntriesByType("navigation")[0];
+          if (!hash || (nav && nav.type === "back_forward")) return;
+          var saved = nav && nav.type === "reload" ? sessionStorage.getItem(key) : null;
+          managed = true;
+          history.scrollRestoration = "manual";
+          root.dataset.heldHash = hash;
+          history.replaceState(history.state, "", location.pathname + location.search);
+          var touched = false;
+          ["wheel", "touchstart", "keydown", "pointerdown"].forEach(function (type) {
+            addEventListener(
+              type,
+              function () {
+                touched = true;
+              },
+              { capture: true, passive: true },
+            );
+          });
+          var place = function () {
+            if (touched) return;
+            var smooth = root.style.scrollBehavior;
+            root.style.scrollBehavior = "auto";
+            if (saved !== null) {
+              scrollTo(0, Number(saved));
+            } else {
+              var target = document.getElementById(decodeURIComponent(hash.slice(1)));
+              // A tab's panel sits in its section; land on the section.
+              if (target && target.matches("[data-panel]"))
+                target = target.closest("section") || target;
+              if (target) target.scrollIntoView(true);
+            }
+            root.style.scrollBehavior = smooth;
+          };
+          addEventListener("DOMContentLoaded", place);
+          addEventListener("load", function () {
+            place();
+            history.replaceState(history.state, "", location.pathname + location.search + hash);
+            delete root.dataset.heldHash;
+            var hold = function () {
+              place();
+            };
+            addEventListener("scroll", hold);
+            setTimeout(function () {
+              removeEventListener("scroll", hold);
+            }, 1000);
+          });
+        } catch (e) {}
+      })();
+    </script>
   </head>
   <body>
     <a class="skip-link" href="#main">

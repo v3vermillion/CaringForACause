@@ -162,7 +162,7 @@ export const hero = {
   tagline: "Together we can.",
   /**
    * The headline is two parts: the lead, in white, and the last line, set in
-   * lavender italic on the banner (decision 50). Keep the service area in the
+   * lavender italic on the banner (decision 51). Keep the service area in the
    * accent: it is the one place on the first screen that names it.
    */
   headline: "Holiday meals, gifts, and diapers",
@@ -181,14 +181,14 @@ export const hero = {
       focus: "center 10%",
     },
     {
-      file: "holiday-gift-bags.jpg",
-      alt: "",
-      focus: "center 18%",
-    },
-    {
       file: "families-banner.jpg",
       alt: "",
       focus: "center 30%",
+    },
+    {
+      file: "holiday-gift-bags.jpg",
+      alt: "",
+      focus: "center 18%",
     },
     {
       file: "holiday-shopping.jpg",

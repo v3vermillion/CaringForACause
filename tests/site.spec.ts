@@ -239,7 +239,7 @@ test.describe("scrolling stability", () => {
         sideBySide: r(".door--help")!.top === r(".door--give")!.top,
         stripBottom: r("aside.banner")?.bottom ?? null,
         // The reference's line breaks: "Holiday meals," / "gifts, and diapers"
-        // / "for Central Indiana" / "families." (decision 50).
+        // / "for Central Indiana" / "families." (decision 51).
         headline: [lines(".hero h1 .lead"), lines(".hero h1 .accent")],
         sub: lines(".hero .sub"),
       };
@@ -1050,6 +1050,73 @@ test.describe("get involved tabs", () => {
     await page.goto("/");
     await page.waitForTimeout(300);
     expect(await page.evaluate(() => window.scrollY)).toBe(0);
+  });
+
+  // Section links scroll smoothly; wait until the page has stopped moving.
+  const settled = (page: import("@playwright/test").Page) =>
+    page.waitForFunction(
+      () =>
+        new Promise<boolean>((resolve) => {
+          const y = window.scrollY;
+          setTimeout(() => resolve(window.scrollY === y), 250);
+        }),
+    );
+  // Back to the top the way a reader gets there, with a key (after a section
+  // link, a browser keeps the page on the section until the reader scrolls;
+  // a script scroll does not count), then by script where the key does not
+  // scroll (a phone has no Home key).
+  const toTop = async (page: import("@playwright/test").Page) => {
+    await settled(page);
+    await page.keyboard.press("Home");
+    await settled(page);
+    await page.evaluate(() => window.scrollTo({ top: 0, behavior: "instant" }));
+    await settled(page);
+    expect(await page.evaluate(() => window.scrollY)).toBe(0);
+  };
+
+  // After a section link the fragment stays in the address, and a refresh
+  // keeps the reader where they were instead of jumping back to the section
+  // (on a phone, Contact is the bottom of the page). See decision 50.
+  test("a refresh after a section link keeps the reader where they were", async ({ page }) => {
+    await page.goto("/");
+    await page.locator('a[href="/#contact"]:visible').first().click();
+    await expect(page.locator("#contact")).toBeInViewport();
+    expect(new URL(page.url()).hash).toBe("#contact");
+    await toTop(page);
+    await page.reload();
+    await page.waitForLoadState("load");
+    await settled(page);
+    expect(await page.evaluate(() => window.scrollY)).toBe(0);
+    expect(new URL(page.url()).hash).toBe("#contact");
+  });
+
+  test("a refresh on the section a link led to stays there", async ({ page }) => {
+    await page.goto("/");
+    await page.locator('a[href="/#contact"]:visible').first().click();
+    await expect(page.locator("#contact")).toBeInViewport();
+    await settled(page);
+    await page.reload();
+    await page.waitForLoadState("load");
+    await expect(page.locator("#contact")).toBeInViewport();
+  });
+
+  test("a refreshed tab link keeps its tab without jumping", async ({ page }) => {
+    await page.goto("/#volunteer");
+    await expect(page.locator("#volunteer")).toBeVisible();
+    await expect(page.locator("#get-involved")).toBeInViewport();
+    await toTop(page);
+    await page.reload();
+    await page.waitForLoadState("load");
+    await settled(page);
+    expect(await page.evaluate(() => window.scrollY)).toBe(0);
+    await expect(page.locator("#tab-volunteer")).toHaveAttribute("aria-selected", "true");
+    expect(new URL(page.url()).hash).toBe("#volunteer");
+  });
+
+  test("a section link from another page lands on its section", async ({ page }) => {
+    await page.goto("/#contact");
+    await expect(page.locator("#contact")).toBeInViewport();
+    expect(new URL(page.url()).hash).toBe("#contact");
   });
 
   test("a tab link in the URL opens that tab", async ({ page }) => {

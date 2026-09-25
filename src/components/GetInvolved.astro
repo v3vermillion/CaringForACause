@@ -121,6 +121,8 @@ const mailto = (subject: string) =>
     });
 
     // Links like /#volunteer open the matching tab and scroll to the section.
+    // When a page opens with one in its address, the layout holds it and
+    // places the reader (Base.astro), so here the tab only opens.
     const fromHash = () => {
       const id = decodeURIComponent(location.hash.slice(1));
       if (panels.some((p) => p.id === id)) {
@@ -130,7 +132,10 @@ const mailto = (subject: string) =>
       }
       return false;
     };
-    if (!fromHash()) select(panels[0]!.id);
+    const held = document.documentElement.dataset.heldHash;
+    const heldId = held ? decodeURIComponent(held.slice(1)) : "";
+    if (panels.some((p) => p.id === heldId)) select(heldId);
+    else if (!fromHash()) select(panels[0]!.id);
     window.addEventListener("hashchange", fromHash);
   });
 </script>

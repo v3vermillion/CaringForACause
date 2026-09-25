@@ -95,7 +95,7 @@ Rules that keep it premium rather than busy:
 
 ## 3. Banner specification
 
-Goal: within the first screen on a phone, a visitor sees real people, her name in her own lettering (in the bar), understands what the organization does, and can choose "Help me" or "Donate." See `docs/DESIGN.md` and decisions 26 and 50.
+Goal: within the first screen on a phone, a visitor sees real people, her name in her own lettering (in the bar), understands what the organization does, and can choose "Help me" or "Donate." See `docs/DESIGN.md` and decisions 26 and 51.
 
 - **Background:** a slow, silent crossfade of four of her event photos (28-second cycle, 7 seconds each), each drifting slowly larger while it shows, under a night veil that keeps white text above 7:1. On phones it fills the banner, showing in a band above the words; on desktop it occupies the right side at close to its native width and the veil hides its edge. The wave at the foot of the banner cuts it. Under `prefers-reduced-motion`, the first photo stays still.
 - **Words:** "Together we can." as the eyebrow, the headline (its last line in lavender italic), the subhead. All from her materials.
