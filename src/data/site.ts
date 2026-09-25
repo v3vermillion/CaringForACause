@@ -175,14 +175,14 @@ export const hero = {
       focus: "center 10%",
     },
     {
-      file: "holiday-gift-bags.jpg",
-      alt: "",
-      focus: "center 18%",
-    },
-    {
       file: "families-banner.jpg",
       alt: "",
       focus: "center 30%",
+    },
+    {
+      file: "holiday-gift-bags.jpg",
+      alt: "",
+      focus: "center 18%",
     },
     {
       file: "holiday-shopping.jpg",
