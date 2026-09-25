@@ -1106,7 +1106,7 @@ const { items, donate, help } = navigation;
   .menu-brand-text {
     display: grid;
     gap: 0.3842rem;
-    font-family: var(--font-menu);
+    font-family: var(--font-serif);
   }
 
   .menu-brand-name {
@@ -1256,7 +1256,7 @@ const { items, donate, help } = navigation;
   }
 
   .menu-label {
-    font-family: var(--font-menu);
+    font-family: var(--font-serif);
     font-weight: 430;
     position: relative;
     top: -0.1134rem;
@@ -1406,18 +1406,6 @@ const { items, donate, help } = navigation;
     font-weight: 100 900;
     font-display: swap;
     unicode-range: U+0066;
-  }
-
-  /* Serif for the phone menu: a Literata display cut, Latin only. */
-  @font-face {
-    font-family: "Menu Serif";
-    src: url("/fonts/menu-serif.woff2") format("woff2");
-    font-weight: 300 600;
-    font-display: swap;
-  }
-
-  :root {
-    --font-menu: "Menu Serif", Georgia, "Times New Roman", serif;
   }
 
   html.menu-open {

@@ -67,11 +67,13 @@ Three pages. The home page is the route map; the two doors lead to their own pag
 ├───────────────────────────────────────────────┤
 │ CONTACT: Call · Email · Facebook · Need help? │  #contact
 ├───────────────────────────────────────────────┤
-│ FOOTER (night): mark over wordmark · [Donate] │
-│ Never give up.    Explore: Help me · About ·  │
-│ Programs · Get involved · Contact             │
+│ FOOTER (near-black, from her reference):      │
+│ lit mark · her lockup artwork · [Donate] ·    │
+│ Never give up.  │  Explore: Help me · About ·│
+│ Programs · Get involved · Contact │           │
 │ Connect with us: phone · email · Facebook     │
-│ legal name · city · copyright                 │
+│ ── lit rule ── mark │ legal name │ city ·     │
+│ serving area │ © year                         │
 └───────────────────────────────────────────────┘
 
 /apply    Help me: four steps (about you · household · what you need ·
@@ -93,7 +95,7 @@ Brand colors are sampled from the final logo file.
 | `--purple`     | `#6008D7` | Brand, buttons, headings            | White on it 8.4:1; on paper 7.9:1    |
 | `--crimson`    | `#BA010C` | Heart, Donate button on paper       | White on it 6.8:1; on paper 6.4:1    |
 | `--signal`     | `#E2202C` | The one crimson on night: "Help me" | White on it 4.6:1 (large, bold text) |
-| `--night`      | `#1B0F2E` | Hero and footer                     | White on it 18.2:1                   |
+| `--night`      | `#1B0F2E` | Hero, dark cards, page openers      | White on it 18.2:1                   |
 | `--night-soft` | `#C9B6F2` | Secondary text on night             | 9.9:1                                |
 | `--paper`      | `#FAF7FD` | Page background                     |                                      |
 | `--lilac`      | `#EFE6FA` | Get involved section                |                                      |
@@ -102,7 +104,7 @@ Brand colors are sampled from the final logo file.
 
 All text pairings pass WCAG AA; most pass AAA.
 
-**Marks:** her wordmark and the heart-and-hands mark are inline SVG tracings of her logo files (`src/assets/brand/`, decision 29). The wordmark is white on the banner and in the footer; the mark appears in the header, the menu, the footer, and the link preview. The logo's purple measures about 2.2:1 against `--night`, so the full logo is never placed directly on the dark background.
+**Marks:** her wordmark and the heart-and-hands mark are inline SVG tracings of her logo files (`src/assets/brand/`, decision 29). The wordmark is white on the banner and lavender in the footer; the mark appears in the header, the menu, the footer (lit, and drawn in lines in the record), and the link preview. The menu and the footer sit on the near-black navy of the owner's references rather than on `--night`. The logo's purple measures about 2.2:1 against `--night`, so the full logo is never placed directly on the dark background.
 
 **Type:**
 
