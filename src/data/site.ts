@@ -114,7 +114,7 @@ export const facts = {
     "Which phone number should families call?",
   ),
   email: needsConfirmation(
-    "Caringforacause2015@gmail.com",
+    "caringforacause2015@gmail.com",
     "caring4acausesupportiveservices.com, which also lists Caring4acause2015@gmail.com",
     "Which email address should be public?",
   ),

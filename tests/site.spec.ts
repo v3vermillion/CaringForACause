@@ -881,7 +881,7 @@ test.describe("navigation", () => {
     // The one action is centred under her lettering, not left with the lockup.
     // The lettering is centred inside a link that spans its column, so its
     // own box is the measure (the link's edge is the page's).
-    const wordmark = (await page.locator(".site-footer svg.brand-wordmark").boundingBox())!;
+    const wordmark = (await page.locator(".site-footer .brand svg.wordmark").boundingBox())!;
     const button = (await donate.boundingBox())!;
     const inkCentre = wordmark.x + wordmark.width / 2;
     expect(Math.abs(button.x + button.width / 2 - inkCentre)).toBeLessThan(20);

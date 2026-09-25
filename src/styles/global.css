@@ -21,11 +21,11 @@
   --font-display: "Bricolage Grotesque Variable", "Arial Rounded MT Bold", system-ui, sans-serif;
   --font-body: "Atkinson Hyperlegible Next", system-ui, -apple-system, "Segoe UI", sans-serif;
   /* The serif of the two surfaces built from the owner's references, the
-     phone menu and the footer (decisions 44 and 47): the Literata subset
+     phone menu and the footer (decisions 44 and 48): the Literata subset
      declared below. */
   --font-serif: "Site Serif", Georgia, "Times New Roman", serif;
   /* The footer's sans: an Assistant subset, the closest open face to the one
-     the owner's reference sets its links and contact details in (decision 47). */
+     the owner's reference sets its links and contact details in (decision 48). */
   --font-footer: "Footer Sans", "Source Sans 3", "Segoe UI", system-ui, sans-serif;
 
   /* Type scale (major third, 1.25) on an 18px base for easy reading on phones.
