@@ -16,10 +16,13 @@ type Props = {
   description?: string;
   /** Preload the largest above-the-fold image so it doesn't wait behind fonts. */
   preloadImage?: { srcset: string; sizes: string; type: string };
+  /** The home page paints the serif's italic on its first screen; nothing else does. */
+  preloadItalic?: boolean;
 };
 
 const {
   preloadImage,
+  preloadItalic = false,
   title = `${org.name} | ${claim(facts.serviceArea)}`,
   description = `${org.shortName} helps families in ${claim(facts.serviceArea)} with holiday meals and gifts, monthly diapers, and school supplies.`,
 } = Astro.props;
@@ -99,8 +102,16 @@ const structuredData = {
     <link rel="preload" href={displayFont} as="font" type="font/woff2" crossorigin />
     <link rel="preload" href={bodyFont} as="font" type="font/woff2" crossorigin />
     <link rel="preload" href={bodyBoldFont} as="font" type="font/woff2" crossorigin />
-    <link rel="preload" href="/fonts/brand-f.woff2" as="font" type="font/woff2" crossorigin />
     <link rel="preload" href="/fonts/serif.woff2" as="font" type="font/woff2" crossorigin />
+    {preloadItalic && (
+      <link
+        rel="preload"
+        href="/fonts/serif-italic.woff2"
+        as="font"
+        type="font/woff2"
+        crossorigin
+      />
+    )}
     <link rel="preload" href="/fonts/footer-sans.woff2" as="font" type="font/woff2" crossorigin />
     <link rel="canonical" href={canonical} />
     <meta name="theme-color" content="#1b0f2e" />
@@ -125,6 +136,16 @@ const structuredData = {
     <meta name="twitter:title" content={title} />
     <meta name="twitter:description" content={description} />
     <script is:inline type="application/ld+json" set:html={JSON.stringify(structuredData)}></script>
+    <!-- The two doors' pages are fetched and rendered when a visitor shows
+         intent (a hover or a touch on their link), so the change of page
+         is immediate; browsers without speculation rules ignore this. -->
+    <script is:inline type="speculationrules">
+      {
+        "prerender": [
+          { "where": { "href_matches": ["/donate", "/apply"] }, "eagerness": "moderate" }
+        ]
+      }
+    </script>
     <!-- Marks the document before anything is painted, so a page can show
          its JavaScript-only parts from the first paint instead of revealing
          them later and moving what is below (the application form). -->

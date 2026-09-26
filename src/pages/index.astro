@@ -12,7 +12,7 @@ import TrustFacts from "../components/TrustFacts.astro";
 import Base from "../layouts/Base.astro";
 ---
 
-<Base>
+<Base preloadItalic>
   <SiteHeader />
   <main id="main">
     <!-- On desktop these three fill the first screen: the banner takes the
@@ -22,6 +22,27 @@ import Base from "../layouts/Base.astro";
       <TrustFacts />
       <SeasonalBanner />
     </div>
+    <!-- The first screen takes the window's height as it was when the page
+         opened, and again whenever the window's width changes (a resize, a
+         rotation). A change of height alone (a tablet's browser bar
+         collapsing, a tool stretching the window to photograph the whole
+         page) leaves it as it is, so nothing below it moves. Without
+         JavaScript the stylesheet's own viewport height applies. -->
+    <script is:inline>
+      (function () {
+        var root = document.documentElement;
+        var width = innerWidth;
+        var fit = function () {
+          root.style.setProperty("--first-screen-vh", innerHeight + "px");
+        };
+        fit();
+        addEventListener("resize", function () {
+          if (innerWidth === width) return;
+          width = innerWidth;
+          fit();
+        });
+      })();
+    </script>
     <Programs />
     <GetInvolved />
     <About />
@@ -39,7 +60,7 @@ import Base from "../layouts/Base.astro";
     .first-screen {
       display: flex;
       flex-direction: column;
-      min-height: calc(100vh - var(--top-chrome));
+      min-height: calc(var(--first-screen-vh, 100vh) - var(--top-chrome));
     }
     .first-screen > :global(.hero) {
       flex: 1;

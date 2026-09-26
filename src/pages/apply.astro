@@ -1,6 +1,7 @@
 ---
 import SiteFooter from "../components/SiteFooter.astro";
 import SiteHeader from "../components/SiteHeader.astro";
+import Wave from "../components/Wave.astro";
 import Base from "../layouts/Base.astro";
 import { claim, show } from "../data/facts.ts";
 import { applyPage, facts, getHelp, links, org, programs } from "../data/site";
@@ -40,6 +41,7 @@ const heard = [
           <a href={`mailto:${email}`}>{email}</a>.
         </p>
       </div>
+      <Wave kind="into-paper" id="wp" class="page-wave" />
     </section>
 
     <section class="section" aria-labelledby="form-title">
@@ -789,11 +791,15 @@ const heard = [
     margin-bottom: var(--space-s);
   }
 
+  /* The heading a family reads on each step: the site's serif, like every
+     heading. */
   .legend-title {
-    font-family: var(--font-display);
+    font-family: var(--font-serif);
     font-size: var(--step-2);
-    font-weight: 750;
-    letter-spacing: -0.02em;
+    font-weight: 700;
+    line-height: 1.08;
+    letter-spacing: -0.012em;
+    text-wrap: balance;
   }
 
   .legend-hint {

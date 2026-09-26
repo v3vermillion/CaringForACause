@@ -36,9 +36,9 @@
      formula gave on the class's reference screen. */
   --step--1: 0.9rem;
   --step-0: 1.125rem;
-  --step-1: 1.406rem;
+  --step-1: 1.25rem; /* the lede and summaries: a phone's section title is 1.7 times it */
   --step-2: 1.6rem;
-  --step-3: 1.9rem;
+  --step-3: 2.1rem; /* the banner headline's 33 reference px */
   --step-4: 2.384rem;
 
   --space-xs: 0.5rem;
@@ -52,14 +52,17 @@
   --r-card: 1.25rem;
   --r-img: 0.875rem;
   /* Rules and card edges: one pixel of the class scale, never thinner than a
-     device can draw, so they scale on a 2560px monitor like everything else. */
+     device can draw, so they scale on a 1600px monitor like everything else. */
   --hairline: max(1px, 0.0625rem);
 
   --measure: 62ch;
+  /* The wave between surfaces (src/components/Wave.astro): the banner's 84
+     reference px on phones and tablets, 92 on desktop. */
+  --wave-h: 5.25rem;
   /* The content column is 90% of the class's reference width, scaled, so it
      is 90% of the screen with a 5% gutter each side on every device. Where
      the scale stops (a phone-class window wider than about 450px, a desktop
-     wider than 2560px) the column stops with it and sits centred, so the
+     wider than 1600px) the column stops with it and sits centred, so the
      page never reflows inside a class. (Written as plain min()/max(): Chromium
      computes "100% - 2 * var(--gutter)" as 0 when the gutter nests a calc()
      around a min().) */
@@ -75,14 +78,20 @@
      phone reference on phones, the 768px-wide tablet reference on tablets, and
      the 1280px-wide reference on desktop (the desktop banner alone scales by
      height, --u, so it can end at the season strip). */
-  --rp: min(calc(100vw / 393), 1.15px); /* stops growing past the largest phone (about 450px) */
+  /* A plain division, with its cap (1.15px, the largest phone at about
+     450px) in the media query under this block rather than a min(): Firefox
+     resolves a min() or max() of lengths to a whole number of sixtieths of a
+     pixel, which made this 59/60 px on a 393px screen and every size built
+     on it (the lockup is 155 of them) 1.7% short (decision 56). */
+  --rp: calc(100vw / 393);
   --sp: var(--rp);
 
   /* What sits above the first screen: the header, plus the preview notice
      while indexing is off (html.preview). The desktop banner fills the rest. */
   /* The header bar scales with --sp; its Donate link is a 44px tap target,
      so the bar can never be shorter than that (a desktop window narrower
-     than about 940px). Plus the 1px rule under it. */
+     than about 940px). Plus the 1px rule under it. Desktop sets its own,
+     taller bar below. */
   --header-h: calc(max(60 * var(--sp), 44px) + 1px);
   --notice-h: calc(1.753rem + 1px);
   --top-chrome: var(--header-h);
@@ -90,6 +99,13 @@
      facts (1rem padding twice, a 0.9rem line at 1.6, two borders) and the
      season strip (0.6rem padding twice, a 44px link, one border). */
   --strips-h: calc(2rem + 1.44rem + 2px + 1.2rem + max(44px, 44 * var(--sp)) + 1px);
+}
+
+/* The phone scale stops growing past the largest phone (393px times 1.15). */
+@media (min-width: 451.95px) {
+  :root {
+    --rp: 1.15px;
+  }
 }
 
 html.preview {
@@ -100,11 +116,20 @@ html.preview {
    300 to 700, with the copyright sign and the bullet the footer's record
    uses (public/fonts/serif-LICENSE.txt). The footer draws it on every page,
    so it is preloaded in the layout like the other faces the page sets
-   (decision 42). */
+   (decision 42). Its italic is the same cut at weight 700 only, for the
+   banner headline's last line (public/fonts/serif-italic-LICENSE.txt). */
 @font-face {
   font-family: "Site Serif";
   src: url("/fonts/serif.woff2") format("woff2");
   font-weight: 300 700;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Site Serif";
+  src: url("/fonts/serif-italic.woff2") format("woff2");
+  font-weight: 700;
+  font-style: italic;
   font-display: swap;
 }
 
@@ -123,6 +148,7 @@ html.preview {
     --sp: calc(100vw / 768);
     --wide: 90vw;
     --gutter: 5vw;
+    --step-1: 1.32rem;
     --step-2: 1.876rem;
     --step-3: 2.36rem;
     --step-4: 3.228rem;
@@ -133,13 +159,27 @@ html.preview {
 @media (min-width: 56rem) {
   :root {
     --rp: 1px;
-    --sp: min(calc(100vw / 1280), 2px); /* stops growing past 2560px */
-    --wide: min(90vw, 2304px); /* 1152 reference px times the 2px cap of --sp */
-    --gutter: max(5vw, 50vw - 1152px);
+    /* Stops growing past 1600px: a wider monitor shows the 1600px page
+       centred (decision 53), as a wide phone shows the largest phone's. */
+    --sp: calc(100vw / 1280); /* capped at 1.25px (a 1600px screen) below */
+    --wide: min(90vw, 1440px); /* 1152 reference px times the 1.25px cap of --sp */
+    --gutter: max(5vw, 50vw - 720px);
+    --step-1: 1.406rem;
+    /* The desktop bar is 72 reference px (her lockup and the links need the
+       room); the 44px floor still applies in a narrow window. */
+    --header-h: calc(max(72 * var(--sp), 44px) + 1px);
     --step-2: 1.9rem;
     --step-3: 2.75rem;
     --step-4: 4rem;
     --space-xl: 6rem;
+    --wave-h: 5.75rem;
+  }
+}
+
+/* The desktop scale stops growing at a 1600px screen (1280px times 1.25). */
+@media (min-width: 1600px) {
+  :root {
+    --sp: 1.25px;
   }
 }
 
@@ -168,6 +208,22 @@ html {
   text-size-adjust: 100%;
   scroll-behavior: smooth;
   scroll-padding-top: 5rem;
+}
+
+/* Moving between pages cross-fades the page under a bar that stays put
+   (same-origin navigations only, in browsers that support cross-document
+   view transitions; others navigate as before). */
+@media (prefers-reduced-motion: no-preference) {
+  @view-transition {
+    navigation: auto;
+  }
+  .site-header {
+    view-transition-name: site-header;
+  }
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation-duration: 220ms;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -203,25 +259,28 @@ body > .site-footer {
   margin-top: auto;
 }
 
+/* Headings are set in the serif of the owner's references, as the banner's
+   headline is (decision 52); the smallest heading and every control stay in
+   Bricolage. The footer sets its own faces and is unchanged. */
 h1,
 h2,
 h3,
 h4 {
-  font-family: var(--font-display);
+  font-family: var(--font-serif);
   line-height: 1.08;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.012em;
   margin: 0;
   text-wrap: balance;
 }
 
 h1 {
   font-size: var(--step-4);
-  font-weight: 800;
+  font-weight: 700;
 }
 
 h2 {
   font-size: var(--step-3);
-  font-weight: 750;
+  font-weight: 700;
 }
 
 h3 {
@@ -230,8 +289,10 @@ h3 {
 }
 
 h4 {
+  font-family: var(--font-display);
   font-size: var(--step-1);
   font-weight: 700;
+  letter-spacing: -0.02em;
 }
 
 p,
@@ -266,9 +327,11 @@ a {
   color: #fff;
 }
 
+/* The states the composition tests cannot measure (focus, hover, blur) are
+   in rem too, with a 2px floor on the ring, so they scale with the class. */
 :focus-visible {
-  outline: 3px solid var(--focus);
-  outline-offset: 3px;
+  outline: max(2px, 0.1875rem) solid var(--focus);
+  outline-offset: 0.1875rem;
   border-radius: 0.25rem;
 }
 
@@ -293,21 +356,41 @@ a {
   margin-top: var(--space-s);
 }
 
-/* Section openers: a small purple label, the heading, one lede line. */
+/* Section openers: a small tracked label over a short lit rule, the heading,
+   one lede line, as the owner's reference sets them ("OUR PROGRAMS" over a
+   purple rule). The label is set in capitals here; the text stays sentence
+   case in the document. */
 .eyebrow {
   display: block;
-  margin-bottom: 0.6rem;
+  margin-bottom: 0.9rem;
   font-family: var(--font-display);
-  font-size: var(--step--1);
+  font-size: 0.75rem;
   font-weight: 700;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
   color: var(--purple);
+}
+
+.eyebrow::after {
+  content: "";
+  display: block;
+  width: 2.25rem;
+  height: 0.1875rem;
+  margin-top: 0.55rem;
+  border-radius: 0.125rem;
+  background: linear-gradient(90deg, var(--purple), #d43a92);
 }
 
 .on-dark .eyebrow {
   color: var(--night-soft);
 }
 
+.on-dark .eyebrow::after {
+  background: linear-gradient(90deg, #a06cff, #e0489a);
+}
+
 .lede {
+  max-width: 48ch;
   font-size: var(--step-1);
   line-height: 1.45;
   color: var(--muted);
@@ -389,15 +472,29 @@ a {
   background: #950009;
 }
 
-/* The signal: crimson with its own glow. One per screen. */
+/* The signal: the banner's glossy crimson pill, lit along its top rim, with
+   its glow. One per screen. */
 .button--signal {
-  background: var(--signal);
+  /* The sheen stays light enough that white on the lit top still reads at
+     4.5:1: the gradient starts at the signal itself and the sheen is thin. */
+  background:
+    linear-gradient(180deg, rgb(255 255 255 / 0.12), rgb(255 255 255 / 0) 30%),
+    linear-gradient(135deg, var(--signal) 0%, #d1141f 55%, #a80c17 100%);
   color: #fff;
-  box-shadow: 0 10px 30px rgb(226 32 44 / 0.35);
+  box-shadow:
+    inset 0 0 0 var(--hairline) rgb(255 255 255 / 0.22),
+    0 0.625rem 1.875rem rgb(226 32 44 / 0.38),
+    0 0.125rem 0.375rem rgb(120 0 10 / 0.3);
 }
 
 .button--signal:hover {
-  background: var(--crimson);
+  background:
+    linear-gradient(180deg, rgb(255 255 255 / 0.14), rgb(255 255 255 / 0) 30%),
+    linear-gradient(135deg, #d61c28 0%, var(--crimson) 55%, #96000b 100%);
+  box-shadow:
+    inset 0 0 0 var(--hairline) rgb(255 255 255 / 0.3),
+    0 0.875rem 2.25rem rgb(226 32 44 / 0.48),
+    0 0.125rem 0.375rem rgb(120 0 10 / 0.3);
 }
 
 .button--outline {
@@ -415,8 +512,8 @@ a {
   background: rgb(255 255 255 / 0.1);
   box-shadow: inset 0 0 0 0.125rem rgb(255 255 255 / 0.35);
   color: #fff;
-  -webkit-backdrop-filter: blur(12px);
-  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(0.75rem);
+  backdrop-filter: blur(0.75rem);
 }
 
 .button--glass:hover {
@@ -504,7 +601,7 @@ a {
 .textarea:focus {
   border-color: var(--purple);
   outline: none;
-  box-shadow: 0 0 0 3px rgb(96 8 215 / 0.2);
+  box-shadow: 0 0 0 0.1875rem rgb(96 8 215 / 0.2);
 }
 
 .input[aria-invalid="true"],
@@ -561,15 +658,26 @@ a {
 }
 
 .choice:has(input:focus-visible) {
-  outline: 3px solid var(--focus);
-  outline-offset: 3px;
+  outline: max(2px, 0.1875rem) solid var(--focus);
+  outline-offset: 0.1875rem;
 }
 
-/* Page openers for the donation and application pages. */
+/* Page openers for the donation and application pages: night, lit like the
+   About section, ending in the wave onto the paper below (decision 52). */
 .page-hero {
-  padding-block: var(--space-l) var(--space-l);
+  position: relative;
+  padding-block: var(--space-l) calc(var(--space-l) + var(--wave-h));
   background:
-    radial-gradient(70% 60% at 100% 0%, rgb(96 8 215 / 0.35), transparent 60%), var(--night);
+    radial-gradient(50rem 24rem at 100% 0, rgb(96 8 215 / 0.4), transparent 70%),
+    radial-gradient(30rem 16rem at 0 100%, rgb(200 40 120 / 0.2), transparent 70%), var(--night);
+}
+
+.page-hero .page-wave {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: var(--wave-h);
 }
 
 .page-hero .back {

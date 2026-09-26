@@ -9,8 +9,10 @@ const items = [
 ];
 ---
 
-<!-- Proof in one line, on the same night ground as the banner. Its height on
-     desktop is part of --strips-h (src/styles/global.css); keep them in step. -->
+<!-- Proof in one line, on the night band the banner's wave lands on. Its
+     height on desktop is part of --strips-h (src/styles/global.css); keep
+     them in step: the two borders count, so they stay even where one is
+     invisible. -->
 <section class="facts on-dark" aria-label="About our organization">
   <div class="wrap">
     <ul>
@@ -24,8 +26,10 @@ const items = [
 <style>
   .facts {
     background: var(--night);
-    border-top: 1px solid rgb(255 255 255 / 0.1);
-    border-bottom: 1px solid rgb(255 255 255 / 0.1);
+    /* Both edges are invisible: the band under the banner is one surface
+       between the two waves. The borders keep --strips-h's arithmetic. */
+    border-top: 1px solid transparent;
+    border-bottom: 1px solid transparent;
   }
 
   /* Sized in the class's reference pixel (--rp) so every phone and every
@@ -51,7 +55,8 @@ const items = [
   }
 
   /* Hairline dividers between items, only on desktop where the three share
-     one row; on phones and tablets they wrap, and a divider would float. */
+     one row; on phones and tablets they wrap, and a divider would float.
+     Lit violet to rose, like the rules of her references. */
   @media (min-width: 56rem) {
     li + li::before {
       content: "";
@@ -60,7 +65,12 @@ const items = [
       top: 0.35em;
       bottom: 0.35em;
       width: 1px;
-      background: rgb(255 255 255 / 0.25);
+      background: linear-gradient(
+        180deg,
+        rgb(160 108 255 / 0.2),
+        #a06cff 50%,
+        rgb(224 72 154 / 0.3)
+      );
     }
   }
 </style>

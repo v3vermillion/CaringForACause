@@ -70,10 +70,10 @@ Everything the site needs to carry for Caring for a Cause, where each piece live
 The site is organized by what a visitor came to do, not by org chart. Two audiences, two doors, one page each.
 
 ```
-HEADER        mark + name · About · Programs · Get involved · Contact · Donate
-BANNER        her photos + wordmark + one sentence + Help me / Donate     who she is, choose your path
-TRUST         since 2015 · 501(c)(3) · Toys for Tots                      proof, in a glance
-SEASON        one line: what's needed now + one link                      urgency, changes each season
+HEADER        mark + her lockup · About · Programs · Get involved · Contact · Donate
+BANNER        her photos + tagline + headline + one sentence + Help me / Donate, then the wave     choose your path
+TRUST         since 2015 · 501(c)(3) · Toys for Tots                      proof, in a glance (night band)
+SEASON        one line: what's needed now + one link, then the wave       urgency, changes each season
 PROGRAMS      tiles, Get help card, then 4 programs as rows               what exists, who qualifies, how to apply
 GET INVOLVED  4 tabs: Sponsor · Donate · Volunteer · Partner              one action per supporter
 ABOUT         her portrait + story + "Do More" video on request           why to trust it
@@ -95,10 +95,10 @@ Rules that keep it premium rather than busy:
 
 ## 3. Banner specification
 
-Goal: within the first screen on a phone, a visitor sees real people, her name in her own lettering, understands what the organization does, and can choose "Help me" or "Donate." See `docs/DESIGN.md` and decision 26.
+Goal: within the first screen on a phone, a visitor sees real people, her name in her own lettering (in the bar), understands what the organization does, and can choose "Help me" or "Donate." See `docs/DESIGN.md` and decisions 26 and 51.
 
-- **Background:** a slow, silent crossfade of four of her event photos (28-second cycle, 7 seconds each) under a night veil that keeps white text above 7:1. On phones it fills the banner; on desktop it occupies the right side at close to its native width and the veil hides its edge. Under `prefers-reduced-motion`, the first photo stays still.
-- **Words:** wordmark, "Together we can.", headline, subhead. All from her materials.
-- **Doors:** two, the same size: "Help me" (signal) and "Donate" (glass), stacked on phones, side by side from 36rem. A test checks the "Help me" door fits an iPhone 15 Safari screen.
+- **Background:** a slow, silent crossfade of four of her event photos (28-second cycle, 7 seconds each), each drifting slowly larger while it shows, under a night veil that keeps white text above 7:1. On phones it fills the banner, showing in a band above the words; on desktop it occupies the right side at close to its native width and the veil hides its edge. The wave at the foot of the banner cuts it. Under `prefers-reduced-motion`, the first photo stays still.
+- **Words:** "Together we can." as the eyebrow, the headline (its last line in lavender italic), the subhead. All from her materials.
+- **Doors:** two, the same size, side by side on every screen: "Help me" (signal) and "Donate" (a pale ring), each a pill with one line under it. A test checks both fit an iPhone 12 mini and an iPhone 15 Safari screen.
 - **Preview notice:** kept (required until launch) as one slim line.
 - **Facts:** the trust line sits directly below the banner on the same ground.

@@ -12,7 +12,10 @@ const phone = show(facts.phone);
   <SiteHeader />
   <main id="main" class="section">
     <div class="wrap stack">
-      <h1>This page doesn't exist</h1>
+      <div>
+        <span class="eyebrow">Page not found</span>
+        <h1>This page doesn't exist</h1>
+      </div>
       <p>
         The link may be out of date. Go to the <a href="/">home page</a>, or call us at{" "}
         <a href={phone.href}>{phone.display}</a>.
@@ -32,3 +35,10 @@ const phone = show(facts.phone);
   </main>
   <SiteFooter />
 </Base>
+
+<style>
+  /* A page-opener heading, not the banner's: one step down. */
+  h1 {
+    font-size: var(--step-3);
+  }
+</style>

@@ -1,12 +1,17 @@
 ---
 import { about } from "../data/site";
 import Photo from "./Photo.astro";
+import Wave from "./Wave.astro";
 
 const watchUrl = `https://www.youtube.com/watch?v=${about.video.id}`;
 ---
 
 <!-- Her portrait, her story, and her feature video, which loads only when asked for. -->
 <section id="about" class="section section--night on-dark" aria-labelledby="about-title">
+  <!-- The ribbons carry the lilac above into the night, and the night out
+       onto the paper below (decision 52). -->
+  <Wave kind="into-night" id="wc" above="#efe6fa" class="wave-top" />
+  <Wave kind="into-paper" id="wd" class="wave-bottom" />
   <div class="wrap">
     <div class="grid">
       <figure class="portrait">
@@ -83,7 +88,34 @@ const watchUrl = `https://www.youtube.com/watch?v=${about.video.id}`;
 </script>
 
 <style>
+  /* Night, lit as the references light it: violet at the top right, a
+     little magenta at the bottom left, each sized in rem from its corner. */
+  #about {
+    position: relative;
+    padding-block: calc(var(--space-xl) + var(--wave-h));
+    background:
+      radial-gradient(50rem 24rem at 100% 0, rgb(96 8 215 / 0.38), transparent 70%),
+      radial-gradient(30rem 16rem at 0 100%, rgb(200 40 120 / 0.2), transparent 70%), var(--night);
+  }
+
+  #about :global(.wave-top),
+  #about :global(.wave-bottom) {
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: var(--wave-h);
+  }
+
+  #about :global(.wave-top) {
+    top: 0;
+  }
+
+  #about :global(.wave-bottom) {
+    bottom: 0;
+  }
+
   .grid {
+    position: relative;
     display: grid;
     gap: var(--space-l);
     align-items: center;
@@ -98,8 +130,8 @@ const watchUrl = `https://www.youtube.com/watch?v=${about.video.id}`;
   .portrait :global(.portrait-photo) {
     border-radius: var(--r-card);
     box-shadow:
-      0 30px 80px rgb(0 0 0 / 0.45),
-      0 0 0 1px rgb(255 255 255 / 0.14);
+      0 1.875rem 5rem rgb(0 0 0 / 0.45),
+      0 0 0 var(--hairline) rgb(255 255 255 / 0.14);
   }
 
   .copy p {
@@ -131,7 +163,7 @@ const watchUrl = `https://www.youtube.com/watch?v=${about.video.id}`;
     overflow: hidden;
     border-radius: var(--r-card);
     background: #000;
-    box-shadow: 0 30px 80px rgb(0 0 0 / 0.45);
+    box-shadow: 0 1.875rem 5rem rgb(0 0 0 / 0.45);
   }
 
   .frame :global(iframe) {
@@ -142,9 +174,16 @@ const watchUrl = `https://www.youtube.com/watch?v=${about.video.id}`;
     border: 0;
   }
 
-  @media (min-width: 56rem) {
+  /* From tablets up her portrait stands beside her story. */
+  @media (min-width: 36rem) {
     .grid {
       grid-template-columns: 5fr 7fr;
+      gap: var(--space-l);
+    }
+  }
+
+  @media (min-width: 56rem) {
+    .grid {
       gap: var(--space-xl);
     }
   }
