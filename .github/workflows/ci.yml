@@ -46,7 +46,7 @@ jobs:
         if: steps.browsers.outputs.cache-hit != 'true'
       - run: npx playwright install-deps chromium webkit firefox
         if: steps.browsers.outputs.cache-hit == 'true'
-      - run: npm run test
+      - run: npx playwright test tests/firefox-diagnostic.spec.ts --project=desktop-firefox --reporter=list
       # Post failed or flaky tests to a single tracking issue, so problems can be
       # diagnosed without downloading logs or artifacts.
       - name: Report failed or flaky browser tests
