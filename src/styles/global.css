@@ -78,7 +78,12 @@
      phone reference on phones, the 768px-wide tablet reference on tablets, and
      the 1280px-wide reference on desktop (the desktop banner alone scales by
      height, --u, so it can end at the season strip). */
-  --rp: min(calc(100vw / 393), 1.15px); /* stops growing past the largest phone (about 450px) */
+  /* A plain division, with its cap (1.15px, the largest phone at about
+     450px) in the media query under this block rather than a min(): Firefox
+     resolves a min() or max() of lengths to a whole number of sixtieths of a
+     pixel, which made this 59/60 px on a 393px screen and every size built
+     on it (the lockup is 155 of them) 1.7% short (decision 56). */
+  --rp: calc(100vw / 393);
   --sp: var(--rp);
 
   /* What sits above the first screen: the header, plus the preview notice
@@ -94,6 +99,13 @@
      facts (1rem padding twice, a 0.9rem line at 1.6, two borders) and the
      season strip (0.6rem padding twice, a 44px link, one border). */
   --strips-h: calc(2rem + 1.44rem + 2px + 1.2rem + max(44px, 44 * var(--sp)) + 1px);
+}
+
+/* The phone scale stops growing past the largest phone (393px times 1.15). */
+@media (min-width: 451.95px) {
+  :root {
+    --rp: 1.15px;
+  }
 }
 
 html.preview {
@@ -149,7 +161,7 @@ html.preview {
     --rp: 1px;
     /* Stops growing past 1600px: a wider monitor shows the 1600px page
        centred (decision 53), as a wide phone shows the largest phone's. */
-    --sp: min(calc(100vw / 1280), 1.25px);
+    --sp: calc(100vw / 1280); /* capped at 1.25px (a 1600px screen) below */
     --wide: min(90vw, 1440px); /* 1152 reference px times the 1.25px cap of --sp */
     --gutter: max(5vw, 50vw - 720px);
     --step-1: 1.406rem;
@@ -161,6 +173,13 @@ html.preview {
     --step-4: 4rem;
     --space-xl: 6rem;
     --wave-h: 5.75rem;
+  }
+}
+
+/* The desktop scale stops growing at a 1600px screen (1280px times 1.25). */
+@media (min-width: 1600px) {
+  :root {
+    --sp: 1.25px;
   }
 }
 
