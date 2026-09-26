@@ -146,12 +146,15 @@ test.describe("device compatibility", () => {
   test("the banner photo and every photo load in a supported format", async ({ page }) => {
     // Scrolled with an instant, in-page scrollIntoView rather than the
     // locator's scrollIntoViewIfNeeded, which first waits for the image to
-    // hold still: the page scrolls smoothly, so on a slow WebKit runner the
-    // wait outlasted the test (decision 57).
+    // hold still: the banner photo drifts for nine seconds once the montage
+    // starts, and on WebKit that wait ran to 8.7s before a smooth scroll of
+    // the rest, which outlasted the test on a slow runner (decision 57).
     const loaded = async (img: import("@playwright/test").Locator) => {
       await img.evaluate((el) => el.scrollIntoView({ block: "center", behavior: "instant" }));
       await expect
-        .poll(() => img.evaluate((el: HTMLImageElement) => el.complete && el.naturalWidth > 0))
+        .poll(() => img.evaluate((el: HTMLImageElement) => el.complete && el.naturalWidth > 0), {
+          timeout: 15_000,
+        })
         .toBe(true);
     };
     await page.goto("/");
