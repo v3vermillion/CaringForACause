@@ -144,8 +144,12 @@ test.describe("device compatibility", () => {
   });
 
   test("the banner photo and every photo load in a supported format", async ({ page }) => {
+    // Scrolled with an instant, in-page scrollIntoView rather than the
+    // locator's scrollIntoViewIfNeeded, which first waits for the image to
+    // hold still: the page scrolls smoothly, so on a slow WebKit runner the
+    // wait outlasted the test (decision 57).
     const loaded = async (img: import("@playwright/test").Locator) => {
-      await img.scrollIntoViewIfNeeded();
+      await img.evaluate((el) => el.scrollIntoView({ block: "center", behavior: "instant" }));
       await expect
         .poll(() => img.evaluate((el: HTMLImageElement) => el.complete && el.naturalWidth > 0))
         .toBe(true);
