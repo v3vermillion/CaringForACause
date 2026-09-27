@@ -43,7 +43,8 @@ Everything visitors read lives in **`src/data/site.ts`**. Common updates:
 
 | To change                                          | Edit                                                                         |
 | -------------------------------------------------- | ---------------------------------------------------------------------------- |
-| The strip under the banner                         | `seasonalBanner` (set `active: false` to hide it)                            |
+| The four programs under the banner (icons, lines)  | `programStrip`                                                               |
+| The season strip below them                        | `seasonalBanner` (set `active: false` to hide it)                            |
 | Phone, email, Facebook, city                       | `facts`                                                                      |
 | Banner words (headline in two parts) and the doors | `hero`                                                                       |
 | Menu and header links                              | `navigation`                                                                 |

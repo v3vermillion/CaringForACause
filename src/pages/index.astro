@@ -4,11 +4,11 @@ import Contact from "../components/Contact.astro";
 import Gallery from "../components/Gallery.astro";
 import GetInvolved from "../components/GetInvolved.astro";
 import Hero from "../components/Hero.astro";
+import ProgramStrip from "../components/ProgramStrip.astro";
 import Programs from "../components/Programs.astro";
 import SeasonalBanner from "../components/SeasonalBanner.astro";
 import SiteFooter from "../components/SiteFooter.astro";
 import SiteHeader from "../components/SiteHeader.astro";
-import TrustFacts from "../components/TrustFacts.astro";
 import Base from "../layouts/Base.astro";
 ---
 
@@ -19,7 +19,7 @@ import Base from "../layouts/Base.astro";
          slack so the season strip ends exactly at the fold. -->
     <div class="first-screen">
       <Hero />
-      <TrustFacts />
+      <ProgramStrip />
       <SeasonalBanner />
     </div>
     <!-- The first screen takes the window's height as it was when the page
@@ -64,6 +64,31 @@ import Base from "../layouts/Base.astro";
     }
     .first-screen > :global(.hero) {
       flex: 1;
+    }
+  }
+
+  /* Desktop: one composition at every screen size. The banner and the strip
+     under it fill the first screen above the season strip, and every size in
+     them is a multiple of --u, one pixel of the reference layout (a 1280 × 800
+     screen, where the banner is 577px tall and the strip 136). Taller screens
+     scale it up, shorter ones down, so the picture is the same on every
+     computer. The width bounds it too (a portrait screen such as an iPad Pro
+     12.9 upright is tall but narrow), so the text column never outgrows its
+     45% of the screen and the headline keeps its four lines. Below two thirds
+     the type would get too small, so the scale stops there and the season
+     strip drops just under the fold instead; above 1.25 (a 1600px screen) it
+     stops with the rest of the site (decision 53), and the photo fills the
+     room left. */
+  @media (min-width: 56rem) {
+    .first-screen {
+      --u: clamp(
+        0.66px,
+        min(
+          calc((var(--first-screen-vh, 100vh) - var(--top-chrome) - var(--strips-h)) / 713),
+          calc(100vw / 1280)
+        ),
+        1.25px
+      );
     }
   }
 </style>

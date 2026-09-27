@@ -218,6 +218,39 @@ export const hero = {
 };
 
 /**
+ * The strip under the banner (decision 58): the four things the banner
+ * promises, each with its icon from her reference, a title, one line, and
+ * the program it opens. The lines are the programs' own words (see
+ * `programs`), cut to fit a phone's column of four.
+ */
+export const programStrip = [
+  {
+    icon: "meals",
+    title: "Holiday Meals",
+    body: "Holiday food boxes for local families.",
+    href: "/#holiday-assistance",
+  },
+  {
+    icon: "gifts",
+    title: "Gifts",
+    body: "Toys and gifts from a child's wish list.",
+    href: "/#holiday-assistance",
+  },
+  {
+    icon: "diapers",
+    title: "Diapers",
+    body: "A reliable monthly supply of diapers.",
+    href: "/#diaper-drive",
+  },
+  {
+    icon: "school",
+    title: "School Supplies",
+    body: "Supplies and hygiene items for students.",
+    href: "/#back-to-school",
+  },
+] as const;
+
+/**
  * Site navigation: one map, four sections. The desktop links and the phone
  * menu share it; the menu adds "Help me" before it and "Donate" after it,
  * and nothing else (decision 38).

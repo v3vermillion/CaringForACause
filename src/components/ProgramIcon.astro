@@ -1,0 +1,206 @@
+---
+/**
+ * The four program icons from the owner's reference mock (decision 58),
+ * redrawn as vector art: neon line work in pinkish white with a violet glow,
+ * crimson and violet fills. Each is drawn in its own box, the crop box of
+ * the reference at its size (meals 103 × 69, gifts 70 × 76, diapers 75 × 67,
+ * school 77 × 81), so their proportions to each other are the reference's.
+ * The glow filter and the fills are shared: ProgramStrip.astro renders the
+ * definitions once per page, and every icon refers to them by id.
+ */
+export type ProgramIconKind = "meals" | "gifts" | "diapers" | "school";
+
+interface Props {
+  kind: ProgramIconKind;
+  class?: string;
+}
+
+const { kind, class: className } = Astro.props;
+
+const boxes: Record<ProgramIconKind, string> = {
+  meals: "0 0 103 69",
+  gifts: "0 0 70 76",
+  diapers: "0 0 75 67",
+  school: "0 0 77 81",
+};
+---
+
+<svg
+  viewBox={boxes[kind]}
+  class:list={["pi", `pi--${kind}`, className]}
+  aria-hidden="true"
+  focusable="false"
+>
+  {kind === "meals" && (
+    <g filter="url(#pi-glow)">
+      <path class="ink" stroke-width="3" d="M3.5 2v14 M9 2v15.5 M14.5 2v15.5 M20 2v14" />
+      <path
+        d="M2 14.5c0 7 3.5 12 7 13.5v35.5c0 2 1.3 3.5 2.8 3.5s2.8-1.5 2.8-3.5V28c3.5-1.5 7-6.5 7-13.5z"
+        fill="url(#pi-silver)"
+      />
+      <circle
+        cx="51.5"
+        cy="35"
+        r="30.5"
+        fill="url(#pi-plate)"
+        stroke="#f5e4fa"
+        stroke-width="3.4"
+      />
+      <circle cx="51.5" cy="35" r="18" fill="url(#pi-plate-in)" />
+      <circle cx="51.5" cy="35" r="18" fill="none" stroke="#e9d8ff" stroke-width="1.8" />
+      <path
+        d="M97 1.5c-6.5 7-10.5 16.5-10.5 27.5 0 6 2.5 9.5 6 10.5v24c0 2 1.3 3.5 2.8 3.5s2.8-1.5 2.8-3.5V39.5c1.5-.5 2.5-1.8 2.5-3.5V18c0-6.5-1.2-12-3.6-16.5z"
+        fill="url(#pi-silver)"
+      />
+    </g>
+  )}
+  {kind === "gifts" && (
+    <g filter="url(#pi-glow)">
+      <rect
+        x="7"
+        y="35"
+        width="56"
+        height="39"
+        rx="4.5"
+        fill="url(#pi-violet)"
+        stroke="#f5e4fa"
+        stroke-width="3"
+      />
+      <rect
+        x="1.5"
+        y="19.5"
+        width="67"
+        height="18"
+        rx="4"
+        fill="url(#pi-red)"
+        stroke="#f5e4fa"
+        stroke-width="3"
+      />
+      <rect
+        x="31"
+        y="19.5"
+        width="8"
+        height="54.5"
+        fill="url(#pi-red)"
+        stroke="#f5e4fa"
+        stroke-width="1.8"
+      />
+      <path
+        class="ink"
+        stroke-width="3"
+        d="M35 19.5C29 7 14 3 10 11c-2.5 5 2 9.5 9 9.5 6 0 11-.5 16-1z M35 19.5C41 7 56 3 60 11c2.5 5-2 9.5-9 9.5-6 0-11-.5-16-1z"
+      />
+    </g>
+  )}
+  {kind === "diapers" && (
+    <g filter="url(#pi-glow)">
+      <path
+        d="M9 2h57c4 0 7 3 7 7v16c0 16-8 28-19.5 36.5-2.5 1.8-4 2.5-7 2.5h-18c-3 0-4.5-.7-7-2.5C10 53 2 41 2 25V9c0-4 3-7 7-7z"
+        fill="url(#pi-violet-dark)"
+        stroke="#f5e4fa"
+        stroke-width="3"
+        stroke-linejoin="round"
+      />
+      <path
+        d="M5.5 30c1 13 8.5 24 20 32-10-1-19-8-23.5-18C4.5 40 4.6 35 5.5 30z"
+        fill="url(#pi-red)"
+        stroke="#f5e4fa"
+        stroke-width="2"
+        stroke-linejoin="round"
+      />
+      <path
+        d="M69.5 30c-1 13-8.5 24-20 32 10-1 19-8 23.5-18 1.5-4 1.4-9 .5-14z"
+        fill="url(#pi-red)"
+        stroke="#f5e4fa"
+        stroke-width="2"
+        stroke-linejoin="round"
+      />
+      <rect
+        x="-0.5"
+        y="15"
+        width="14"
+        height="18"
+        rx="4"
+        fill="url(#pi-red)"
+        stroke="#f5e4fa"
+        stroke-width="2.4"
+      />
+      <rect
+        x="61.5"
+        y="15"
+        width="14"
+        height="18"
+        rx="4"
+        fill="url(#pi-red)"
+        stroke="#f5e4fa"
+        stroke-width="2.4"
+      />
+    </g>
+  )}
+  {kind === "school" && (
+    <g filter="url(#pi-glow)">
+      <path class="ink" stroke-width="3.2" d="M30 10.5c0-6 3.8-9 8.5-9s8.5 3 8.5 9" />
+      <rect
+        x="1.5"
+        y="30"
+        width="10.5"
+        height="35"
+        rx="5.2"
+        fill="url(#pi-violet)"
+        stroke="#f5e4fa"
+        stroke-width="2.6"
+      />
+      <rect
+        x="65"
+        y="30"
+        width="10.5"
+        height="35"
+        rx="5.2"
+        fill="url(#pi-violet)"
+        stroke="#f5e4fa"
+        stroke-width="2.6"
+      />
+      <path
+        d="M11 79.5V35C11 20 23 9.5 38.5 9.5S66 20 66 35v44.5z"
+        fill="url(#pi-red)"
+        stroke="#f5e4fa"
+        stroke-width="3.2"
+        stroke-linejoin="round"
+      />
+      <path class="ink" stroke-width="2.8" d="M31.5 29.5c2-3 4.5-4.2 7-4.2s5 1.2 7 4.2" />
+      <rect
+        x="19.5"
+        y="52"
+        width="38"
+        height="25.5"
+        rx="6"
+        fill="url(#pi-violet)"
+        stroke="#f5e4fa"
+        stroke-width="3"
+      />
+      <rect
+        x="17"
+        y="45"
+        width="43"
+        height="12.5"
+        rx="5.5"
+        fill="url(#pi-violet)"
+        stroke="#f5e4fa"
+        stroke-width="3"
+      />
+    </g>
+  )}
+</svg>
+
+<style is:global>
+  .pi {
+    display: block;
+    overflow: visible;
+  }
+  .pi .ink {
+    fill: none;
+    stroke: #f5e4fa;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+</style>

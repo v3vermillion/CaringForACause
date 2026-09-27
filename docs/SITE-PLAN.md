@@ -17,7 +17,7 @@ The site is delivered to Tamara as a finished gift. Contact with her is kept to 
 | ----------------------- | ------------------------------------------------------- | --------------------------------------- |
 | Families in need        | What programs exist, whether they qualify, how to apply | Hero "I need help" → Get help           |
 | Holiday sponsors        | How to sponsor a family, right now                      | Seasonal banner → Sponsor tab           |
-| Donors                  | A way to give, proof it's a real nonprofit              | Donate button → Donate tab, trust facts |
+| Donors                  | A way to give, proof it's a real nonprofit              | Donate button → Donate tab, proof line  |
 | Volunteers and stylists | How to sign up                                          | Get involved → Volunteer or Partner tab |
 | Funders and press       | Who runs it, mission, EIN                               | About, trust strip                      |
 
@@ -47,8 +47,9 @@ Three pages. The home page is the route map; the two doors lead to their own pag
 │  one line under each                          │
 │ ~~~ wave: violet and crimson ribbons ~~~~~~~~ │
 ├───────────────────────────────────────────────┤
-│ Trust facts: since 2015 · 501(c)(3) + EIN ·   │  night band
-│              Toys for Tots partner            │
+│ Holiday Meals · Gifts · Diapers · School      │  night band: program strip
+│  Supplies (her neon icons, a line each)       │  → each opens its program
+│ — since 2015 · 501(c)(3) + EIN · Toys for Tots — │  proof line
 │ Seasonal strip (night)     Sponsor a family → │  optional
 │ ~~~ wave ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ │
 ├───────────────────────────────────────────────┤

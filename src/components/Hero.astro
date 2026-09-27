@@ -477,26 +477,10 @@ const cycle = slides.length * 7;
   }
 
   @media (min-width: 56rem) {
-    /* Desktop: one composition at every screen size. The banner fills the
-       first screen (src/pages/index.astro), and every size in it is a multiple
-       of --u, one pixel of the reference layout (a 1280 × 800 screen, where
-       the banner is 577px tall). Taller screens scale it up, shorter ones
-       down, so the picture is the same on every computer. The width bounds
-       it too (a portrait screen such as an iPad Pro 12.9 upright is tall but
-       narrow), so the text column never outgrows its 45% of the screen and
-       the headline keeps its four lines. Below seven tenths the type would
-       get too small, so the scale stops there and the season strip drops just
-       under the fold instead; above 1.25 (a 1600px screen) it stops with the
-       rest of the site (decision 53), and the photo fills the room left. */
+    /* Desktop: every size is a multiple of --u, one pixel of the 1280 × 800
+       reference layout, set on the first screen (src/pages/index.astro) so
+       the banner and the strip under it share it. */
     .hero {
-      --u: clamp(
-        0.7px,
-        min(
-          calc((var(--first-screen-vh, 100vh) - var(--top-chrome) - var(--strips-h)) / 577),
-          calc(100vw / 1280)
-        ),
-        1.25px
-      );
       --wave-h: calc(92 * var(--u));
       /* Where the text column starts: the .wrap's left edge. */
       --wrap-left: calc((100% - min(100% - 2 * var(--gutter), var(--wide))) / 2);

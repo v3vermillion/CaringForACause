@@ -1,7 +1,7 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test } from "@playwright/test";
 import { claim } from "../src/data/facts";
-import { facts, hero, navigation, org, seasonalBanner } from "../src/data/site";
+import { facts, hero, navigation, org, programStrip, seasonalBanner } from "../src/data/site";
 
 // The content the tests expect comes from the content file, so a content
 // edit (a confirmed year, a renamed section) never needs a test edit. The
@@ -94,6 +94,7 @@ test.describe("device compatibility", () => {
       ".checklist summary",
       ".site-footer li a",
       ".door",
+      ".strip .item",
       ".yt-link",
       ".arrow-link",
       ".tile",
@@ -348,8 +349,8 @@ test.describe("scrolling stability", () => {
     expect(give!.y + give!.height).toBeLessThanOrEqual(657);
   });
 
-  // On desktop the banner, the trust facts, and the season strip fill the
-  // first screen exactly, whatever the screen height (see decision 39).
+  // On desktop the banner, the program strip, and the season strip fill the
+  // first screen exactly, whatever the screen height (decisions 39 and 58).
   for (const [width, height] of [
     [1024, 768], // an iPad in landscape
     [1024, 1366], // an iPad Pro 12.9 upright: tall, so the width bounds the scale
@@ -1195,6 +1196,23 @@ test.describe("get involved tabs", () => {
     await page.keyboard.press("ArrowLeft");
     await expect(page.locator("#tab-partner")).toBeFocused();
     await expect(page.locator("#partner")).toBeVisible();
+  });
+});
+
+test.describe("the program strip", () => {
+  // The four things the banner promises, each a link to its program, with
+  // the proof line under them (decision 58).
+  test("lists the four programs, each opening its program", async ({ page }) => {
+    await page.goto("/");
+    const items = page.locator(".strip .item");
+    await expect(items).toHaveCount(programStrip.length);
+    for (const [i, item] of programStrip.entries()) {
+      await expect(items.nth(i).locator(".name")).toHaveText(item.title);
+      await expect(items.nth(i)).toHaveAttribute("href", item.href);
+      const target = item.href.replace("/#", "#");
+      await expect(page.locator(target)).toHaveCount(1);
+    }
+    await expect(page.locator(".strip .pi")).toHaveCount(programStrip.length);
   });
 });
 

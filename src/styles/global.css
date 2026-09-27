@@ -95,10 +95,10 @@
   --header-h: calc(max(60 * var(--sp), 44px) + 1px);
   --notice-h: calc(1.753rem + 1px);
   --top-chrome: var(--header-h);
-  /* The two strips under the banner on desktop, each one line: the trust
-     facts (1rem padding twice, a 0.9rem line at 1.6, two borders) and the
-     season strip (0.6rem padding twice, a 44px link, one border). */
-  --strips-h: calc(2rem + 1.44rem + 2px + 1.2rem + max(44px, 44 * var(--sp)) + 1px);
+  /* What ends the first screen on desktop below the banner and its program
+     strip (both in --u, src/pages/index.astro): the season strip, one line
+     (0.6rem padding twice, a 44px link, one border). */
+  --strips-h: calc(1.2rem + max(44px, 44 * var(--sp)) + 1px);
 }
 
 /* The phone scale stops growing past the largest phone (393px times 1.15). */
