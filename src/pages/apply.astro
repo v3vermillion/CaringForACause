@@ -4,17 +4,18 @@ import SiteHeader from "../components/SiteHeader.astro";
 import Wave from "../components/Wave.astro";
 import Base from "../layouts/Base.astro";
 import { claim, show } from "../data/facts.ts";
-import { applyPage, facts, getHelp, links, org, programs } from "../data/site";
+import { applyPage, facts, getHelp, links, org } from "../data/site";
 
 const phone = show(facts.phone);
 const email = show(facts.email);
 const mailto = `mailto:${email}?subject=${encodeURIComponent(applyPage.emailSubject)}`;
-const description = `${getHelp.whoCanApply} Apply online for holiday meals and gifts, monthly diapers, school supplies, and free haircuts in ${claim(facts.serviceArea)}.`;
+const description = `Apply for holiday meals and gifts, monthly diapers, school supplies, or a free haircut in ${claim(facts.serviceArea)}. Anyone struggling right now can apply.`;
 
-const names = Object.fromEntries(programs.map((p) => [p.slug, p.name]));
+const steps = applyPage.steps;
+const stepCount = steps.length;
 const adults = ["1", "2", "3", "4", "5", "6 or more"];
 const children = ["0", "1", "2", "3", "4", "5", "6", "7", "8 or more"];
-const ages = Array.from({ length: 18 }, (_, i) => String(i));
+const ages = ["Under 1", ...Array.from({ length: 17 }, (_, i) => String(i + 1))];
 const heard = [
   "Facebook",
   "A friend or family member",
@@ -23,6 +24,17 @@ const heard = [
   "Another organization",
   "Other",
 ];
+/** The follow-up list a kind of help opens, keyed as `applyPage.needs[].followUp` names it. */
+const followUps = {
+  holidays: { legend: "Which holidays?", options: applyPage.holidays },
+  diaperSizes: { legend: "Which sizes?", options: applyPage.diaperSizes },
+  grades: { legend: "Which grades?", options: applyPage.grades },
+};
+/**
+ * The aside's heading asks the question, so its body is the home card's line
+ * without the question it opens with.
+ */
+const sideBody = getHelp.talk.body;
 ---
 
 <Base title={`Apply for help | ${org.shortName}`} description={description}>
@@ -30,15 +42,15 @@ const heard = [
   <main id="main">
     <section class="page-hero on-dark">
       <div class="wrap">
-        <a class="back" href="/">
-          ← Back to home
-        </a>
         <span class="eyebrow">{applyPage.eyebrow}</span>
         <h1>{applyPage.heading}</h1>
         <p class="lede">{getHelp.whoCanApply}</p>
         <p class="talk">
-          Prefer to talk? Call <a href={phone.href}>{phone.display}</a> or email{" "}
-          <a href={`mailto:${email}`}>{email}</a>.
+          {applyPage.intro}{" "}
+          <span class="talk-offer">
+            Prefer to talk? Call <a href={phone.href}>{phone.display}</a> or email{" "}
+            <a href={`mailto:${email}`}>{email}</a>.
+          </span>
         </p>
       </div>
       <Wave kind="into-paper" id="wp" class="page-wave" />
@@ -47,390 +59,426 @@ const heard = [
     <section class="section" aria-labelledby="form-title">
       <div class="wrap">
         <div class="layout">
-          <h2 id="form-title" class="visually-hidden">
-            Application form
-          </h2>
+          <div class="main">
+            <h2 id="form-title" class="visually-hidden">
+              Application form
+            </h2>
 
-          {links.familyApplication && (
-            <p class="online">
-              <a
-                class="button button--purple"
-                href={links.familyApplication}
-                target="_blank"
-                rel="noopener"
-              >
-                Use our online application
-                <span class="visually-hidden"> (opens in a new tab)</span>
-              </a>
-            </p>
-          )}
+            {links.familyApplication && (
+              <p class="online">
+                <a
+                  class="button button--purple"
+                  href={links.familyApplication}
+                  target="_blank"
+                  rel="noopener"
+                >
+                  Use our online application
+                  <span class="visually-hidden"> (opens in a new tab)</span>
+                </a>
+              </p>
+            )}
 
-          <noscript>
-            <p class="noscript">
-              {applyPage.noScript} Call <a href={phone.href}>{phone.display}</a> or email{" "}
-              <a href={mailto}>{email}</a>.
-            </p>
-          </noscript>
+            <noscript>
+              <p class="noscript">
+                {applyPage.noScript} Call <a href={phone.href}>{phone.display}</a> or email{" "}
+                <a href={mailto}>{email}</a>.
+              </p>
+            </noscript>
 
-          <form class="apply" data-apply novalidate>
-            <ol class="progress" aria-label="Steps">
-              {applyPage.steps.map((step, i) => (
-                <li data-progress={step.id} aria-current={i === 0 ? "step" : undefined}>
-                  <span class="num" aria-hidden="true">
-                    {i + 1}
-                  </span>
-                  <span class="step-title">{step.title}</span>
-                </li>
-              ))}
-            </ol>
+            <form class="apply" data-apply novalidate>
+              <ol class="progress" aria-label="Steps">
+                {steps.map((step, i) => (
+                  <li data-progress={step.id} aria-current={i === 0 ? "step" : undefined}>
+                    <button type="button" class="progress-go" data-goto={i} disabled>
+                      <span class="num" aria-hidden="true">
+                        {i + 1}
+                      </span>
+                      <span class="step-title">
+                        <span class="step-prefix">
+                          Step {i + 1} of {stepCount}:{" "}
+                        </span>
+                        {step.title}
+                      </span>
+                    </button>
+                  </li>
+                ))}
+              </ol>
+              <p class="visually-hidden" aria-live="polite" data-step-live></p>
 
-            <p class="intro">{applyPage.intro}</p>
+              <div class="sheet">
+                <!-- Step 1: about you -->
+                <fieldset class="step" data-step="you">
+                  <legend>
+                    <span class="eyebrow">Step 1 of {stepCount}</span>
+                    <span class="legend-title" tabindex="-1" data-step-title>
+                      {steps[0]!.title}
+                    </span>
+                    <span class="legend-hint">{steps[0]!.hint}</span>
+                  </legend>
+                  <div class="fields two">
+                    <div class="field">
+                      <label for="firstName">First name</label>
+                      <input
+                        class="input"
+                        id="firstName"
+                        name="firstName"
+                        autocomplete="given-name"
+                        autocapitalize="words"
+                        spellcheck="false"
+                        enterkeyhint="next"
+                        required
+                      />
+                    </div>
+                    <div class="field">
+                      <label for="lastName">Last name</label>
+                      <input
+                        class="input"
+                        id="lastName"
+                        name="lastName"
+                        autocomplete="family-name"
+                        autocapitalize="words"
+                        spellcheck="false"
+                        enterkeyhint="next"
+                        required
+                      />
+                    </div>
+                    <div class="field">
+                      <label for="phone">Phone number</label>
+                      <input
+                        class="input"
+                        id="phone"
+                        name="phone"
+                        type="tel"
+                        autocomplete="tel"
+                        inputmode="tel"
+                        enterkeyhint="next"
+                        maxlength="14"
+                        required
+                        data-kind="phone"
+                      />
+                    </div>
+                    <div class="field">
+                      <label for="email">
+                        Email{" "}
+                        <span class="optional" data-email-optional>
+                          (optional)
+                        </span>
+                      </label>
+                      <input
+                        class="input"
+                        id="email"
+                        name="email"
+                        type="email"
+                        autocomplete="email"
+                        inputmode="email"
+                        autocapitalize="none"
+                        spellcheck="false"
+                        enterkeyhint="next"
+                      />
+                    </div>
+                  </div>
+                  <fieldset class="field">
+                    <legend class="label">Best way to reach you</legend>
+                    <div class="choices">
+                      {applyPage.contactMethods.map((method, i) => (
+                        <label class="choice">
+                          <input
+                            type="radio"
+                            name="contactMethod"
+                            value={method}
+                            checked={i === 0}
+                          />
+                          {method}
+                        </label>
+                      ))}
+                    </div>
+                  </fieldset>
+                </fieldset>
 
-            <!-- Step 1: about you -->
-            <fieldset class="step" data-step="you">
-              <legend>
-                <span class="legend-title">{applyPage.steps[0]!.title}</span>
-                <span class="legend-hint">{applyPage.steps[0]!.hint}</span>
-              </legend>
-              <div class="fields two">
-                <div class="field">
-                  <label for="firstName">First name</label>
-                  <input
-                    class="input"
-                    id="firstName"
-                    name="firstName"
-                    autocomplete="given-name"
-                    required
-                  />
-                </div>
-                <div class="field">
-                  <label for="lastName">Last name</label>
-                  <input
-                    class="input"
-                    id="lastName"
-                    name="lastName"
-                    autocomplete="family-name"
-                    required
-                  />
-                </div>
-                <div class="field">
-                  <label for="phone">Phone</label>
-                  <input
-                    class="input"
-                    id="phone"
-                    name="phone"
-                    type="tel"
-                    autocomplete="tel"
-                    inputmode="tel"
-                    required
-                    data-kind="phone"
-                  />
-                </div>
-                <div class="field">
-                  <label for="email">
-                    Email <span class="optional">(optional)</span>
-                  </label>
-                  <input
-                    class="input"
-                    id="email"
-                    name="email"
-                    type="email"
-                    autocomplete="email"
-                    inputmode="email"
-                  />
-                </div>
-              </div>
-              <fieldset class="field">
-                <legend class="label">Best way to reach you</legend>
-                <div class="choices">
-                  {applyPage.contactMethods.map((method, i) => (
-                    <label class="choice">
-                      <input type="radio" name="contactMethod" value={method} checked={i === 0} />
-                      {method}
-                    </label>
-                  ))}
-                </div>
-              </fieldset>
-            </fieldset>
+                <!-- Step 2: household -->
+                <fieldset class="step" data-step="household" hidden>
+                  <legend>
+                    <span class="eyebrow">Step 2 of {stepCount}</span>
+                    <span class="legend-title" tabindex="-1" data-step-title>
+                      {steps[1]!.title}
+                    </span>
+                    <span class="legend-hint">{steps[1]!.hint}</span>
+                  </legend>
+                  <div class="fields">
+                    <div class="field">
+                      <label for="street">Street address</label>
+                      <input
+                        class="input"
+                        id="street"
+                        name="street"
+                        autocomplete="address-line1"
+                        enterkeyhint="next"
+                        required
+                      />
+                    </div>
+                  </div>
+                  <div class="fields three">
+                    <div class="field">
+                      <label for="city">City</label>
+                      <input
+                        class="input"
+                        id="city"
+                        name="city"
+                        autocomplete="address-level2"
+                        autocapitalize="words"
+                        enterkeyhint="next"
+                        required
+                      />
+                    </div>
+                    <div class="field">
+                      <label for="zip">ZIP code</label>
+                      <input
+                        class="input"
+                        id="zip"
+                        name="zip"
+                        autocomplete="postal-code"
+                        inputmode="numeric"
+                        enterkeyhint="next"
+                        maxlength="10"
+                        required
+                        data-kind="zip"
+                      />
+                    </div>
+                    <div class="field">
+                      <label for="county">County</label>
+                      <select class="select" id="county" name="county" enterkeyhint="next" required>
+                        <option value="">Choose one</option>
+                        {applyPage.counties.map((c) => (
+                          <option value={c}>{c}</option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+                  <div class="fields two">
+                    <div class="field">
+                      <label for="adults">Adults in your household</label>
+                      <select class="select" id="adults" name="adults" enterkeyhint="next" required>
+                        {adults.map((n) => (
+                          <option value={n}>{n}</option>
+                        ))}
+                      </select>
+                    </div>
+                    <div class="field">
+                      <label for="childCount">Children in your household</label>
+                      <select
+                        class="select"
+                        id="childCount"
+                        name="childCount"
+                        enterkeyhint="next"
+                        required
+                        data-child-count
+                      >
+                        {children.map((n) => (
+                          <option value={n}>{n}</option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+                  <div class="children" data-children hidden>
+                    <p class="children-label">About each child</p>
+                    <p class="hint">
+                      Ages help us match gifts and supplies. Everything else here is optional.
+                    </p>
+                    <div class="child-rows" data-child-rows></div>
+                  </div>
+                  <template data-child-template>
+                    <div class="child-row">
+                      <p class="child-heading" data-child-heading>
+                        Child
+                      </p>
+                      <div class="child-fields">
+                        <div class="field">
+                          <label>
+                            <span class="visually-hidden" data-child-prefix></span>Age
+                          </label>
+                          <select class="select" name="childAge" enterkeyhint="next" required>
+                            <option value="">Choose one</option>
+                            {ages.map((a) => (
+                              <option value={a}>{a}</option>
+                            ))}
+                          </select>
+                        </div>
+                        <div class="field">
+                          <label>
+                            <span class="visually-hidden" data-child-prefix></span>Girl or boy{" "}
+                            <span class="optional">(optional)</span>
+                          </label>
+                          <select class="select" name="childGender" enterkeyhint="next">
+                            <option value="">Choose one</option>
+                            <option value="Girl">Girl</option>
+                            <option value="Boy">Boy</option>
+                            <option value="Prefer not to say">Prefer not to say</option>
+                          </select>
+                        </div>
+                        <div class="field">
+                          <label>
+                            <span class="visually-hidden" data-child-prefix></span>Clothing size{" "}
+                            <span class="optional">(optional)</span>
+                          </label>
+                          <input
+                            class="input"
+                            name="childClothing"
+                            autocomplete="off"
+                            enterkeyhint="next"
+                            placeholder="e.g. 5T, youth M"
+                          />
+                        </div>
+                        <div class="field">
+                          <label>
+                            <span class="visually-hidden" data-child-prefix></span>Shoe size{" "}
+                            <span class="optional">(optional)</span>
+                          </label>
+                          <input
+                            class="input"
+                            name="childShoe"
+                            autocomplete="off"
+                            enterkeyhint="next"
+                            placeholder="e.g. 12C"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </template>
+                </fieldset>
 
-            <!-- Step 2: household -->
-            <fieldset class="step" data-step="household" hidden>
-              <legend>
-                <span class="legend-title">{applyPage.steps[1]!.title}</span>
-                <span class="legend-hint">{applyPage.steps[1]!.hint}</span>
-              </legend>
-              <div class="fields">
-                <div class="field">
-                  <label for="street">Street address</label>
-                  <input
-                    class="input"
-                    id="street"
-                    name="street"
-                    autocomplete="street-address"
-                    required
-                  />
-                </div>
-              </div>
-              <div class="fields three">
-                <div class="field">
-                  <label for="city">City</label>
-                  <input
-                    class="input"
-                    id="city"
-                    name="city"
-                    autocomplete="address-level2"
-                    required
-                  />
-                </div>
-                <div class="field">
-                  <label for="zip">ZIP code</label>
-                  <input
-                    class="input"
-                    id="zip"
-                    name="zip"
-                    autocomplete="postal-code"
-                    inputmode="numeric"
-                    required
-                    data-kind="zip"
-                  />
-                </div>
-                <div class="field">
-                  <label for="county">County</label>
-                  <select class="select" id="county" name="county" required>
-                    <option value="">Choose one</option>
-                    {applyPage.counties.map((c) => (
-                      <option value={c}>{c}</option>
+                <!-- Step 3: what you need -->
+                <fieldset class="step" data-step="needs" hidden>
+                  <legend>
+                    <span class="eyebrow">Step 3 of {stepCount}</span>
+                    <span class="legend-title" tabindex="-1" data-step-title>
+                      {steps[2]!.title}
+                    </span>
+                    <span class="legend-hint">{steps[2]!.hint}</span>
+                  </legend>
+                  <fieldset class="needs">
+                    <legend class="visually-hidden">Kinds of help</legend>
+                    <p class="error" data-needs-error role="alert" hidden>
+                      Choose at least one kind of help.
+                    </p>
+                    {applyPage.needs.map((need) => (
+                      <div class="need">
+                        <label class="need-card">
+                          <input
+                            type="checkbox"
+                            name="need"
+                            value={need.title}
+                            data-toggle={need.id}
+                          />
+                          <span class="need-title">{need.title}</span>
+                          <span class="need-line">{need.line}</span>
+                        </label>
+                        {need.followUp && (
+                          <fieldset class="sub" data-sub={need.id} hidden>
+                            <legend class="label">{followUps[need.followUp].legend}</legend>
+                            <div class="choices">
+                              {followUps[need.followUp].options.map((option) => (
+                                <label class="choice">
+                                  <input type="checkbox" name={need.followUp} value={option} />
+                                  {option}
+                                </label>
+                              ))}
+                            </div>
+                          </fieldset>
+                        )}
+                      </div>
                     ))}
-                  </select>
-                </div>
-              </div>
-              <div class="fields two">
-                <div class="field">
-                  <label for="adults">Adults in your household</label>
-                  <select class="select" id="adults" name="adults" required>
-                    {adults.map((n) => (
-                      <option value={n}>{n}</option>
-                    ))}
-                  </select>
-                </div>
-                <div class="field">
-                  <label for="childCount">Children in your household</label>
-                  <select
-                    class="select"
-                    id="childCount"
-                    name="childCount"
-                    required
-                    data-child-count
-                  >
-                    {children.map((n) => (
-                      <option value={n}>{n}</option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-              <div class="children" data-children hidden>
-                <p class="label">About each child</p>
-                <p class="hint">
-                  Ages help us match the right gifts and supplies. Sizes are optional.
-                </p>
-                <div class="child-rows" data-child-rows></div>
-              </div>
-              <template data-child-template>
-                <div class="child-row">
+                  </fieldset>
+
                   <div class="field">
-                    <label>Age</label>
-                    <select class="select" name="childAge">
-                      {ages.map((a) => (
-                        <option value={a}>{a}</option>
+                    <label for="notes">
+                      Anything else we should know? <span class="optional">(optional)</span>
+                    </label>
+                    <textarea class="textarea" id="notes" name="notes" rows="4"></textarea>
+                  </div>
+                  <div class="field">
+                    <label for="heard">
+                      How did you hear about us? <span class="optional">(optional)</span>
+                    </label>
+                    <select class="select" id="heard" name="heard" enterkeyhint="next">
+                      <option value="">Choose one</option>
+                      {heard.map((h) => (
+                        <option value={h}>{h}</option>
                       ))}
                     </select>
                   </div>
-                  <div class="field">
-                    <label>Girl or boy</label>
-                    <select class="select" name="childGender">
-                      <option value="">Choose</option>
-                      <option value="Girl">Girl</option>
-                      <option value="Boy">Boy</option>
-                      <option value="Prefer not to say">Prefer not to say</option>
-                    </select>
-                  </div>
-                  <div class="field">
-                    <label>
-                      Clothing size <span class="optional">(optional)</span>
-                    </label>
-                    <input class="input" name="childClothing" placeholder="e.g. 5T, youth M" />
-                  </div>
-                  <div class="field">
-                    <label>
-                      Shoe size <span class="optional">(optional)</span>
-                    </label>
-                    <input class="input" name="childShoe" placeholder="e.g. 12C" />
-                  </div>
-                </div>
-              </template>
-            </fieldset>
+                </fieldset>
 
-            <!-- Step 3: what you need -->
-            <fieldset class="step" data-step="needs" hidden>
-              <legend>
-                <span class="legend-title">{applyPage.steps[2]!.title}</span>
-                <span class="legend-hint">{applyPage.steps[2]!.hint}</span>
-              </legend>
-              <p class="error" data-needs-error hidden>
-                Choose at least one kind of help.
-              </p>
-              <div class="needs">
-                <div class="need">
-                  <label class="choice need-toggle">
-                    <input
-                      type="checkbox"
-                      name="need"
-                      value={names["holiday-assistance"]}
-                      data-toggle="holiday"
-                    />
-                    {names["holiday-assistance"]}
+                <!-- Step 4: review and send -->
+                <fieldset class="step" data-step="review" hidden>
+                  <legend>
+                    <span class="eyebrow">Step 4 of {stepCount}</span>
+                    <span class="legend-title" tabindex="-1" data-step-title>
+                      {steps[3]!.title}
+                    </span>
+                    <span class="legend-hint">{steps[3]!.hint}</span>
+                  </legend>
+                  <div class="review" data-review></div>
+                  <label class="consent">
+                    <input type="checkbox" name="consent" required />
+                    <span>
+                      My answers are accurate, and {org.shortName} may contact me about help.
+                    </span>
                   </label>
-                  <fieldset class="sub" data-sub="holiday" hidden>
-                    <legend class="label">Which holidays?</legend>
-                    <div class="choices">
-                      {applyPage.holidays.map((h) => (
-                        <label class="choice">
-                          <input type="checkbox" name="holidays" value={h} />
-                          {h}
-                        </label>
-                      ))}
-                    </div>
-                  </fieldset>
-                </div>
+                  <p class="error" data-consent-error role="alert" hidden>
+                    Check the box to send your application.
+                  </p>
+                  <p class="privacy">{applyPage.privacy}</p>
+                </fieldset>
 
-                <div class="need">
-                  <label class="choice need-toggle">
-                    <input
-                      type="checkbox"
-                      name="need"
-                      value={names["diaper-drive"]}
-                      data-toggle="diapers"
-                    />
-                    Diapers
-                  </label>
-                  <fieldset class="sub" data-sub="diapers" hidden>
-                    <legend class="label">Which sizes?</legend>
-                    <div class="choices">
-                      {applyPage.diaperSizes.map((s) => (
-                        <label class="choice">
-                          <input type="checkbox" name="diaperSizes" value={s} />
-                          {s}
-                        </label>
-                      ))}
-                    </div>
-                  </fieldset>
-                </div>
-
-                <div class="need">
-                  <label class="choice need-toggle">
-                    <input
-                      type="checkbox"
-                      name="need"
-                      value={names["back-to-school"]}
-                      data-toggle="school"
-                    />
-                    School supplies
-                  </label>
-                  <fieldset class="sub" data-sub="school" hidden>
-                    <legend class="label">Which grades?</legend>
-                    <div class="choices">
-                      {applyPage.grades.map((g) => (
-                        <label class="choice">
-                          <input type="checkbox" name="grades" value={g} />
-                          {g}
-                        </label>
-                      ))}
-                    </div>
-                  </fieldset>
-                </div>
-
-                <div class="need">
-                  <label class="choice need-toggle">
-                    <input type="checkbox" name="need" value={names["haircuts"]} />
-                    Free haircut or style
-                  </label>
+                <div class="nav">
+                  <button type="button" class="button button--outline" data-back hidden>
+                    Back
+                  </button>
+                  <button type="button" class="button button--purple" data-next>
+                    Next: {steps[1]!.title}
+                  </button>
+                  <button type="submit" class="button button--signal" data-send hidden>
+                    Send my application by email
+                  </button>
                 </div>
               </div>
+            </form>
 
-              <div class="field">
-                <label for="notes">
-                  Anything else we should know? <span class="optional">(optional)</span>
-                </label>
-                <textarea class="textarea" id="notes" name="notes" rows="4"></textarea>
+            <div class="done" data-done hidden tabindex="-1">
+              <h2>{applyPage.done.heading}</h2>
+              <p>{applyPage.done.body}</p>
+              <textarea
+                class="textarea"
+                data-done-text
+                readonly
+                rows="10"
+                aria-label="Your application text"
+              ></textarea>
+              <div class="button-row">
+                <button type="button" class="button button--purple" data-copy>
+                  Copy my application
+                </button>
+                <a class="button button--outline" href={phone.href}>
+                  Call {phone.display}
+                </a>
+                <a class="arrow-link" href={mailto}>
+                  Open a blank email to us
+                </a>
               </div>
-              <div class="field">
-                <label for="heard">
-                  How did you hear about us? <span class="optional">(optional)</span>
-                </label>
-                <select class="select" id="heard" name="heard">
-                  <option value="">Choose one</option>
-                  {heard.map((h) => (
-                    <option value={h}>{h}</option>
-                  ))}
-                </select>
-              </div>
-            </fieldset>
-
-            <!-- Step 4: review and send -->
-            <fieldset class="step" data-step="review" hidden>
-              <legend>
-                <span class="legend-title">{applyPage.steps[3]!.title}</span>
-                <span class="legend-hint">{applyPage.steps[3]!.hint}</span>
-              </legend>
-              <dl class="review" data-review></dl>
-              <label class="consent">
-                <input type="checkbox" name="consent" required />
-                <span>
-                  The information above is accurate, and I'd like {org.shortName} to contact me
-                  about help.
-                </span>
-              </label>
-              <p class="error" data-consent-error hidden>
-                Please confirm your information to send.
-              </p>
-              <p class="privacy">{applyPage.privacy}</p>
-            </fieldset>
-
-            <div class="nav">
-              <button type="button" class="button button--outline" data-back hidden>
-                Back
-              </button>
-              <button type="button" class="button button--purple" data-next>
-                Next
-              </button>
-              <button type="submit" class="button button--signal" data-send hidden>
-                Send my application by email
-              </button>
-            </div>
-          </form>
-
-          <div class="done" data-done hidden tabindex="-1">
-            <h2>{applyPage.done.heading}</h2>
-            <p>{applyPage.done.body}</p>
-            <textarea
-              class="textarea"
-              data-done-text
-              readonly
-              rows="12"
-              aria-label="Your application text"
-            ></textarea>
-            <div class="button-row">
-              <button type="button" class="button button--purple" data-copy>
-                Copy the text
-              </button>
-              <a class="button button--outline" href={phone.href}>
-                Call {phone.display}
-              </a>
-              <a class="arrow-link" href={mailto}>
-                Open a blank email to us
-              </a>
             </div>
           </div>
+
+          <aside class="side on-dark" aria-labelledby="side-title">
+            <h2 id="side-title">{getHelp.talk.heading}</h2>
+            <p>{sideBody}</p>
+            <a class="button button--glass" href={phone.href}>
+              Call {phone.display}
+            </a>
+            <a class="arrow-link" href={mailto}>
+              Email us
+            </a>
+            <p class="side-note">{applyPage.privacy}</p>
+          </aside>
         </div>
       </div>
     </section>
@@ -441,70 +489,56 @@ const heard = [
 <script>
   const form = document.querySelector<HTMLFormElement>("[data-apply]");
   if (form) {
-    const email = form
-      .closest("main")!
-      .querySelector<HTMLAnchorElement>("a[href^='mailto:']")!.href;
+    const done = document.querySelector<HTMLElement>("[data-done]")!;
+    const doneText = done.querySelector<HTMLTextAreaElement>("[data-done-text]")!;
+    const email = done.querySelector<HTMLAnchorElement>("a[href^='mailto:']")!.href;
     const subject = new URL(email).searchParams.get("subject") ?? "Application for help";
     const steps = Array.from(form.querySelectorAll<HTMLFieldSetElement>("[data-step]"));
+    const titles = steps.map((step) =>
+      (step.querySelector("[data-step-title]")!.textContent ?? "").trim(),
+    );
+    const last = steps.length - 1;
     const progress = Array.from(form.querySelectorAll<HTMLElement>("[data-progress]"));
+    const live = form.querySelector<HTMLElement>("[data-step-live]")!;
     const back = form.querySelector<HTMLButtonElement>("[data-back]")!;
     const next = form.querySelector<HTMLButtonElement>("[data-next]")!;
     const send = form.querySelector<HTMLButtonElement>("[data-send]")!;
     const review = form.querySelector<HTMLElement>("[data-review]")!;
-    const done = document.querySelector<HTMLElement>("[data-done]")!;
-    const doneText = done.querySelector<HTMLTextAreaElement>("[data-done-text]")!;
     let current = 0;
+    /** Set when a Change button on the review opens a step: Next then returns there. */
+    let returnToReview = false;
 
-    // Children: one row of fields per child.
-    const count = form.querySelector<HTMLSelectElement>("[data-child-count]")!;
-    const children = form.querySelector<HTMLElement>("[data-children]")!;
-    const rows = form.querySelector<HTMLElement>("[data-child-rows]")!;
-    const template = form.querySelector<HTMLTemplateElement>("[data-child-template]")!;
-    const renderChildren = () => {
-      const n = parseInt(count.value, 10) || 0;
-      children.hidden = n === 0;
-      while (rows.children.length > n) rows.lastElementChild!.remove();
-      while (rows.children.length < n) {
-        const row = template.content.firstElementChild!.cloneNode(true) as HTMLElement;
-        const index = rows.children.length + 1;
-        row.querySelectorAll("label").forEach((label, i) => {
-          const control = label.nextElementSibling as HTMLElement;
-          const id = `child-${index}-${i}`;
-          control.id = id;
-          label.setAttribute("for", id);
-          label.insertAdjacentText("afterbegin", `Child ${index}: `);
-        });
-        rows.append(row);
-      }
+    // Validation: required fields, a phone with 10 digits, a 5-digit ZIP, and
+    // an email address when it is the chosen way to reach the family. Each
+    // message says what to enter; the label supplies the field's name.
+    const labelOf = (input: Element) => {
+      const label = input.closest(".field")?.querySelector("label");
+      return Array.from(label?.childNodes ?? [])
+        .filter((node) => node.nodeType === Node.TEXT_NODE)
+        .map((node) => node.textContent)
+        .join("")
+        .trim()
+        .toLowerCase();
     };
-    count.addEventListener("change", renderChildren);
-    renderChildren();
-
-    // Needs: a sub-group opens under each kind of help that is chosen.
-    form.querySelectorAll<HTMLInputElement>("[data-toggle]").forEach((box) => {
-      const sub = form.querySelector<HTMLElement>(`[data-sub="${box.dataset.toggle}"]`)!;
-      const sync = () => {
-        sub.hidden = !box.checked;
-      };
-      box.addEventListener("change", sync);
-      sync();
-    });
-
-    // Validation: required fields, a phone with 10 digits, a 5-digit ZIP.
     const messageFor = (input: HTMLInputElement | HTMLSelectElement) => {
       const value = input.value.trim();
-      if (input.required && !value) return "This is required.";
-      if (input.dataset.kind === "phone" && value.replace(/\D/g, "").length < 10)
-        return "Enter a phone number with area code.";
       if (input.dataset.kind === "zip" && !/^\d{5}(-\d{4})?$/.test(value))
-        return "Enter a 5-digit ZIP code.";
+        return "Enter your 5-digit ZIP code.";
+      if (input.required && !value) {
+        if (input instanceof HTMLSelectElement)
+          return input.id === "county" ? "Choose your county." : "Choose one.";
+        if (input.id === "email") return "Enter an email address, or choose Call or Text.";
+        return `Enter your ${labelOf(input)}.`;
+      }
+      if (input.dataset.kind === "phone" && value.replace(/\D/g, "").length < 10)
+        return "Enter a 10-digit phone number with the area code.";
       if (
         input instanceof HTMLInputElement &&
         input.type === "email" &&
         value &&
         !input.validity.valid
       )
-        return "Enter a valid email address.";
+        return "Enter an email address like name@example.com.";
       return "";
     };
     const setError = (input: HTMLInputElement | HTMLSelectElement, message: string) => {
@@ -550,69 +584,174 @@ const heard = [
       first?.focus();
       return !first;
     };
-    form
-      .querySelectorAll<HTMLInputElement | HTMLSelectElement>(".input, .select")
-      .forEach((input) => {
-        input.addEventListener("blur", () => {
-          if (input.value.trim() || input.getAttribute("aria-invalid"))
-            setError(input, messageFor(input));
-        });
-        input.addEventListener("input", () => {
-          if (input.getAttribute("aria-invalid")) setError(input, messageFor(input));
-        });
+    // Nothing on the first blur of an empty field; errors on Next; then a live
+    // re-check while the field is being corrected.
+    const watch = (input: HTMLInputElement | HTMLSelectElement) => {
+      input.addEventListener("blur", () => {
+        if (input.value.trim() || input.getAttribute("aria-invalid"))
+          setError(input, messageFor(input));
       });
+      input.addEventListener("input", () => {
+        if (input.getAttribute("aria-invalid")) setError(input, messageFor(input));
+      });
+    };
 
-    // The answers, as label/value pairs, for the review step and the email.
-    const answers = () => {
+    // The phone number, formatted as typed: (317) 555-1234.
+    const formatPhone = (raw: string) => {
+      const d = raw.replace(/\D/g, "").slice(0, 10);
+      if (d.length > 6) return `(${d.slice(0, 3)}) ${d.slice(3, 6)}-${d.slice(6)}`;
+      if (d.length > 3) return `(${d.slice(0, 3)}) ${d.slice(3)}`;
+      return d;
+    };
+    const phone = form.querySelector<HTMLInputElement>("#phone")!;
+    phone.addEventListener("input", () => {
+      // Only while typing at the end, so an edit in the middle keeps its caret.
+      if (phone.selectionStart !== phone.value.length) return;
+      phone.value = formatPhone(phone.value);
+    });
+
+    form.querySelectorAll<HTMLInputElement | HTMLSelectElement>(".input, .select").forEach(watch);
+
+    // Email is required when it is the chosen way to reach the family.
+    const emailInput = form.querySelector<HTMLInputElement>("#email")!;
+    const emailOptional = form.querySelector<HTMLElement>("[data-email-optional]")!;
+    const syncEmail = () => {
+      const byEmail =
+        form.querySelector<HTMLInputElement>("input[name=contactMethod]:checked")?.value ===
+        "Email";
+      emailInput.required = byEmail;
+      emailOptional.hidden = byEmail;
+      if (emailInput.getAttribute("aria-invalid")) setError(emailInput, messageFor(emailInput));
+    };
+    form
+      .querySelectorAll<HTMLInputElement>("input[name=contactMethod]")
+      .forEach((radio) => radio.addEventListener("change", syncEmail));
+    syncEmail();
+
+    // Children: one row of fields per child.
+    const count = form.querySelector<HTMLSelectElement>("[data-child-count]")!;
+    const children = form.querySelector<HTMLElement>("[data-children]")!;
+    const rows = form.querySelector<HTMLElement>("[data-child-rows]")!;
+    const template = form.querySelector<HTMLTemplateElement>("[data-child-template]")!;
+    const renderChildren = () => {
+      const n = parseInt(count.value, 10) || 0;
+      children.hidden = n === 0;
+      while (rows.children.length > n) rows.lastElementChild!.remove();
+      while (rows.children.length < n) {
+        const row = template.content.firstElementChild!.cloneNode(true) as HTMLElement;
+        const index = rows.children.length + 1;
+        row.querySelector("[data-child-heading]")!.textContent = `Child ${index}`;
+        row.querySelectorAll("label").forEach((label, i) => {
+          const control = label.nextElementSibling as HTMLInputElement | HTMLSelectElement;
+          const id = `child-${index}-${i}`;
+          control.id = id;
+          label.setAttribute("for", id);
+          label.querySelector("[data-child-prefix]")!.textContent = `Child ${index}: `;
+          watch(control);
+        });
+        rows.append(row);
+      }
+    };
+    count.addEventListener("change", renderChildren);
+    renderChildren();
+
+    // Needs: a follow-up list opens under each kind of help that has one.
+    form.querySelectorAll<HTMLInputElement>("[data-toggle]").forEach((box) => {
+      const sub = form.querySelector<HTMLElement>(`[data-sub="${box.dataset.toggle}"]`);
+      if (!sub) return;
+      const sync = () => {
+        sub.hidden = !box.checked;
+      };
+      box.addEventListener("change", sync);
+      sync();
+    });
+
+    // The answers, one group per step, for the review and the email.
+    type Row = [string, string];
+    type Group = { title: string; goto: number; rows: Row[] };
+    const answers = (): Group[] => {
       const data = new FormData(form);
       const get = (name: string) => String(data.get(name) ?? "").trim();
-      const all = (name: string) => data.getAll(name).map(String);
-      const out: [string, string][] = [
+      const all = (name: string) => data.getAll(name).map((value) => String(value).trim());
+      const you: Row[] = [
         ["Name", `${get("firstName")} ${get("lastName")}`.trim()],
-        ["Phone", get("phone")],
-        ["Email", get("email") || "(none)"],
-        ["Best way to reach", get("contactMethod")],
-        ["Address", `${get("street")}, ${get("city")} ${get("zip")} (${get("county")} County)`],
+        ["Phone", formatPhone(get("phone"))],
+      ];
+      if (get("email")) you.push(["Email", get("email")]);
+      you.push(["Reach me by", get("contactMethod")]);
+      const household: Row[] = [
+        [
+          "Address",
+          `${get("street")}, ${get("city")} ${get("zip")}${get("county") === "Other" ? "" : ` (${get("county")} County)`}`,
+        ],
         ["Adults", get("adults")],
         ["Children", get("childCount")],
       ];
-      const ages = all("childAge");
       const genders = all("childGender");
       const clothing = all("childClothing");
       const shoes = all("childShoe");
-      ages.forEach((age, i) => {
+      all("childAge").forEach((age, i) => {
         const bits = [
-          `age ${age}`,
+          age && (age === "Under 1" ? "age under 1" : `age ${age}`),
           genders[i],
           clothing[i] && `clothing ${clothing[i]}`,
           shoes[i] && `shoes ${shoes[i]}`,
         ]
           .filter(Boolean)
           .join(", ");
-        out.push([`Child ${i + 1}`, bits]);
+        household.push([`Child ${i + 1}`, bits]);
       });
-      out.push(["Help needed", all("need").join(", ")]);
-      if (all("holidays").length) out.push(["Holidays", all("holidays").join(", ")]);
-      if (all("diaperSizes").length) out.push(["Diaper sizes", all("diaperSizes").join(", ")]);
-      if (all("grades").length) out.push(["Grades", all("grades").join(", ")]);
-      if (get("notes")) out.push(["Notes", get("notes")]);
-      if (get("heard")) out.push(["Heard about us", get("heard")]);
-      return out;
+      const needs: Row[] = [["Help requested", all("need").join(", ")]];
+      if (all("holidays").length) needs.push(["Holidays", all("holidays").join(", ")]);
+      if (all("diaperSizes").length) needs.push(["Diaper sizes", all("diaperSizes").join(", ")]);
+      if (all("grades").length) needs.push(["Grades", all("grades").join(", ")]);
+      if (get("notes")) needs.push(["Notes", get("notes")]);
+      if (get("heard")) needs.push(["How you heard about us", get("heard")]);
+      return [
+        { title: titles[0]!, goto: 0, rows: you },
+        { title: titles[1]!, goto: 1, rows: household },
+        { title: titles[2]!, goto: 2, rows: needs },
+      ];
     };
     const renderReview = () => {
       review.replaceChildren(
-        ...answers().flatMap(([label, value]) => {
-          const dt = document.createElement("dt");
-          dt.textContent = label;
-          const dd = document.createElement("dd");
-          dd.textContent = value;
-          return [dt, dd];
+        ...answers().map((group) => {
+          const section = document.createElement("section");
+          section.className = "review-group";
+          const head = document.createElement("div");
+          head.className = "review-head";
+          const heading = document.createElement("h3");
+          heading.textContent = group.title;
+          const change = document.createElement("button");
+          change.type = "button";
+          change.className = "review-change";
+          change.dataset.goto = String(group.goto);
+          change.textContent = "Change";
+          const which = document.createElement("span");
+          which.className = "visually-hidden";
+          which.textContent = ` ${group.title.toLowerCase()}`;
+          change.append(which);
+          head.append(heading, change);
+          const list = document.createElement("dl");
+          list.className = "review-list";
+          group.rows.forEach(([label, value]) => {
+            const row = document.createElement("div");
+            const dt = document.createElement("dt");
+            dt.textContent = label;
+            const dd = document.createElement("dd");
+            dd.textContent = value;
+            row.append(dt, dd);
+            list.append(row);
+          });
+          section.append(head, list);
+          return section;
         }),
       );
     };
 
     const show = (index: number, moveFocus = true) => {
       current = index;
+      form.dataset.current = String(index);
       steps.forEach((step, i) => {
         step.hidden = i !== index;
       });
@@ -620,28 +759,63 @@ const heard = [
         if (i === index) item.setAttribute("aria-current", "step");
         else item.removeAttribute("aria-current");
         item.classList.toggle("passed", i < index);
+        // A passed step can be reopened; the ones ahead wait for Next.
+        item.querySelector<HTMLButtonElement>("[data-goto]")!.disabled = i >= index;
       });
       back.hidden = index === 0;
-      next.hidden = index === steps.length - 1;
-      send.hidden = index !== steps.length - 1;
-      if (index === steps.length - 1) renderReview();
+      next.hidden = index === last;
+      send.hidden = index !== last;
+      if (index < last)
+        next.textContent = returnToReview ? "Back to review" : `Next: ${titles[index + 1]}`;
+      if (index === last) renderReview();
       if (!moveFocus) return;
-      steps[index]!.scrollIntoView({ block: "start", behavior: "instant" });
-      steps[index]!.querySelector<HTMLElement>("input, select, textarea")?.focus({
+      live.textContent = `Step ${index + 1} of ${steps.length}, ${titles[index]}`;
+      form.scrollIntoView({ block: "start", behavior: "instant" });
+      steps[index]!.querySelector<HTMLElement>("[data-step-title]")!.focus({
         preventScroll: true,
       });
     };
 
-    next.addEventListener("click", () => {
-      if (validate(steps[current]!)) show(current + 1);
+    const advance = () => {
+      if (!validate(steps[current]!)) return;
+      if (returnToReview) {
+        returnToReview = false;
+        show(last);
+      } else show(current + 1);
+    };
+    // Going back never loses answers and is never gated. A step reopened from
+    // the review returns there on Next; any other way back walks forward again.
+    const goTo = (index: number) => {
+      if (index >= current) return;
+      returnToReview = current === last;
+      show(index);
+    };
+    next.addEventListener("click", advance);
+    back.addEventListener("click", () => {
+      returnToReview = false;
+      show(current - 1);
     });
-    back.addEventListener("click", () => show(current - 1));
+    form.querySelectorAll<HTMLButtonElement>(".progress-go").forEach((button) => {
+      button.addEventListener("click", () => goTo(Number(button.dataset.goto)));
+    });
+    review.addEventListener("click", (event) => {
+      const button = (event.target as Element).closest<HTMLButtonElement>("[data-goto]");
+      if (button) goTo(Number(button.dataset.goto));
+    });
 
     form.addEventListener("submit", (event) => {
       event.preventDefault();
+      // Enter on an earlier step means Next, never send.
+      if (current < last) {
+        advance();
+        return;
+      }
       if (!validate(steps[current]!)) return;
-      const lines = answers().map(([label, value]) => `${label}: ${value}`);
-      const body = `Application for help\n\n${lines.join("\n")}\n`;
+      const blocks = answers().map(
+        (group) =>
+          `${group.title}\n${group.rows.map(([label, value]) => `${label}: ${value}`).join("\n")}`,
+      );
+      const body = `${subject}\n\n${blocks.join("\n\n")}\n`;
       // Built by hand: URLSearchParams writes spaces as "+", which mail apps show literally.
       const url = new URL(email);
       url.search = `?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
@@ -649,11 +823,11 @@ const heard = [
       form.hidden = true;
       done.hidden = false;
       done.focus();
-      const send = new CustomEvent("application:send", {
+      const sending = new CustomEvent("application:send", {
         detail: url.toString(),
         cancelable: true,
       });
-      if (form.dispatchEvent(send)) window.location.href = url.toString();
+      if (form.dispatchEvent(sending)) window.location.href = url.toString();
     });
 
     done
@@ -675,6 +849,7 @@ const heard = [
 <style>
   .talk {
     margin-top: var(--space-s);
+    max-width: 48ch;
     color: var(--night-soft);
   }
 
@@ -682,8 +857,14 @@ const heard = [
     color: #fff;
   }
 
+  /* The form, then the night aside; side by side on desktop. */
   .layout {
-    max-width: 44rem;
+    display: grid;
+    gap: var(--space-l);
+  }
+
+  .main {
+    min-width: 0;
   }
 
   .online {
@@ -700,6 +881,9 @@ const heard = [
   .apply {
     display: grid;
     gap: var(--space-m);
+    /* A step change scrolls the form's top to just under the bar. The page's
+       scroll-padding (5rem) already clears the bar, so only the rest is added. */
+    scroll-margin-top: max(0px, calc(var(--header-h) + var(--space-s) - 5rem));
   }
 
   /* The form needs JavaScript. It is shown from the first paint when the
@@ -707,11 +891,13 @@ const heard = [
      rather than revealed by this page's script: that arrived after the
      first paint on a slow machine and moved the footer (a layout shift of
      0.21). Without JavaScript the noscript note above stands in for it. */
-  html:not(.js) .apply {
+  html:not(.js) .apply,
+  .apply[hidden] {
     display: none;
   }
 
-  /* Progress: four numbered steps, the current one in purple. */
+  /* Progress: four numbered steps, the current one in purple. A passed step
+     is a button that reopens it. */
   .progress {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
@@ -719,14 +905,10 @@ const heard = [
     padding: 0;
     margin: 0;
     list-style: none;
-    counter-reset: step;
   }
 
   .progress li {
-    display: grid;
-    gap: 0.4rem;
-    padding-top: 0.6rem;
-    border-top: 0.1875rem solid var(--rule);
+    border-top: max(3px, 0.1875rem) solid var(--rule);
     font-size: var(--step--1);
     color: var(--muted);
   }
@@ -739,6 +921,29 @@ const heard = [
   .progress li[aria-current] {
     color: var(--ink);
     font-weight: 700;
+  }
+
+  .progress-go {
+    display: grid;
+    gap: 0.4rem;
+    justify-items: start;
+    width: 100%;
+    min-height: max(44px, 2.75rem);
+    padding: 0.6rem 0 0;
+    border: 0;
+    background: none;
+    font: inherit;
+    color: inherit;
+    text-align: left;
+    cursor: pointer;
+  }
+
+  .progress-go:disabled {
+    cursor: default;
+  }
+
+  .progress-go:not(:disabled):hover .step-title {
+    text-decoration: underline;
   }
 
   .num {
@@ -760,39 +965,53 @@ const heard = [
     color: #fff;
   }
 
-  .step-title {
-    display: none;
+  /* "Step 2 of 4: " is read aloud with every title. */
+  .step-prefix {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
   }
 
-  .intro {
-    color: var(--muted);
+  /* One sheet holds the four steps and the buttons that move between them. */
+  .sheet {
+    background: #fff;
+    border-radius: var(--r-card);
+    box-shadow:
+      0 0 0 var(--hairline) var(--rule),
+      0 1rem 2.5rem rgb(27 15 46 / 0.06);
+    overflow: clip;
   }
 
   .step {
     display: grid;
     gap: var(--space-m);
+    min-width: 0;
     margin: 0;
     padding: var(--space-m);
-    border: var(--hairline) solid var(--rule);
-    border-radius: var(--r-card);
-    background: #fff;
+    border: 0;
   }
 
   .step[hidden] {
     display: none;
   }
 
+  /* Each step opens like a section: eyebrow, serif title, one lede line. */
   .step > legend {
     display: grid;
-    gap: 0.15rem;
+    gap: 0.35rem;
     padding: 0;
     float: left;
     width: 100%;
-    margin-bottom: var(--space-s);
+    margin-bottom: var(--space-xs);
   }
 
-  /* The heading a family reads on each step: the site's serif, like every
-     heading. */
+  .step > legend .eyebrow {
+    margin-bottom: 0.35rem;
+  }
+
   .legend-title {
     font-family: var(--font-serif);
     font-size: var(--step-2);
@@ -802,7 +1021,16 @@ const heard = [
     text-wrap: balance;
   }
 
+  /* Focus lands here after a step change so the title is read; it is not a
+     control, so no ring. */
+  .legend-title:focus {
+    outline: none;
+  }
+
   .legend-hint {
+    max-width: 48ch;
+    font-size: var(--step-1);
+    line-height: 1.45;
     color: var(--muted);
   }
 
@@ -812,6 +1040,7 @@ const heard = [
   }
 
   fieldset.field {
+    min-width: 0;
     margin: 0;
     padding: 0;
     border: 0;
@@ -827,6 +1056,33 @@ const heard = [
     color: var(--muted);
   }
 
+  /* Errors carry a mark as well as the colour. Field errors are appended by
+     the script, so these rules are global inside the form. */
+  .apply :global(.error) {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    column-gap: 0.45em;
+    align-items: start;
+  }
+
+  .apply :global(.error[hidden]) {
+    display: none;
+  }
+
+  .apply :global(.error::before) {
+    content: "!";
+    display: inline-grid;
+    place-items: center;
+    width: 1.25em;
+    height: 1.25em;
+    margin-top: 0.2em;
+    border-radius: 50%;
+    background: var(--crimson);
+    color: #fff;
+    font-size: 0.8em;
+    line-height: 1;
+  }
+
   .children {
     display: grid;
     gap: 0.35rem;
@@ -834,6 +1090,17 @@ const heard = [
 
   .children[hidden] {
     display: none;
+  }
+
+  .children-label {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: var(--step-0);
+  }
+
+  .children .hint {
+    font-size: var(--step--1);
+    color: var(--muted);
   }
 
   .child-rows {
@@ -848,55 +1115,187 @@ const heard = [
     padding: 1rem;
     border-radius: var(--r-img);
     background: var(--paper);
+    box-shadow: inset 0 0 0 var(--hairline) var(--rule);
   }
 
-  .needs {
+  .child-heading {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: var(--step-0);
+    letter-spacing: -0.02em;
+  }
+
+  /* Controls sit on one line whatever their label's height. */
+  .child-fields {
     display: grid;
     gap: 0.75rem;
+    align-items: end;
+  }
+
+  /* Kinds of help: selectable cards. The follow-up list opens as the lower
+     half of the same card. */
+  .needs {
+    display: grid;
+    gap: var(--space-xs);
+    min-width: 0;
+    margin: 0;
+    padding: 0;
+    border: 0;
   }
 
   .need {
     display: grid;
-    gap: 0.75rem;
+    border-radius: var(--r-img);
+    background: #fff;
+    box-shadow: inset 0 0 0 max(2px, 0.125rem) var(--rule-strong);
+    transition:
+      box-shadow 150ms ease,
+      background-color 150ms ease;
   }
 
-  .need-toggle {
-    justify-self: start;
+  .need:has(.need-card:hover) {
+    box-shadow: inset 0 0 0 max(2px, 0.125rem) var(--purple);
+  }
+
+  .need:has(input[name="need"]:checked) {
+    background: var(--lilac);
+    box-shadow: inset 0 0 0 max(2px, 0.125rem) var(--purple);
+  }
+
+  .need:has(input[name="need"]:focus-visible) {
+    outline: max(2px, 0.1875rem) solid var(--focus);
+    outline-offset: 0.1875rem;
+  }
+
+  .need-card {
+    display: grid;
+    grid-template-columns: 1.5rem 1fr;
+    column-gap: 0.875rem;
+    align-items: start;
+    min-height: max(44px, 3.5rem);
+    padding: 1rem 1.125rem;
+    cursor: pointer;
+  }
+
+  .need-card input {
+    grid-row: 1 / span 2;
+    width: 1.5rem;
+    height: 1.5rem;
+    margin: 0.1rem 0 0;
+    accent-color: var(--purple);
+    cursor: pointer;
+  }
+
+  /* The card carries the ring; the box inside does not need a second one. */
+  .need-card input:focus-visible {
+    outline: none;
+  }
+
+  .need-title {
+    font-family: var(--font-display);
+    font-weight: 700;
     font-size: var(--step-0);
+    line-height: 1.3;
+  }
+
+  .need-line {
+    grid-column: 2;
+    font-size: var(--step--1);
+    color: var(--muted);
   }
 
   .sub {
-    margin: 0;
-    padding: 1rem;
+    min-width: 0;
+    margin: 0 1.125rem;
+    padding: 0 0 1.125rem;
     border: 0;
-    border-radius: var(--r-img);
-    background: var(--paper);
+    border-top: var(--hairline) solid var(--rule-strong);
   }
 
   .sub[hidden] {
     display: none;
   }
 
-  .sub legend {
-    display: block;
-    padding: 0;
+  .sub > legend {
+    float: left;
+    width: 100%;
+    padding: 1rem 0 0;
     margin-bottom: 0.5rem;
   }
 
+  .sub > .choices {
+    clear: both;
+  }
+
+  /* Review: one group per step, each with a way back to it. The script builds
+     it, so the rules are global inside the list. */
   .review {
     display: grid;
-    grid-template-columns: auto 1fr;
-    gap: 0.4rem 1rem;
+  }
+
+  .review :global(.review-group) {
+    display: grid;
+    gap: 0.5rem;
+    padding-block: var(--space-s);
+    border-top: var(--hairline) solid var(--rule);
+  }
+
+  .review :global(.review-group:first-child) {
+    padding-top: 0;
+    border-top: 0;
+  }
+
+  .review :global(.review-head) {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: var(--space-s);
+  }
+
+  .review :global(.review-head h3) {
+    font-family: var(--font-display);
+    font-size: var(--step-1);
+    line-height: 1.2;
+    letter-spacing: -0.01em;
+  }
+
+  .review :global(.review-change) {
+    min-height: max(44px, 2.75rem);
+    padding: 0 0.25rem;
+    border: 0;
+    background: none;
+    color: var(--purple);
+    font: inherit;
+    font-family: var(--font-display);
+    font-weight: 700;
+    text-decoration: underline;
+    text-underline-offset: 0.18em;
+    cursor: pointer;
+  }
+
+  .review :global(.review-change:hover) {
+    color: var(--purple-deep);
+  }
+
+  .review :global(.review-list) {
+    display: grid;
+    gap: 0.5rem;
     margin: 0;
   }
 
-  .review dt {
+  .review :global(.review-list > div) {
+    display: grid;
+    gap: 0.1rem;
+  }
+
+  .review :global(.review-list dt) {
     font-family: var(--font-display);
+    font-size: var(--step--1);
     font-weight: 700;
     color: var(--muted);
   }
 
-  .review dd {
+  .review :global(.review-list dd) {
     margin: 0;
     overflow-wrap: anywhere;
   }
@@ -922,11 +1321,16 @@ const heard = [
     color: var(--muted);
   }
 
+  /* The buttons that move the form sit inside the sheet, on a paper band. */
   .nav {
     display: flex;
     flex-wrap: wrap;
     justify-content: space-between;
     gap: var(--space-s);
+    padding: var(--space-s) var(--space-m);
+    border-top: var(--hairline) solid var(--rule);
+    border-radius: 0 0 var(--r-card) var(--r-card);
+    background: var(--paper);
   }
 
   .nav [data-next],
@@ -938,21 +1342,15 @@ const heard = [
     display: none;
   }
 
-  /* On a phone, Back and the long Send label don't fit on one row: let Send
-     take the whole second row instead of sitting stranded at the right. */
-  @media (max-width: 35.99rem) {
-    .nav [data-send] {
-      flex-grow: 1;
-    }
-  }
-
   .done {
     display: grid;
     gap: var(--space-s);
     padding: var(--space-m);
     border-radius: var(--r-card);
     background: #fff;
-    border: var(--hairline) solid var(--rule);
+    box-shadow:
+      0 0 0 var(--hairline) var(--rule),
+      0 1rem 2.5rem rgb(27 15 46 / 0.06);
   }
 
   .done[hidden] {
@@ -963,24 +1361,103 @@ const heard = [
     font-size: var(--step-2);
   }
 
-  @media (min-width: 36rem) {
+  /* The application's text, as a block to copy rather than a field to fill. */
+  .done .textarea {
+    border: 0;
+    background: var(--paper);
+    box-shadow: inset 0 0 0 var(--hairline) var(--rule);
+    font-size: var(--step--1);
+    line-height: 1.5;
+  }
+
+  /* The night aside: the home page's Get help card language. */
+  .side {
+    display: grid;
+    gap: var(--space-s);
+    align-content: start;
+    justify-items: start;
+    padding: var(--space-m);
+    border-radius: var(--r-card);
+    background:
+      radial-gradient(70% 60% at 100% 0%, rgb(96 8 215 / 0.35), transparent 60%), var(--night);
+  }
+
+  .side h2 {
+    font-size: calc(var(--step-3) * 0.85);
+    color: #fff;
+  }
+
+  .side p {
+    color: var(--night-soft);
+  }
+
+  .side-note {
+    font-size: var(--step--1);
+  }
+
+  @media (max-width: 35.99rem) {
+    /* On a phone the bar shows the numbers; the step's eyebrow and title,
+       just under it, carry the count and the name. The title stays as each
+       button's accessible name. */
     .step-title {
-      display: block;
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip: rect(0 0 0 0);
+      white-space: nowrap;
     }
+
+    /* Back and the long Send label don't fit on one row: let Send take the
+       whole second row instead of sitting stranded at the right. */
+    .nav [data-send] {
+      flex-grow: 1;
+    }
+  }
+
+  @media (min-width: 36rem) {
     .fields.two {
       grid-template-columns: 1fr 1fr;
     }
+
     .fields.three {
       grid-template-columns: 2fr 1fr 1.4fr;
     }
-    .child-row {
-      grid-template-columns: repeat(4, 1fr);
+
+    .child-fields {
+      grid-template-columns: 1fr 1.4fr 1.4fr 1fr;
+    }
+
+    .review :global(.review-list > div) {
+      grid-template-columns: 11rem 1fr;
+      gap: 1rem;
     }
   }
 
   @media (min-width: 56rem) {
+    .layout {
+      grid-template-columns: minmax(0, 44rem) minmax(18rem, 1fr);
+      gap: var(--space-xl);
+      align-items: start;
+    }
+
+    .side {
+      position: sticky;
+      top: calc(var(--header-h) + var(--space-m));
+      padding: var(--space-l);
+    }
+
+    /* The aside carries the call and the email; the opener keeps the intro. */
+    .talk-offer {
+      display: none;
+    }
+
     .step {
       padding: var(--space-l);
+    }
+
+    .nav {
+      padding: var(--space-s) var(--space-l);
     }
   }
 </style>

@@ -1351,6 +1351,40 @@ test.describe("donation page", () => {
 });
 
 test.describe("application page", () => {
+  // Errors name the field, an email is required when it is the chosen way to
+  // reach the family, Next says where it leads, and Enter never sends early
+  // (decision 62).
+  test("names its errors, asks for an email when chosen, and Enter only advances", async ({
+    page,
+  }) => {
+    await page.goto("/apply");
+    await expect(page.locator("[data-next]")).toHaveText("Next: Your household");
+    await page.locator("[data-next]").click();
+    await expect(page.locator(".field:has(#firstName) .error")).toHaveText(
+      "Enter your first name.",
+    );
+    await expect(page.locator(".field:has(#phone) .error")).toHaveText("Enter your phone number.");
+    await page.locator("input[name=contactMethod][value=Email]").check();
+    await page.locator("[data-next]").click();
+    await expect(page.locator("#email")).toHaveAttribute("aria-invalid", "true");
+    await expect(page.locator(".field:has(#email) .error")).toHaveText(
+      "Enter an email address, or choose Call or Text.",
+    );
+    await page.locator("input[name=contactMethod][value=Call]").check();
+    await expect(page.locator("#email")).not.toHaveAttribute("aria-invalid", "true");
+    await page.locator("#firstName").fill("Jane");
+    await page.locator("#lastName").fill("Doe");
+    await page.locator("#phone").fill("3175550100");
+    await expect(page.locator("#phone")).toHaveValue("(317) 555-0100");
+    await page.locator("#lastName").press("Enter");
+    await expect(page.locator("[data-step=household]")).toBeVisible();
+    await expect(page.locator("[data-done]")).toBeHidden();
+    await expect(page.locator("[data-next]")).toHaveText("Next: What you need");
+    // A passed step can be revisited from the progress bar.
+    await page.locator(".progress [data-goto='0']").click();
+    await expect(page.locator("[data-step=you]")).toBeVisible();
+  });
+
   test("walks through four steps, validates each, and sends by email", async ({ page }) => {
     await page.goto("/apply");
     const form = page.locator("[data-apply]");

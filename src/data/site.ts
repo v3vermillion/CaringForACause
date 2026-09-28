@@ -276,6 +276,8 @@ export const getHelp = {
     "Households with children and seniors are our focus, but anyone who is struggling right now can apply.",
   howToApply:
     "Prefer to talk to someone first? Call or email us and we'll send you an application.",
+  /** The aside beside the application form on desktop: the same offer under its own heading. */
+  talk: { heading: "Prefer to talk?", body: "Call or email us and we'll send you an application." },
   action: { label: "Start an application", href: "/apply" },
 };
 
