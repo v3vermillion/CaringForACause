@@ -422,7 +422,7 @@ const { items, donate, help } = navigation;
   .brand {
     display: inline-flex;
     align-items: center;
-    gap: calc(6 * var(--sp));
+    gap: calc(5 * var(--sp));
     min-height: max(44px, calc(44 * var(--sp)));
     min-width: 0;
     margin-right: auto;
@@ -430,16 +430,19 @@ const { items, donate, help } = navigation;
   }
 
   .brand :global(.brand-icon) {
-    width: calc(32 * var(--sp));
+    width: calc(38 * var(--sp));
     flex: none;
     filter: drop-shadow(0 0 calc(2 * var(--sp)) rgb(160 100 255 / 0.9))
       drop-shadow(0 0 calc(8 * var(--sp)) rgb(120 60 255 / 0.55));
   }
 
   /* The lockup (decisions 45 and 49) in its lit lavender paint, with the
-     footer's violet glow; its width sets its height (about 4.84 to 1). */
+     footer's violet glow; its width sets its height (about 4.84 to 1). Its
+     size per class follows the owner's reference, where the lockup stands
+     about seven tenths of the bar's height (decision 60): phones are held
+     a little under that by the Donate pill beside it. */
   .brand :global(.brand-lockup) {
-    width: calc(155 * var(--sp));
+    width: calc(166 * var(--sp));
     flex: none;
     filter: drop-shadow(0 0 calc(5 * var(--sp)) rgb(170 110 255 / 0.45));
   }
@@ -454,7 +457,7 @@ const { items, donate, help } = navigation;
     isolation: isolate;
     flex: none;
     gap: calc(2 * var(--sp));
-    width: calc(88 * var(--sp));
+    width: calc(82 * var(--sp));
     min-height: max(44px, calc(44 * var(--sp)));
     padding: 0 0 0 calc(4 * var(--sp));
     font-size: calc(16.3 * var(--sp));
@@ -746,10 +749,10 @@ const { items, donate, help } = navigation;
   /* Tablets: the lockup at the 768px reference's size, and the pill's chevron. */
   @media (min-width: 36rem) {
     .brand :global(.brand-icon) {
-      width: calc(36 * var(--sp));
+      width: calc(42 * var(--sp));
     }
     .brand :global(.brand-lockup) {
-      width: calc(174 * var(--sp));
+      width: calc(196 * var(--sp));
     }
     .donate {
       width: calc(100 * var(--sp));
@@ -780,10 +783,10 @@ const { items, donate, help } = navigation;
       margin-right: 0;
     }
     .brand :global(.brand-icon) {
-      width: calc(48 * var(--sp));
+      width: calc(54 * var(--sp));
     }
     .brand :global(.brand-lockup) {
-      width: calc(212 * var(--sp));
+      width: calc(244 * var(--sp));
     }
     .donate {
       width: calc(104 * var(--sp));
