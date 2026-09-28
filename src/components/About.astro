@@ -68,10 +68,14 @@ const watchUrl = `https://www.youtube.com/watch?v=${about.video.id}`;
     button.removeAttribute("rel");
     button.querySelector("[data-watch-hint]")?.remove();
     const id = new URL(button.href).searchParams.get("v");
+    // The player is brought into view smoothly, or at once for a reader who
+    // has asked for reduced motion (a script scroll ignores the stylesheet).
+    const reduce = matchMedia("(prefers-reduced-motion: reduce)");
+    const behavior = (): ScrollBehavior => (reduce.matches ? "auto" : "smooth");
     button.addEventListener("click", (event) => {
       event.preventDefault();
       if (!player.hidden) {
-        player.scrollIntoView({ behavior: "smooth", block: "center" });
+        player.scrollIntoView({ behavior: behavior(), block: "center" });
         return;
       }
       const iframe = document.createElement("iframe");
@@ -81,7 +85,7 @@ const watchUrl = `https://www.youtube.com/watch?v=${about.video.id}`;
       iframe.allowFullscreen = true;
       frame.replaceChildren(iframe);
       player.hidden = false;
-      player.scrollIntoView({ behavior: "smooth", block: "center" });
+      player.scrollIntoView({ behavior: behavior(), block: "center" });
       iframe.focus();
     });
   }

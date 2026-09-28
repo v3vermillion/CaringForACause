@@ -3,6 +3,11 @@ import { navigation, org } from "../data/site";
 import Brand from "./Brand.astro";
 
 const { items, donate, help } = navigation;
+// The page's own path, so the bar's pill and the menu's rows can say "you
+// are here" on the two door pages (/donate, /apply). Section links are
+// marked by the script below as their section crosses the window.
+const here = Astro.url.pathname.replace(/\/+$/, "") || "/";
+const current = (href: string) => (href.replace(/\/+$/, "") === here ? "page" : undefined);
 ---
 
 <header class="site-header" data-header>
@@ -25,7 +30,7 @@ const { items, donate, help } = navigation;
       </ul>
     </nav>
 
-    <a class="button button--crimson donate" href={donate.href}>
+    <a class="button button--crimson donate" href={donate.href} aria-current={current(donate.href)}>
       {donate.label}
       <svg class="chev" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
         <path d="m9 5 7 7-7 7"></path>
@@ -239,7 +244,7 @@ const { items, donate, help } = navigation;
       <ol class="menu-list">
         {[help, ...items, donate].map((item, i) => (
           <li class:list={[i === 0 && "menu-help"]} style={`--n: ${i};`}>
-            <a href={item.href} data-menu-close>
+            <a href={item.href} data-menu-close aria-current={current(item.href)}>
               <span class="menu-label">{item.label}</span>
               <svg class="menu-chevron" viewBox="0 0 10 17" aria-hidden="true">
                 <path
@@ -294,28 +299,34 @@ const { items, donate, help } = navigation;
     header.classList.add("no-menu");
   }
 
-  // The desktop links mark the section on screen: the link whose section
-  // crosses the middle of the window carries aria-current, which draws its
-  // underline. Nothing is marked on the first screen. Without
-  // IntersectionObserver the links simply have no current state.
+  // The section links mark the section on screen: the links whose section
+  // crosses the middle of the window carry aria-current, which draws the
+  // desktop link's underline and marks the menu's row. Nothing is marked on
+  // the first screen. Without IntersectionObserver the links simply have no
+  // current state. (The door pages' "page" marks are set in the markup.)
   const sectionLinks = Array.from(
-    document.querySelectorAll<HTMLAnchorElement>(".inline-nav a[data-section]"),
+    document.querySelectorAll<HTMLAnchorElement>(
+      '.inline-nav a[data-section], #menu a[href^="/#"]',
+    ),
   );
+  const sectionOf = (a: HTMLAnchorElement) => a.dataset.section ?? a.getAttribute("href")!.slice(2);
   if (header && sectionLinks.length && "IntersectionObserver" in window) {
-    const byId = new Map(sectionLinks.map((a) => [a.dataset.section!, a]));
+    const ids = new Set(sectionLinks.map(sectionOf));
+    const mark = (id: string | null) => {
+      sectionLinks.forEach((a) => {
+        if (id !== null && sectionOf(a) === id) a.setAttribute("aria-current", "location");
+        else a.removeAttribute("aria-current");
+      });
+    };
     const watcher = new IntersectionObserver(
       (entries) => {
         for (const entry of entries) {
-          if (!entry.isIntersecting) continue;
-          const link = byId.get(entry.target.id);
-          if (!link) continue;
-          sectionLinks.forEach((a) => a.removeAttribute("aria-current"));
-          link.setAttribute("aria-current", "location");
+          if (entry.isIntersecting && ids.has(entry.target.id)) mark(entry.target.id);
         }
       },
       { rootMargin: "-45% 0px -50% 0px" },
     );
-    byId.forEach((_, id) => {
+    ids.forEach((id) => {
       const section = document.getElementById(id);
       if (section) watcher.observe(section);
     });
@@ -324,7 +335,7 @@ const { items, donate, help } = navigation;
     if (top) {
       new IntersectionObserver(
         ([entry]) => {
-          if (entry?.isIntersecting) sectionLinks.forEach((a) => a.removeAttribute("aria-current"));
+          if (entry?.isIntersecting) mark(null);
         },
         { rootMargin: "-45% 0px -50% 0px" },
       ).observe(top);
@@ -539,6 +550,16 @@ const { items, donate, help } = navigation;
       0 0 calc(16 * var(--sp)) calc(4 * var(--sp)) rgb(245 150 215 / 0.5),
       inset var(--sp) var(--sp) var(--sp) rgb(255 90 90 / 0.35),
       inset 0 calc(-2 * var(--sp)) calc(5 * var(--sp)) rgb(90 0 10 / 0.25);
+  }
+
+  /* On the donation page the pill is where you are: a little quieter, and
+     it stays so under the hand. Nothing else about it changes. */
+  .donate[aria-current="page"]::after {
+    filter: saturate(0.8);
+  }
+
+  .donate[aria-current="page"]:hover::after {
+    filter: saturate(0.8) brightness(1.08);
   }
 
   /* Inline links: hidden on phones once the menu is available. Each link
@@ -1190,6 +1211,29 @@ const { items, donate, help } = navigation;
     outline-offset: -0.126rem;
   }
 
+  /* The row you are in (the section crossing the window, or the page you
+     are on): the label white, the chevron rose, and a short rose-to-violet
+     bar at the row's left, sized in rem like the rest of the menu. Help me
+     already carries its own bar and colours, so it keeps them. */
+  .menu-list > li:not(.menu-help) > a[aria-current] .menu-label {
+    color: #fff;
+  }
+
+  .menu-list > li:not(.menu-help) > a[aria-current] .menu-chevron {
+    color: #ff5a86;
+  }
+
+  .menu-list > li:not(.menu-help) > a[aria-current]::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 30%;
+    bottom: 30%;
+    width: 0.19rem;
+    border-radius: 1rem;
+    background: linear-gradient(#ff5a86, #a06cff);
+  }
+
   /* Portrait tablets: the root font follows the 768px tablet reference, so
      the phone menu would fill only the top half of the screen. Scale the
      menu's own sizes by --k instead. Only a tall tablet-width screen
@@ -1249,6 +1293,9 @@ const { items, donate, help } = navigation;
       top: calc(0.9132rem * var(--k));
       bottom: calc(0.781rem * var(--k));
       width: calc(0.3149rem * var(--k));
+    }
+    .menu-list > li:not(.menu-help) > a[aria-current]::after {
+      width: calc(0.19rem * var(--k));
     }
     .menu-ribbon {
       width: calc(11.8782rem * var(--k));

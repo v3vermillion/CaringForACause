@@ -21,53 +21,64 @@ const mailto = (subject: string) =>
       buttons stay hidden and every panel is shown in order.
     -->
     <div class="tabs" data-tabs>
+      <!-- One segmented track: the tabs sit on a white rail and the purple
+           pill (the thumb) slides under the chosen one. The tablist is the
+           scroller (it bleeds to the phone's edges); the track is the rail. -->
       <div class="tablist" role="tablist" aria-label={getInvolved.heading} hidden>
-        {tabs.map((tab, i) => (
-          <button
-            type="button"
-            role="tab"
-            id={`tab-${tab.id}`}
-            aria-controls={tab.id}
-            aria-selected={i === 0 ? "true" : "false"}
-            tabindex={i === 0 ? 0 : -1}
-          >
-            {tab.label}
-          </button>
-        ))}
+        <div class="track" role="presentation">
+          <span class="thumb" aria-hidden="true"></span>
+          {tabs.map((tab, i) => (
+            <button
+              type="button"
+              role="tab"
+              id={`tab-${tab.id}`}
+              aria-controls={tab.id}
+              aria-selected={i === 0 ? "true" : "false"}
+              tabindex={i === 0 ? 0 : -1}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
       </div>
 
-      {tabs.map((tab) => {
-        const href = tab.action.href ?? mailto(tab.heading);
-        const label = tab.action.href ? tab.action.label : tab.action.fallbackLabel;
-        const external = href.startsWith("http");
-        return (
-          <div class:list={["panel", { "panel--text": !tab.photo }]} id={tab.id} data-panel>
-            <div class="stack">
-              <h3>{tab.heading}</h3>
-              {tab.body.map((line) => (
-                <p>{line}</p>
-              ))}
-              <p class="action">
-                <a
-                  class="button button--purple"
-                  href={href}
-                  {...(external ? { target: "_blank", rel: "noopener" } : {})}
-                >
-                  {label}
-                  {external && <span class="visually-hidden"> (opens in a new tab)</span>}
-                </a>
-              </p>
+      <!-- The stage holds the panels: with JavaScript one shows at a time,
+           and a change crossfades in place while the stage's height eases,
+           so nothing below the card jumps. -->
+      <div class="stage" data-stage>
+        {tabs.map((tab) => {
+          const href = tab.action.href ?? mailto(tab.heading);
+          const label = tab.action.href ? tab.action.label : tab.action.fallbackLabel;
+          const external = href.startsWith("http");
+          return (
+            <div class:list={["panel", { "panel--text": !tab.photo }]} id={tab.id} data-panel>
+              <div class="stack">
+                <h3>{tab.heading}</h3>
+                {tab.body.map((line) => (
+                  <p>{line}</p>
+                ))}
+                <p class="action">
+                  <a
+                    class="button button--purple"
+                    href={href}
+                    {...(external ? { target: "_blank", rel: "noopener" } : {})}
+                  >
+                    {label}
+                    {external && <span class="visually-hidden"> (opens in a new tab)</span>}
+                  </a>
+                </p>
+              </div>
+              {tab.photo && (
+                <Photo
+                  photo={tab.photo}
+                  ratio="var(--photo-ratio, 3 / 2)"
+                  sizes="(min-width: 56rem) 560px, 90vw"
+                />
+              )}
             </div>
-            {tab.photo && (
-              <Photo
-                photo={tab.photo}
-                ratio="var(--photo-ratio, 3 / 2)"
-                sizes="(min-width: 56rem) 560px, 90vw"
-              />
-            )}
-          </div>
-        );
-      })}
+          );
+        })}
+      </div>
     </div>
   </div>
 </section>
@@ -75,38 +86,151 @@ const mailto = (subject: string) =>
 <script>
   document.querySelectorAll<HTMLElement>("[data-tabs]").forEach((root) => {
     const tablist = root.querySelector<HTMLElement>("[role=tablist]");
+    const track = root.querySelector<HTMLElement>(".track");
+    const stage = root.querySelector<HTMLElement>("[data-stage]");
     const tabs = Array.from(root.querySelectorAll<HTMLButtonElement>("[role=tab]"));
     const panels = Array.from(root.querySelectorAll<HTMLElement>("[data-panel]"));
-    if (!tablist || tabs.length === 0) return;
+    if (!tablist || !track || !stage || tabs.length === 0) return;
 
+    const reduce = matchMedia("(prefers-reduced-motion: reduce)");
+    const live = () => root.classList.contains("is-live");
+    const STORE = "involved-tab";
+
+    // The panels are tabpanels, not tab stops: each holds a button, which
+    // is where Tab from the tablist should land.
     panels.forEach((panel) => {
       panel.setAttribute("role", "tabpanel");
       panel.setAttribute("aria-labelledby", `tab-${panel.id}`);
-      panel.tabIndex = 0;
     });
     tablist.hidden = false;
     root.classList.add("is-enhanced");
-    // Panels ease in only once the page has painted: a panel that is on
-    // screen at load appears at once, where it is.
+    // Panels ease in and the thumb slides only once the page has painted: a
+    // panel that is on screen at load appears at once, where it is.
     requestAnimationFrame(() => requestAnimationFrame(() => root.classList.add("is-live")));
 
-    const select = (id: string, focus = false) => {
-      tabs.forEach((tab) => {
-        const on = tab.getAttribute("aria-controls") === id;
-        tab.setAttribute("aria-selected", String(on));
-        tab.tabIndex = on ? 0 : -1;
-        if (on && focus) {
-          tab.focus();
-          tab.scrollIntoView({ block: "nearest", inline: "nearest" });
-        }
-      });
-      panels.forEach((panel) => {
-        panel.hidden = panel.id !== id;
+    const selected = () => tabs.find((tab) => tab.getAttribute("aria-selected") === "true");
+
+    // The thumb sits under the chosen tab: its place and width are the tab's.
+    const place = () => {
+      const tab = selected();
+      if (!tab) return;
+      track.style.setProperty("--x", `${tab.offsetLeft}px`);
+      track.style.setProperty("--w", `${tab.offsetWidth}px`);
+    };
+    document.fonts?.ready.then(place);
+    if ("ResizeObserver" in window) new ResizeObserver(place).observe(track);
+
+    // The chosen tab is brought to the middle of the strip (the strip
+    // scrolls on phones), never moving the page itself.
+    const reveal = (tab: HTMLElement) => {
+      const left = tab.getBoundingClientRect().left - tablist.getBoundingClientRect().left;
+      tablist.scrollTo({
+        left: tablist.scrollLeft + left - (tablist.clientWidth - tab.offsetWidth) / 2,
+        behavior: reduce.matches || !live() ? "auto" : "smooth",
       });
     };
 
+    // A leaving panel fades out in place (absolutely positioned, out of the
+    // accessibility tree at once) and is hidden after the fade; the timer is
+    // the safety net if the transition never ends.
+    const leaving = new Map<HTMLElement, number>();
+    const settle = (panel: HTMLElement) => {
+      clearTimeout(leaving.get(panel));
+      leaving.delete(panel);
+      panel.classList.remove("is-leaving");
+      panel.removeAttribute("aria-hidden");
+      panel.inert = false;
+      panel.hidden = true;
+    };
+    let stageTimer = 0;
+    const settleStage = () => {
+      clearTimeout(stageTimer);
+      stage.style.height = "";
+    };
+    stage.addEventListener("transitionend", (event) => {
+      const target = event.target as HTMLElement;
+      if (target === stage && event.propertyName === "height") settleStage();
+      else if (event.propertyName === "opacity" && leaving.has(target)) settle(target);
+    });
+
+    const select = (id: string, focus = false, user = false) => {
+      const tab = tabs.find((t) => t.getAttribute("aria-controls") === id);
+      const panel = panels.find((p) => p.id === id);
+      if (!tab || !panel) return;
+      const from = tabs.indexOf(selected() ?? tab);
+      const to = tabs.indexOf(tab);
+
+      tabs.forEach((t) => {
+        const on = t === tab;
+        t.setAttribute("aria-selected", String(on));
+        t.tabIndex = on ? 0 : -1;
+      });
+      if (focus) tab.focus({ preventScroll: true });
+      reveal(tab);
+      place();
+
+      // A person's choice is kept in the address (so it can be copied and
+      // survives a refresh) and for the visit; a link's or the page's own
+      // choice is not written back.
+      if (user) {
+        history.replaceState(history.state, "", `#${id}`);
+        try {
+          sessionStorage.setItem(STORE, id);
+        } catch {
+          /* private mode: the address still carries it */
+        }
+      }
+
+      const showing = panels.filter((p) => !p.hidden && !leaving.has(p));
+      if (showing.length === 1 && showing[0] === panel) return;
+
+      // Before the page has painted (or under reduced motion) the change is
+      // a plain swap: nothing on screen moves.
+      if (!live() || reduce.matches) {
+        leaving.forEach((_, p) => settle(p));
+        settleStage();
+        panels.forEach((p) => {
+          p.hidden = p !== panel;
+        });
+        return;
+      }
+
+      // The stage keeps the old height while the panels cross, then eases
+      // to the new one (measure, set the start, force a layout, set the end).
+      const before = stage.offsetHeight;
+      stage.dataset.dir = to > from ? "next" : "prev";
+      panels.forEach((p) => {
+        if (p === panel) {
+          // If it was on its way out, it comes straight back.
+          clearTimeout(leaving.get(p));
+          leaving.delete(p);
+          p.classList.remove("is-leaving");
+          p.removeAttribute("aria-hidden");
+          p.inert = false;
+          p.hidden = false;
+        } else if (!p.hidden && !leaving.has(p)) {
+          p.classList.add("is-leaving");
+          p.setAttribute("aria-hidden", "true");
+          p.inert = true;
+          leaving.set(
+            p,
+            window.setTimeout(() => settle(p), 240),
+          );
+        }
+      });
+      stage.style.height = "";
+      const after = stage.offsetHeight;
+      if (before !== after) {
+        stage.style.height = `${before}px`;
+        void stage.offsetHeight;
+        stage.style.height = `${after}px`;
+        clearTimeout(stageTimer);
+        stageTimer = window.setTimeout(settleStage, 400);
+      }
+    };
+
     tabs.forEach((tab, i) => {
-      tab.addEventListener("click", () => select(tab.getAttribute("aria-controls")!));
+      tab.addEventListener("click", () => select(tab.getAttribute("aria-controls")!, false, true));
       tab.addEventListener("keydown", (event) => {
         const keys: Record<string, number> = {
           ArrowRight: i + 1,
@@ -119,26 +243,57 @@ const mailto = (subject: string) =>
         if (!(event.key in keys)) return;
         event.preventDefault();
         const next = tabs[(keys[event.key]! + tabs.length) % tabs.length]!;
-        select(next.getAttribute("aria-controls")!, true);
+        select(next.getAttribute("aria-controls")!, true, true);
       });
+    });
+
+    // On a touch screen a sideways swipe on the card turns to the next or
+    // the previous panel (no wrap at the ends). Vertical scrolling is left
+    // to the browser (touch-action: pan-y), and nothing is prevented, so the
+    // button inside the card works as before.
+    let swipe: { x: number; y: number; id: number } | null = null;
+    stage.addEventListener("pointerdown", (event) => {
+      if (event.pointerType === "touch")
+        swipe = { x: event.clientX, y: event.clientY, id: event.pointerId };
+    });
+    stage.addEventListener("pointerup", (event) => {
+      if (!swipe || event.pointerId !== swipe.id) return;
+      const dx = event.clientX - swipe.x;
+      const dy = event.clientY - swipe.y;
+      swipe = null;
+      if (Math.abs(dx) < 48 || Math.abs(dx) < 1.5 * Math.abs(dy)) return;
+      const next = tabs[tabs.indexOf(selected()!) + (dx < 0 ? 1 : -1)];
+      if (next) select(next.getAttribute("aria-controls")!, false, true);
+    });
+    stage.addEventListener("pointercancel", () => {
+      swipe = null;
     });
 
     // Links like /#volunteer open the matching tab and scroll to the section.
     // When a page opens with one in its address, the layout holds it and
     // places the reader (Base.astro), so here the tab only opens.
+    const has = (id: string) => panels.some((p) => p.id === id);
     const fromHash = () => {
       const id = decodeURIComponent(location.hash.slice(1));
-      if (panels.some((p) => p.id === id)) {
+      if (has(id)) {
         select(id);
-        root.closest("section")?.scrollIntoView();
+        root.closest("section")?.scrollIntoView({ behavior: reduce.matches ? "auto" : "smooth" });
         return true;
       }
       return false;
     };
+    // On load: the held section, the address, the visit's last choice, or
+    // the first panel.
     const held = document.documentElement.dataset.heldHash;
     const heldId = held ? decodeURIComponent(held.slice(1)) : "";
-    if (panels.some((p) => p.id === heldId)) select(heldId);
-    else if (!fromHash()) select(panels[0]!.id);
+    let remembered = "";
+    try {
+      remembered = sessionStorage.getItem(STORE) ?? "";
+    } catch {
+      /* no storage: the first panel */
+    }
+    if (has(heldId)) select(heldId);
+    else if (!fromHash()) select(has(remembered) ? remembered : panels[0]!.id);
     window.addEventListener("hashchange", fromHash);
   });
 </script>
@@ -164,16 +319,33 @@ const mailto = (subject: string) =>
     margin-top: var(--space-s);
   }
 
-  /* Tabs: one row that scrolls on phones, sitting on the panel's own axis. */
+  /* Tabs: one row that scrolls on phones and tablets, sitting on the
+     panel's own axis. Its edges fade where it bleeds past the column, so a
+     tab cut by the screen dissolves rather than chops; at rest the tabs
+     start where the fade ends (the bleed and the fade are both the gutter),
+     so nothing at rest is dimmed. */
   .tablist {
     display: flex;
-    gap: 0.5rem;
     padding: 0.25rem var(--gutter) var(--r-card); /* clear of the card by its own radius */
     margin: 0 calc(-1 * var(--gutter));
     overflow-x: auto;
     scroll-snap-type: x proximity;
     scroll-padding-inline: var(--gutter);
     scrollbar-width: none;
+    -webkit-mask-image: linear-gradient(
+      90deg,
+      transparent,
+      #000 var(--gutter),
+      #000 calc(100% - var(--gutter)),
+      transparent
+    );
+    mask-image: linear-gradient(
+      90deg,
+      transparent,
+      #000 var(--gutter),
+      #000 calc(100% - var(--gutter)),
+      transparent
+    );
   }
 
   .tablist::-webkit-scrollbar {
@@ -184,35 +356,83 @@ const mailto = (subject: string) =>
     display: none;
   }
 
+  /* The rail: white, ringed by a hairline (a shadow, not a border, so it
+     never snaps to a whole pixel), holding the tabs and the thumb. */
+  .track {
+    position: relative;
+    display: inline-flex;
+    flex: none;
+    gap: 0;
+    padding: 0.25rem;
+    border-radius: var(--r-pill);
+    background: #fff;
+    box-shadow: 0 0 0 var(--hairline) var(--rule);
+  }
+
+  /* The thumb: the purple pill under the chosen tab, placed by the script
+     (--x and --w are the tab's offset and width) and slid there once the
+     page has painted. */
+  .thumb {
+    position: absolute;
+    top: 0.25rem;
+    left: 0;
+    height: calc(100% - 0.5rem);
+    width: var(--w, 0px);
+    translate: var(--x, 0px) 0;
+    border-radius: var(--r-pill);
+    background: var(--purple);
+  }
+
+  .is-live .thumb {
+    transition:
+      translate 280ms cubic-bezier(0.2, 0.8, 0.2, 1),
+      width 280ms cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+
   [role="tab"] {
+    position: relative;
+    z-index: 1;
     flex: none;
     min-height: max(44px, 3rem);
     padding: 0.625rem 1.225rem; /* no border: it would snap to whole pixels and shift the row */
     border: 0;
     border-radius: var(--r-pill);
-    background: #fff;
-    box-shadow: 0 0 0 var(--hairline) var(--rule);
+    background: transparent;
     color: var(--ink);
     font: inherit;
     font-family: var(--font-display);
     font-weight: 700;
     white-space: nowrap;
-    scroll-snap-align: start;
+    scroll-snap-align: center;
     cursor: pointer;
-    transition:
-      background-color 150ms ease,
-      box-shadow 150ms ease,
-      color 150ms ease;
+    -webkit-tap-highlight-color: transparent; /* the tab answers a press itself */
+    transition: color 200ms ease;
   }
 
   [role="tab"]:hover {
     color: var(--purple);
   }
 
+  [role="tab"]:not([aria-selected="true"]):active {
+    color: var(--purple-deep);
+  }
+
   [role="tab"][aria-selected="true"] {
-    background: var(--purple);
-    box-shadow: 0 0 0 var(--hairline) var(--purple);
     color: #fff;
+  }
+
+  /* The keyboard ring keeps to the rail's padding. */
+  [role="tab"]:focus-visible {
+    outline-offset: 0.0625rem;
+  }
+
+  /* The stage: the panels' room. Its height eases between panels (set by
+     the script), and a sideways swipe on it turns the panel while vertical
+     scrolling stays the browser's. */
+  .stage {
+    position: relative;
+    touch-action: pan-y;
+    transition: height 260ms cubic-bezier(0.2, 0.8, 0.2, 1);
   }
 
   .panel {
@@ -228,9 +448,11 @@ const mailto = (subject: string) =>
       0 1.5rem 3rem rgb(27 15 46 / 0.07);
   }
 
-  /* A chosen panel arrives with a short ease rather than a cut (only after
-     the page has painted, so nothing on screen at load moves); in browsers
-     without @starting-style it simply appears. */
+  /* A chosen panel arrives with a short ease from the side it was called
+     from (only after the page has painted, so nothing on screen at load
+     moves); in browsers without @starting-style it simply appears. The one
+     it replaces fades out on top of it, lifted out of the flow so the stage
+     is already the new panel's height. */
   .is-live .panel {
     transition:
       opacity 220ms ease,
@@ -242,6 +464,21 @@ const mailto = (subject: string) =>
       opacity: 0;
       translate: 0 0.5rem;
     }
+    .is-live .stage[data-dir="next"] .panel {
+      translate: 1rem 0;
+    }
+    .is-live .stage[data-dir="prev"] .panel {
+      translate: -1rem 0;
+    }
+  }
+
+  .panel.is-leaving {
+    position: absolute;
+    inset: 0 0 auto 0;
+    z-index: 1;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 160ms ease;
   }
 
   /* On phones and tablets the photo leads, edge to edge at the top of the
@@ -299,6 +536,8 @@ const mailto = (subject: string) =>
     .tablist {
       margin-inline: 0;
       padding-inline: 0;
+      -webkit-mask-image: none;
+      mask-image: none;
     }
     /* On desktop the photo takes the panel's right half edge to edge, as an
        editorial spread; the words keep the panel's padding. */
