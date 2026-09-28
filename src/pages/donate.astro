@@ -80,7 +80,9 @@ const mailto = `mailto:${email}?subject=${encodeURIComponent(subject)}&body=${en
             </div>
           </fieldset>
 
-          <p class="visually-hidden" aria-live="polite" data-summary>Your gift: {defaultGift}.</p>
+          <p class="visually-hidden" aria-live="polite" data-summary>
+            Your gift: {defaultGift}.
+          </p>
 
           <div class="action">
             {portal ? (
@@ -98,8 +100,8 @@ const mailto = `mailto:${email}?subject=${encodeURIComponent(subject)}&body=${en
           </div>
 
           <p class="tax">
-            {claim(facts.legalName)} is a {taxExempt.section} nonprofit (EIN {claim(facts.ein)}) helping
-            families since {claim(facts.founded)}.
+            {claim(facts.legalName)} is a {taxExempt.section} nonprofit (EIN {claim(facts.ein)})
+            helping families since {claim(facts.founded)}.
             {taxExempt.deductible && " Gifts are tax-deductible to the extent allowed by law."}
           </p>
         </form>
