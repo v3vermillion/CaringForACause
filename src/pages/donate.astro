@@ -9,8 +9,15 @@ import { donatePage, facts, links, org } from "../data/site";
 const email = show(facts.email);
 const taxExempt = claim(facts.taxExempt);
 const portal = links.donate;
-const mailto = `mailto:${email}?subject=${encodeURIComponent(donatePage.emailSubject)}`;
-const description = `${donatePage.intro} ${claim(facts.legalName)} is a ${taxExempt.section} nonprofit.`;
+const description = `Give once or monthly to ${org.shortName}, a ${taxExempt.section} nonprofit. ${donatePage.intro}`;
+
+// The default choice ($50, once) is written into the summary, the button and
+// the email, so all three are right before the script runs and without it.
+const defaultGift = `$${donatePage.amounts[1]}`;
+const subject = `${donatePage.emailSubject}: ${defaultGift}`;
+const body = `Hello,\n\nI'd like to make a one-time gift of ${defaultGift} to ${org.shortName}. What's the best way to send it?\n\nThank you,\n`;
+// Encoded by hand: URLSearchParams writes spaces as "+", which mail apps show literally.
+const mailto = `mailto:${email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
 ---
 
 <Base title={`Donate | ${org.shortName}`} description={description}>
@@ -18,9 +25,6 @@ const description = `${donatePage.intro} ${claim(facts.legalName)} is a ${taxExe
   <main id="main">
     <section class="page-hero on-dark">
       <div class="wrap">
-        <a class="back" href="/">
-          ← Back to home
-        </a>
         <span class="eyebrow">{donatePage.eyebrow}</span>
         <h1>{donatePage.heading}</h1>
         <p class="lede">{donatePage.intro}</p>
@@ -30,8 +34,14 @@ const description = `${donatePage.intro} ${claim(facts.legalName)} is a ${taxExe
 
     <section class="section give" aria-labelledby="give-title">
       <div class="wrap">
-        <form class="card" data-give novalidate>
-          <h2 id="give-title">Choose your gift</h2>
+        <form
+          class="card"
+          data-give
+          data-org={org.shortName}
+          data-subject={donatePage.emailSubject}
+          novalidate
+        >
+          <h2 id="give-title">{donatePage.giftHeading}</h2>
 
           <fieldset class="field">
             <legend class="label">How often</legend>
@@ -53,46 +63,44 @@ const description = `${donatePage.intro} ${claim(facts.legalName)} is a ${taxExe
                   <input type="radio" name="amount" value={amount} checked={i === 1} />${amount}
                 </label>
               ))}
-              <label class="choice">
-                <input type="radio" name="amount" value="other" />
-                Other
+              <label class="choice choice--other">
+                <span aria-hidden="true">$</span>
+                <span class="visually-hidden">Other amount in dollars</span>
+                <input
+                  id="other-amount"
+                  name="otherAmount"
+                  type="number"
+                  inputmode="numeric"
+                  min="1"
+                  step="1"
+                  placeholder="Other"
+                  enterkeyhint="go"
+                />
               </label>
-            </div>
-            <div class="other" data-other hidden>
-              <label for="other-amount">Other amount (USD)</label>
-              <input
-                class="input"
-                id="other-amount"
-                name="otherAmount"
-                type="number"
-                inputmode="decimal"
-                min="1"
-                step="1"
-                placeholder="75"
-              />
             </div>
           </fieldset>
 
-          <p class="summary" aria-live="polite" data-summary>
-            Your gift: $50, one time.
-          </p>
+          <p class="visually-hidden" aria-live="polite" data-summary>Your gift: {defaultGift}.</p>
 
-          {portal ? (
-            <a class="button button--signal go" href={portal} data-portal>
-              {donatePage.continueLabel}
-            </a>
-          ) : (
-            <>
-              <p class="note">{donatePage.emailNote}</p>
-              <a class="button button--signal go" href={mailto} data-email>
-                {donatePage.emailLabel}
+          <div class="action">
+            {portal ? (
+              <a class="button button--signal go" href={portal} data-portal>
+                {donatePage.continueLabel} {defaultGift}
               </a>
-            </>
-          )}
+            ) : (
+              <>
+                <a class="button button--signal go" href={mailto} data-email>
+                  Donate {defaultGift} by email
+                </a>
+                <p class="note">{donatePage.emailNote}</p>
+              </>
+            )}
+          </div>
 
           <p class="tax">
-            {claim(facts.legalName)} is a {taxExempt.section} nonprofit, EIN {claim(facts.ein)}.
-            {taxExempt.deductible && " Donations are tax-deductible to the extent allowed by law."}
+            {claim(facts.legalName)} is a {taxExempt.section} nonprofit (EIN {claim(facts.ein)}) helping
+            families since {claim(facts.founded)}.
+            {taxExempt.deductible && " Gifts are tax-deductible to the extent allowed by law."}
           </p>
         </form>
       </div>
@@ -102,53 +110,76 @@ const description = `${donatePage.intro} ${claim(facts.legalName)} is a ${taxExe
 </Base>
 
 <script>
-  // Keeps the summary and the giving link in step with the chosen amount.
+  // Keeps the button's label, the hidden summary and the giving link in step
+  // with the chosen gift. The chips and the dollar field are one choice:
+  // typing in the field clears the chips, and choosing a chip clears the field.
   const form = document.querySelector<HTMLFormElement>("[data-give]");
   if (form) {
     const summary = form.querySelector<HTMLElement>("[data-summary]")!;
-    const other = form.querySelector<HTMLElement>("[data-other]")!;
     const otherInput = form.querySelector<HTMLInputElement>("#other-amount")!;
+    const chips = form.querySelectorAll<HTMLInputElement>('input[name="amount"]');
     const emailLink = form.querySelector<HTMLAnchorElement>("[data-email]");
     const portalLink = form.querySelector<HTMLAnchorElement>("[data-portal]");
+    const orgName = form.dataset.org ?? "";
+    const subjectPrefix = form.dataset.subject ?? "Donation";
 
     const read = () => {
       const data = new FormData(form);
-      const frequency = data.get("frequency") === "monthly" ? "monthly" : "one time";
-      const picked = String(data.get("amount") ?? "");
-      const amount = picked === "other" ? Number(otherInput.value) || 0 : Number(picked);
-      return { frequency, amount, isOther: picked === "other" };
+      const monthly = data.get("frequency") === "monthly";
+      // The typed amount, whole dollars only, wins while the field holds one.
+      const amount =
+        otherInput.value !== ""
+          ? Math.floor(Number(otherInput.value)) || 0
+          : Number(data.get("amount")) || 0;
+      return { monthly, amount };
     };
 
     const update = () => {
-      const { frequency, amount, isOther } = read();
-      other.hidden = !isOther;
-      const dollars = amount > 0 ? `$${amount.toLocaleString("en-US")}` : "an amount";
-      summary.textContent = `Your gift: ${dollars}, ${frequency}.`;
+      const { monthly, amount } = read();
+      const dollars = amount > 0 ? `$${amount.toLocaleString("en-US")}` : "";
+      const gift = dollars && monthly ? `${dollars} a month` : dollars;
+      summary.textContent = gift ? `Your gift: ${gift}.` : "Enter an amount.";
       if (emailLink) {
-        // Built by hand: URLSearchParams writes spaces as "+", which mail apps show literally.
-        const url = new URL(emailLink.href);
-        const subject = url.searchParams.get("subject") ?? "Donation";
-        const body = `Hello,\n\nI'd like to give ${dollars} (${frequency}) to Caring for a Cause. Please let me know the best way to send it.\n\nThank you,\n`;
-        url.search = `?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-        emailLink.href = url.toString();
+        emailLink.textContent = gift ? `Donate ${gift} by email` : "Donate by email";
+        const subject = gift ? `${subjectPrefix}: ${gift}` : subjectPrefix;
+        const body = dollars
+          ? `Hello,\n\nI'd like to make a ${monthly ? "monthly" : "one-time"} gift of ${dollars} to ${orgName}. What's the best way to send it?\n\nThank you,\n`
+          : `Hello,\n\nI'd like to give to ${orgName}. What's the best way to send it?\n\nThank you,\n`;
+        // Encoded by hand: URLSearchParams writes spaces as "+", which mail apps show literally.
+        const address = emailLink.href.split("?")[0];
+        emailLink.href = `${address}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
       }
       if (portalLink) {
+        portalLink.textContent = gift ? `Donate ${gift}` : "Donate";
         // Amount and frequency ride along as a hint; the payment page has the final say.
         const url = new URL(portalLink.href);
         if (amount > 0) url.searchParams.set("amount", String(amount));
-        url.searchParams.set("frequency", frequency === "monthly" ? "monthly" : "once");
+        else url.searchParams.delete("amount");
+        url.searchParams.set("frequency", monthly ? "monthly" : "once");
         portalLink.href = url.toString();
       }
     };
 
-    form.addEventListener("change", update);
-    otherInput.addEventListener("input", update);
-    form.addEventListener("submit", (event) => event.preventDefault());
+    otherInput.addEventListener("input", () => {
+      for (const chip of chips) chip.checked = false;
+      update();
+    });
+    form.addEventListener("change", (event) => {
+      if ((event.target as HTMLInputElement).name === "amount") otherInput.value = "";
+      update();
+    });
+    // Enter or Go in the dollar field follows the button.
+    form.addEventListener("submit", (event) => {
+      event.preventDefault();
+      (portalLink ?? emailLink)?.click();
+    });
     update();
   }
 </script>
 
 <style>
+  /* The chooser: a white card lifted off the paper by a soft shadow, so it
+     reads as a panel and not a flat form. */
   .card {
     max-width: 44rem;
     display: grid;
@@ -157,6 +188,9 @@ const description = `${donatePage.intro} ${claim(facts.legalName)} is a ${taxExe
     background: #fff;
     border: var(--hairline) solid var(--rule);
     border-radius: var(--r-card);
+    box-shadow:
+      0 1rem 2.5rem rgb(27 15 46 / 0.08),
+      0 0.125rem 0.375rem rgb(27 15 46 / 0.06);
   }
 
   .card h2 {
@@ -174,36 +208,90 @@ const description = `${donatePage.intro} ${claim(facts.legalName)} is a ${taxExe
     margin-bottom: 0.5rem;
   }
 
+  /* The amounts: four chips and a dollar field that is the fifth choice.
+     Three columns on phones ($25 $50 $100 / $250 [$ Other]); one row from
+     tablets up, the field taking what is left. */
+  .field .amounts {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.5rem;
+  }
+
   .amounts .choice {
-    min-width: 5rem;
+    min-width: 0;
     justify-content: center;
   }
 
-  .other {
+  .amounts .choice--other {
+    grid-column: span 2;
+    gap: 0.25rem;
+    padding-inline: 0.875rem;
+    cursor: text;
+  }
+
+  /* The field is the pill's text, not an invisible overlay like the radios. */
+  .amounts .choice--other input {
+    position: static;
+    inset: auto;
+    width: 100%;
+    min-width: 0;
+    height: auto;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    opacity: 1;
+    font: inherit;
+    color: inherit;
+    outline: none;
+    appearance: textfield;
+    -moz-appearance: textfield;
+  }
+
+  .amounts .choice--other input::-webkit-inner-spin-button,
+  .amounts .choice--other input::-webkit-outer-spin-button {
+    appearance: none;
+    margin: 0;
+  }
+
+  .amounts .choice--other input::placeholder {
+    color: var(--muted);
+    opacity: 1;
+  }
+
+  /* While the field holds a value it is the choice: it turns purple, and a
+     chip still checked (JavaScript off) looks unselected. */
+  .field .amounts .choice--other:has(input:not(:placeholder-shown)) {
+    background: var(--purple);
+    color: #fff;
+    box-shadow: inset 0 0 0 0.125rem var(--purple);
+  }
+
+  .amounts:has(#other-amount:not(:placeholder-shown)) .choice:has([name="amount"]:checked) {
+    background: #fff;
+    color: inherit;
+    box-shadow: inset 0 0 0 var(--hairline) var(--rule-strong);
+  }
+
+  /* The button and, while giving is by email, one line under it saying what
+     the button does. The trust line follows as the card's last words. */
+  .action {
     display: grid;
-    gap: 0.35rem;
-    margin-top: 0.75rem;
-    max-width: 16rem;
-  }
-
-  .other[hidden] {
-    display: none;
-  }
-
-  .other label {
-    font-weight: 700;
-    font-size: var(--step--1);
-  }
-
-  /* The chosen gift, read back in the body face: the questions above it
-     and the button below are the things to look at. */
-  .summary {
-    font-size: var(--step-0);
-    color: var(--ink);
+    gap: var(--space-s);
   }
 
   .go {
     justify-self: start;
+  }
+
+  @media (max-width: 35.99rem) {
+    .go {
+      justify-self: stretch;
+    }
+  }
+
+  .note {
+    max-width: 40ch;
   }
 
   .note,
@@ -212,9 +300,50 @@ const description = `${donatePage.intro} ${claim(facts.legalName)} is a ${taxExe
     color: var(--muted);
   }
 
+  @media (min-width: 36rem) {
+    .field .amounts {
+      grid-template-columns: repeat(4, 1fr) minmax(8rem, 1.5fr);
+    }
+
+    .amounts .choice--other {
+      grid-column: auto;
+    }
+  }
+
+  /* Desktop: the card stands beside the opener's words and crosses the wave,
+     so the first screen holds the choices and the button. The opener keeps
+     the card's column free; the card is pulled up by the opener's bottom
+     padding, the wave and the height of the opener's words, so its top
+     aligns with the eyebrow. */
   @media (min-width: 56rem) {
+    .page-hero .wrap {
+      padding-right: 36rem;
+    }
+
+    .page-hero .lede {
+      max-width: 30ch;
+    }
+
+    .page-hero + .section.give {
+      position: relative;
+      padding-top: 0;
+      margin-top: calc(-1 * (var(--wave-h) + var(--space-l) + 15.875rem));
+    }
+
+    .give .wrap {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 34rem;
+    }
+
     .card {
+      grid-column: 2;
+      max-width: none;
+      position: relative;
+      z-index: 1;
       padding: var(--space-l);
+      box-shadow:
+        0 1.5rem 3rem rgb(27 15 46 / 0.24),
+        0 0.125rem 0.375rem rgb(27 15 46 / 0.12);
     }
   }
 </style>

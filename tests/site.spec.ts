@@ -1293,20 +1293,29 @@ test.describe("donation page", () => {
     await page.goto("/donate");
     await page.locator("input[name=amount][value='100']").check();
     await page.locator("input[name=frequency][value=monthly]").check();
-    await expect(page.locator("[data-summary]")).toHaveText("Your gift: $100, monthly.");
+    await expect(page.locator("[data-summary]")).toHaveText("Your gift: $100 a month.");
     const go = page.locator(".go");
+    // The button carries the gift, so the last thing read before the click confirms it.
+    await expect(go).toHaveText("Donate $100 a month by email");
     const href = decodeURIComponent((await go.getAttribute("href"))!);
     expect(href).toMatch(/\$100/);
     expect(href).toMatch(/monthly/);
   });
 
-  test("Other reveals an amount field", async ({ page }) => {
+  test("the other amount is an always-visible field that acts as the fifth choice", async ({
+    page,
+  }) => {
     await page.goto("/donate");
-    await expect(page.locator("#other-amount")).toBeHidden();
-    await page.locator("input[name=amount][value=other]").check();
-    await expect(page.locator("#other-amount")).toBeVisible();
-    await page.locator("#other-amount").fill("75");
-    await expect(page.locator("[data-summary]")).toHaveText("Your gift: $75, one time.");
+    const other = page.locator("#other-amount");
+    await expect(other).toBeVisible();
+    await other.fill("75");
+    await expect(page.locator("[data-summary]")).toHaveText("Your gift: $75.");
+    await expect(page.locator(".go")).toHaveText("Donate $75 by email");
+    await expect(page.locator("input[name=amount]:checked")).toHaveCount(0);
+    // Choosing a chip again empties the field.
+    await page.locator("input[name=amount][value='25']").check();
+    await expect(other).toHaveValue("");
+    await expect(page.locator("[data-summary]")).toHaveText("Your gift: $25.");
   });
 
   test("states the nonprofit's EIN and tax status", async ({ page }) => {
