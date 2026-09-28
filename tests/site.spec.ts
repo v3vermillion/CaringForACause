@@ -402,7 +402,7 @@ test.describe("scrolling stability", () => {
         doors: share(r(".doors")),
         // The words start on the header's left edge, on every screen.
         left: r(".hero .content").left - r(".site-header .brand").left,
-        lines: [lines(".hero h1"), lines(".hero .sub"), lines(".door--help .door-body")],
+        lines: [lines(".hero h1"), lines(".hero .sub")],
         // The header as a share of the text block's height, and her lockup's width in it.
         header: r(".site-header").height / hero.height,
         lockup: r(".site-header .brand-lockup").width,
@@ -536,9 +536,9 @@ test.describe("the header by device", () => {
     test(`the header is the same picture on every ${cls}`, async ({ page }, testInfo) => {
       test.skip(!testInfo.project.name.startsWith("desktop-"), "runs once per engine");
       test.slow(); // a dozen page loads and screenshots
-      // The bar is one component from the layout on every page, and the
-      // preview notice sits above it on every page too, so the home page is
-      // the whole picture; a second page would repeat the same screenshots.
+      // The bar is one component from the layout on every page, so the home
+      // page is the whole picture; a second page would repeat the same
+      // screenshots.
       for (const path of ["/"]) {
         const ref = await bar(page, reference[0], reference[1], path);
         for (const [width, height] of others) {
@@ -1500,35 +1500,6 @@ test.describe("videos", () => {
     const iframe = page.locator("#about iframe");
     await expect(iframe).toHaveAttribute("src", /^https:\/\/www\.youtube-nocookie\.com\/embed\//);
     await expect(iframe).toHaveAttribute("title", /.+/);
-  });
-});
-
-test.describe("preview notice", () => {
-  const text = "Preview: some details are still being confirmed.";
-
-  for (const path of pages) {
-    test(`appears first on ${path}, with exact wording, and cannot be dismissed`, async ({
-      page,
-    }) => {
-      await page.goto(path);
-      const notice = page.locator("[data-preview-notice]");
-      await expect(notice).toHaveText(text);
-      await expect(notice).toHaveRole("complementary");
-      await expect(notice).toBeVisible();
-      await expect(notice.locator("button, a")).toHaveCount(0);
-      // Above the header and the claims it qualifies
-      const noticeBox = await notice.boundingBox();
-      const headerBox = await page.locator(".site-header").boundingBox();
-      expect(noticeBox!.y).toBeLessThan(headerBox!.y);
-    });
-  }
-
-  test.describe("without JavaScript", () => {
-    test.use({ javaScriptEnabled: false });
-    test("is still shown", async ({ page }) => {
-      await page.goto("/");
-      await expect(page.locator("[data-preview-notice]")).toHaveText(text);
-    });
   });
 });
 

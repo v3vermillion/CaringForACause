@@ -68,7 +68,7 @@ Every factual claim (legal name, EIN, founding year, phone, email, and so on) is
 - `orgPublished(...)`: stated on the organization's own current website.
 - `needsConfirmation(..., question)`: conflicting or outdated; ask Tamara.
 
-Statements of fact on the page only accept confirmed values, so an unconfirmed fact used as a claim is a type error. Contact details may show while unconfirmed, because the preview needs them, and every build log lists what's still pending. While search indexing is off, every page shows a preview notice. **A launch build (`PUBLIC_ALLOW_INDEXING=true`) fails until every fact is confirmed**, and lists the questions to ask.
+Statements of fact on the page only accept confirmed values, so an unconfirmed fact used as a claim is a type error. Contact details may show while unconfirmed, because the preview needs them, and every build log lists what's still pending. **A launch build (`PUBLIC_ALLOW_INDEXING=true`) fails until every fact is confirmed**, and lists the questions to ask.
 
 When Tamara confirms a detail, change it to `orgPublished(...)` with her confirmation as the source.
 

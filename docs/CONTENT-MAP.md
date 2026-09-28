@@ -63,7 +63,6 @@ Everything the site needs to carry for Caring for a Cause, where each piece live
 
 - Current-season notice (what is needed right now)
 - Event dates and deadlines per season: **confirm**
-- Preview notice (removed automatically at launch)
 
 ## 2. Where it goes
 
@@ -99,6 +98,5 @@ Goal: within the first screen on a phone, a visitor sees real people, her name i
 
 - **Background:** a slow, silent crossfade of four of her event photos (28-second cycle, 7 seconds each), each drifting slowly larger while it shows, under a night veil that keeps white text above 7:1. On phones it fills the banner, showing in a band above the words; on desktop it occupies the right side at close to its native width and the veil hides its edge. The wave at the foot of the banner cuts it. Under `prefers-reduced-motion`, the first photo stays still.
 - **Words:** "Together we can." as the eyebrow, the headline (its last line in lavender italic), the subhead. All from her materials.
-- **Doors:** two, the same size, side by side on every screen: "Help me" (signal) and "Donate" (a pale ring), each a pill with one line under it. A test checks both fit an iPhone 12 mini and an iPhone 15 Safari screen.
-- **Preview notice:** kept (required until launch) as one slim line.
+- **Doors:** two, the same size, side by side on every screen: "Help me" (signal) and "Donate" (a pale ring), each a pill. A test checks both fit an iPhone 12 mini and an iPhone 15 Safari screen.
 - **Facts:** the trust line sits directly below the banner on the same ground.

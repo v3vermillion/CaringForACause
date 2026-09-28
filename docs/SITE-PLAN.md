@@ -44,7 +44,6 @@ Three pages. The home page is the route map; the two doors lead to their own pag
 │  Headline (serif, last line lavender italic)  │
 │  subhead                                      │
 │  ( Help me › )  ( Donate › )   equal pills    │  → /apply, /donate
-│  one line under each                          │
 │ ~~~ wave: violet and crimson ribbons ~~~~~~~~ │
 ├───────────────────────────────────────────────┤
 │ Holiday Meals · Gifts · Diapers · School      │  night band: program strip

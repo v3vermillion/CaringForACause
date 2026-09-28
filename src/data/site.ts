@@ -202,18 +202,14 @@ export const hero = {
    * The city is still unconfirmed (see facts.city), so it stays out of here.
    */
   subhead: "A nonprofit for families facing financial hardship.",
-  /** The two doors. Families first; giving second. */
+  /**
+   * The two doors. Families first; giving second. They stand alone: the
+   * program strip under the banner says what the help is, and the donate
+   * page says how giving works (decision 61).
+   */
   doors: {
-    getHelp: {
-      title: "Help me",
-      body: "Holiday meals and gifts, monthly diapers, and school supplies.",
-      href: "/apply",
-    },
-    donate: {
-      title: "Donate",
-      body: "Give once or monthly to local families.",
-      href: "/donate",
-    },
+    getHelp: { title: "Help me", href: "/apply" },
+    donate: { title: "Donate", href: "/donate" },
   },
 };
 

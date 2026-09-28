@@ -89,14 +89,13 @@
   --rp: calc(100vw / 393);
   --sp: var(--rp);
 
-  /* What sits above the first screen: the header, plus the preview notice
-     while indexing is off (html.preview). The desktop banner fills the rest. */
+  /* What sits above the first screen: the header. The desktop banner fills
+     the rest. */
   /* The header bar scales with --sp; its Donate link is a 44px tap target,
      so the bar can never be shorter than that (a desktop window narrower
      than about 940px). Plus the 1px rule under it. Desktop sets its own,
      taller bar below. */
   --header-h: calc(max(60 * var(--sp), 44px) + 1px);
-  --notice-h: calc(1.753rem + 1px);
   --top-chrome: var(--header-h);
   /* What ends the first screen on desktop below the banner and its program
      strip (both in --u, src/pages/index.astro): the season strip, one line
@@ -109,10 +108,6 @@
   :root {
     --rp: 1.15px;
   }
-}
-
-html.preview {
-  --top-chrome: calc(var(--header-h) + var(--notice-h));
 }
 
 /* The serif: a Literata display cut (optical size 72), Latin only, weights

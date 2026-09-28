@@ -30,8 +30,8 @@ const cycle = slides.length * 7;
 <!--
   The banner, from the owner's reference (decision 51): her tagline as a small
   tracked line between two rules, the headline in the serif with its last
-  line in lavender italic, one sentence, and the two doors as pills with a
-  line under each, over her photos under the night veil. The wave ribbon at
+  line in lavender italic, one sentence, and the two doors as pills, over her
+  photos under the night veil (decision 61). The wave ribbon at
   the bottom cuts the photo and lands on the night band below. Her lockup is
   in the header now. On desktop the banner fills the first screen (see
   src/pages/index.astro and docs/DESIGN.md).
@@ -75,7 +75,6 @@ const cycle = slides.length * 7;
               <path d="m9 5 7 7-7 7"></path>
             </svg>
           </span>
-          <span class="door-body">{doors.getHelp.body}</span>
         </a>
         <a class="door door--give" href={doors.donate.href}>
           <span class="door-pill">
@@ -84,7 +83,6 @@ const cycle = slides.length * 7;
               <path d="m9 5 7 7-7 7"></path>
             </svg>
           </span>
-          <span class="door-body">{doors.donate.body}</span>
         </a>
       </div>
     </div>
@@ -314,16 +312,15 @@ const cycle = slides.length * 7;
     text-shadow: 0 max(1px, calc(1 * var(--rp))) calc(14 * var(--rp)) rgb(27 15 46 / 0.6);
   }
 
-  /* Two doors, equal, side by side: a pill and one line under it. Crimson is
-     the signal; the other is an outlined pill. The whole door is the link, so
-     the line under the pill is part of the tap target too, and the door is
-     never shorter than 44px; the pill itself carries no floor, so it scales
-     with the class like everything else (a floor on it changed the
-     composition on short laptops). */
+  /* Two doors, equal, side by side: a pill each. Crimson is the signal; the
+     other is an outlined pill. The whole door is the link and is never
+     shorter than 44px; the pill itself carries no floor, so it scales with
+     the class like everything else (a floor on it changed the composition on
+     short laptops). */
   .doors {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    grid-auto-rows: 1fr; /* the doors stay the same size whatever their lines */
+    grid-auto-rows: 1fr;
     gap: calc(12 * var(--rp));
     margin-top: calc(20 * var(--rp));
   }
@@ -381,16 +378,6 @@ const cycle = slides.length * 7;
 
   .door:hover .chev {
     transform: translateX(3px);
-  }
-
-  /* The line under each pill balances its lines, so neither door ends in a
-     word on its own. */
-  .door-body {
-    font-size: calc(15 * var(--rp));
-    line-height: 1.4;
-    text-wrap: balance;
-    color: #e6ddf8;
-    text-shadow: 0 max(1px, calc(1 * var(--rp))) calc(12 * var(--rp)) rgb(27 15 46 / 0.6);
   }
 
   /* The signal: a glossy crimson pill, lit along its top rim, with its glow.
@@ -566,10 +553,6 @@ const cycle = slides.length * 7;
     }
     .door-title {
       top: calc(-0.5 * var(--u));
-    }
-    .door-body {
-      font-size: calc(15 * var(--u));
-      text-shadow: 0 max(1px, calc(1 * var(--u))) calc(12 * var(--u)) rgb(27 15 46 / 0.6);
     }
     .door--give .door-pill {
       -webkit-backdrop-filter: blur(calc(10 * var(--u)));
