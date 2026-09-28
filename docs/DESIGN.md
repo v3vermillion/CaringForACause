@@ -81,7 +81,7 @@ One browser test checks all of it on every push ("every phone/tablet/desktop sho
 
 ## Motion
 
-One orchestrated moment: the banner photos crossfade (seven seconds each), each drifting slowly larger while it shows so the crossfade breathes, and as the banner scrolls away its photo moves at three quarters of the page's speed (a scroll-driven animation the compositor runs; nothing moves at the top of the page). The bar takes a shadow as the page scrolls under it, scroll-driven too. Everything else moves only in response to a person: doors and cards lift 2 px on hover, the links' underlines draw in, the menu fades and settles in and leaves the same way, a chosen tab's panel eases in, items stagger in, and a change of page cross-fades under a bar that stays put (the two doors' pages are prerendered on intent, so it is immediate). Nothing fades in on scroll or on load: a page whose parts appear late is a page whose composition cannot be measured. All of it stops under `prefers-reduced-motion`.
+One orchestrated moment: the banner photos crossfade (seven seconds each), each drifting slowly larger while it shows so the crossfade breathes, and as the banner scrolls away its photo moves at three quarters of the page's speed (a scroll-driven animation the compositor runs; nothing moves at the top of the page). The bar takes a shadow as the page scrolls under it, scroll-driven too. Everything else moves only in response to a person: doors and cards lift 2 px on hover, the links' underlines draw in, the menu fades and settles in and leaves the same way, the Get involved tabs' selected pill slides along its track and the panels cross-fade in place while the strip's height eases (so the page never jumps), the checklist opens with an ease, a pressed play button shows a ring over her photo until the player arrives, items stagger in, and a change of page cross-fades under a bar that stays put (the two doors' pages are prerendered on intent, so it is immediate). Nothing fades in on scroll or on load: a page whose parts appear late is a page whose composition cannot be measured. All of it stops under `prefers-reduced-motion`.
 
 ## Type
 
@@ -96,7 +96,9 @@ One orchestrated moment: the banner photos crossfade (seven seconds each), each 
 
 ## Shape
 
-Three radii and nothing else: pills (`--r-pill`) for buttons, chips and tabs; cards (`--r-card`, 1.25rem: 20px on the reference screen) for doors, panels and cards; images (`--r-img`, 0.875rem: 14px). Focus rings are purple on light surfaces and white on dark ones (`--focus`), never a third color.
+Three radii and nothing else: pills (`--r-pill`) for buttons, chips and tabs; cards (`--r-card`, 1.25rem: 20px on the reference screen) for doors, panels and cards; images (`--r-img`, 0.875rem: 14px, the program tiles' thumbnails too). Focus rings are purple on light surfaces and white on dark ones (`--focus`), never a third color.
+
+One surface language for anything that rests on paper or lilac (decision 62): a hairline ring plus a soft cool shadow (the tiles, the contact cards, the involvement panel, the form's sheet, the donate chooser), never a plain 1px border; the border is kept for focus. Control boundaries (fields, chips) are `--rule-strong`, a violet that holds 3:1 on white and on paper; `--rule` stays for the rules between rows. Every control answers a press within a frame (`:active`: a 1px settle on buttons, the chip going lilac, the tile flattening) and the browser's tap flash is off only where such a state exists.
 
 ## Decoration
 

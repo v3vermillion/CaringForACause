@@ -82,12 +82,15 @@ Three pages. The home page is the route map; the two doors lead to their own pag
 │ serving area │ © year                         │
 └───────────────────────────────────────────────┘
 
-/apply    Help me: a night opener ending in the wave, then four steps
-          (about you · household · what you need · review and send),
-          sent by email, one row per child
-/donate   Donate: a night opener ending in the wave, then frequency and
-          amount, then the payment page (`links.donate`) or an email
-          with the gift written in
+/apply    Help me: a night opener ending in the wave, then one sheet of
+          four steps (about you · household · what you need · review and
+          send), each opening "Step N of 4", sent by email, one row per
+          child; on desktop a night aside offers the phone and email
+/donate   Donate: a night opener, and beside it on desktop (crossing the
+          wave; under it on phones) the chooser: once or monthly, four
+          amounts and a "$ Other" field, the gift in the button, then the
+          payment page (`links.donate`) or an email with the gift written in
+/404      Page not found: the night opener with the banner's two doors
 ```
 
 On phones every two-column block stacks, the two doors stay side by side under the headline, and the tabs and program tiles scroll sideways inside the page gutter.
