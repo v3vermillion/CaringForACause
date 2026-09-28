@@ -50,10 +50,11 @@ Everything visitors read lives in **`src/data/site.ts`**. Common updates:
 | Menu and header links                              | `navigation`                                                                 |
 | Donation page, online application, sponsor sign-up | `links` (the pages upgrade themselves when a link is set)                    |
 | Donation amounts and wording                       | `donatePage`                                                                 |
-| Application steps, counties, sizes, grades         | `applyPage`                                                                  |
+| Application steps, kinds of help, counties, sizes  | `applyPage` (`needs` are the cards on step 3)                                |
 | A program's text, or hide a program                | `programs` (set `active: false`)                                             |
 | Get involved tabs                                  | `getInvolved.tabs`                                                           |
 | About and the contact section                      | `about`, `contact`                                                           |
+| The page for a missing address                     | `notFoundPage`                                                               |
 | Gallery photos                                     | Add files to `src/assets/photos/`, then list them in `gallery` (shows at 4+) |
 
 Run `npm run verify` after editing. It catches missing fields and typos in field names.

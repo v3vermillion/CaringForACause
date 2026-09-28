@@ -54,6 +54,8 @@ export type Program = {
   photo?: Photo;
   /** A click-to-play player takes the photo's place beside the text. */
   video?: YouTubeVideo;
+  /** The one next step at the foot of the row, pointing at a place on the site. */
+  link?: { label: string; href: string };
   /** Set to false to hide a program without deleting it. */
   active: boolean;
 };
@@ -153,7 +155,7 @@ export const links = {
 /** The strip under the hero. Change each season, or set `active: false`. */
 export const seasonalBanner = {
   active: true,
-  message: "Holiday sponsors are needed for Thanksgiving and Christmas.",
+  message: "Families need holiday sponsors for Thanksgiving and Christmas.",
   action: { label: "Sponsor a family", href: "/#sponsor" },
 };
 
@@ -201,7 +203,7 @@ export const hero = {
    * the service area and the trust strip has the year, so neither is repeated.
    * The city is still unconfirmed (see facts.city), so it stays out of here.
    */
-  subhead: "A nonprofit for families facing financial hardship.",
+  subhead: "A nonprofit for households facing financial hardship.",
   /**
    * The two doors. Families first; giving second. They stand alone: the
    * program strip under the banner says what the help is, and the donate
@@ -223,25 +225,25 @@ export const programStrip = [
   {
     icon: "meals",
     title: "Holiday Meals",
-    body: "Holiday food boxes for local families.",
+    body: "Food boxes for local families.",
     href: "/#holiday-assistance",
   },
   {
     icon: "gifts",
     title: "Gifts",
-    body: "Toys and gifts from a child's wish list.",
+    body: "Toys and clothes from a child's wish list.",
     href: "/#holiday-assistance",
   },
   {
     icon: "diapers",
     title: "Diapers",
-    body: "A reliable monthly supply of diapers.",
+    body: "A reliable supply, every month.",
     href: "/#diaper-drive",
   },
   {
     icon: "school",
     title: "School Supplies",
-    body: "Supplies and hygiene items for students.",
+    body: "Care packages for the new school year.",
     href: "/#back-to-school",
   },
 ] as const;
@@ -273,7 +275,7 @@ export const getHelp = {
   whoCanApply:
     "Households with children and seniors are our focus, but anyone who is struggling right now can apply.",
   howToApply:
-    "Start an application here, or call or email us and we'll send you one with more information.",
+    "Prefer to talk to someone first? Call or email us and we'll send you an application.",
   action: { label: "Start an application", href: "/apply" },
 };
 
@@ -282,9 +284,9 @@ export const applyPage = {
   eyebrow: "Help me",
   heading: "Apply for help",
   intro:
-    "Tell us a little about your household and what you need. It goes straight to us by email, and we'll follow up with next steps.",
+    "Four short steps. Your answers go straight to us by email, and we'll follow up with next steps.",
   privacy:
-    "We use this only to contact you about help. Nothing is stored on this website; your answers are sent to us by email.",
+    "This website stores nothing. Your application goes to us by email, and we use it only to arrange help for you.",
   /** Shown when JavaScript is off, since the form can't send without it. */
   noScript:
     "This form needs JavaScript to send. Call or email us instead and we'll send you an application.",
@@ -308,13 +310,38 @@ export const applyPage = {
     "Other",
   ],
   contactMethods: ["Call", "Text", "Email"],
+  /**
+   * The kinds of help a family can ask for, as selectable cards: a title, one
+   * line from the program's own words, and which follow-up list opens.
+   */
+  needs: [
+    {
+      id: "holiday",
+      title: "Holiday meals and gifts",
+      line: "Thanksgiving, Christmas, and Easter",
+      followUp: "holidays",
+    },
+    { id: "diapers", title: "Diapers", line: "A reliable monthly supply", followUp: "diaperSizes" },
+    {
+      id: "school",
+      title: "School supplies",
+      line: "Supplies and hygiene items for students",
+      followUp: "grades",
+    },
+    {
+      id: "haircut",
+      title: "Free haircut or style",
+      line: "Cuts, styles, and face painting",
+      followUp: null,
+    },
+  ] as const,
   diaperSizes: ["Newborn", "Size 1", "Size 2", "Size 3", "Size 4", "Size 5", "Size 6", "Pull-ups"],
   grades: ["Pre-K", "K", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"],
   holidays: ["Thanksgiving", "Christmas", "Easter"],
   emailSubject: "Application for help",
   done: {
-    heading: "Your email app should be open",
-    body: "Press send to finish. If it didn't open, copy the text below and email it to us, or call us.",
+    heading: "One more step",
+    body: "Your email app should have opened with your application filled in. Press Send there and you're done. If nothing opened, copy your application below and paste it into an email to us, or call us.",
   },
 };
 
@@ -322,11 +349,12 @@ export const applyPage = {
 export const donatePage = {
   eyebrow: "Donate",
   heading: `Give to families in ${claim(facts.serviceArea)}`,
-  intro:
-    "Donations help provide diapers, holiday meals, gifts, and school supplies for local families.",
+  intro: "Your gift helps put holiday meals, gifts, diapers, and school supplies into local homes.",
+  /** The chooser's heading, over the frequency and amount choices. */
+  giftHeading: "Give once or every month",
   amounts: [25, 50, 100, 250],
   frequencies: [
-    { id: "once", label: "One time" },
+    { id: "once", label: "Once" },
     { id: "monthly", label: "Monthly" },
   ],
   /** Shown while `links.donate` is not set: giving is arranged by email. */
@@ -335,14 +363,21 @@ export const donatePage = {
   continueLabel: "Donate",
   emailLabel: "Donate by email",
   emailNote:
-    "Online payments open once our secure giving page is set up. Until then, choose an amount and the button below opens an email to us; we'll arrange it with you directly.",
+    "We don't take card payments on this site yet. This button opens an email to us with your gift written in, and we'll reply with the easiest way to send it.",
 };
 
 /** The contact section on the home page. */
 export const contact = {
   eyebrow: "Contact",
   heading: "Reach us",
-  intro: "Call or email us, or send a message on Facebook.",
+  intro: "Whether you need help or want to give it, start here.",
+};
+
+/** The page shown for an address that doesn't exist. */
+export const notFoundPage = {
+  eyebrow: "Page not found",
+  heading: "We can't find that page",
+  body: "The link may be old or mistyped. If you need help right now, call us.",
 };
 
 export const programs: Program[] = [
@@ -350,8 +385,7 @@ export const programs: Program[] = [
     slug: "holiday-assistance",
     name: "Holiday Assistance",
     label: "Thanksgiving, Christmas, Easter",
-    summary:
-      "Food boxes and gifts for families at Thanksgiving, Christmas, and Easter, so every household has a meal and something to open.",
+    summary: "Food boxes and gifts, so every household has a holiday meal and something to open.",
     forWhom: "Low-income families in Central Indiana, especially households with children.",
     details: [
       "Families can receive toys, clothes, gift cards, meals, or gifts from their wish list.",
@@ -363,19 +397,21 @@ export const programs: Program[] = [
       alt: "Children holding holiday gift bags beside a volunteer in a Santa hat",
       focus: "center 27%",
     },
+    link: { label: "Sponsor a family", href: "/#sponsor" },
     active: true,
   },
   {
     slug: "diaper-drive",
     name: "Diaper Drive",
     label: "Diapers every month",
-    summary: "A reliable monthly supply of diapers, plus referrals to partner resources.",
+    summary: "A reliable supply, plus referrals to partner resources.",
     forWhom: "Families with babies and toddlers who need help with diapers.",
     photo: {
       file: "diaper-drive.jpg",
       alt: "A volunteer hands a large pack of diapers to a family with a young child",
       focus: "center 34%",
     },
+    link: { label: "Partner on the Diaper Drive", href: "/#partner" },
     active: true,
   },
   {
@@ -444,7 +480,7 @@ export const programs: Program[] = [
     name: "Free Haircuts & Styles",
     label: "Cuts, styles, face painting",
     summary:
-      "Volunteer barbers, stylists, makeup artists, and face painters give free cuts and styles.",
+      "Volunteer barbers and stylists cut and style hair at our outreach events; makeup artists and face painters join them.",
     forWhom: "People experiencing homelessness and low-income families.",
     photo: {
       file: "haircut-boy.jpg",
@@ -457,6 +493,7 @@ export const programs: Program[] = [
       poster: "stylist-haircut.jpg",
       posterFocus: "center 27%",
     },
+    link: { label: "Volunteer at a haircut event", href: "/#partner" },
     active: true,
   },
   {
@@ -470,7 +507,7 @@ export const programs: Program[] = [
 ];
 
 export const getInvolved = {
-  heading: "Get involved",
+  heading: "Four ways to help",
   intro: "Choose how you'd like to help.",
   tabs: [
     {
@@ -478,8 +515,8 @@ export const getInvolved = {
       label: "Sponsor a family",
       heading: "Sponsor a family for the holidays",
       body: [
-        "Sponsors help a family with gifts from their wish list, a holiday meal, or both.",
-        "You can sponsor one family or several, for one holiday or all three.",
+        "As a sponsor, you give a family gifts from their wish list, a holiday meal, or both.",
+        "Sponsor one family or several, for one holiday or all three.",
       ],
       action: {
         label: "Sign up to sponsor",
@@ -498,16 +535,21 @@ export const getInvolved = {
       heading: "Donate money or items",
       /** The short version: /donate is the destination, so this says one thing and hands off. */
       body: [
-        "Donations help provide diapers, holiday meals, gifts, and school supplies for local families.",
+        "Give once or monthly. Your gift helps provide holiday meals, gifts, diapers, and school supplies for local families.",
       ],
       action: { label: "Donate", href: "/donate", fallbackLabel: "Donate" },
+      photo: {
+        file: "face-paint-closeup.jpg",
+        alt: "A child with a colorful painted face at a community event",
+        focus: "center 35%",
+      },
     },
     {
       id: "volunteer",
       label: "Volunteer",
       heading: "Volunteer your time",
       body: [
-        "Our part-time volunteers are committed to helping others, and we're always looking for more help.",
+        "Our volunteers are part-time and help run every program. We're always looking for more.",
       ],
       action: {
         label: "Fill out the volunteer form",
@@ -525,7 +567,7 @@ export const getInvolved = {
       label: "Partner",
       heading: "Partner with us",
       body: [
-        "Businesses and organizations can partner with us on the Diaper Drive and holiday programs.",
+        "Businesses and organizations can support the Diaper Drive and our holiday programs.",
         "Barbers, stylists, makeup artists, and face painters can donate their time at our haircut events.",
       ],
       action: {
@@ -546,7 +588,7 @@ export const about = {
   eyebrow: "About",
   heading: `Meet ${claim(facts.founder)}`,
   body: [
-    `${claim(facts.founder)} founded ${org.shortName} in ${claim(facts.founded)} to support families in ${claim(facts.serviceArea)} who are facing financial hardship.`,
+    `${claim(facts.founder).split(" ")[0]} founded ${org.shortName} in ${claim(facts.founded)} to support families in ${claim(facts.serviceArea)} who are facing financial hardship.`,
     "Part-time volunteers help run every program, and the organization has grown thanks to the helping hands of this community.",
   ],
   /** A still from her "Do More" feature, cropped to leave out the program's caption. */

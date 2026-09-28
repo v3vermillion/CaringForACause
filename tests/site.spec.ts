@@ -1572,6 +1572,6 @@ test.describe("search and sharing", () => {
   test("unknown pages return the custom 404", async ({ page }) => {
     const response = await page.goto("/this-page-does-not-exist");
     expect(response?.status()).toBe(404);
-    await expect(page.getByRole("heading", { level: 1 })).toHaveText("This page doesn't exist");
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText("We can't find that page");
   });
 });
