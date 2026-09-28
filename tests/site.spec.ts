@@ -1214,6 +1214,21 @@ test.describe("the program strip", () => {
     }
     await expect(page.locator(".strip .pi")).toHaveCount(programStrip.length);
   });
+
+  // From tablets up the proof is one line between two rules: the rules take
+  // only the space the words leave, so the closing rule never wraps under
+  // the tax ID.
+  test("the proof line is one line from tablets up", async ({ page, viewport }) => {
+    test.skip(!viewport || viewport.width < 576, "phones stack the proof");
+    await page.goto("/");
+    const proof = page.locator(".strip .facts");
+    const [box, lineHeight] = await Promise.all([
+      proof.boundingBox(),
+      proof.evaluate((el) => parseFloat(getComputedStyle(el).lineHeight)),
+    ]);
+    expect(box).not.toBeNull();
+    expect(box!.height).toBeLessThan(lineHeight * 1.6);
+  });
 });
 
 test.describe("one home per fact", () => {

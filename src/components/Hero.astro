@@ -12,10 +12,17 @@ const files = import.meta.glob<{ default: ImageMetadata }>(
   "../assets/photos/*.{jpg,jpeg,png,webp}",
   { eager: true },
 );
+/* A slide's focus ("center 20%") is set for a tall desktop window; a short
+   window shows fewer rows of the photo, so its vertical part rides down by
+   the montage's shift (see --montage-shift in the desktop styles). */
+const position = (focus = "center") => {
+  const [x, y] = focus.split(/\s+/);
+  return y ? `${x} calc(${y} + var(--montage-shift, 0px))` : x;
+};
 const slides = hero.montage.map((photo, index) => {
   const match = files[`../assets/photos/${photo.file}`];
   if (!match) throw new Error(`Photo not found: src/assets/photos/${photo.file}`);
-  return { ...photo, src: match.default, index };
+  return { ...photo, src: match.default, index, position: position(photo.focus) };
 });
 const cycle = slides.length * 7;
 ---
@@ -43,7 +50,7 @@ const cycle = slides.length * 7;
           loading={slide.index === 0 ? "eager" : "lazy"}
           fetchpriority={slide.index === 0 ? "high" : "auto"}
           decoding="async"
-          style={`object-position: ${slide.focus ?? "center"};`}
+          style={`object-position: ${slide.position};`}
         />
       </div>
     ))}
@@ -493,7 +500,12 @@ const cycle = slides.length * 7;
     /* Her photos sit to the right of the words; night takes the left, and the
        veil hides the photo's edge. Both are measured from the text column so
        the words always sit on the same part of the veil. */
+    /* The montage's crop follows the window's height: a short window (--u
+       below 0.85) shows fewer rows of each photo, so the crop slides down by
+       up to 55px (about 5% of a photo's hidden height) to keep the faces near
+       the wave whole; a tall window shows the focus as set. */
     .montage {
+      --montage-shift: clamp(0px, calc((0.85px - var(--u)) * 600), 55px);
       left: calc(var(--wrap-left) + 218 * var(--u));
     }
     .scrim {

@@ -23,171 +23,232 @@ const boxes: Record<ProgramIconKind, string> = {
   diapers: "0 0 75 67",
   school: "0 0 77 81",
 };
+/* The box's width, for the strip to size each icon by one shared scale. */
+const widths: Record<ProgramIconKind, number> = { meals: 103, gifts: 70, diapers: 75, school: 77 };
 ---
 
 <svg
   viewBox={boxes[kind]}
   class:list={["pi", `pi--${kind}`, className]}
+  style={`--pi-w: ${widths[kind]}`}
   aria-hidden="true"
   focusable="false"
 >
   {kind === "meals" && (
     <g filter="url(#pi-glow)">
-      <path class="ink" stroke-width="3" d="M3.5 2v14 M9 2v15.5 M14.5 2v15.5 M20 2v14" />
-      <path
-        d="M2 14.5c0 7 3.5 12 7 13.5v35.5c0 2 1.3 3.5 2.8 3.5s2.8-1.5 2.8-3.5V28c3.5-1.5 7-6.5 7-13.5z"
-        fill="url(#pi-silver)"
+      <!-- fork: three tines on a hollow U bowl that narrows into a handle widening to a round end -->
+      <rect
+        x="1.5"
+        y="1"
+        width="3.6"
+        height="18"
+        rx="1.8"
+        fill="url(#pi-tube)"
+        stroke="#fbf7ff"
+        stroke-width="1.6"
       />
+      <rect
+        x="8.2"
+        y="1"
+        width="3.6"
+        height="18"
+        rx="1.8"
+        fill="url(#pi-tube)"
+        stroke="#fbf7ff"
+        stroke-width="1.6"
+      />
+      <rect
+        x="14.9"
+        y="1"
+        width="3.6"
+        height="18"
+        rx="1.8"
+        fill="url(#pi-tube)"
+        stroke="#fbf7ff"
+        stroke-width="1.6"
+      />
+      <path
+        d="M1.5 16.5c0 5.5 1.6 9.6 5 12.2 1 .8 1.6 1.4 1.6 2.6l-.3 25.2c0 4.9 1 8.7 2.2 11.5h0c1.2-2.8 2.2-6.6 2.2-11.5L12 31.3c0-1.2.6-1.8 1.6-2.6 3.4-2.6 5-6.7 5-12.2z"
+        fill="url(#pi-tube)"
+        stroke="#fbf7ff"
+        stroke-width="1.9"
+        stroke-linejoin="round"
+      />
+      <!-- plate -->
       <circle
-        cx="51.5"
+        cx="52.5"
         cy="35"
-        r="30.5"
+        r="30.1"
         fill="url(#pi-plate)"
-        stroke="#f5e4fa"
-        stroke-width="3.4"
+        stroke="#fbf7ff"
+        stroke-width="1.8"
       />
-      <circle cx="51.5" cy="35" r="18" fill="url(#pi-plate-in)" />
-      <circle cx="51.5" cy="35" r="18" fill="none" stroke="#e9d8ff" stroke-width="1.8" />
+      <circle cx="52.5" cy="35" r="19" fill="url(#pi-plate-in)" />
+      <circle cx="52.5" cy="35" r="19" fill="none" stroke="#f8e0ea" stroke-width="1.3" />
+      <!-- knife: a straight spine, a bellied edge, a heel into a handle that widens to a round end -->
       <path
-        d="M97 1.5c-6.5 7-10.5 16.5-10.5 27.5 0 6 2.5 9.5 6 10.5v24c0 2 1.3 3.5 2.8 3.5s2.8-1.5 2.8-3.5V39.5c1.5-.5 2.5-1.8 2.5-3.5V18c0-6.5-1.2-12-3.6-16.5z"
-        fill="url(#pi-silver)"
+        d="M100.5 4c0-1.6-1.2-2.8-2.8-2.8S94.6 2.6 94 4c-4.5 8-6.5 16.5-6.5 24 0 4.5 2 8.5 5.2 10l.3 19c0 4.9 1 8.7 2.2 11.5h0c1.2-2.8 2.2-6.6 2.2-11.5L100.5 38z"
+        fill="url(#pi-tube)"
+        stroke="#fbf7ff"
+        stroke-width="1.9"
+        stroke-linejoin="round"
       />
     </g>
   )}
   {kind === "gifts" && (
     <g filter="url(#pi-glow)">
       <rect
-        x="7"
-        y="35"
-        width="56"
-        height="39"
-        rx="4.5"
-        fill="url(#pi-violet)"
-        stroke="#f5e4fa"
-        stroke-width="3"
-      />
-      <rect
-        x="1.5"
-        y="19.5"
-        width="67"
-        height="18"
+        x="7.5"
+        y="37.5"
+        width="55"
+        height="37.25"
         rx="4"
-        fill="url(#pi-red)"
-        stroke="#f5e4fa"
+        fill="url(#pi-violet)"
+        stroke="#fbf7ff"
         stroke-width="3"
       />
       <rect
-        x="31"
-        y="19.5"
-        width="8"
-        height="54.5"
+        x="31.25"
+        y="37.5"
+        width="7.5"
+        height="37.25"
         fill="url(#pi-red)"
-        stroke="#f5e4fa"
-        stroke-width="1.8"
+        stroke="#fbf7ff"
+        stroke-width="2.4"
+      />
+      <rect
+        x="2.75"
+        y="23"
+        width="64.5"
+        height="14.5"
+        rx="3.5"
+        fill="url(#pi-red)"
+        stroke="#fbf7ff"
+        stroke-width="2.6"
+      />
+      <rect
+        x="31.75"
+        y="24.3"
+        width="6.5"
+        height="11.9"
+        fill="url(#pi-red)"
+        stroke="#fbf7ff"
+        stroke-width="0.6"
+        stroke-opacity="0.7"
+      />
+      <!-- bow: two near-circular loops, round at their outer ends, meeting in a knot on the lid -->
+      <path
+        d="M35 22.5C30 9 18 2 13 5.5c-4.5 3.2-3 11.5 3 15 5.5 3.3 13.5 2.4 19 2z"
+        fill="url(#pi-violet)"
+        stroke="#fbf7ff"
+        stroke-width="3"
+        stroke-linejoin="round"
       />
       <path
-        class="ink"
+        d="M35 22.5C40 9 52 2 57 5.5c4.5 3.2 3 11.5-3 15-5.5 3.3-13.5 2.4-19 2z"
+        fill="url(#pi-violet)"
+        stroke="#fbf7ff"
         stroke-width="3"
-        d="M35 19.5C29 7 14 3 10 11c-2.5 5 2 9.5 9 9.5 6 0 11-.5 16-1z M35 19.5C41 7 56 3 60 11c2.5 5-2 9.5-9 9.5-6 0-11-.5-16-1z"
+        stroke-linejoin="round"
       />
     </g>
   )}
   {kind === "diapers" && (
     <g filter="url(#pi-glow)">
+      <!-- the body's fill first, then the tabs and cuffs, then its outline over them -->
       <path
-        d="M9 2h57c4 0 7 3 7 7v16c0 16-8 28-19.5 36.5-2.5 1.8-4 2.5-7 2.5h-18c-3 0-4.5-.7-7-2.5C10 53 2 41 2 25V9c0-4 3-7 7-7z"
-        fill="url(#pi-violet-dark)"
-        stroke="#f5e4fa"
-        stroke-width="3"
-        stroke-linejoin="round"
-      />
-      <path
-        d="M5.5 30c1 13 8.5 24 20 32-10-1-19-8-23.5-18C4.5 40 4.6 35 5.5 30z"
-        fill="url(#pi-red)"
-        stroke="#f5e4fa"
-        stroke-width="2"
-        stroke-linejoin="round"
-      />
-      <path
-        d="M69.5 30c-1 13-8.5 24-20 32 10-1 19-8 23.5-18 1.5-4 1.4-9 .5-14z"
-        fill="url(#pi-red)"
-        stroke="#f5e4fa"
-        stroke-width="2"
-        stroke-linejoin="round"
+        d="M5.5 2h64c2 0 3.5 1.5 3.5 3.5V34C73 50 62 64 49 64H26C13 64 2 50 2 34V5.5C2 3.5 3.5 2 5.5 2z"
+        fill="url(#pi-well)"
       />
       <rect
-        x="-0.5"
-        y="15"
-        width="14"
-        height="18"
+        x="1.5"
+        y="11"
+        width="15.5"
+        height="17.5"
         rx="4"
-        fill="url(#pi-red)"
-        stroke="#f5e4fa"
-        stroke-width="2.4"
+        fill="url(#pi-tab)"
+        stroke="#fbf7ff"
+        stroke-width="1.5"
       />
       <rect
-        x="61.5"
-        y="15"
-        width="14"
-        height="18"
+        x="58"
+        y="11"
+        width="15.5"
+        height="17.5"
         rx="4"
-        fill="url(#pi-red)"
-        stroke="#f5e4fa"
-        stroke-width="2.4"
+        fill="url(#pi-tab)"
+        stroke="#fbf7ff"
+        stroke-width="1.5"
+      />
+      <path
+        d="M7 34c5 3.5 12 8 17 13.5 1.5 2 2.5 5.5 3 10.5l-.5 3.5C22 60 16 55 12 51 8 47 5.5 42 5 37z"
+        fill="url(#pi-cuff)"
+        stroke="#fbf7ff"
+        stroke-width="2.6"
+        stroke-linejoin="round"
+      />
+      <path
+        d="M68 34c-5 3.5-12 8-17 13.5-1.5 2-2.5 5.5-3 10.5l.5 3.5C53 60 59 55 63 51c4-4 6.5-9 7-14z"
+        fill="url(#pi-cuff)"
+        stroke="#fbf7ff"
+        stroke-width="2.6"
+        stroke-linejoin="round"
+      />
+      <path
+        d="M5.5 2h64c2 0 3.5 1.5 3.5 3.5V34C73 50 62 64 49 64H26C13 64 2 50 2 34V5.5C2 3.5 3.5 2 5.5 2z"
+        fill="none"
+        stroke="#fbf7ff"
+        stroke-width="3.1"
+        stroke-linejoin="round"
       />
     </g>
   )}
   {kind === "school" && (
     <g filter="url(#pi-glow)">
-      <path class="ink" stroke-width="3.2" d="M30 10.5c0-6 3.8-9 8.5-9s8.5 3 8.5 9" />
-      <rect
-        x="1.5"
-        y="30"
-        width="10.5"
-        height="35"
-        rx="5.2"
-        fill="url(#pi-violet)"
-        stroke="#f5e4fa"
-        stroke-width="2.6"
+      <path
+        class="ink"
+        stroke-width="2.9"
+        d="M12.75 40H8.75V27A15.5 15.5 0 0 1 24.25 11.5H29.25A9.25 9.25 0 0 1 47.75 11.5H51.5A15.5 15.5 0 0 1 67 27V40H64.5"
       />
       <rect
-        x="65"
-        y="30"
-        width="10.5"
-        height="35"
-        rx="5.2"
-        fill="url(#pi-violet)"
-        stroke="#f5e4fa"
-        stroke-width="2.6"
+        x="2.75"
+        y="44"
+        width="10"
+        height="29"
+        rx="4.5"
+        fill="url(#pi-pocket)"
+        stroke="#fbf7ff"
+        stroke-width="2.5"
+      />
+      <rect
+        x="64.5"
+        y="44"
+        width="10"
+        height="29"
+        rx="4.5"
+        fill="url(#pi-pocket)"
+        stroke="#fbf7ff"
+        stroke-width="2.5"
       />
       <path
-        d="M11 79.5V35C11 20 23 9.5 38.5 9.5S66 20 66 35v44.5z"
-        fill="url(#pi-red)"
-        stroke="#f5e4fa"
-        stroke-width="3.2"
+        d="M12.75 75V39.5A25.875 25.875 0 0 1 64.5 39.5V75A2.5 2.5 0 0 1 62 77.5H15.25A2.5 2.5 0 0 1 12.75 75z"
+        fill="url(#pi-panel)"
+        stroke="#fbf7ff"
+        stroke-width="2.6"
         stroke-linejoin="round"
       />
-      <path class="ink" stroke-width="2.8" d="M31.5 29.5c2-3 4.5-4.2 7-4.2s5 1.2 7 4.2" />
+      <path class="ink" stroke-width="2.6" d="M32.5 33V30.5a3 3 0 0 1 3-3h7.5a3 3 0 0 1 3 3V33" />
       <rect
-        x="19.5"
-        y="52"
-        width="38"
-        height="25.5"
+        x="20.75"
+        y="47.25"
+        width="36.25"
+        height="26.25"
         rx="6"
-        fill="url(#pi-violet)"
-        stroke="#f5e4fa"
-        stroke-width="3"
+        fill="url(#pi-pocket)"
+        stroke="#fbf7ff"
+        stroke-width="2.6"
       />
-      <rect
-        x="17"
-        y="45"
-        width="43"
-        height="12.5"
-        rx="5.5"
-        fill="url(#pi-violet)"
-        stroke="#f5e4fa"
-        stroke-width="3"
-      />
+      <path class="ink" stroke-width="2.6" d="M20.75 56.5h36.25" />
     </g>
   )}
 </svg>
@@ -199,7 +260,7 @@ const boxes: Record<ProgramIconKind, string> = {
   }
   .pi .ink {
     fill: none;
-    stroke: #f5e4fa;
+    stroke: #fbf7ff;
     stroke-linecap: round;
     stroke-linejoin: round;
   }

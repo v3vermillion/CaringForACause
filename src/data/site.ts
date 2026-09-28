@@ -178,17 +178,17 @@ export const hero = {
     {
       file: "haircut-boy.jpg",
       alt: "",
-      focus: "center 10%",
+      focus: "85% 5%",
     },
     {
       file: "families-banner.jpg",
       alt: "",
-      focus: "center 30%",
+      focus: "center 38%",
     },
     {
       file: "holiday-gift-bags.jpg",
       alt: "",
-      focus: "center 18%",
+      focus: "center 20%",
     },
     {
       file: "holiday-shopping.jpg",
@@ -365,7 +365,7 @@ export const programs: Program[] = [
     photo: {
       file: "holiday-gift-bags.jpg",
       alt: "Children holding holiday gift bags beside a volunteer in a Santa hat",
-      focus: "center 62%",
+      focus: "center 27%",
     },
     active: true,
   },
@@ -378,7 +378,7 @@ export const programs: Program[] = [
     photo: {
       file: "diaper-drive.jpg",
       alt: "A volunteer hands a large pack of diapers to a family with a young child",
-      focus: "center 40%",
+      focus: "center 34%",
     },
     active: true,
   },
@@ -391,7 +391,7 @@ export const programs: Program[] = [
     photo: {
       file: "care-basket.jpg",
       alt: "A woman carries a basket filled with care package items",
-      focus: "center 50%",
+      focus: "center 28%",
     },
     checklist: {
       title: "See what we're collecting",
@@ -459,7 +459,7 @@ export const programs: Program[] = [
       id: "Z5USx1xFF58",
       title: "Free haircut and styles outreach program",
       poster: "stylist-haircut.jpg",
-      posterFocus: "center 35%",
+      posterFocus: "center 27%",
     },
     active: true,
   },
@@ -493,7 +493,7 @@ export const getInvolved = {
       photo: {
         file: "holiday-shopping.jpg",
         alt: "Children holding shopping bags during a holiday shopping trip",
-        focus: "center 60%",
+        focus: "center 50%",
       },
     },
     {
@@ -520,8 +520,8 @@ export const getInvolved = {
       },
       photo: {
         file: "volunteer-face-painting.jpg",
-        alt: "A volunteer paints a girl's face at a community event",
-        focus: "center 40%",
+        alt: "A volunteer styles a girl's hair at a community event",
+        focus: "center 8%",
       },
     },
     {
@@ -540,7 +540,7 @@ export const getInvolved = {
       photo: {
         file: "stylist-haircut.jpg",
         alt: "A volunteer stylist cuts a man's hair at a free haircut event",
-        focus: "center 40%",
+        focus: "center 32%",
       },
     },
   ] satisfies InvolvementTab[],
@@ -557,7 +557,7 @@ export const about = {
   portrait: {
     file: "tamara-portrait.jpg",
     alt: `${claim(facts.founder)}, founder of ${org.shortName}, smiling outside in a red top`,
-    focus: "center 25%",
+    focus: "left 25%",
   } satisfies Photo,
   watchLabel: "Watch her story",
   video: {

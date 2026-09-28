@@ -59,6 +59,9 @@
   /* The wave between surfaces (src/components/Wave.astro): the banner's 84
      reference px on phones and tablets, 92 on desktop. */
   --wave-h: 5.25rem;
+  /* The Get involved section's diagonal cut into the section above it
+     (src/components/GetInvolved.astro), which that section pays for. */
+  --wedge: 3rem;
   /* The content column is 90% of the class's reference width, scaled, so it
      is 90% of the screen with a 5% gutter each side on every device. Where
      the scale stops (a phone-class window wider than about 450px, a desktop

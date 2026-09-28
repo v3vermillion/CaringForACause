@@ -148,7 +148,7 @@ const mailto = (subject: string) =>
      to the right), cut out of the paper above it; the lilac is lit by a soft
      violet glow at its top right, sized in rem from that corner. */
   #get-involved {
-    --cut: 3rem;
+    --cut: var(--wedge);
     margin-top: calc(-1 * var(--cut));
     padding-top: calc(var(--space-xl) + var(--cut));
     clip-path: polygon(0 var(--cut), 100% 0, 100% 100%, 0 100%);
@@ -168,7 +168,7 @@ const mailto = (subject: string) =>
   .tablist {
     display: flex;
     gap: 0.5rem;
-    padding: 0.25rem var(--gutter) 0.75rem;
+    padding: 0.25rem var(--gutter) var(--r-card); /* clear of the card by its own radius */
     margin: 0 calc(-1 * var(--gutter));
     overflow-x: auto;
     scroll-snap-type: x proximity;
@@ -254,8 +254,13 @@ const mailto = (subject: string) =>
     padding-inline: var(--space-m);
   }
 
-  .panel :global(.photo) {
+  /* The grid's child is the picture element (the img sits inside it), so
+     the order that puts the photo first goes on the picture. */
+  .panel > :global(picture) {
     order: -1;
+  }
+
+  .panel :global(.photo) {
     border-radius: var(--r-card) var(--r-card) 0 0;
   }
 

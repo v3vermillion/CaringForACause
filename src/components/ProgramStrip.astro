@@ -26,17 +26,17 @@ const proof = [
     <defs>
       <filter
         id="pi-glow"
-        x="-30%"
-        y="-30%"
-        width="160%"
-        height="160%"
+        x="-40%"
+        y="-40%"
+        width="180%"
+        height="180%"
         color-interpolation-filters="sRGB"
       >
-        <feGaussianBlur in="SourceGraphic" stdDeviation="1.8" result="b1"></feGaussianBlur>
-        <feFlood flood-color="#a56cff" flood-opacity="1" result="c1"></feFlood>
+        <feGaussianBlur in="SourceGraphic" stdDeviation="1.2" result="b1"></feGaussianBlur>
+        <feFlood flood-color="#9a80ff" flood-opacity="0.5" result="c1"></feFlood>
         <feComposite in="c1" in2="b1" operator="in" result="g1"></feComposite>
-        <feGaussianBlur in="SourceGraphic" stdDeviation="5" result="b2"></feGaussianBlur>
-        <feFlood flood-color="#7a2cff" flood-opacity="0.5" result="c2"></feFlood>
+        <feGaussianBlur in="SourceGraphic" stdDeviation="7" result="b2"></feGaussianBlur>
+        <feFlood flood-color="#3a14c8" flood-opacity="0.6" result="c2"></feFlood>
         <feComposite in="c2" in2="b2" operator="in" result="g2"></feComposite>
         <feMerge>
           <feMergeNode in="g2"></feMergeNode>
@@ -45,32 +45,54 @@ const proof = [
         </feMerge>
       </filter>
       <linearGradient id="pi-red" x1="0" y1="0" x2="0" y2="1">
-        <stop offset="0" stop-color="#ea4a5a"></stop>
-        <stop offset="0.55" stop-color="#c8202f"></stop>
-        <stop offset="1" stop-color="#951524"></stop>
+        <stop offset="0" stop-color="#c8343f"></stop>
+        <stop offset="0.5" stop-color="#b52c3a"></stop>
+        <stop offset="1" stop-color="#a22836"></stop>
       </linearGradient>
-      <radialGradient id="pi-plate" cx="0.42" cy="0.36" r="0.66">
-        <stop offset="0" stop-color="#ee5462"></stop>
-        <stop offset="0.6" stop-color="#c2212f"></stop>
-        <stop offset="1" stop-color="#8a1324"></stop>
+      <radialGradient id="pi-plate" cx="0.45" cy="0.35" r="0.7">
+        <stop offset="0" stop-color="#c83447"></stop>
+        <stop offset="0.7" stop-color="#b02832"></stop>
+        <stop offset="1" stop-color="#9c2226"></stop>
       </radialGradient>
-      <radialGradient id="pi-plate-in" cx="0.5" cy="0.35" r="0.72">
-        <stop offset="0" stop-color="#d6323f"></stop>
-        <stop offset="0.7" stop-color="#9d182a"></stop>
-        <stop offset="1" stop-color="#650d1d"></stop>
-      </radialGradient>
+      <linearGradient id="pi-plate-in" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#6a1410"></stop>
+        <stop offset="0.5" stop-color="#951d1c"></stop>
+        <stop offset="1" stop-color="#bf272c"></stop>
+      </linearGradient>
       <linearGradient id="pi-violet" x1="0" y1="0" x2="0" y2="1">
-        <stop offset="0" stop-color="#5a2bf5"></stop>
-        <stop offset="1" stop-color="#3714c2"></stop>
+        <stop offset="0" stop-color="#4414cc"></stop>
+        <stop offset="0.5" stop-color="#2e0ba2"></stop>
+        <stop offset="1" stop-color="#4416c4"></stop>
       </linearGradient>
-      <linearGradient id="pi-violet-dark" x1="0" y1="0" x2="0" y2="1">
-        <stop offset="0" stop-color="#2b0f7a"></stop>
-        <stop offset="1" stop-color="#170846"></stop>
+      <radialGradient id="pi-well" cx="0.5" cy="0.45" r="0.62">
+        <stop offset="0" stop-color="#0d0737"></stop>
+        <stop offset="0.72" stop-color="#150a4a"></stop>
+        <stop offset="1" stop-color="#2f0e9c"></stop>
+      </radialGradient>
+      <linearGradient id="pi-tab" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#dc3f57"></stop>
+        <stop offset="0.7" stop-color="#c92c46"></stop>
+        <stop offset="1" stop-color="#8b2538"></stop>
       </linearGradient>
-      <linearGradient id="pi-silver" x1="0" y1="0" x2="1" y2="0">
-        <stop offset="0" stop-color="#f7ecfd"></stop>
-        <stop offset="1" stop-color="#c9b4f4"></stop>
+      <linearGradient id="pi-cuff" x1="0" y1="0" x2="1" y2="0">
+        <stop offset="0" stop-color="#992850"></stop>
+        <stop offset="1" stop-color="#c73050"></stop>
       </linearGradient>
+      <linearGradient id="pi-tube" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#9b7ce4" stop-opacity="0.55"></stop>
+        <stop offset="1" stop-color="#58429e" stop-opacity="0.75"></stop>
+      </linearGradient>
+      <linearGradient id="pi-panel" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#e43c5a"></stop>
+        <stop offset="0.22" stop-color="#b02628"></stop>
+        <stop offset="0.55" stop-color="#9a2020"></stop>
+        <stop offset="1" stop-color="#8a1a1c"></stop>
+      </linearGradient>
+      <radialGradient id="pi-pocket" cx="0.5" cy="0.5" r="0.72">
+        <stop offset="0" stop-color="#24058f"></stop>
+        <stop offset="0.78" stop-color="#2a0798"></stop>
+        <stop offset="1" stop-color="#4a18d7"></stop>
+      </radialGradient>
     </defs>
   </svg>
 
@@ -106,8 +128,30 @@ const proof = [
 </section>
 
 <style>
+  /* The band is lit from the wave and falls off to the deeper night, as the
+     reference's does: a gradient down to --night-2 (the season strip and the
+     wave out of the band continue it) and a violet bloom centred on the seam
+     with the wave, straddling it so no edge shows. */
   .strip {
-    background: var(--night);
+    position: relative;
+    isolation: isolate;
+    background: linear-gradient(180deg, var(--night), var(--night-2));
+  }
+
+  .strip::before {
+    content: "";
+    position: absolute;
+    z-index: -1;
+    left: 0;
+    right: 0;
+    top: calc(-0.34 * var(--wave-h));
+    height: calc(0.34 * var(--wave-h) + 9rem);
+    pointer-events: none;
+    background: radial-gradient(
+      ellipse 58% 100% at 50% calc(0.34 * var(--wave-h)),
+      rgb(116 60 232 / 0.26),
+      rgb(116 60 232 / 0) 70%
+    );
   }
 
   .pi-defs {
@@ -164,6 +208,7 @@ const proof = [
   /* A flex box, not a grid: a percentage height inside an auto grid row
      resolves as auto, and the icon would take its width's height instead. */
   .icon {
+    --k: calc(48 / 81 * var(--rp));
     display: flex;
     align-items: center;
     justify-content: center;
@@ -172,9 +217,13 @@ const proof = [
     transition: filter 0.25s ease;
   }
 
+  /* One scale for the four, not one height: each icon keeps its own size in
+     the reference's row (the backpack, 81 tall in its box, sets the row's
+     height; the plate is the widest and the shortest), so --k is the row
+     height over 81 and each icon's width is its box's times --k. */
   .icon :global(.pi) {
-    height: 100%;
-    width: auto;
+    width: calc(var(--pi-w) * var(--k));
+    height: auto;
     max-width: 100%;
   }
 
@@ -226,10 +275,11 @@ const proof = [
     margin: calc(20 * var(--rp)) 0 0;
     padding: 0 0 calc(22 * var(--rp));
     font-family: var(--font-display);
-    font-weight: 600;
-    font-size: calc(13 * var(--rp));
+    font-weight: 500;
+    font-size: calc(12.5 * var(--rp));
     line-height: 1.5;
-    color: var(--night-soft);
+    letter-spacing: 0.01em;
+    color: rgb(201 182 242 / 0.85);
     text-align: center;
   }
 
@@ -239,12 +289,17 @@ const proof = [
     width: calc(72 * var(--rp));
     height: 1px;
     margin: calc(6 * var(--rp)) 0;
-    background: linear-gradient(90deg, rgb(160 108 255 / 0), #a06cff, rgb(160 108 255 / 0));
+    background: linear-gradient(
+      90deg,
+      rgb(160 108 255 / 0),
+      rgb(160 108 255 / 0.7),
+      rgb(160 108 255 / 0)
+    );
   }
 
   .sep {
     display: none;
-    color: #ff5a86;
+    color: rgb(255 90 134 / 0.7);
   }
 
   /* Tablets: the same columns in the tablet's reference pixel (--sp is one
@@ -263,6 +318,7 @@ const proof = [
       border-radius: calc(8 * var(--sp));
     }
     .icon {
+      --k: calc(54 / 81 * var(--sp));
       height: calc(54 * var(--sp));
       width: calc(80 * var(--sp));
     }
@@ -280,21 +336,25 @@ const proof = [
       flex-wrap: wrap;
       align-items: center;
       justify-content: center;
-      gap: 0 calc(10 * var(--sp));
+      gap: 0 calc(9 * var(--sp));
       margin-top: calc(24 * var(--sp));
       padding-bottom: calc(22 * var(--sp));
-      font-size: calc(14 * var(--sp));
+      font-size: calc(13 * var(--sp));
     }
+    /* The rules take only what the words leave (a zero basis can never force
+       a wrap), so the line stays one line and the closing rule never drops
+       under the tax ID. */
     .facts::before,
     .facts::after {
-      flex: 1 1 calc(32 * var(--sp));
+      flex: 1 1 0;
+      min-width: 0;
       width: auto;
       max-width: calc(120 * var(--sp));
       margin: 0;
-      background: linear-gradient(90deg, rgb(160 108 255 / 0), #a06cff);
+      background: linear-gradient(90deg, rgb(160 108 255 / 0), rgb(160 108 255 / 0.7));
     }
     .facts::after {
-      background: linear-gradient(90deg, #a06cff, rgb(160 108 255 / 0));
+      background: linear-gradient(90deg, rgb(160 108 255 / 0.7), rgb(160 108 255 / 0));
     }
     .sep {
       display: inline;
@@ -316,16 +376,21 @@ const proof = [
       top: calc(4 * var(--u));
       bottom: calc(4 * var(--u));
     }
+    /* Each icon-and-words pair is centred in its cell (icon 70, gap 14,
+       words 150 of the 288 at 1280), so the hairlines fall midway between
+       neighbours instead of hugging the icon on their right. */
     .item {
-      grid-template-columns: auto minmax(0, 1fr);
+      grid-template-columns: auto minmax(0, calc(150 * var(--u)));
       align-items: center;
+      justify-content: center;
       justify-items: start;
       gap: 0 calc(14 * var(--u));
-      padding: 0 calc(18 * var(--u));
+      padding: 0 calc(12 * var(--u));
       text-align: left;
       border-radius: calc(8 * var(--u));
     }
     .icon {
+      --k: calc(52 / 81 * var(--u));
       height: calc(52 * var(--u));
       width: calc(70 * var(--u));
     }
@@ -346,7 +411,7 @@ const proof = [
       height: calc(18 * var(--u));
       margin-top: calc(14 * var(--u));
       padding: 0;
-      font-size: calc(13 * var(--u));
+      font-size: calc(12.5 * var(--u));
       line-height: calc(18 * var(--u));
       white-space: nowrap;
     }
