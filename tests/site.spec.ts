@@ -1197,6 +1197,31 @@ test.describe("get involved tabs", () => {
     await expect(page.locator("#tab-partner")).toBeFocused();
     await expect(page.locator("#partner")).toBeVisible();
   });
+
+  // A chosen way to help is written to the address and remembered for the
+  // visit, and choosing never moves the page (decision 62).
+  test("choosing a tab keeps the page still and records the choice", async ({ page }) => {
+    await page.goto("/");
+    await page.locator("#get-involved").scrollIntoViewIfNeeded();
+    const before = await page.evaluate(() => window.scrollY);
+    await page.locator("#tab-partner").click();
+    await expect(page.locator("#partner")).toBeVisible();
+    await expect(page.locator("#sponsor")).toBeHidden();
+    expect(new URL(page.url()).hash).toBe("#partner");
+    expect(Math.abs((await page.evaluate(() => window.scrollY)) - before)).toBeLessThan(2);
+    expect(await page.evaluate(() => sessionStorage.getItem("involved-tab"))).toBe("partner");
+    // Leaving for another page and coming back through the header keeps it.
+    await page.goto("/donate");
+    await page.locator(".site-header .brand").click();
+    await expect(page.locator("#tab-partner")).toHaveAttribute("aria-selected", "true");
+  });
+
+  test("Tab from a tab lands on the panel's button, not the panel", async ({ page }) => {
+    await page.goto("/");
+    await page.locator("#tab-sponsor").focus();
+    await page.keyboard.press("Tab");
+    await expect(page.locator("#sponsor a.button")).toBeFocused();
+  });
 });
 
 test.describe("the program strip", () => {
