@@ -439,10 +439,11 @@ const { items, donate, help } = navigation;
   /* The lockup (decisions 45 and 49) in its lit lavender paint, with the
      footer's violet glow; its width sets its height (about 4.84 to 1). Its
      size per class follows the owner's reference, where the lockup stands
-     about seven tenths of the bar's height (decision 60): phones are held
-     a little under that by the Donate pill beside it. */
+     about two thirds of the bar's height (decision 60): phones are held a
+     little under that by the Donate pill beside it (164 is the widest that
+     leaves the brand its own box beside the pill at 393). */
   .brand :global(.brand-lockup) {
-    width: calc(166 * var(--sp));
+    width: calc(164 * var(--sp));
     flex: none;
     filter: drop-shadow(0 0 calc(5 * var(--sp)) rgb(170 110 255 / 0.45));
   }
@@ -459,7 +460,7 @@ const { items, donate, help } = navigation;
     gap: calc(2 * var(--sp));
     width: calc(82 * var(--sp));
     min-height: max(44px, calc(44 * var(--sp)));
-    padding: 0 0 0 calc(4 * var(--sp));
+    padding: 0; /* the chevron's offset comes with the chevron (tablets up) */
     font-size: calc(16.3 * var(--sp));
     font-weight: 800;
     letter-spacing: -0.045em;
@@ -756,6 +757,7 @@ const { items, donate, help } = navigation;
     }
     .donate {
       width: calc(100 * var(--sp));
+      padding-left: calc(4 * var(--sp)); /* the label sits a little left of the chevron */
     }
     .donate .chev {
       display: block;
