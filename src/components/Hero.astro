@@ -372,12 +372,22 @@ const cycle = slides.length * 7;
     transition: transform 150ms ease;
   }
 
+  /* A press answers within a frame, so the browser's tap flash is off. */
+  .door {
+    -webkit-tap-highlight-color: transparent;
+  }
+
   .door:hover .door-pill {
     transform: translateY(-2px);
   }
 
   .door:hover .chev {
     transform: translateX(3px);
+  }
+
+  .door:active .door-pill {
+    transform: translateY(1px) scale(0.985);
+    transition-duration: 60ms;
   }
 
   /* The signal: a glossy crimson pill, lit along its top rim, with its glow.

@@ -3,42 +3,53 @@ import SiteFooter from "../components/SiteFooter.astro";
 import SiteHeader from "../components/SiteHeader.astro";
 import Base from "../layouts/Base.astro";
 import { show } from "../data/facts.ts";
-import { facts } from "../data/site";
+import { facts, notFoundPage, org } from "../data/site";
 
 const phone = show(facts.phone);
 ---
 
-<Base title="Page not found">
+<Base title={`Page not found | ${org.shortName}`}>
   <SiteHeader />
-  <main id="main" class="section">
-    <div class="wrap stack">
-      <div>
-        <span class="eyebrow">Page not found</span>
-        <h1>This page doesn't exist</h1>
+  <!-- The night opener of the two door pages, without the wave: the footer
+       is night too, so the opener runs into it. -->
+  <main id="main">
+    <section class="page-hero on-dark hero--404">
+      <div class="wrap">
+        <span class="eyebrow">{notFoundPage.eyebrow}</span>
+        <h1>{notFoundPage.heading}</h1>
+        <p class="lede">
+          {notFoundPage.body} {notFoundPage.callUs} <a href={phone.href}>{phone.display}</a>.
+        </p>
+        <p class="button-row">
+          <a class="button button--signal" href="/apply">
+            Help me
+          </a>
+          <a class="button button--glass" href="/donate">
+            Donate
+          </a>
+          <a class="arrow-link" href="/">
+            Back to home
+          </a>
+        </p>
       </div>
-      <p>
-        The link may be out of date. Go to the <a href="/">home page</a>, or call us at{" "}
-        <a href={phone.href}>{phone.display}</a>.
-      </p>
-      <p class="button-row">
-        <a class="button button--purple" href="/">
-          Home page
-        </a>
-        <a class="button button--outline" href="/apply">
-          Help me
-        </a>
-        <a class="button button--outline" href="/donate">
-          Donate
-        </a>
-      </p>
-    </div>
+    </section>
   </main>
   <SiteFooter />
 </Base>
 
 <style>
-  /* A page-opener heading, not the banner's: one step down. */
-  h1 {
-    font-size: var(--step-3);
+  /* The opener fills whatever the footer leaves, so a tall window shows no
+     paper between two night surfaces. */
+  main {
+    display: grid;
+    flex: 1;
+  }
+
+  .page-hero.hero--404 {
+    padding-block: var(--space-xl);
+  }
+
+  .hero--404 .button-row {
+    margin-top: var(--space-m);
   }
 </style>

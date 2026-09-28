@@ -933,10 +933,10 @@ test.describe("navigation", () => {
     await expect(page.locator(".door--give")).toHaveAttribute("href", "/donate");
   });
 
-  test("subpages link back to the home page", async ({ page }) => {
+  test("subpages lead back to the home page through her lockup", async ({ page }) => {
     for (const path of ["/donate", "/apply"]) {
       await page.goto(path);
-      await page.locator(".page-hero .back").click();
+      await page.locator(".site-header .brand").click();
       await expect(page).toHaveURL(/\/$/);
     }
   });

@@ -377,7 +377,9 @@ export const contact = {
 export const notFoundPage = {
   eyebrow: "Page not found",
   heading: "We can't find that page",
-  body: "The link may be old or mistyped. If you need help right now, call us.",
+  body: "The link may be old or mistyped.",
+  /** Followed by the phone number as a link. */
+  callUs: "If you need help right now, call",
 };
 
 export const programs: Program[] = [
