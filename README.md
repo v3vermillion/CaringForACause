@@ -41,21 +41,21 @@ npm run dev        # http://localhost:4321
 
 Everything visitors read lives in **`src/data/site.ts`**. Common updates:
 
-| To change                                          | Edit                                                                         |
-| -------------------------------------------------- | ---------------------------------------------------------------------------- |
-| The four programs under the banner (icons, lines)  | `programStrip`                                                               |
-| The season strip below them                        | `seasonalBanner` (set `active: false` to hide it)                            |
-| Phone, email, Facebook, city                       | `facts`                                                                      |
-| Banner words (headline in two parts) and the doors | `hero`                                                                       |
-| Menu and header links                              | `navigation`                                                                 |
-| Donation page, online application, sponsor sign-up | `links` (the pages upgrade themselves when a link is set)                    |
-| Donation amounts and wording                       | `donatePage`                                                                 |
-| Application steps, kinds of help, counties, sizes  | `applyPage` (`needs` are the cards on step 3)                                |
-| A program's text, or hide a program                | `programs` (set `active: false`)                                             |
-| Get involved tabs                                  | `getInvolved.tabs`                                                           |
-| About and the contact section                      | `about`, `contact`                                                           |
-| The page for a missing address                     | `notFoundPage`                                                               |
-| Gallery photos                                     | Add files to `src/assets/photos/`, then list them in `gallery` (shows at 4+) |
+| To change                                          | Edit                                                                             |
+| -------------------------------------------------- | -------------------------------------------------------------------------------- |
+| The four programs under the banner (icons, lines)  | `programStrip`                                                                   |
+| The season strip below them                        | `seasonalBanner` (set `active: false` to hide it)                                |
+| Phone, email, Facebook, city                       | `facts`                                                                          |
+| Banner words (headline in two parts) and the doors | `hero`                                                                           |
+| Menu and header links                              | `navigation`                                                                     |
+| Donation page, online application, sponsor sign-up | `links` (the pages upgrade themselves when a link is set)                        |
+| Donation amounts and wording                       | `donatePage`                                                                     |
+| Application steps, kinds of help, counties, sizes  | `applyPage` (`needs` are the cards on step 3; `photo` opens the page on desktop) |
+| A program's text, or hide a program                | `programs` (set `active: false`)                                                 |
+| Get involved tabs                                  | `getInvolved.tabs`                                                               |
+| About and the contact section                      | `about`, `contact`                                                               |
+| The page for a missing address                     | `notFoundPage`                                                                   |
+| Gallery photos                                     | Add files to `src/assets/photos/`, then list them in `gallery` (shows at 4+)     |
 
 Run `npm run verify` after editing. It catches missing fields and typos in field names.
 

@@ -283,6 +283,12 @@ export const getHelp = {
 
 /** The application page (/apply). Field choices live here so they can be edited without touching layout. */
 export const applyPage = {
+  /** Beside the opener's words on desktop: a family the programs reached. */
+  photo: {
+    file: "holiday-gift-bags.jpg",
+    alt: "Children holding holiday gift bags beside a volunteer in a Santa hat",
+    focus: "center 27%",
+  } satisfies Photo,
   eyebrow: "Help me",
   heading: "Apply for help",
   intro:
@@ -354,6 +360,8 @@ export const donatePage = {
   intro: "Your gift helps put holiday meals, gifts, diapers, and school supplies into local homes.",
   /** The chooser's heading, over the frequency and amount choices. */
   giftHeading: "Give once or every month",
+  /** The heading over the four programs a gift goes to (programStrip). */
+  providesHeading: "What your gift provides",
   amounts: [25, 50, 100, 250],
   frequencies: [
     { id: "once", label: "Once" },

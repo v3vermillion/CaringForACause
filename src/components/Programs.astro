@@ -12,7 +12,7 @@ const applyEmail = `mailto:${show(facts.email)}?subject=${encodeURIComponent("Ap
 const applyHref = links.familyApplication ?? getHelp.action.href;
 ---
 
-<section id="programs" class="section" aria-labelledby="programs-title">
+<section id="programs" class="section ground" aria-labelledby="programs-title">
   <!-- The wave lifts the night band off the page: night above, paper below. -->
   <Wave kind="into-paper" id="wb" above="var(--night-2)" class="wave-in" />
   <div class="wrap">
@@ -30,7 +30,7 @@ const applyHref = links.familyApplication ?? getHelp.action.href;
       <ul>
         {active.map((program) => (
           <li>
-            <a class="tile" href={`#${program.slug}`}>
+            <a class="tile surface" href={`#${program.slug}`}>
               {program.photo && (
                 <Photo
                   photo={program.photo}
@@ -51,7 +51,7 @@ const applyHref = links.familyApplication ?? getHelp.action.href;
     </nav>
 
     <!-- Get help: the one dark card on the page, so families can't miss it. -->
-    <div id="get-help" class="get-help on-dark">
+    <div id="get-help" class="get-help surface surface--night on-dark">
       <div class="stack">
         <h3>{getHelp.heading}</h3>
         <p>{getHelp.whoCanApply}</p>
@@ -77,6 +77,9 @@ const applyHref = links.familyApplication ?? getHelp.action.href;
           class:list={["row", { "has-media": program.photo || program.video }]}
         >
           <div class="stack copy">
+            <span class="index" aria-hidden="true">
+              {String(i + 1).padStart(2, "0")}
+            </span>
             <div>
               <span class="eyebrow">{program.label}</span>
               <h3>{program.name}</h3>
@@ -94,7 +97,7 @@ const applyHref = links.familyApplication ?? getHelp.action.href;
               </ul>
             )}
             {program.link && (
-              <p>
+              <p class="next">
                 <a class="arrow-link" href={program.link.href}>
                   {program.link.label}
                 </a>
@@ -124,7 +127,7 @@ const applyHref = links.familyApplication ?? getHelp.action.href;
             </div>
           ) : (
             program.photo && (
-              <div class="media">
+              <div class:list={["media", "plate", { "plate--left": i % 2 === 1 }]}>
                 <Photo
                   photo={program.photo}
                   ratio={`var(--photo-ratio, ${i === 0 ? "4 / 3" : "3 / 2"})`}
@@ -233,6 +236,8 @@ const applyHref = links.familyApplication ?? getHelp.action.href;
     scroll-snap-align: start;
   }
 
+  /* A surface (global.css): lifted, with a rim of light; the tile's own
+     shadow is lighter than a panel's, and the rim goes purple on hover. */
   .tile {
     display: flex;
     align-items: flex-start; /* the names share a line across the row */
@@ -240,14 +245,9 @@ const applyHref = links.familyApplication ?? getHelp.action.href;
     height: 100%;
     min-height: max(44px, 2.75rem);
     padding: 0.75rem;
-    border-radius: var(--r-card);
-    background: #fff;
-    /* The involvement panel's frame: a hairline ring and a soft shadow, not a
-       flat border. The transparent border holds the box, so nothing moves. */
-    border: var(--hairline) solid transparent;
     box-shadow:
-      0 0 0 var(--hairline) rgb(96 8 215 / 0.08),
-      0 0.75rem 2rem rgb(27 15 46 / 0.06);
+      0 0.75rem 2rem rgb(27 15 46 / 0.06),
+      inset 0 1px 0 rgb(255 255 255 / 0.9);
     color: var(--ink);
     text-decoration: none;
     -webkit-tap-highlight-color: transparent;
@@ -256,10 +256,14 @@ const applyHref = links.familyApplication ?? getHelp.action.href;
       transform 150ms ease;
   }
 
+  .tile:hover::before {
+    background: var(--purple);
+  }
+
   .tile:hover {
     box-shadow:
-      0 0 0 var(--hairline) var(--purple),
-      0 1rem 2.5rem rgb(27 15 46 / 0.1);
+      0 1rem 2.5rem rgb(27 15 46 / 0.1),
+      inset 0 1px 0 rgb(255 255 255 / 0.9);
     transform: translateY(-2px);
   }
 
@@ -304,9 +308,6 @@ const applyHref = links.familyApplication ?? getHelp.action.href;
     gap: var(--space-m);
     margin-block: var(--space-m) var(--space-xl);
     padding: var(--space-m);
-    border-radius: var(--r-card);
-    background:
-      radial-gradient(70% 60% at 100% 0%, rgb(96 8 215 / 0.35), transparent 60%), var(--night);
   }
 
   /* A step under the section's title, like a program's name. */
@@ -332,20 +333,69 @@ const applyHref = links.familyApplication ?? getHelp.action.href;
     gap: var(--space-l);
   }
 
+  /* Each row is a spread: a rule of light above it, its number set large and
+     faint behind the words, the copy a column that starts where the photo
+     starts and ends, with its one next step, where the photo ends. */
   .row {
+    position: relative;
     display: grid;
     gap: var(--space-m);
     padding-top: var(--space-l);
-    border-top: var(--hairline) solid var(--rule);
+  }
+
+  .row::before {
+    content: "";
+    position: absolute;
+    inset: 0 0 auto 0;
+    height: var(--hairline);
+    background: linear-gradient(
+      90deg,
+      rgb(160 108 255 / 0.55),
+      rgb(255 90 134 / 0.45) 55%,
+      rgb(160 108 255 / 0) 100%
+    );
   }
 
   .row:first-child {
     padding-top: 0;
-    border-top: 0;
+  }
+
+  .row:first-child::before {
+    display: none;
   }
 
   .copy {
     order: 1;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* The program's number in the reference's serif: a chapter number over
+     the eyebrow on phones; from tablets up, set large and so faint behind
+     the eyebrow that it is a texture rather than a figure. */
+  .index {
+    display: block;
+    margin-bottom: 0.25rem;
+    font-family: var(--font-serif);
+    font-weight: 700;
+    font-size: 3rem;
+    line-height: 0.9;
+    letter-spacing: -0.04em;
+    color: rgb(96 8 215 / 0.22);
+    pointer-events: none;
+    user-select: none;
+  }
+
+  /* The row's one next step stands on its own short rule. */
+  .copy > .next {
+    margin-top: var(--space-m);
+    padding-top: var(--space-s);
+    border-top: var(--hairline) solid rgb(96 8 215 / 0.14);
+  }
+
+  .details li::marker {
+    color: var(--purple);
   }
 
   .media {
@@ -362,8 +412,9 @@ const applyHref = links.familyApplication ?? getHelp.action.href;
   .media :global(.photo),
   .media :global(.yt) {
     box-shadow:
-      0 0 0 var(--hairline) rgb(96 8 215 / 0.1),
-      0 1.5rem 3rem rgb(27 15 46 / 0.1);
+      0 0 0 var(--hairline) rgb(160 108 255 / 0.4),
+      0 0 0 calc(var(--hairline) * 2) rgb(255 255 255 / 0.6),
+      0 1.5rem 3rem rgb(27 15 46 / 0.14);
   }
 
   .summary {
@@ -495,8 +546,23 @@ const applyHref = links.familyApplication ?? getHelp.action.href;
       gap: var(--space-l);
       align-items: center;
     }
+    /* The photo is square beside the words on tablets and a little wider
+       than tall on desktop: a crop about as tall as the words, so no column
+       runs empty beside it, and one picture per class (a photo that took
+       the row's height changed with the words' wrapping). */
     .media {
-      --photo-ratio: 4 / 5;
+      --photo-ratio: 1 / 1;
+      align-self: center;
+    }
+    .index {
+      position: absolute;
+      top: -0.55em;
+      left: -0.08em;
+      z-index: -1;
+      margin: 0;
+      font-size: 9rem;
+      line-height: 1;
+      color: rgb(96 8 215 / 0.09);
     }
     .copy,
     .media {
@@ -524,6 +590,9 @@ const applyHref = links.familyApplication ?? getHelp.action.href;
   }
 
   @media (min-width: 56rem) {
+    .media {
+      --photo-ratio: 5 / 4;
+    }
     #programs :global(.watermark) {
       top: -2.5rem;
       right: -3rem;

@@ -1,10 +1,12 @@
 ---
 import SiteFooter from "../components/SiteFooter.astro";
 import SiteHeader from "../components/SiteHeader.astro";
+import ProgramIcon from "../components/ProgramIcon.astro";
+import ProgramIconDefs from "../components/ProgramIconDefs.astro";
 import Wave from "../components/Wave.astro";
 import Base from "../layouts/Base.astro";
 import { claim, show } from "../data/facts.ts";
-import { donatePage, facts, links, org } from "../data/site";
+import { donatePage, facts, links, org, programStrip } from "../data/site";
 
 const email = show(facts.email);
 const taxExempt = claim(facts.taxExempt);
@@ -32,10 +34,10 @@ const mailto = `mailto:${email}?subject=${encodeURIComponent(subject)}&body=${en
       <Wave kind="into-paper" id="wp" class="page-wave" />
     </section>
 
-    <section class="section give" aria-labelledby="give-title">
+    <section class="section give ground" aria-labelledby="give-title">
       <div class="wrap">
         <form
-          class="card"
+          class="card surface"
           data-give
           data-org={org.shortName}
           data-subject={donatePage.emailSubject}
@@ -105,6 +107,26 @@ const mailto = `mailto:${email}?subject=${encodeURIComponent(subject)}&body=${en
             {taxExempt.deductible && " Gifts are tax-deductible to the extent allowed by law."}
           </p>
         </form>
+
+        <aside class="provides surface surface--night on-dark" aria-labelledby="provides-title">
+          <ProgramIconDefs />
+          <h2 id="provides-title">{donatePage.providesHeading}</h2>
+          <ul class="programs">
+            {programStrip.map((item) => (
+              <li>
+                <a class="program" href={item.href}>
+                  <span class="icon">
+                    <ProgramIcon kind={item.icon} />
+                  </span>
+                  <span class="words">
+                    <span class="name">{item.title}</span>
+                    <span class="line">{item.body}</span>
+                  </span>
+                </a>
+              </li>
+            ))}
+          </ul>
+        </aside>
       </div>
     </section>
   </main>
@@ -180,19 +202,99 @@ const mailto = `mailto:${email}?subject=${encodeURIComponent(subject)}&body=${en
 </script>
 
 <style>
-  /* The chooser: a white card lifted off the paper by a soft shadow, so it
-     reads as a panel and not a flat form. */
+  /* The chooser: a surface (global.css), lifted off the ground with a rim
+     of light, so it reads as a panel and not a flat form. */
   .card {
     max-width: 44rem;
     display: grid;
     gap: var(--space-m);
     padding: var(--space-m);
-    background: #fff;
-    border: var(--hairline) solid var(--rule);
-    border-radius: var(--r-card);
-    box-shadow:
-      0 1rem 2.5rem rgb(27 15 46 / 0.08),
-      0 0.125rem 0.375rem rgb(27 15 46 / 0.06);
+  }
+
+  /* What the gift provides: the banner's four programs, their neon icons
+     on a lit night surface, each a link to its program. */
+  .provides {
+    display: grid;
+    gap: var(--space-m);
+    align-content: start;
+    max-width: 44rem;
+    margin-top: var(--space-l);
+    padding: var(--space-m);
+  }
+
+  .provides h2 {
+    font-size: var(--step-2);
+    color: #fff;
+  }
+
+  .programs {
+    display: grid;
+    gap: 0.25rem;
+    padding: 0;
+    margin: 0;
+    list-style: none;
+  }
+
+  .programs li + li {
+    border-top: var(--hairline) solid rgb(255 255 255 / 0.1);
+  }
+
+  .program {
+    display: grid;
+    grid-template-columns: 4.5rem 1fr;
+    gap: 1rem;
+    align-items: center;
+    min-height: max(44px, 3rem);
+    padding: 0.75rem 0.25rem;
+    border-radius: var(--r-img);
+    color: #fff;
+    text-decoration: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .program:hover .name {
+    text-decoration: underline;
+    text-underline-offset: 0.15em;
+  }
+
+  .program:hover .icon {
+    filter: brightness(1.15) drop-shadow(0 0 0.5rem rgb(160 108 255 / 0.6));
+  }
+
+  /* One scale for the four icons, as the strip sizes them: the backpack (81
+     tall in its box) sets the row's height, and each icon's width is its
+     box's times that scale. */
+  .icon {
+    --k: calc(2.75rem / 81);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 2.75rem;
+    width: 4.5rem;
+    transition: filter 0.25s ease;
+  }
+
+  .icon :global(.pi) {
+    width: calc(var(--pi-w) * var(--k));
+    height: auto;
+    max-width: 100%;
+  }
+
+  .words {
+    display: grid;
+    gap: 0.15rem;
+  }
+
+  .name {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: var(--step-0);
+    line-height: 1.2;
+  }
+
+  .line {
+    font-size: var(--step--1);
+    color: var(--night-soft);
   }
 
   .card h2 {
@@ -327,25 +429,52 @@ const mailto = `mailto:${email}?subject=${encodeURIComponent(subject)}&body=${en
     }
 
     .page-hero + .section.give {
+      --overlap: calc(var(--wave-h) + var(--space-l) + 15.875rem);
       position: relative;
       padding-top: 0;
-      margin-top: calc(-1 * (var(--wave-h) + var(--space-l) + 15.875rem));
+      margin-top: calc(-1 * var(--overlap));
+    }
+
+    /* The section reaches up under the opener to hold the card; its ground
+       (the wash and the grain) starts where the opener's wave ends. */
+    .give::before,
+    .give::after {
+      top: var(--overlap);
     }
 
     .give .wrap {
       display: grid;
       grid-template-columns: minmax(0, 1fr) 34rem;
+      column-gap: var(--space-xl);
     }
 
     .card {
       grid-column: 2;
+      grid-row: 1;
+      align-self: start;
       max-width: none;
-      position: relative;
       z-index: 1;
       padding: var(--space-l);
       box-shadow:
         0 1.5rem 3rem rgb(27 15 46 / 0.24),
-        0 0.125rem 0.375rem rgb(27 15 46 / 0.12);
+        0 0.125rem 0.375rem rgb(27 15 46 / 0.12),
+        inset 0 1px 0 rgb(255 255 255 / 0.9);
+    }
+
+    /* The programs panel takes the opener's empty half, under its words and
+       the wave, beside the card. */
+    .provides {
+      grid-column: 1;
+      grid-row: 1;
+      align-self: start;
+      max-width: 34rem;
+      margin-top: calc(var(--overlap) + var(--space-l));
+      padding: var(--space-l);
+    }
+
+    /* Tighter rows, so the panel ends near the card's foot. */
+    .program {
+      padding-block: 0.5rem;
     }
   }
 </style>

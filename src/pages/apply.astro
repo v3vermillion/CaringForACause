@@ -1,5 +1,6 @@
 ---
 import SiteFooter from "../components/SiteFooter.astro";
+import Photo from "../components/Photo.astro";
 import SiteHeader from "../components/SiteHeader.astro";
 import Wave from "../components/Wave.astro";
 import Base from "../layouts/Base.astro";
@@ -42,21 +43,31 @@ const sideBody = getHelp.talk.body;
   <main id="main">
     <section class="page-hero on-dark">
       <div class="wrap">
-        <span class="eyebrow">{applyPage.eyebrow}</span>
-        <h1>{applyPage.heading}</h1>
-        <p class="lede">{getHelp.whoCanApply}</p>
-        <p class="talk">
-          {applyPage.intro}{" "}
-          <span class="talk-offer">
-            Prefer to talk? Call <a href={phone.href}>{phone.display}</a> or email{" "}
-            <a href={`mailto:${email}`}>{email}</a>.
-          </span>
-        </p>
+        <div class="opener-words">
+          <span class="eyebrow">{applyPage.eyebrow}</span>
+          <h1>{applyPage.heading}</h1>
+          <p class="lede">{getHelp.whoCanApply}</p>
+          <p class="talk">
+            {applyPage.intro}{" "}
+            <span class="talk-offer">
+              Prefer to talk? Call <a href={phone.href}>{phone.display}</a> or email{" "}
+              <a href={`mailto:${email}`}>{email}</a>.
+            </span>
+          </p>
+        </div>
+        <div class="opener-photo plate">
+          <Photo
+            photo={applyPage.photo}
+            ratio="5 / 4"
+            sizes="(min-width: 56rem) 352px, 1px"
+            widths={[352, 704]}
+          />
+        </div>
       </div>
       <Wave kind="into-paper" id="wp" class="page-wave" />
     </section>
 
-    <section class="section" aria-labelledby="form-title">
+    <section class="section ground" aria-labelledby="form-title">
       <div class="wrap">
         <div class="layout">
           <div class="main">
@@ -105,7 +116,7 @@ const sideBody = getHelp.talk.body;
               </ol>
               <p class="visually-hidden" aria-live="polite" data-step-live></p>
 
-              <div class="sheet">
+              <div class="sheet surface">
                 <!-- Step 1: about you -->
                 <fieldset class="step" data-step="you">
                   <legend>
@@ -444,7 +455,7 @@ const sideBody = getHelp.talk.body;
               </div>
             </form>
 
-            <div class="done" data-done hidden tabindex="-1">
+            <div class="done surface" data-done hidden tabindex="-1">
               <h2>{applyPage.done.heading}</h2>
               <p>{applyPage.done.body}</p>
               <textarea
@@ -468,7 +479,7 @@ const sideBody = getHelp.talk.body;
             </div>
           </div>
 
-          <aside class="side on-dark" aria-labelledby="side-title">
+          <aside class="side surface surface--night on-dark" aria-labelledby="side-title">
             <h2 id="side-title">{getHelp.talk.heading}</h2>
             <p>{sideBody}</p>
             <a class="button button--glass" href={phone.href}>
@@ -857,6 +868,19 @@ const sideBody = getHelp.talk.body;
     color: #fff;
   }
 
+  /* The opener's photo is a desktop composition: below that, the words
+     alone open the page. */
+  .opener-photo {
+    display: none;
+  }
+
+  .opener-photo :global(.photo) {
+    border-radius: var(--r-card);
+    box-shadow:
+      0 0 0 var(--hairline) rgb(255 255 255 / 0.28),
+      0 1.875rem 5rem rgb(0 0 0 / 0.45);
+  }
+
   /* The form, then the night aside; side by side on desktop. */
   .layout {
     display: grid;
@@ -913,8 +937,11 @@ const sideBody = getHelp.talk.body;
     color: var(--muted);
   }
 
-  .progress li[aria-current],
   .progress li.passed {
+    border-top-color: rgb(96 8 215 / 0.45);
+  }
+
+  .progress li[aria-current] {
     border-top-color: var(--purple);
   }
 
@@ -975,13 +1002,9 @@ const sideBody = getHelp.talk.body;
     white-space: nowrap;
   }
 
-  /* One sheet holds the four steps and the buttons that move between them. */
+  /* One sheet, a surface (global.css), holds the four steps and the
+     buttons that move between them. */
   .sheet {
-    background: #fff;
-    border-radius: var(--r-card);
-    box-shadow:
-      0 0 0 var(--hairline) var(--rule),
-      0 1rem 2.5rem rgb(27 15 46 / 0.06);
     overflow: clip;
   }
 
@@ -1346,11 +1369,6 @@ const sideBody = getHelp.talk.body;
     display: grid;
     gap: var(--space-s);
     padding: var(--space-m);
-    border-radius: var(--r-card);
-    background: #fff;
-    box-shadow:
-      0 0 0 var(--hairline) var(--rule),
-      0 1rem 2.5rem rgb(27 15 46 / 0.06);
   }
 
   .done[hidden] {
@@ -1370,16 +1388,13 @@ const sideBody = getHelp.talk.body;
     line-height: 1.5;
   }
 
-  /* The night aside: the home page's Get help card language. */
+  /* The night aside: a night surface, the home page's Get help card. */
   .side {
     display: grid;
     gap: var(--space-s);
     align-content: start;
     justify-items: start;
     padding: var(--space-m);
-    border-radius: var(--r-card);
-    background:
-      radial-gradient(70% 60% at 100% 0%, rgb(96 8 215 / 0.35), transparent 60%), var(--night);
   }
 
   .side h2 {
@@ -1435,6 +1450,21 @@ const sideBody = getHelp.talk.body;
   }
 
   @media (min-width: 56rem) {
+    /* The opener: the words, and beside them a family the programs reached,
+       standing on its plate at the foot of the words' column. */
+    .page-hero .wrap {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 22rem;
+      column-gap: var(--space-xl);
+      align-items: end;
+    }
+
+    .opener-photo {
+      display: block;
+      position: relative;
+      z-index: 1;
+    }
+
     .layout {
       grid-template-columns: minmax(0, 44rem) minmax(18rem, 1fr);
       gap: var(--space-xl);
