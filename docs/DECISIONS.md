@@ -496,3 +496,13 @@ Declined: sentence case for the strip titles (the reference sets them and they r
 - **Contact** cards carry the footer's line glyphs in lit discs (an arrow on the night card), which turn purple with the rim on hover. **About** stands her portrait in a pool of light on its plate, rimmed pale, on a night ground. The **Get involved** track is glass over the lilac ground.
 
 **Why:** The brief for this pass was the owner's: "treat every word, design, layout, creative solution, blank space, gap ... as if it's going to be used to demonstrate what a fully optimized website in 2050 would look like," and the critique was that the sections under the banner did not meet it. The banner, the strip and the footer had been built from her references and had their light, their rules and their grain; the sections between them were built on flat fills, which is what made them read as plain. The fix is one system, so every section gets the same light and every box the same lift: a ground with corner washes and grain, a surface with a rim, a plate under a photo. Each was sized in rem and checked at the four widths, and the composition, overflow and interaction tests decided what stayed (the stretched photo did not).
+
+## 64. CI runs on pull requests, not again on `main`
+
+**Decision:** `ci.yml` no longer runs on a push to `main`. It runs on every pull request and by hand (`workflow_dispatch`, the "Run workflow" button in the Actions tab).
+
+**Why:** The run on `main` repeated the run the pull request had just passed. The ruleset (decision 17) lets nothing reach `main` except a squash merge of a pull request whose browser-test check passed on a branch that was up to date with `main`, with no bypass list, so the tree on `main` is the tree the check already ran on. The run could not block anything either: Cloudflare deploys `main` on its own, whatever CI says. The live check (`live-check.yml`) runs the full suite against the deployed site after every merge. The record agreed: of the runs on `main` since the ruleset, none caught anything the pull request had missed (the only two failures predate the ruleset; the rest passed or were cancelled by a newer push), and they took about a quarter of a month's Actions minutes (758 of 3,019).
+
+**Side effect:** the live check is now what refreshes the saved npm and browser caches on `main`, and it saves them only when it passes. After a dependency bump, while the live check is failing, pull requests download the browsers again (about one to two minutes each). Speed only; results do not change.
+
+**Revisit if:** the ruleset ever gains a bypass or the required check is removed; then a run on `main` would again be checking something untested.
