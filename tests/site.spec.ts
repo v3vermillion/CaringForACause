@@ -1247,12 +1247,20 @@ test.describe("the program strip", () => {
     test.skip(!viewport || viewport.width < 576, "phones stack the proof");
     await page.goto("/");
     const proof = page.locator(".strip .facts");
-    const [box, lineHeight] = await Promise.all([
+    const [box, metrics] = await Promise.all([
       proof.boundingBox(),
-      proof.evaluate((el) => parseFloat(getComputedStyle(el).lineHeight)),
+      proof.evaluate((el) => {
+        const style = getComputedStyle(el);
+        return {
+          lineHeight: parseFloat(style.lineHeight),
+          // The box carries the strip's bottom spacing on tablets; only the
+          // line itself is measured.
+          padding: parseFloat(style.paddingTop) + parseFloat(style.paddingBottom),
+        };
+      }),
     ]);
     expect(box).not.toBeNull();
-    expect(box!.height).toBeLessThan(lineHeight * 1.6);
+    expect(box!.height - metrics.padding).toBeLessThan(metrics.lineHeight * 1.6);
   });
 });
 
