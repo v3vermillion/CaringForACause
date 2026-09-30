@@ -1,0 +1,267 @@
+---
+/**
+ * The four program icons from the owner's reference mock (decision 58),
+ * redrawn as vector art: neon line work in pinkish white with a violet glow,
+ * crimson and violet fills. Each is drawn in its own box, the crop box of
+ * the reference at its size (meals 103 × 69, gifts 70 × 76, diapers 75 × 67,
+ * school 77 × 81), so their proportions to each other are the reference's.
+ * The glow filter and the fills are shared: ProgramStrip.astro renders the
+ * definitions once per page, and every icon refers to them by id.
+ */
+export type ProgramIconKind = "meals" | "gifts" | "diapers" | "school";
+
+interface Props {
+  kind: ProgramIconKind;
+  class?: string;
+}
+
+const { kind, class: className } = Astro.props;
+
+const boxes: Record<ProgramIconKind, string> = {
+  meals: "0 0 103 69",
+  gifts: "0 0 70 76",
+  diapers: "0 0 75 67",
+  school: "0 0 77 81",
+};
+/* The box's width, for the strip to size each icon by one shared scale. */
+const widths: Record<ProgramIconKind, number> = { meals: 103, gifts: 70, diapers: 75, school: 77 };
+---
+
+<svg
+  viewBox={boxes[kind]}
+  class:list={["pi", `pi--${kind}`, className]}
+  style={`--pi-w: ${widths[kind]}`}
+  aria-hidden="true"
+  focusable="false"
+>
+  {kind === "meals" && (
+    <g filter="url(#pi-glow)">
+      <!-- fork: three tines on a hollow U bowl that narrows into a handle widening to a round end -->
+      <rect
+        x="1.5"
+        y="1"
+        width="3.6"
+        height="18"
+        rx="1.8"
+        fill="url(#pi-tube)"
+        stroke="#fbf7ff"
+        stroke-width="1.6"
+      />
+      <rect
+        x="8.2"
+        y="1"
+        width="3.6"
+        height="18"
+        rx="1.8"
+        fill="url(#pi-tube)"
+        stroke="#fbf7ff"
+        stroke-width="1.6"
+      />
+      <rect
+        x="14.9"
+        y="1"
+        width="3.6"
+        height="18"
+        rx="1.8"
+        fill="url(#pi-tube)"
+        stroke="#fbf7ff"
+        stroke-width="1.6"
+      />
+      <path
+        d="M1.5 16.5c0 5.5 1.6 9.6 5 12.2 1 .8 1.6 1.4 1.6 2.6l-.3 25.2c0 4.9 1 8.7 2.2 11.5h0c1.2-2.8 2.2-6.6 2.2-11.5L12 31.3c0-1.2.6-1.8 1.6-2.6 3.4-2.6 5-6.7 5-12.2z"
+        fill="url(#pi-tube)"
+        stroke="#fbf7ff"
+        stroke-width="1.9"
+        stroke-linejoin="round"
+      />
+      <!-- plate -->
+      <circle
+        cx="52.5"
+        cy="35"
+        r="30.1"
+        fill="url(#pi-plate)"
+        stroke="#fbf7ff"
+        stroke-width="1.8"
+      />
+      <circle cx="52.5" cy="35" r="19" fill="url(#pi-plate-in)" />
+      <circle cx="52.5" cy="35" r="19" fill="none" stroke="#f8e0ea" stroke-width="1.3" />
+      <!-- knife: a straight spine, a bellied edge, a heel into a handle that widens to a round end -->
+      <path
+        d="M100.5 4c0-1.6-1.2-2.8-2.8-2.8S94.6 2.6 94 4c-4.5 8-6.5 16.5-6.5 24 0 4.5 2 8.5 5.2 10l.3 19c0 4.9 1 8.7 2.2 11.5h0c1.2-2.8 2.2-6.6 2.2-11.5L100.5 38z"
+        fill="url(#pi-tube)"
+        stroke="#fbf7ff"
+        stroke-width="1.9"
+        stroke-linejoin="round"
+      />
+    </g>
+  )}
+  {kind === "gifts" && (
+    <g filter="url(#pi-glow)">
+      <rect
+        x="7.5"
+        y="37.5"
+        width="55"
+        height="37.25"
+        rx="4"
+        fill="url(#pi-violet)"
+        stroke="#fbf7ff"
+        stroke-width="3"
+      />
+      <rect
+        x="31.25"
+        y="37.5"
+        width="7.5"
+        height="37.25"
+        fill="url(#pi-red)"
+        stroke="#fbf7ff"
+        stroke-width="2.4"
+      />
+      <rect
+        x="2.75"
+        y="23"
+        width="64.5"
+        height="14.5"
+        rx="3.5"
+        fill="url(#pi-red)"
+        stroke="#fbf7ff"
+        stroke-width="2.6"
+      />
+      <rect
+        x="31.75"
+        y="24.3"
+        width="6.5"
+        height="11.9"
+        fill="url(#pi-red)"
+        stroke="#fbf7ff"
+        stroke-width="0.6"
+        stroke-opacity="0.7"
+      />
+      <!-- bow: two near-circular loops, round at their outer ends, meeting in a knot on the lid -->
+      <path
+        d="M35 22.5C30 9 18 2 13 5.5c-4.5 3.2-3 11.5 3 15 5.5 3.3 13.5 2.4 19 2z"
+        fill="url(#pi-violet)"
+        stroke="#fbf7ff"
+        stroke-width="3"
+        stroke-linejoin="round"
+      />
+      <path
+        d="M35 22.5C40 9 52 2 57 5.5c4.5 3.2 3 11.5-3 15-5.5 3.3-13.5 2.4-19 2z"
+        fill="url(#pi-violet)"
+        stroke="#fbf7ff"
+        stroke-width="3"
+        stroke-linejoin="round"
+      />
+    </g>
+  )}
+  {kind === "diapers" && (
+    <g filter="url(#pi-glow)">
+      <!-- the body's fill first, then the tabs and cuffs, then its outline over them -->
+      <path
+        d="M5.5 2h64c2 0 3.5 1.5 3.5 3.5V34C73 50 62 64 49 64H26C13 64 2 50 2 34V5.5C2 3.5 3.5 2 5.5 2z"
+        fill="url(#pi-well)"
+      />
+      <rect
+        x="1.5"
+        y="11"
+        width="15.5"
+        height="17.5"
+        rx="4"
+        fill="url(#pi-tab)"
+        stroke="#fbf7ff"
+        stroke-width="1.5"
+      />
+      <rect
+        x="58"
+        y="11"
+        width="15.5"
+        height="17.5"
+        rx="4"
+        fill="url(#pi-tab)"
+        stroke="#fbf7ff"
+        stroke-width="1.5"
+      />
+      <path
+        d="M7 34c5 3.5 12 8 17 13.5 1.5 2 2.5 5.5 3 10.5l-.5 3.5C22 60 16 55 12 51 8 47 5.5 42 5 37z"
+        fill="url(#pi-cuff)"
+        stroke="#fbf7ff"
+        stroke-width="2.6"
+        stroke-linejoin="round"
+      />
+      <path
+        d="M68 34c-5 3.5-12 8-17 13.5-1.5 2-2.5 5.5-3 10.5l.5 3.5C53 60 59 55 63 51c4-4 6.5-9 7-14z"
+        fill="url(#pi-cuff)"
+        stroke="#fbf7ff"
+        stroke-width="2.6"
+        stroke-linejoin="round"
+      />
+      <path
+        d="M5.5 2h64c2 0 3.5 1.5 3.5 3.5V34C73 50 62 64 49 64H26C13 64 2 50 2 34V5.5C2 3.5 3.5 2 5.5 2z"
+        fill="none"
+        stroke="#fbf7ff"
+        stroke-width="3.1"
+        stroke-linejoin="round"
+      />
+    </g>
+  )}
+  {kind === "school" && (
+    <g filter="url(#pi-glow)">
+      <path
+        class="ink"
+        stroke-width="2.9"
+        d="M12.75 40H8.75V27A15.5 15.5 0 0 1 24.25 11.5H29.25A9.25 9.25 0 0 1 47.75 11.5H51.5A15.5 15.5 0 0 1 67 27V40H64.5"
+      />
+      <rect
+        x="2.75"
+        y="44"
+        width="10"
+        height="29"
+        rx="4.5"
+        fill="url(#pi-pocket)"
+        stroke="#fbf7ff"
+        stroke-width="2.5"
+      />
+      <rect
+        x="64.5"
+        y="44"
+        width="10"
+        height="29"
+        rx="4.5"
+        fill="url(#pi-pocket)"
+        stroke="#fbf7ff"
+        stroke-width="2.5"
+      />
+      <path
+        d="M12.75 75V39.5A25.875 25.875 0 0 1 64.5 39.5V75A2.5 2.5 0 0 1 62 77.5H15.25A2.5 2.5 0 0 1 12.75 75z"
+        fill="url(#pi-panel)"
+        stroke="#fbf7ff"
+        stroke-width="2.6"
+        stroke-linejoin="round"
+      />
+      <path class="ink" stroke-width="2.6" d="M32.5 33V30.5a3 3 0 0 1 3-3h7.5a3 3 0 0 1 3 3V33" />
+      <rect
+        x="20.75"
+        y="47.25"
+        width="36.25"
+        height="26.25"
+        rx="6"
+        fill="url(#pi-pocket)"
+        stroke="#fbf7ff"
+        stroke-width="2.6"
+      />
+      <path class="ink" stroke-width="2.6" d="M20.75 56.5h36.25" />
+    </g>
+  )}
+</svg>
+
+<style is:global>
+  .pi {
+    display: block;
+    overflow: visible;
+  }
+  .pi .ink {
+    fill: none;
+    stroke: #fbf7ff;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+</style>

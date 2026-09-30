@@ -4,7 +4,6 @@ import "@fontsource/atkinson-hyperlegible-next/400.css";
 import "@fontsource/atkinson-hyperlegible-next/700.css";
 import "../styles/global.css";
 import BrandPaint from "../components/BrandPaint.astro";
-import PreviewNotice from "../components/PreviewNotice.astro";
 import displayFont from "@fontsource-variable/bricolage-grotesque/files/bricolage-grotesque-latin-wght-normal.woff2?url";
 import bodyFont from "@fontsource/atkinson-hyperlegible-next/files/atkinson-hyperlegible-next-latin-400-normal.woff2?url";
 import bodyBoldFont from "@fontsource/atkinson-hyperlegible-next/files/atkinson-hyperlegible-next-latin-700-normal.woff2?url";
@@ -75,7 +74,7 @@ const structuredData = {
 ---
 
 <!doctype html>
-<html lang="en" class:list={[{ preview: !allowIndexing }]}>
+<html lang="en">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -232,7 +231,6 @@ const structuredData = {
     <a class="skip-link" href="#main">
       Skip to content
     </a>
-    {!allowIndexing && <PreviewNotice />}
     <slot />
     <slot name="after" />
     <BrandPaint />

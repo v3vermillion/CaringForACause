@@ -14,7 +14,7 @@ working after handoff without a developer, and is it true?
 
 1. **Nothing false ships.** Every factual claim lives in `src/data/facts.ts`
    form with a source and a status. Unconfirmed details can appear in the
-   private preview, marked by the preview notice, but a public build refuses to
+   private preview (the build log lists them), but a public build refuses to
    run until they are confirmed. Never state something as fact because it
    sounds right or appeared once online.
 2. **Real over polished.** Use the organization's own photos and words. No

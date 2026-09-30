@@ -145,11 +145,6 @@ export function validateBuild(dist, { allowIndexing }) {
       fail(`Indexing is off but ${name} robots meta is "${robotsMeta}"`);
     }
 
-    // Preview notice: required on the private preview, forbidden on the public site
-    const notice = doc.querySelector("[data-preview-notice]");
-    if (!allowIndexing && !notice) fail(`Preview build: ${name} is missing the preview notice`);
-    if (allowIndexing && notice) fail(`Public build: ${name} still shows the preview notice`);
-
     // Structured data
     const ld = doc.querySelector('script[type="application/ld+json"]');
     try {

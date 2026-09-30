@@ -1,0 +1,349 @@
+---
+import { claim } from "../data/facts.ts";
+import { facts, programStrip } from "../data/site";
+import ProgramIcon from "./ProgramIcon.astro";
+import ProgramIconDefs from "./ProgramIconDefs.astro";
+
+// Proof in one line under the four programs, as the reference's line between
+// two rules; every item is a claim with a source (src/data/facts.ts).
+const proof = [
+  `Helping families since ${claim(facts.founded)}`,
+  `${claim(facts.taxExempt).section} nonprofit, EIN ${claim(facts.ein)}`,
+  `Partnered with ${claim(facts.toysForTotsPartner)}`,
+];
+---
+
+<!--
+  The four programs the banner promises, on the night band its wave lands on
+  (decision 58): her reference's row of neon icons, each with a title and one
+  line, hairlines between them, and under them the proof line between two
+  rules. Each item is a link to its program. On desktop the strip is part of
+  the first screen and is sized in --u like the banner, 126 reference pixels
+  tall, so the season strip still ends at the fold; on phones and tablets it
+  is sized in the class's reference pixel and stacks as the reference shows.
+-->
+<section class="strip on-dark" aria-label="What we do">
+  <ProgramIconDefs />
+
+  <div class="wrap">
+    <ul class="items">
+      {programStrip.map((item) => (
+        <li>
+          <a class="item" href={item.href}>
+            <span class="icon">
+              <ProgramIcon kind={item.icon} />
+            </span>
+            <span class="words">
+              <span class="name">{item.title}</span>
+              <span class="line">{item.body}</span>
+            </span>
+          </a>
+        </li>
+      ))}
+    </ul>
+    <p class="facts">
+      {proof.map((item, i) => (
+        <>
+          {i > 0 && (
+            <span class="sep" aria-hidden="true">
+              ·
+            </span>
+          )}
+          <span>{item}</span>
+        </>
+      ))}
+    </p>
+  </div>
+</section>
+
+<style>
+  /* The band is lit from the wave and falls off to the deeper night, as the
+     reference's does: a gradient down to --night-2 (the season strip and the
+     wave out of the band continue it) and a violet bloom centred on the seam
+     with the wave, straddling it so no edge shows. */
+  .strip {
+    position: relative;
+    isolation: isolate;
+    background: linear-gradient(180deg, var(--night), var(--night-2));
+  }
+
+  .strip::before {
+    content: "";
+    position: absolute;
+    z-index: -1;
+    left: 0;
+    right: 0;
+    top: calc(-0.34 * var(--wave-h));
+    height: calc(0.34 * var(--wave-h) + 9rem);
+    pointer-events: none;
+    background: radial-gradient(
+      ellipse 58% 100% at 50% calc(0.34 * var(--wave-h)),
+      rgb(116 60 232 / 0.26),
+      rgb(116 60 232 / 0) 70%
+    );
+  }
+
+  /* Phones: the reference's four columns, sized in --rp (one pixel of the
+     393px reference), the icons about 48 tall, the title in the serif over a
+     three-line body. */
+  .items {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    padding: calc(30 * var(--rp)) 0 0;
+    margin: 0;
+    list-style: none;
+  }
+
+  li {
+    position: relative;
+  }
+
+  /* Hairlines between the columns, lit violet to rose like the rules of her
+     references, from the icons' top to the bodies' end. */
+  li + li::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: calc(2 * var(--rp));
+    bottom: calc(4 * var(--rp));
+    width: 1px;
+    background: linear-gradient(
+      180deg,
+      rgb(160 108 255 / 0.15),
+      #a06cff 45%,
+      rgb(224 72 154 / 0.35)
+    );
+  }
+
+  .item {
+    display: grid;
+    justify-items: center;
+    gap: calc(11 * var(--rp)) 0;
+    height: 100%;
+    padding: 0 calc(5 * var(--rp));
+    text-align: center;
+    text-decoration: none;
+    color: #fff;
+    border-radius: calc(8 * var(--rp));
+  }
+
+  /* A flex box, not a grid: a percentage height inside an auto grid row
+     resolves as auto, and the icon would take its width's height instead. */
+  .icon {
+    --k: calc(48 / 81 * var(--rp));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: calc(48 * var(--rp));
+    width: calc(70 * var(--rp));
+    transition: filter 0.25s ease;
+  }
+
+  /* One scale for the four, not one height: each icon keeps its own size in
+     the reference's row (the backpack, 81 tall in its box, sets the row's
+     height; the plate is the widest and the shortest), so --k is the row
+     height over 81 and each icon's width is its box's times --k. */
+  .icon :global(.pi) {
+    width: calc(var(--pi-w) * var(--k));
+    height: auto;
+    max-width: 100%;
+  }
+
+  .words {
+    display: grid;
+    gap: calc(7 * var(--rp));
+  }
+
+  .name {
+    font-family: var(--font-serif);
+    font-weight: 700;
+    font-size: calc(17 * var(--rp));
+    line-height: 1.15;
+    letter-spacing: -0.005em;
+    text-wrap: balance;
+    transition: color 0.25s ease;
+  }
+
+  .line {
+    font-size: calc(11.5 * var(--rp));
+    line-height: 1.35;
+    color: var(--night-soft);
+    text-wrap: pretty;
+  }
+
+  .item:hover .name,
+  .item:focus-visible .name {
+    color: #e2d3ff;
+  }
+
+  .item:hover .icon,
+  .item:focus-visible .icon {
+    filter: brightness(1.12) saturate(1.05);
+  }
+
+  .item:focus-visible {
+    outline: max(2px, 0.1875rem) solid var(--focus);
+    outline-offset: 0;
+  }
+
+  /* Proof under the icons, as the reference's line between two rules. On
+     phones the three items stack, centred, between a short rule above and
+     below; from tablets up they share one line with the rules at its ends. */
+  .facts {
+    display: grid;
+    justify-items: center;
+    gap: calc(2 * var(--rp));
+    max-width: none;
+    margin: calc(20 * var(--rp)) 0 0;
+    padding: 0 0 calc(22 * var(--rp));
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: calc(12.5 * var(--rp));
+    line-height: 1.5;
+    letter-spacing: 0.01em;
+    color: rgb(201 182 242 / 0.85);
+    text-align: center;
+  }
+
+  .facts::before,
+  .facts::after {
+    content: "";
+    width: calc(72 * var(--rp));
+    height: 1px;
+    margin: calc(6 * var(--rp)) 0;
+    background: linear-gradient(
+      90deg,
+      rgb(160 108 255 / 0),
+      rgb(160 108 255 / 0.7),
+      rgb(160 108 255 / 0)
+    );
+  }
+
+  .sep {
+    display: none;
+    color: rgb(255 90 134 / 0.7);
+  }
+
+  /* Tablets: the same columns in the tablet's reference pixel (--sp is one
+     pixel of the 768px reference), a little more air. */
+  @media (min-width: 36rem) {
+    .items {
+      padding-top: calc(32 * var(--sp));
+    }
+    li + li::before {
+      top: calc(2 * var(--sp));
+      bottom: calc(4 * var(--sp));
+    }
+    .item {
+      gap: calc(12 * var(--sp)) 0;
+      padding: 0 calc(12 * var(--sp));
+      border-radius: calc(8 * var(--sp));
+    }
+    .icon {
+      --k: calc(54 / 81 * var(--sp));
+      height: calc(54 * var(--sp));
+      width: calc(80 * var(--sp));
+    }
+    .words {
+      gap: calc(7 * var(--sp));
+    }
+    .name {
+      font-size: calc(19 * var(--sp));
+    }
+    .line {
+      font-size: calc(13 * var(--sp));
+    }
+    .facts {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: center;
+      gap: 0 calc(9 * var(--sp));
+      margin-top: calc(24 * var(--sp));
+      padding-bottom: calc(22 * var(--sp));
+      font-size: calc(13 * var(--sp));
+    }
+    /* The rules take only what the words leave (a zero basis can never force
+       a wrap), so the line stays one line and the closing rule never drops
+       under the tax ID. */
+    .facts::before,
+    .facts::after {
+      flex: 1 1 0;
+      min-width: 0;
+      width: auto;
+      max-width: calc(120 * var(--sp));
+      margin: 0;
+      background: linear-gradient(90deg, rgb(160 108 255 / 0), rgb(160 108 255 / 0.7));
+    }
+    .facts::after {
+      background: linear-gradient(90deg, rgb(160 108 255 / 0.7), rgb(160 108 255 / 0));
+    }
+    .sep {
+      display: inline;
+    }
+  }
+
+  /* Desktop: part of the first screen, sized in --u like the banner (see
+     src/pages/index.astro): 22 above, a 64 row of icon beside words, 14, an
+     18 line of proof, 18 below: 136 reference pixels, the number the
+     first screen's arithmetic uses. Every height here is fixed so the sum
+     holds whatever the words do. */
+  @media (min-width: 56rem) {
+    .items {
+      height: calc(64 * var(--u));
+      padding: 0;
+      column-gap: 0;
+    }
+    li + li::before {
+      top: calc(4 * var(--u));
+      bottom: calc(4 * var(--u));
+    }
+    /* Each icon-and-words pair is centred in its cell (icon 70, gap 14,
+       words 150 of the 288 at 1280), so the hairlines fall midway between
+       neighbours instead of hugging the icon on their right. */
+    .item {
+      grid-template-columns: auto minmax(0, calc(150 * var(--u)));
+      align-items: center;
+      justify-content: center;
+      justify-items: start;
+      gap: 0 calc(14 * var(--u));
+      padding: 0 calc(12 * var(--u));
+      text-align: left;
+      border-radius: calc(8 * var(--u));
+    }
+    .icon {
+      --k: calc(52 / 81 * var(--u));
+      height: calc(52 * var(--u));
+      width: calc(70 * var(--u));
+    }
+    .words {
+      gap: calc(3 * var(--u));
+    }
+    .name {
+      font-size: calc(18 * var(--u));
+      line-height: calc(21 * var(--u));
+    }
+    .line {
+      font-size: calc(13 * var(--u));
+      line-height: calc(17 * var(--u));
+    }
+    .facts {
+      flex-wrap: nowrap;
+      gap: 0 calc(10 * var(--u));
+      height: calc(18 * var(--u));
+      margin-top: calc(14 * var(--u));
+      padding: 0;
+      font-size: calc(12.5 * var(--u));
+      line-height: calc(18 * var(--u));
+      white-space: nowrap;
+    }
+    .facts::before,
+    .facts::after {
+      flex-basis: calc(40 * var(--u));
+      max-width: calc(160 * var(--u));
+    }
+    .strip {
+      padding: calc(22 * var(--u)) 0 calc(18 * var(--u));
+    }
+  }
+</style>

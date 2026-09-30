@@ -29,7 +29,7 @@ if (!poster) {
       formats={["avif", "webp"]}
       alt=""
       widths={[480, 720, 1080].filter((w) => w <= poster.width)}
-      sizes="(min-width: 56rem) 540px, calc(100vw - 2.5rem)"
+      sizes="(min-width: 56rem) 620px, (min-width: 36rem) 52vw, calc(100vw - 2.5rem)"
       loading="lazy"
       decoding="async"
       style={`object-position: ${video.posterFocus ?? "center"};`}
@@ -44,12 +44,26 @@ if (!poster) {
     const link = el.querySelector("a");
     link?.addEventListener("click", (event) => {
       event.preventDefault();
+      if (el.classList.contains("is-loading")) return;
       const iframe = document.createElement("iframe");
       iframe.src = `https://www.youtube-nocookie.com/embed/${el.dataset.ytId}?autoplay=1&rel=0`;
       iframe.title = el.dataset.ytTitle ?? "Video";
       iframe.allow = "autoplay; encrypted-media; picture-in-picture; fullscreen";
       iframe.allowFullscreen = true;
-      el.replaceChildren(iframe);
+      // The poster stays under the player while it loads, with a turning
+      // ring where the play button was; once the frame has loaded, the
+      // poster and its link go. (A browser can fire load for the frame's
+      // empty first document before YouTube's page; that one is skipped:
+      // YouTube's document is cross-origin, so it reads as null here.)
+      el.classList.add("is-loading");
+      const loaded = () => {
+        if (iframe.contentDocument?.URL === "about:blank") return;
+        iframe.removeEventListener("load", loaded);
+        el.classList.remove("is-loading");
+        link.remove();
+      };
+      iframe.addEventListener("load", loaded);
+      el.append(iframe);
       iframe.focus();
     });
   });
@@ -58,6 +72,7 @@ if (!poster) {
 <style>
   .yt {
     position: relative;
+    isolation: isolate;
     aspect-ratio: 16 / 9;
     overflow: hidden;
     border-radius: var(--r-img);
@@ -71,6 +86,12 @@ if (!poster) {
     width: 100%;
     height: 100%;
     border: 0;
+  }
+
+  /* The player sits over the poster, see-through until its page paints. */
+  .yt :global(iframe) {
+    z-index: 1;
+    background: transparent;
   }
 
   .yt-link :global(img) {
@@ -103,5 +124,36 @@ if (!poster) {
 
   .yt-link:hover .yt-play {
     background: #950009;
+  }
+
+  /* While the player loads: the play button becomes a ring that turns
+     above the frame (under reduced motion the global rule holds it still),
+     and the link under the frame takes no taps. */
+  .yt.is-loading .yt-link {
+    pointer-events: none;
+  }
+
+  .yt.is-loading .yt-play {
+    z-index: 2;
+    background: transparent;
+    box-shadow: none;
+  }
+
+  .yt.is-loading .yt-play::after {
+    inset: 0;
+    margin: auto;
+    width: 2.5rem;
+    height: 2.5rem;
+    transform: none;
+    border: 0.25rem solid rgb(255 255 255 / 0.35);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: spin 900ms linear infinite;
+  }
+
+  @keyframes spin {
+    to {
+      transform: rotate(1turn);
+    }
   }
 </style>

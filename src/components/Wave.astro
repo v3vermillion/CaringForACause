@@ -88,7 +88,7 @@ const B = {
         <stop offset="0.64" stop-color="#5a0a48" stop-opacity="0" />
       </linearGradient>
       <linearGradient id={`${id}-crimson-lit`} x1="0" x2="1" y1="0" y2="0">
-        <stop offset="0" stop-color="#ffb3bf" stop-opacity="0.7" />
+        <stop offset="0" stop-color="#ffb3bf" stop-opacity="0.5" />
         <stop offset="0.4" stop-color="#ff7f9e" stop-opacity="0.3" />
         <stop offset="0.62" stop-color="#ff7f9e" stop-opacity="0" />
       </linearGradient>
@@ -103,10 +103,10 @@ const B = {
         <stop offset="1" stop-color="#b48cff" stop-opacity="0.3" />
       </linearGradient>
       <linearGradient id={`${id}-edge`} x1="0" x2="1" y1="0" y2="0">
-        <stop offset="0" stop-color="#ffd6e6" />
-        <stop offset="0.45" stop-color="#ffc2ec" />
-        <stop offset="0.7" stop-color="#e0c0ff" />
-        <stop offset="1" stop-color="#b48cff" stop-opacity="0.7" />
+        <stop offset="0" stop-color="#ffd6e6" stop-opacity="0.7" />
+        <stop offset="0.45" stop-color="#ffc2ec" stop-opacity="0.4" />
+        <stop offset="0.7" stop-color="#e0c0ff" stop-opacity="0.15" />
+        <stop offset="1" stop-color="#b48cff" stop-opacity="0" />
       </linearGradient>
       <linearGradient id={`${id}-seam`} x1="0" x2="1" y1="0" y2="0">
         <stop offset="0" stop-color="#ff9ab2" stop-opacity="0.7" />
@@ -125,13 +125,13 @@ const B = {
         <path d={A.under} />
       </clipPath>
       <filter id={`${id}-soft`} x="-5%" y="-60%" width="110%" height="220%">
-        <feGaussianBlur stdDeviation="1.6" />
+        <feGaussianBlur stdDeviation="1.2 3.2" />
       </filter>
       <filter id={`${id}-glow`} x="-5%" y="-50%" width="110%" height="200%">
-        <feGaussianBlur stdDeviation="2.6" />
+        <feGaussianBlur stdDeviation="2 5" />
       </filter>
       <filter id={`${id}-spill`} x="-5%" y="-60%" width="110%" height="220%">
-        <feGaussianBlur stdDeviation="5" />
+        <feGaussianBlur stdDeviation="4 8" />
       </filter>
     </defs>
     {above && <path d={A.above} fill={above} />}
@@ -150,11 +150,11 @@ const B = {
     <path
       d={A.glowTop}
       fill={`url(#${id}-light)`}
-      opacity="0.5"
+      opacity="0.35"
       filter={`url(#${id}-glow)`}
       style="mix-blend-mode: screen"
     />
-    <path d={A.edgeTop} fill={`url(#${id}-edge)`} opacity="0.85" />
+    <path d={A.edgeTop} fill={`url(#${id}-edge)`} opacity="0.5" />
     <path d={A.seam} fill={`url(#${id}-seam)`} />
   </svg>
 ) : (
@@ -185,13 +185,13 @@ const B = {
       <linearGradient id={`${id}-crimson-lit`} x1="0" x2="1" y1="0" y2="0">
         <stop offset="0.2" stop-color="#ff7f9e" stop-opacity="0.2" />
         <stop offset="0.6" stop-color="#ff9ab0" stop-opacity="0.4" />
-        <stop offset="1" stop-color="#ffb3bf" stop-opacity="0.7" />
+        <stop offset="1" stop-color="#ffb3bf" stop-opacity="0.5" />
       </linearGradient>
       <linearGradient id={`${id}-edge`} x1="0" x2="1" y1="0" y2="0">
-        <stop offset="0" stop-color="#dcc8ff" stop-opacity="0.8" />
-        <stop offset="0.4" stop-color="#e0c0ff" />
-        <stop offset="0.7" stop-color="#ffc2ec" />
-        <stop offset="1" stop-color="#ffd6e6" />
+        <stop offset="0" stop-color="#dcc8ff" stop-opacity="0" />
+        <stop offset="0.3" stop-color="#e0c0ff" stop-opacity="0.15" />
+        <stop offset="0.55" stop-color="#ffc2ec" stop-opacity="0.4" />
+        <stop offset="1" stop-color="#ffd6e6" stop-opacity="0.7" />
       </linearGradient>
       <linearGradient id={`${id}-seam`} x1="0" x2="1" y1="0" y2="0">
         <stop offset="0.3" stop-color="#c9a6ff" stop-opacity="0" />
@@ -210,13 +210,13 @@ const B = {
         <path d={B.under} />
       </clipPath>
       <filter id={`${id}-soft`} x="-5%" y="-60%" width="110%" height="220%">
-        <feGaussianBlur stdDeviation="1.6" />
+        <feGaussianBlur stdDeviation="1.2 3.2" />
       </filter>
       <filter id={`${id}-glow`} x="-5%" y="-50%" width="110%" height="200%">
-        <feGaussianBlur stdDeviation="2.6" />
+        <feGaussianBlur stdDeviation="2 5" />
       </filter>
       <filter id={`${id}-spill`} x="-5%" y="-60%" width="110%" height="220%">
-        <feGaussianBlur stdDeviation="5" />
+        <feGaussianBlur stdDeviation="4 8" />
       </filter>
     </defs>
     <path d={B.above} fill={above ?? "#1b0f2e"} />
@@ -235,11 +235,11 @@ const B = {
     <path
       d={B.glowTop}
       fill={`url(#${id}-light)`}
-      opacity="0.5"
+      opacity="0.35"
       filter={`url(#${id}-glow)`}
       style="mix-blend-mode: screen"
     />
-    <path d={B.edgeTop} fill={`url(#${id}-edge)`} opacity="0.85" />
+    <path d={B.edgeTop} fill={`url(#${id}-edge)`} opacity="0.5" />
     <path d={B.seam} fill={`url(#${id}-seam)`} />
   </svg>
 )}

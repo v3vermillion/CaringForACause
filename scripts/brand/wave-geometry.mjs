@@ -159,13 +159,13 @@ ${palette}
         <path d={${P}.under} />
       </clipPath>
       <filter id={\`\${id}-soft\`} x="-5%" y="-60%" width="110%" height="220%">
-        <feGaussianBlur stdDeviation="1.6" />
+        <feGaussianBlur stdDeviation="1.2 3.2" />
       </filter>
       <filter id={\`\${id}-glow\`} x="-5%" y="-50%" width="110%" height="200%">
-        <feGaussianBlur stdDeviation="2.6" />
+        <feGaussianBlur stdDeviation="2 5" />
       </filter>
       <filter id={\`\${id}-spill\`} x="-5%" y="-60%" width="110%" height="220%">
-        <feGaussianBlur stdDeviation="5" />
+        <feGaussianBlur stdDeviation="4 8" />
       </filter>
     </defs>
 ${
@@ -189,11 +189,11 @@ ${
     <path
       d={${P}.glowTop}
       fill={\`url(#\${id}-light)\`}
-      opacity="0.5"
+      opacity="0.35"
       filter={\`url(#\${id}-glow)\`}
       style="mix-blend-mode: screen"
     />
-    <path d={${P}.edgeTop} fill={\`url(#\${id}-edge)\`} opacity="0.85" />
+    <path d={${P}.edgeTop} fill={\`url(#\${id}-edge)\`} opacity="0.5" />
     <path d={${P}.seam} fill={\`url(#\${id}-seam)\`} />
   </svg>`;
 
@@ -214,7 +214,7 @@ const paletteA = [
     [0.64, "#5a0a48", 0],
   ]),
   grad("crimson-lit", [
-    [0, "#ffb3bf", 0.7],
+    [0, "#ffb3bf", 0.5],
     [0.4, "#ff7f9e", 0.3],
     [0.62, "#ff7f9e", 0],
   ]),
@@ -229,10 +229,10 @@ const paletteA = [
     [1, "#b48cff", 0.3],
   ]),
   grad("edge", [
-    [0, "#ffd6e6"],
-    [0.45, "#ffc2ec"],
-    [0.7, "#e0c0ff"],
-    [1, "#b48cff", 0.7],
+    [0, "#ffd6e6", 0.7],
+    [0.45, "#ffc2ec", 0.4],
+    [0.7, "#e0c0ff", 0.15],
+    [1, "#b48cff", 0],
   ]),
   grad("seam", [
     [0, "#ff9ab2", 0.7],
@@ -265,13 +265,13 @@ const paletteB = [
   grad("crimson-lit", [
     [0.2, "#ff7f9e", 0.2],
     [0.6, "#ff9ab0", 0.4],
-    [1, "#ffb3bf", 0.7],
+    [1, "#ffb3bf", 0.5],
   ]),
   grad("edge", [
-    [0, "#dcc8ff", 0.8],
-    [0.4, "#e0c0ff"],
-    [0.7, "#ffc2ec"],
-    [1, "#ffd6e6"],
+    [0, "#dcc8ff", 0],
+    [0.3, "#e0c0ff", 0.15],
+    [0.55, "#ffc2ec", 0.4],
+    [1, "#ffd6e6", 0.7],
   ]),
   grad("seam", [
     [0.3, "#c9a6ff", 0],

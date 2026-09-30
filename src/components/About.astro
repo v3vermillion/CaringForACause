@@ -7,14 +7,18 @@ const watchUrl = `https://www.youtube.com/watch?v=${about.video.id}`;
 ---
 
 <!-- Her portrait, her story, and her feature video, which loads only when asked for. -->
-<section id="about" class="section section--night on-dark" aria-labelledby="about-title">
+<section
+  id="about"
+  class="section section--night ground ground--night on-dark"
+  aria-labelledby="about-title"
+>
   <!-- The ribbons carry the lilac above into the night, and the night out
        onto the paper below (decision 52). -->
   <Wave kind="into-night" id="wc" above="#efe6fa" class="wave-top" />
   <Wave kind="into-paper" id="wd" class="wave-bottom" />
   <div class="wrap">
     <div class="grid">
-      <figure class="portrait">
+      <figure class="portrait plate">
         <Photo
           photo={about.portrait}
           ratio="4 / 5"
@@ -68,10 +72,14 @@ const watchUrl = `https://www.youtube.com/watch?v=${about.video.id}`;
     button.removeAttribute("rel");
     button.querySelector("[data-watch-hint]")?.remove();
     const id = new URL(button.href).searchParams.get("v");
+    // The player is brought into view smoothly, or at once for a reader who
+    // has asked for reduced motion (a script scroll ignores the stylesheet).
+    const reduce = matchMedia("(prefers-reduced-motion: reduce)");
+    const behavior = (): ScrollBehavior => (reduce.matches ? "auto" : "smooth");
     button.addEventListener("click", (event) => {
       event.preventDefault();
       if (!player.hidden) {
-        player.scrollIntoView({ behavior: "smooth", block: "center" });
+        player.scrollIntoView({ behavior: behavior(), block: "center" });
         return;
       }
       const iframe = document.createElement("iframe");
@@ -81,21 +89,18 @@ const watchUrl = `https://www.youtube.com/watch?v=${about.video.id}`;
       iframe.allowFullscreen = true;
       frame.replaceChildren(iframe);
       player.hidden = false;
-      player.scrollIntoView({ behavior: "smooth", block: "center" });
+      player.scrollIntoView({ behavior: behavior(), block: "center" });
       iframe.focus();
     });
   }
 </script>
 
 <style>
-  /* Night, lit as the references light it: violet at the top right, a
-     little magenta at the bottom left, each sized in rem from its corner. */
+  /* A night ground (global.css): lit violet at the top right, a little
+     magenta at the bottom left, and grained. */
   #about {
-    position: relative;
+    overflow: clip; /* the portrait's pool of light bleeds past the column */
     padding-block: calc(var(--space-xl) + var(--wave-h));
-    background:
-      radial-gradient(50rem 24rem at 100% 0, rgb(96 8 215 / 0.38), transparent 70%),
-      radial-gradient(30rem 16rem at 0 100%, rgb(200 40 120 / 0.2), transparent 70%), var(--night);
   }
 
   #about :global(.wave-top),
@@ -121,17 +126,39 @@ const watchUrl = `https://www.youtube.com/watch?v=${about.video.id}`;
     align-items: center;
   }
 
+  /* Her portrait stands in a pool of light on the night, rimmed like the
+     surfaces, so it is lit rather than pasted on. */
   .portrait {
     position: relative;
     margin: 0;
     max-width: 26rem;
   }
 
+  .portrait::after {
+    content: "";
+    position: absolute;
+    inset: -18% -22%;
+    z-index: -2;
+    background: radial-gradient(
+      closest-side,
+      rgb(160 108 255 / 0.4),
+      rgb(255 90 134 / 0.14) 55%,
+      transparent 78%
+    );
+    pointer-events: none;
+  }
+
+  .portrait.plate::before {
+    border-radius: var(--r-card);
+    background: linear-gradient(135deg, rgb(160 108 255 / 0.45), rgb(255 90 134 / 0.35));
+  }
+
   .portrait :global(.portrait-photo) {
     border-radius: var(--r-card);
     box-shadow:
       0 1.875rem 5rem rgb(0 0 0 / 0.45),
-      0 0 0 var(--hairline) rgb(255 255 255 / 0.14);
+      0 0 0 var(--hairline) rgb(255 255 255 / 0.28),
+      0 0 0 calc(var(--hairline) * 2) rgb(160 108 255 / 0.25);
   }
 
   .copy p {

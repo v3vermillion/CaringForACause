@@ -1,7 +1,7 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test } from "@playwright/test";
 import { claim } from "../src/data/facts";
-import { facts, hero, navigation, org, seasonalBanner } from "../src/data/site";
+import { facts, hero, navigation, org, programStrip, seasonalBanner } from "../src/data/site";
 
 // The content the tests expect comes from the content file, so a content
 // edit (a confirmed year, a renamed section) never needs a test edit. The
@@ -94,6 +94,7 @@ test.describe("device compatibility", () => {
       ".checklist summary",
       ".site-footer li a",
       ".door",
+      ".strip .item",
       ".yt-link",
       ".arrow-link",
       ".tile",
@@ -348,8 +349,8 @@ test.describe("scrolling stability", () => {
     expect(give!.y + give!.height).toBeLessThanOrEqual(657);
   });
 
-  // On desktop the banner, the trust facts, and the season strip fill the
-  // first screen exactly, whatever the screen height (see decision 39).
+  // On desktop the banner, the program strip, and the season strip fill the
+  // first screen exactly, whatever the screen height (decisions 39 and 58).
   for (const [width, height] of [
     [1024, 768], // an iPad in landscape
     [1024, 1366], // an iPad Pro 12.9 upright: tall, so the width bounds the scale
@@ -401,7 +402,7 @@ test.describe("scrolling stability", () => {
         doors: share(r(".doors")),
         // The words start on the header's left edge, on every screen.
         left: r(".hero .content").left - r(".site-header .brand").left,
-        lines: [lines(".hero h1"), lines(".hero .sub"), lines(".door--help .door-body")],
+        lines: [lines(".hero h1"), lines(".hero .sub")],
         // The header as a share of the text block's height, and her lockup's width in it.
         header: r(".site-header").height / hero.height,
         lockup: r(".site-header .brand-lockup").width,
@@ -535,9 +536,9 @@ test.describe("the header by device", () => {
     test(`the header is the same picture on every ${cls}`, async ({ page }, testInfo) => {
       test.skip(!testInfo.project.name.startsWith("desktop-"), "runs once per engine");
       test.slow(); // a dozen page loads and screenshots
-      // The bar is one component from the layout on every page, and the
-      // preview notice sits above it on every page too, so the home page is
-      // the whole picture; a second page would repeat the same screenshots.
+      // The bar is one component from the layout on every page, so the home
+      // page is the whole picture; a second page would repeat the same
+      // screenshots.
       for (const path of ["/"]) {
         const ref = await bar(page, reference[0], reference[1], path);
         for (const [width, height] of others) {
@@ -932,10 +933,10 @@ test.describe("navigation", () => {
     await expect(page.locator(".door--give")).toHaveAttribute("href", "/donate");
   });
 
-  test("subpages link back to the home page", async ({ page }) => {
+  test("subpages lead back to the home page through her lockup", async ({ page }) => {
     for (const path of ["/donate", "/apply"]) {
       await page.goto(path);
-      await page.locator(".page-hero .back").click();
+      await page.locator(".site-header .brand").click();
       await expect(page).toHaveURL(/\/$/);
     }
   });
@@ -1196,6 +1197,71 @@ test.describe("get involved tabs", () => {
     await expect(page.locator("#tab-partner")).toBeFocused();
     await expect(page.locator("#partner")).toBeVisible();
   });
+
+  // A chosen way to help is written to the address and remembered for the
+  // visit, and choosing never moves the page (decision 62).
+  test("choosing a tab keeps the page still and records the choice", async ({ page }) => {
+    await page.goto("/");
+    await page.locator("#get-involved").scrollIntoViewIfNeeded();
+    const before = await page.evaluate(() => window.scrollY);
+    await page.locator("#tab-partner").click();
+    await expect(page.locator("#partner")).toBeVisible();
+    await expect(page.locator("#sponsor")).toBeHidden();
+    expect(new URL(page.url()).hash).toBe("#partner");
+    expect(Math.abs((await page.evaluate(() => window.scrollY)) - before)).toBeLessThan(2);
+    expect(await page.evaluate(() => sessionStorage.getItem("involved-tab"))).toBe("partner");
+    // Leaving for another page and coming back through the header keeps it.
+    await page.goto("/donate");
+    await page.locator(".site-header .brand").click();
+    await expect(page.locator("#tab-partner")).toHaveAttribute("aria-selected", "true");
+  });
+
+  test("Tab from a tab lands on the panel's button, not the panel", async ({ page }) => {
+    await page.goto("/");
+    await page.locator("#tab-sponsor").focus();
+    await page.keyboard.press("Tab");
+    await expect(page.locator("#sponsor a.button")).toBeFocused();
+  });
+});
+
+test.describe("the program strip", () => {
+  // The four things the banner promises, each a link to its program, with
+  // the proof line under them (decision 58).
+  test("lists the four programs, each opening its program", async ({ page }) => {
+    await page.goto("/");
+    const items = page.locator(".strip .item");
+    await expect(items).toHaveCount(programStrip.length);
+    for (const [i, item] of programStrip.entries()) {
+      await expect(items.nth(i).locator(".name")).toHaveText(item.title);
+      await expect(items.nth(i)).toHaveAttribute("href", item.href);
+      const target = item.href.replace("/#", "#");
+      await expect(page.locator(target)).toHaveCount(1);
+    }
+    await expect(page.locator(".strip .pi")).toHaveCount(programStrip.length);
+  });
+
+  // From tablets up the proof is one line between two rules: the rules take
+  // only the space the words leave, so the closing rule never wraps under
+  // the tax ID.
+  test("the proof line is one line from tablets up", async ({ page, viewport }) => {
+    test.skip(!viewport || viewport.width < 576, "phones stack the proof");
+    await page.goto("/");
+    const proof = page.locator(".strip .facts");
+    const [box, metrics] = await Promise.all([
+      proof.boundingBox(),
+      proof.evaluate((el) => {
+        const style = getComputedStyle(el);
+        return {
+          lineHeight: parseFloat(style.lineHeight),
+          // The box carries the strip's bottom spacing on tablets; only the
+          // line itself is measured.
+          padding: parseFloat(style.paddingTop) + parseFloat(style.paddingBottom),
+        };
+      }),
+    ]);
+    expect(box).not.toBeNull();
+    expect(box!.height - metrics.padding).toBeLessThan(metrics.lineHeight * 1.6);
+  });
 });
 
 test.describe("one home per fact", () => {
@@ -1260,20 +1326,29 @@ test.describe("donation page", () => {
     await page.goto("/donate");
     await page.locator("input[name=amount][value='100']").check();
     await page.locator("input[name=frequency][value=monthly]").check();
-    await expect(page.locator("[data-summary]")).toHaveText("Your gift: $100, monthly.");
+    await expect(page.locator("[data-summary]")).toHaveText("Your gift: $100 a month.");
     const go = page.locator(".go");
+    // The button carries the gift, so the last thing read before the click confirms it.
+    await expect(go).toHaveText("Donate $100 a month by email");
     const href = decodeURIComponent((await go.getAttribute("href"))!);
     expect(href).toMatch(/\$100/);
     expect(href).toMatch(/monthly/);
   });
 
-  test("Other reveals an amount field", async ({ page }) => {
+  test("the other amount is an always-visible field that acts as the fifth choice", async ({
+    page,
+  }) => {
     await page.goto("/donate");
-    await expect(page.locator("#other-amount")).toBeHidden();
-    await page.locator("input[name=amount][value=other]").check();
-    await expect(page.locator("#other-amount")).toBeVisible();
-    await page.locator("#other-amount").fill("75");
-    await expect(page.locator("[data-summary]")).toHaveText("Your gift: $75, one time.");
+    const other = page.locator("#other-amount");
+    await expect(other).toBeVisible();
+    await other.fill("75");
+    await expect(page.locator("[data-summary]")).toHaveText("Your gift: $75.");
+    await expect(page.locator(".go")).toHaveText("Donate $75 by email");
+    await expect(page.locator("input[name=amount]:checked")).toHaveCount(0);
+    // Choosing a chip again empties the field.
+    await page.locator("input[name=amount][value='25']").check();
+    await expect(other).toHaveValue("");
+    await expect(page.locator("[data-summary]")).toHaveText("Your gift: $25.");
   });
 
   test("states the nonprofit's EIN and tax status", async ({ page }) => {
@@ -1284,6 +1359,40 @@ test.describe("donation page", () => {
 });
 
 test.describe("application page", () => {
+  // Errors name the field, an email is required when it is the chosen way to
+  // reach the family, Next says where it leads, and Enter never sends early
+  // (decision 62).
+  test("names its errors, asks for an email when chosen, and Enter only advances", async ({
+    page,
+  }) => {
+    await page.goto("/apply");
+    await expect(page.locator("[data-next]")).toHaveText("Next: Your household");
+    await page.locator("[data-next]").click();
+    await expect(page.locator(".field:has(#firstName) .error")).toHaveText(
+      "Enter your first name.",
+    );
+    await expect(page.locator(".field:has(#phone) .error")).toHaveText("Enter your phone number.");
+    await page.locator("input[name=contactMethod][value=Email]").check();
+    await page.locator("[data-next]").click();
+    await expect(page.locator("#email")).toHaveAttribute("aria-invalid", "true");
+    await expect(page.locator(".field:has(#email) .error")).toHaveText(
+      "Enter an email address, or choose Call or Text.",
+    );
+    await page.locator("input[name=contactMethod][value=Call]").check();
+    await expect(page.locator("#email")).not.toHaveAttribute("aria-invalid", "true");
+    await page.locator("#firstName").fill("Jane");
+    await page.locator("#lastName").fill("Doe");
+    await page.locator("#phone").fill("3175550100");
+    await expect(page.locator("#phone")).toHaveValue("(317) 555-0100");
+    await page.locator("#lastName").press("Enter");
+    await expect(page.locator("[data-step=household]")).toBeVisible();
+    await expect(page.locator("[data-done]")).toBeHidden();
+    await expect(page.locator("[data-next]")).toHaveText("Next: What you need");
+    // A passed step can be revisited from the progress bar.
+    await page.locator(".progress [data-goto='0']").click();
+    await expect(page.locator("[data-step=you]")).toBeVisible();
+  });
+
   test("walks through four steps, validates each, and sends by email", async ({ page }) => {
     await page.goto("/apply");
     const form = page.locator("[data-apply]");
@@ -1470,35 +1579,6 @@ test.describe("videos", () => {
   });
 });
 
-test.describe("preview notice", () => {
-  const text = "Preview: some details are still being confirmed.";
-
-  for (const path of pages) {
-    test(`appears first on ${path}, with exact wording, and cannot be dismissed`, async ({
-      page,
-    }) => {
-      await page.goto(path);
-      const notice = page.locator("[data-preview-notice]");
-      await expect(notice).toHaveText(text);
-      await expect(notice).toHaveRole("complementary");
-      await expect(notice).toBeVisible();
-      await expect(notice.locator("button, a")).toHaveCount(0);
-      // Above the header and the claims it qualifies
-      const noticeBox = await notice.boundingBox();
-      const headerBox = await page.locator(".site-header").boundingBox();
-      expect(noticeBox!.y).toBeLessThan(headerBox!.y);
-    });
-  }
-
-  test.describe("without JavaScript", () => {
-    test.use({ javaScriptEnabled: false });
-    test("is still shown", async ({ page }) => {
-      await page.goto("/");
-      await expect(page.locator("[data-preview-notice]")).toHaveText(text);
-    });
-  });
-});
-
 test.describe("search and sharing", () => {
   test("search engines are blocked by default", async ({ page, request }) => {
     await page.goto("/");
@@ -1568,6 +1648,6 @@ test.describe("search and sharing", () => {
   test("unknown pages return the custom 404", async ({ page }) => {
     const response = await page.goto("/this-page-does-not-exist");
     expect(response?.status()).toBe(404);
-    await expect(page.getByRole("heading", { level: 1 })).toHaveText("This page doesn't exist");
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText("We can't find that page");
   });
 });
