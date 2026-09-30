@@ -112,7 +112,7 @@ Short records of the technical choices behind this site, so anyone taking it ove
 
 ## 17. Pull requests only, with deploy confirmation
 
-**Decision:** A GitHub ruleset (GitHub Pro) requires a pull request, squash merging, and the browser-test check before anything reaches `main`, with no bypass list. After every merge, the live check waits for the page's `version` meta tag (the short commit from Cloudflare's `WORKERS_CI_COMMIT_SHA`) to match the merged commit. Merged branches are deleted as a process step rather than automatically. See `docs/WORKFLOW.md`.
+**Decision:** A GitHub ruleset (GitHub Pro) requires a pull request, squash merging, and the browser-test check before anything reaches `main`, with no bypass list. After every merge, the live check waits for the page's `version` meta tag (the short commit from Cloudflare's `WORKERS_CI_COMMIT_SHA`) to match the merged commit. GitHub deletes each branch automatically when its pull request merges (Settings → General → Automatically delete head branches); the ruleset protects only `main`, so the two don't interact. This replaced deleting branches by hand, which had left twelve merged or closed branches behind. See `docs/WORKFLOW.md`.
 
 **Relation to decision 16:** decision 16 was written when branch protection was unavailable. With the ruleset enforced, Cloudflare Workers Builds deploys only commits that passed the required check, so the workflow `deploy` job was removed to keep a single deploy path. Two paths would risk double deploys and conflicting settings.
 
