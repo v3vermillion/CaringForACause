@@ -252,7 +252,13 @@ test.describe("scrolling stability", () => {
         };
       });
     await page.route("**/", async (route) => {
-      const response = await route.fetch();
+      // Playwright's own fetch decodes gzip, deflate and br, not zstd. The
+      // deployed site answers Firefox's accept-encoding (which lists zstd)
+      // with zstd, and the page would be fulfilled with undecoded bytes; so
+      // the fetch asks for an encoding Playwright decodes.
+      const response = await route.fetch({
+        headers: { ...route.request().headers(), "accept-encoding": "gzip, deflate, br" },
+      });
       const html = (await response.text()).replace(
         /<script type="module"[^>]*>[\s\S]*?<\/script>/g,
         "",

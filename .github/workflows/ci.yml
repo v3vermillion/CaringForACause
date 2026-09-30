@@ -1,9 +1,10 @@
 name: CI
 
+# No run on push to main: every change arrives through a PR that already
+# passed this exact code (see docs/DECISIONS.md). Run by hand if needed.
 on:
-  push:
-    branches: [main]
   pull_request:
+  workflow_dispatch:
 
 permissions:
   contents: read
