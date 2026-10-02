@@ -32,7 +32,7 @@ Two packages are held at their current major version in `.github/dependabot.yml`
 
 ## When something fails
 
-- **Required check fails:** the change cannot merge. Read the `ci-failure` issue, fix on the same branch, push. A failing browser test leaves a screenshot and a trace in the run's `playwright-report` artifact; a test marked skipped is not a failure (see README, browser tests).
+- **Required check fails:** the change cannot merge. Read the `ci-failure` issue, fix on the same branch, push. A failing browser test leaves a screenshot and a trace in its part's `test-results-<part>` artifact (the part's devices are in its name on the pull request); a test marked skipped is not a failure (see README, browser tests).
 - **Cloudflare build fails (publish gate):** nothing is published and the site keeps the last good version. The `Live site check` run fails at "Wait for Cloudflare to publish this commit". Read the build log in Cloudflare → Workers & Pages → caring-for-a-cause → Deployments, fix on a new branch.
 - **Live check fails after a successful deploy:** the change is live. Fix forward on a new branch, or revert the merge commit through a pull request.
 - **Emergency:** a repository admin can temporarily disable the ruleset (Settings → Rules → Rulesets). Re-enable it immediately after.

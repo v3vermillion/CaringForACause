@@ -506,3 +506,27 @@ Declined: sentence case for the strip titles (the reference sets them and they r
 **Side effect:** the live check is now what refreshes the saved npm and browser caches on `main`, and it saves them only when it passes. After a dependency bump, while the live check is failing, pull requests download the browsers again (about one to two minutes each). Speed only; results do not change.
 
 **Revisit if:** the ruleset ever gains a bypass or the required check is removed; then a run on `main` would again be checking something untested.
+
+## 65. The browser suite runs as five parts side by side
+
+**Decision:** CI's browser tests run as five jobs at once, two devices each, using Playwright's own `--shard`, instead of one job running all ten devices in turn. The type check and build gate run once, in their own job, alongside them. A report job merges the five parts into one report and posts any failures to the `ci-failure` issue as before. A final job, named as the ruleset's required check ("Format, types, build, and browser tests (10 devices, 3 engines)"), passes only if the checks, all five parts and the report all passed.
+
+**Why:** A run took 13 to 19 minutes, most of it one job running the devices one after another, and every fix after a failure paid that again. Run side by side, the same suite takes about 7 to 9 minutes. Nothing about the tests changed: the same 1,120 tests, workers, retry, traces and screenshots, and `playwright.config.ts` and the spec are untouched. A failure now shows as soon as its part finishes, under that part's device names.
+
+**What keeps it safe:**
+
+- `--shard` divides the whole test list, so every test runs in exactly one part by construction. There are no hand-kept lists of tests that a new test could miss.
+- Each part checks that it runs the devices its name says. Adding or removing a device fails that check until the names in `ci.yml` are updated.
+- The report job fails unless the merged report holds every listed test exactly once, because the merge itself reports success even when tests failed, and a part that never ran leaves nothing to merge.
+- The required job runs even when a part fails or is cancelled, because a skipped required check would count as passing.
+
+This was proven before merging. Locally, three shards with a deliberately failing test merged to exactly the listed count, with the failure reported. Every guard failed when it should. The pull request merged only after its runs showed the merged count matching the suite, and after a deliberate failure on a throwaway branch turned the required check red and was posted to the issue.
+
+**Cost:** five runners instead of one, each repeating about two minutes of setup. That is free while the repository is public. If it goes private again, a run uses about 10 more billed minutes; the gain is unchanged.
+
+**Considered and not done:**
+
+- More workers on one runner: the timing-sensitive tests get flakier, and private runners have two CPUs.
+- Recording traces only on retries: the first failure would lose its trace.
+- Splitting by browser engine: WebKit is three quarters of the time, so one job would still do most of the work.
+- Building once and passing the build to the parts: slower, because each handoff between jobs costs more than the part's own two-second build.

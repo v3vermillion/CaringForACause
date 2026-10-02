@@ -26,6 +26,8 @@ npm-debug.log*
 # Playwright
 test-results/
 playwright-report/
+blob-report/
+all-blob-reports/
 lhci-report/
 .lighthouseci/
 failure-summary.md
