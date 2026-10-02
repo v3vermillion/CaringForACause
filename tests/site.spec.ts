@@ -1364,15 +1364,33 @@ test.describe("donation page", () => {
   });
 });
 
-test.describe("application page", () => {
-  // When Next finds an error it focuses the first field, and the site's smooth
-  // scrolling glides the page up to it. On WebKit a tap during that glide only
-  // stops the scroll, so the next choice was sometimes never made (the live
-  // check saw "Clicking the checkbox did not change its state"). Without
-  // smooth scrolling the page jumps, so every tap lands; the steps and what
-  // they check are unchanged.
-  test.use({ reducedMotion: "reduce" });
+// When Next or Send finds an error, the form focuses the first field and the
+// site's smooth scrolling glides the page to it. On WebKit a tap during that
+// glide only stops the scroll, so the tap is lost (the live check once saw
+// "Clicking the checkbox did not change its state"). So the application tests
+// press the form's buttons through this helper, which waits for the page to
+// come to rest (six frames without scrolling) before the next tap. Smooth
+// scrolling stays on, as visitors have it; turning it off with reduced motion
+// was measured to slow these tests on WebKit by a third.
+const pressAndSettle = async (page: import("@playwright/test").Page, selector: string) => {
+  await page.locator(selector).click();
+  await page.evaluate(
+    () =>
+      new Promise<void>((resolve) => {
+        let last = scrollY;
+        let still = 0;
+        const tick = () => {
+          still = scrollY === last ? still + 1 : 0;
+          last = scrollY;
+          if (still >= 6) resolve();
+          else requestAnimationFrame(tick);
+        };
+        requestAnimationFrame(tick);
+      }),
+  );
+};
 
+test.describe("application page", () => {
   // Errors name the field, an email is required when it is the chosen way to
   // reach the family, Next says where it leads, and Enter never sends early
   // (decision 62).
@@ -1381,13 +1399,13 @@ test.describe("application page", () => {
   }) => {
     await page.goto("/apply");
     await expect(page.locator("[data-next]")).toHaveText("Next: Your household");
-    await page.locator("[data-next]").click();
+    await pressAndSettle(page, "[data-next]");
     await expect(page.locator(".field:has(#firstName) .error")).toHaveText(
       "Enter your first name.",
     );
     await expect(page.locator(".field:has(#phone) .error")).toHaveText("Enter your phone number.");
     await page.locator("input[name=contactMethod][value=Email]").check();
-    await page.locator("[data-next]").click();
+    await pressAndSettle(page, "[data-next]");
     await expect(page.locator("#email")).toHaveAttribute("aria-invalid", "true");
     await expect(page.locator(".field:has(#email) .error")).toHaveText(
       "Enter an email address, or choose Call or Text.",
@@ -1419,17 +1437,17 @@ test.describe("application page", () => {
     await expect(form).toBeVisible();
 
     // Step 1: required fields block Next.
-    await page.locator("[data-next]").click();
+    await pressAndSettle(page, "[data-next]");
     await expect(page.locator("#firstName")).toHaveAttribute("aria-invalid", "true");
     await expect(page.locator("#firstName")).toBeFocused();
     await page.locator("#firstName").fill("Jane");
     await page.locator("#lastName").fill("Doe");
     await page.locator("#phone").fill("317");
-    await page.locator("[data-next]").click();
+    await pressAndSettle(page, "[data-next]");
     await expect(page.locator("#phone")).toHaveAttribute("aria-invalid", "true");
     await page.locator("#phone").fill("317-555-0100");
     await page.locator("input[name=contactMethod][value=Text]").check();
-    await page.locator("[data-next]").click();
+    await pressAndSettle(page, "[data-next]");
 
     // Step 2: household, with a row per child.
     await expect(page.locator("[data-step=household]")).toBeVisible();
@@ -1443,11 +1461,11 @@ test.describe("application page", () => {
     await expect(page.locator(".child-row")).toHaveCount(2);
     await page.locator("#child-1-0").selectOption("4");
     await page.locator("#child-2-0").selectOption("9");
-    await page.locator("[data-next]").click();
+    await pressAndSettle(page, "[data-next]");
 
     // Step 3: at least one kind of help, with details that open on demand.
     await expect(page.locator("[data-step=needs]")).toBeVisible();
-    await page.locator("[data-next]").click();
+    await pressAndSettle(page, "[data-next]");
     await expect(page.locator("[data-needs-error]")).toBeVisible();
     await expect(page.locator("[data-sub=holiday]")).toBeHidden();
     await page.locator("input[name=need][data-toggle=holiday]").check();
@@ -1461,7 +1479,7 @@ test.describe("application page", () => {
         () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
       ),
     ).toBe(0);
-    await page.locator("[data-next]").click();
+    await pressAndSettle(page, "[data-next]");
 
     // Step 4: review shows the answers; sending needs consent and opens email.
     await expect(page.locator("[data-step=review]")).toBeVisible();
@@ -1471,7 +1489,7 @@ test.describe("application page", () => {
     await expect(review).toContainText("Child 1");
     await expect(review).toContainText("Christmas");
     await expect(review).toContainText("Size 4");
-    await page.locator("[data-send]").click();
+    await pressAndSettle(page, "[data-send]");
     await expect(page.locator("[data-consent-error]")).toBeVisible();
     await page.locator("input[name=consent]").check();
 
@@ -1482,7 +1500,7 @@ test.describe("application page", () => {
         (window as unknown as { __mail: string }).__mail = (event as CustomEvent<string>).detail;
       });
     });
-    await page.locator("[data-send]").click();
+    await pressAndSettle(page, "[data-send]");
     await expect(page.locator("[data-done]")).toBeVisible();
     await expect(page.locator("[data-done-text]")).toHaveValue(/Name: Jane Doe/);
     const mail = await page.evaluate(() => (window as unknown as { __mail: string }).__mail);
@@ -1495,9 +1513,9 @@ test.describe("application page", () => {
     await page.locator("#firstName").fill("Jane");
     await page.locator("#lastName").fill("Doe");
     await page.locator("#phone").fill("3175550100");
-    await page.locator("[data-next]").click();
+    await pressAndSettle(page, "[data-next]");
     await expect(page.locator("[data-step=household]")).toBeVisible();
-    await page.locator("[data-back]").click();
+    await pressAndSettle(page, "[data-back]");
     await expect(page.locator("[data-step=you]")).toBeVisible();
     await expect(page.locator("#firstName")).toHaveValue("Jane");
   });
