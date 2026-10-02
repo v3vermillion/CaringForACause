@@ -29,6 +29,11 @@ updates:
       # Types must match the Node major the site runs on (.nvmrc). Bump both together.
       - dependency-name: "@types/node"
         update-types: ["version-update:semver-major"]
+      # 1.0.1 re-indents comments inside nested CSS rules on every run, so
+      # formatting never settles and the format check always fails. Skip only
+      # that version; a fixed release still comes through.
+      - dependency-name: prettier-plugin-astro
+        versions: ["1.0.1"]
     labels: [dependencies]
     commit-message:
       prefix: "chore(deps)"
