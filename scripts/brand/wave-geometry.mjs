@@ -364,10 +364,11 @@ type Props = {
   below?: string;
   /**
    * Instead of a flat colour on that side: the lit ground of the section
-   * beyond the ribbons, continued under them (global.css, .wave-ground).
+   * beyond the ribbons, continued under them (global.css, .wave-ground);
+   * "footer" is the footer's lit top, under the About section's last wave.
    */
   aboveGround?: "paper" | "lilac";
-  belowGround?: "paper" | "lilac";
+  belowGround?: "paper" | "lilac" | "footer";
   class?: string;
 };
 const { kind, id, above, below, aboveGround, belowGround, class: className } = Astro.props;

@@ -969,6 +969,51 @@ a {
     linear-gradient(rgb(200 170 250 / 0.22), rgb(200 170 250 / 0.22));
 }
 
+/* The footer below the ribbons (decision 70): its darkest navy, lit along
+   its top edge and at its top corners (src/components/SiteFooter.astro,
+   .top), seen from the edge it crosses: the glows at this box's bottom
+   corners and the lit edge rising from its foot. The glows are the
+   footer's own sizes per class. */
+.wave-ground--footer {
+  --glow-top-w: 14rem;
+  --glow-top-h: 4rem;
+  background-color: #020018;
+}
+
+.wave-ground--below.wave-ground--footer::before {
+  background-image:
+    radial-gradient(
+      var(--glow-top-w) var(--glow-top-h) at 100% 100%,
+      rgb(175 40 185 / 0.42),
+      transparent 100%
+    ),
+    radial-gradient(
+      var(--glow-top-w) var(--glow-top-h) at 0 100%,
+      rgb(105 20 175 / 0.32),
+      transparent 100%
+    ),
+    linear-gradient(0deg, rgb(85 14 140 / 0.22) 0, rgb(50 8 100 / 0.1) 1.8rem, transparent 4.5rem);
+}
+
+/* The footer paints no grain. */
+.wave-ground--footer::after {
+  display: none;
+}
+
+@media (min-width: 36rem) {
+  .wave-ground--footer {
+    --glow-top-w: 24rem;
+    --glow-top-h: 5rem;
+  }
+}
+
+@media (min-width: 56rem) {
+  .wave-ground--footer {
+    --glow-top-w: 40rem;
+    --glow-top-h: 6.5rem;
+  }
+}
+
 /* Lilac below the ribbons (the gallery, when it shows): the violet wash at
    its top left (this box's bottom left), the gradient at its white head. */
 .wave-ground--below.wave-ground--lilac::before {

@@ -98,7 +98,6 @@ test.describe("device compatibility", () => {
       ".yt-link",
       ".arrow-link",
       ".tile",
-      "#contact .card",
     ];
     for (const selector of selectors) {
       // A renamed class would otherwise drop out of this check silently.
@@ -983,12 +982,15 @@ test.describe("navigation", () => {
     await expect(page.locator("#get-involved")).toBeInViewport();
   });
 
+  // The footer's Explore is the map less Contact: its Connect column is the
+  // Contact, and carries the id the Contact links lead to (decision 70).
   test("the footer draws the same map, with Donate as its one action", async ({ page }) => {
     await page.goto("/");
     await expect(page.locator(".site-footer nav a")).toHaveText([
       navigation.help.label,
-      ...sectionLabels,
+      ...sectionLabels.filter((label) => label !== "Contact"),
     ]);
+    await expect(page.locator(".site-footer #contact")).toHaveCount(1);
     const donate = page.locator(".site-footer .donate");
     await expect(donate).toHaveText(navigation.donate.label);
     await expect(donate).toHaveAttribute("href", navigation.donate.href);
@@ -1157,12 +1159,22 @@ test.describe("get involved tabs", () => {
     expect(await page.evaluate(() => window.scrollY)).toBe(0);
   };
 
+  // The Contact link: inline in the header on wide screens, in the menu on
+  // phones and tablets, where the menu is opened first.
+  const followContact = async (page: import("@playwright/test").Page) => {
+    if ((await page.locator('a[href="/#contact"]:visible').count()) === 0) {
+      await page.locator("[data-menu-open]").click();
+    }
+    await page.locator('a[href="/#contact"]:visible').first().click();
+  };
+
   // After a section link the fragment stays in the address, and a refresh
   // keeps the reader where they were instead of jumping back to the section
-  // (on a phone, Contact is the bottom of the page). See decision 50.
+  // (Contact is the footer's contact column, the bottom of the page; decision
+  // 70). See decision 50.
   test("a refresh after a section link keeps the reader where they were", async ({ page }) => {
     await page.goto("/");
-    await page.locator('a[href="/#contact"]:visible').first().click();
+    await followContact(page);
     await expect(page.locator("#contact")).toBeInViewport();
     expect(new URL(page.url()).hash).toBe("#contact");
     await toTop(page);
@@ -1175,7 +1187,7 @@ test.describe("get involved tabs", () => {
 
   test("a refresh on the section a link led to stays there", async ({ page }) => {
     await page.goto("/");
-    await page.locator('a[href="/#contact"]:visible').first().click();
+    await followContact(page);
     await expect(page.locator("#contact")).toBeInViewport();
     await settled(page);
     await page.reload();

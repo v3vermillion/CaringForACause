@@ -77,8 +77,7 @@ PROGRAMS      tiles, Get help card, then 4 programs as rows               what e
 GET INVOLVED  4 tabs: Sponsor · Donate · Volunteer · Partner              one action per supporter
 ABOUT         her portrait + story + "Do More" video on request           why to trust it
 MOMENTS       photo gallery (hidden until 4+ photos)                      the work, unposed
-CONTACT       call · email · Facebook · start an application              reach her
-FOOTER        lit mark · wordmark · Donate · "Never give up." · Explore · phone · email · Facebook · legal line   reach her, verify her
+FOOTER        lit mark · wordmark · Donate · "Never give up." · Explore · phone · email · Facebook (the page's Contact) · legal line   reach her, verify her
 
 /apply        four-step application, sent by email                        families
 /donate       frequency + amount, then the payment page or an email       donors

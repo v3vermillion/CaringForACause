@@ -7,7 +7,9 @@ const phone = show(facts.phone);
 const email = show(facts.email);
 
 /** The same map the header and the phone menu draw (decision 38). */
-const explore = [navigation.help, ...navigation.items];
+// Explore is the site's map less Contact, which is the column beside it
+// (decision 70).
+const explore = [navigation.help, ...navigation.items.filter((item) => item.id !== "contact")];
 const { donate } = navigation;
 
 const year = new Date().getFullYear();
@@ -72,7 +74,9 @@ const year = new Date().getFullYear();
         </ul>
       </nav>
 
-      <section class="col col--connect" aria-labelledby="connect-title">
+      <!-- The page's Contact: where the header's and the menu's Contact link
+           and /#contact land (decision 70). -->
+      <section id="contact" class="col col--connect" aria-labelledby="connect-title">
         <h2 id="connect-title" class="col-title">
           Connect with us
         </h2>

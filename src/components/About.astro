@@ -5,8 +5,9 @@ import Wave from "./Wave.astro";
 
 const watchUrl = `https://www.youtube.com/watch?v=${about.video.id}`;
 // The ground the bottom wave lands on: the gallery's lilac when it shows
-// (Gallery.astro shows it at four photos or more), otherwise Contact's paper.
-const nextGround = gallery.length >= 4 ? "lilac" : "paper";
+// (Gallery.astro shows it at four photos or more), otherwise the footer's
+// navy (decision 70).
+const nextGround = gallery.length >= 4 ? "lilac" : "footer";
 ---
 
 <!-- Her portrait, her story, and her feature video, which loads only when asked for. -->
@@ -16,7 +17,8 @@ const nextGround = gallery.length >= 4 ? "lilac" : "paper";
   aria-labelledby="about-title"
 >
   <!-- The ribbons carry the lilac above into the night, and the night out
-       onto the paper below (decision 52). -->
+       onto what follows (decision 52): the footer, or the gallery when it
+       shows. -->
   <!-- Each wave shows this section's own lit ground on its near side and
        continues the neighbouring ground on the far side (decision 67). -->
   <Wave kind="into-night" id="wc" aboveGround="lilac" below="none" class="wave-top" />

@@ -71,12 +71,10 @@ Three pages. The home page is the route map; the two doors lead to their own pag
 ├───────────────────────────────────────────────┤
 │ Gallery strip (hidden until 4+ photos)        │
 ├───────────────────────────────────────────────┤
-│ CONTACT: Call · Email · Facebook · Need help? │  #contact
-├───────────────────────────────────────────────┤
-│ FOOTER (near-black, from her reference):      │
+│ FOOTER (near-black, from her reference):      │  #contact is its Connect column
 │ lit mark · her lockup artwork · [Donate] ·    │
 │ Never give up.  │  Explore: Help me · About ·│
-│ Programs · Get involved · Contact │           │
+│ Programs · Get involved │                     │
 │ Connect with us: phone · email · Facebook     │
 │ ── lit rule ── mark │ legal name │ city ·     │
 │ serving area │ © year                         │
