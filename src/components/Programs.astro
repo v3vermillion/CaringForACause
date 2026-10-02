@@ -202,11 +202,17 @@ const applyHref = links.familyApplication ?? getHelp.action.href;
      The strip bleeds into the gutters and fades at both edges, so a cut tile
      dissolves instead of chopping; at rest the tiles start where the fade
      ends, so nothing at rest is dimmed. */
+  /* The strip scrolls sideways, which makes it clip vertically too, and a
+     tile's shadow cut at the strip's edge drew a line across the page
+     under the tiles (decision 67). The strip's box reaches 2rem above and
+     3rem below the tiles (past the farthest shadow), with margins that
+     take all but the 0.25rem and 0.75rem it always kept back, so the
+     tiles sit where they did and the shadows fall whole. */
   .tiles ul {
     display: flex;
     gap: var(--space-xs);
-    padding: 0.25rem var(--gutter) 0.75rem;
-    margin: 0 calc(-1 * var(--gutter));
+    padding: 2rem var(--gutter) 3rem;
+    margin: -1.75rem calc(-1 * var(--gutter)) -2.25rem;
     list-style: none;
     overflow-x: auto;
     scroll-snap-type: x mandatory;
