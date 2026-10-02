@@ -84,7 +84,7 @@ When Tamara confirms a detail, change it to `orgPublished(...)` with her confirm
 
 Measured at setup (Lighthouse, local build): mobile performance 99, desktop 100, accessibility 100, best practices 100, SEO 100 with indexing enabled. Measured again after the first-screen redesign (decisions 51 to 55): home page mobile 96 to 97 and desktop 100, the donation and application pages 97 to 100, accessibility and best practices 100 on every page, no layout shift, including with the desktop and mobile audits of a page run at the same time (decision 55).
 
-When a browser test fails or only passes on retry, CI posts a summary to an open GitHub issue labeled `ci-failure` (created automatically). Close the issue once the fix passes.
+When a browser test fails or only passes on retry, CI posts a summary to an open GitHub issue labeled `ci-failure` (created automatically), with the error from the attempt that failed. Close the issue once the fix passes.
 
 To run the browser tests locally the first time: `npx playwright install chromium webkit firefox`. To run one engine: `PW_ENGINES=chromium npm run test`.
 

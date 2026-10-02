@@ -11,7 +11,9 @@ const walk = (suite, titles = []) => {
   const path = suite.title ? [...titles, suite.title] : titles;
   for (const spec of suite.specs ?? []) {
     for (const t of spec.tests ?? []) {
-      const final = t.results?.at(-1);
+      // A flaky test's last attempt passed, so its error is on the attempt
+      // that failed before it.
+      const final = t.results?.findLast((r) => r.error || r.errors?.length) ?? t.results?.at(-1);
       if (t.status === "unexpected" || t.status === "flaky") {
         failures.push({
           status: t.status,

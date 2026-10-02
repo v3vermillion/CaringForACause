@@ -1365,6 +1365,14 @@ test.describe("donation page", () => {
 });
 
 test.describe("application page", () => {
+  // When Next finds an error it focuses the first field, and the site's smooth
+  // scrolling glides the page up to it. On WebKit a tap during that glide only
+  // stops the scroll, so the next choice was sometimes never made (the live
+  // check saw "Clicking the checkbox did not change its state"). Without
+  // smooth scrolling the page jumps, so every tap lands; the steps and what
+  // they check are unchanged.
+  test.use({ reducedMotion: "reduce" });
+
   // Errors name the field, an email is required when it is the chosen way to
   // reach the family, Next says where it leads, and Enter never sends early
   // (decision 62).
