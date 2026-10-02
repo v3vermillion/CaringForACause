@@ -563,3 +563,9 @@ The first continuation was a box clipped by a reference to an SVG clip path in t
 - **A plate steps 0.75rem on phones**, 1.25rem from tablets up (`--plate` in `global.css`, on every plate: the program photos, the About portrait, the application opener's photo). A photo on a phone fills the column, and a 1.25rem step ran the slab 0.4px past the screen's edge, where the section's clip cut it flat.
 
 **Why:** The owner read the two lines around the link and the plate at the edge as the page not flowing, and that is what they were: a rule that was meant to be short drawn full width, a slab sized for a column with room beside it drawn where there was none. Each fix restores what the design language already says (`docs/DESIGN.md`, "Shape"), and the rule-above-link construct exists nowhere else on the site (checked), so the rows were the whole of it.
+
+## 69. The page ends on the footer's rule, and the canvas behind it is navy
+
+**Decision:** The footer's record ends on the hairline under the copyright line: the band of a step bluer navy that lay under that line (2.6 reference pixels on phones, 2.8rem on tablets, 3.35rem on desktop, where the record's fixed height is now the line's 5.9rem alone) is gone, so the last thing on every page is the record and its rule. The canvas behind the page (`html`'s background, which a phone's browser shows when the page is pulled past its end) is the footer's navy instead of the default white, with the body keeping its paper.
+
+**Why:** The owner's iPhone showed the footer running on below the rule and then a flash of white under it. The band was the reference's foot, but under a rule that reads as the page's last line it looked like the page had more to say; and the white was the browser's bounce region showing the page's canvas, which a dark footer should own.
