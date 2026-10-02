@@ -294,17 +294,20 @@ const proof = [
       top: calc(4 * var(--u));
       bottom: calc(4 * var(--u));
     }
-    /* Each icon-and-words pair is centred in its cell (icon 70, gap 14,
-       words 150 of the 288 at 1280), so the hairlines fall midway between
-       neighbours instead of hugging the icon on their right. */
+    /* Each icon-and-title pair is centred in its cell on its own width
+       (the icon's 70 box, a 16 gap, the title as wide as its word), so a
+       short title such as "Gifts" sits as centred in its cell as a long
+       one, and the hairlines fall midway between neighbours. A fixed word
+       column had left the short titles' pairs leaning left (decision 66). */
     .item {
-      grid-template-columns: auto minmax(0, calc(150 * var(--u)));
+      grid-template-columns: auto auto;
       align-items: center;
       justify-content: center;
       justify-items: start;
-      gap: 0 calc(14 * var(--u));
+      gap: 0 calc(16 * var(--u));
       padding: 0 calc(12 * var(--u));
       text-align: left;
+      white-space: nowrap;
       border-radius: calc(8 * var(--u));
     }
     .icon {
@@ -315,9 +318,11 @@ const proof = [
     .words {
       gap: calc(3 * var(--u));
     }
+    /* The title stands a little taller beside its icon now that it is the
+       pair's only words; the row's 64 is unchanged. */
     .name {
-      font-size: calc(18 * var(--u));
-      line-height: calc(21 * var(--u));
+      font-size: calc(21 * var(--u));
+      line-height: calc(24 * var(--u));
     }
     .facts {
       flex-wrap: nowrap;
