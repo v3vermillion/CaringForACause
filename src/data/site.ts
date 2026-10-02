@@ -152,9 +152,13 @@ export const links = {
   volunteerForm: "https://forms.gle/HPL8HgMWvVsk9oAt5",
 } as const;
 
-/** The strip under the hero. Change each season, or set `active: false`. */
+/**
+ * The season's one ask, a bar under the program strip. Off (decision 66):
+ * the first screen ends with the proof line, on phones too. Set `active`
+ * to true to show it again; the first screen makes room for it.
+ */
 export const seasonalBanner = {
-  active: true,
+  active: false,
   message: "Families need holiday sponsors for Thanksgiving and Christmas.",
   action: { label: "Sponsor a family", href: "/#sponsor" },
 };

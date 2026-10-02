@@ -294,7 +294,12 @@ test.describe("scrolling stability", () => {
         helpBottom: r(".door--help")!.bottom,
         giveBottom: r(".door--give")!.bottom,
         sideBySide: r(".door--help")!.top === r(".door--give")!.top,
-        stripBottom: r("aside.banner")?.bottom ?? null,
+        seasonBottom: r("aside.banner")?.bottom ?? null,
+        // The proof line's closing rule: the strip's bottom less its padding.
+        proofBottom:
+          r(".strip .facts")!.bottom -
+          parseFloat(getComputedStyle(document.querySelector(".strip .facts")!).paddingBottom),
+        stripBottom: r(".strip")!.bottom,
         // The reference's line breaks: "Holiday meals," / "gifts, and diapers"
         // / "for Central Indiana" / "families." (decision 51).
         headline: [lines(".hero h1 .lead"), lines(".hero h1 .accent")],
@@ -306,41 +311,59 @@ test.describe("scrolling stability", () => {
     expect(m.sideBySide).toBe(true);
     expect(m.headline).toEqual([2, 2]);
     expect(m.sub).toBe(2);
+    // What ends the first screen on tablets and desktop: the season strip
+    // when it is on, otherwise the program strip (decision 66).
+    const endsAt = seasonalBanner.active ? m.seasonBottom : m.stripBottom;
+    if (seasonalBanner.active) expect(m.seasonBottom, "the season strip").not.toBeNull();
     if (m.width >= 896) {
       // Desktop: the scaled banner (the words sit 36 reference pixels under
       // the header, at most double), and the strip ends the first screen.
       expect(m.wordsUnderHeader).toBeLessThan(90);
-      if (seasonalBanner.active) expect(m.stripBottom, "the season strip").not.toBeNull();
-      if (m.stripBottom !== null) expect(Math.abs(m.stripBottom - m.height)).toBeLessThanOrEqual(2);
+      expect(Math.abs(endsAt! - m.height)).toBeLessThanOrEqual(2);
     } else if (m.width >= 576) {
       // Tablets: the phone's words beside the photo, both doors on screen, and
       // the strip ends the first screen.
       expect(m.helpBottom).toBeLessThanOrEqual(m.height);
       expect(m.giveBottom).toBeLessThanOrEqual(m.height);
-      if (seasonalBanner.active) expect(m.stripBottom, "the season strip").not.toBeNull();
-      if (m.stripBottom !== null) expect(Math.abs(m.stripBottom - m.height)).toBeLessThanOrEqual(2);
+      expect(Math.abs(endsAt! - m.height)).toBeLessThanOrEqual(2);
     } else {
-      // Phones: a band of her photo above the words (96 reference pixels,
-      // scaled by the width between 320 and 450px) and both doors fit.
-      expect(m.wordsUnderHeader).toBeGreaterThan(70);
-      expect(m.wordsUnderHeader).toBeLessThan(120);
+      // Phones: a band of her photo above the words (40 reference pixels,
+      // scaled by the width between 320 and 450px), both doors, and the
+      // program strip with its proof line all fit (decision 66).
+      expect(m.wordsUnderHeader).toBeGreaterThan(30);
+      expect(m.wordsUnderHeader).toBeLessThan(60);
       expect(m.helpBottom).toBeLessThanOrEqual(m.height);
       expect(m.giveBottom).toBeLessThanOrEqual(m.height);
+      expect(m.proofBottom, "the proof line").toBeLessThanOrEqual(m.height);
     }
   });
 
+  // A phone's Safari screen with its bars showing: both doors, the four
+  // programs, and the proof line all fit, with the strip ending at the fold
+  // or just under it (decision 66).
   for (const [name, width, height] of [
     ["iPhone 12 mini", 375, 629],
     ["iPhone 15", 393, 660],
   ] as const) {
-    test(`both doors fit on an ${name} Safari screen`, async ({ page }, testInfo) => {
+    test(`the banner and the proof line fit on an ${name} Safari screen`, async ({
+      page,
+    }, testInfo) => {
       oncePerEngine(testInfo);
       await page.setViewportSize({ width, height });
       await page.goto("/");
+      await fontsSettled(page);
       const help = await page.locator(".door--help").boundingBox();
       const give = await page.locator(".door--give").boundingBox();
       expect(help!.y + help!.height).toBeLessThanOrEqual(height);
       expect(give!.y + give!.height).toBeLessThanOrEqual(height);
+      const proof = page.locator(".strip .facts");
+      const box = (await proof.boundingBox())!;
+      const padding = await proof.evaluate((el) => parseFloat(getComputedStyle(el).paddingBottom));
+      expect(box.y + box.height - padding, "the proof line's closing rule").toBeLessThanOrEqual(
+        height,
+      );
+      const strip = (await page.locator(".strip").boundingBox())!;
+      expect(strip.y + strip.height, "the strip's end").toBeLessThanOrEqual(height + 8);
     });
   }
 
@@ -355,8 +378,9 @@ test.describe("scrolling stability", () => {
     expect(give!.y + give!.height).toBeLessThanOrEqual(657);
   });
 
-  // On desktop the banner, the program strip, and the season strip fill the
-  // first screen exactly, whatever the screen height (decisions 39 and 58).
+  // On desktop the banner, the program strip, and the season strip (while it
+  // is on; decision 66) fill the first screen exactly, whatever the screen
+  // height (decisions 39 and 58).
   for (const [width, height] of [
     [1024, 768], // an iPad in landscape
     [1024, 1366], // an iPad Pro 12.9 upright: tall, so the width bounds the scale
@@ -365,16 +389,16 @@ test.describe("scrolling stability", () => {
     [1536, 730],
     [1920, 950],
   ]) {
-    test(`the first screen ends with the season strip at ${width} × ${height}`, async ({
+    const last = seasonalBanner.active ? "the season strip" : "the program strip";
+    test(`the first screen ends with ${last} at ${width} × ${height}`, async ({
       page,
     }, testInfo) => {
       oncePerEngine(testInfo);
-      // The strip is seasonal content: off, the test is skipped and says so
-      // instead of passing with nothing measured.
-      test.skip(!seasonalBanner.active, "the season strip is off this season");
       await page.setViewportSize({ width, height });
       await page.goto("/");
-      const strip = page.locator("aside.banner");
+      // The season strip is seasonal content: while it is off, the program
+      // strip ends the first screen instead.
+      const strip = page.locator(seasonalBanner.active ? "aside.banner" : ".strip");
       await expect(strip).toHaveCount(1);
       const box = await strip.boundingBox();
       expect(Math.abs(box!.y + box!.height - height)).toBeLessThanOrEqual(2);

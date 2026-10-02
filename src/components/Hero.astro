@@ -114,19 +114,20 @@ const cycle = slides.length * 7;
     it changes as the address bar collapses. Desktop has its own block at the
     end.
 
-    On a phone the photo shows in a band above the words (96 reference px),
-    then the words and the doors, then the wave; the whole banner fits an
-    iPhone 12 mini's Safari screen (a test checks).
+    On a phone the photo shows in a band above the words (40 reference px),
+    then the words and the doors, then the wave; the banner, the program
+    strip and its proof line together fit an iPhone 15 Safari screen and an
+    iPhone 12 mini's (decision 66; a test checks).
   */
   .hero {
-    --wave-h: calc(84 * var(--rp));
+    --wave-h: calc(64 * var(--rp));
     position: relative;
     isolation: isolate;
     overflow: hidden;
     background: var(--night);
     /* The bottom padding clears the wave's ribbons where they sit highest,
        at the left edge (26% of the wave's height from its top), plus a gap. */
-    padding-block: calc(96 * var(--rp)) calc(16 * var(--rp) + var(--wave-h) * 0.74);
+    padding-block: calc(40 * var(--rp)) calc(12 * var(--rp) + var(--wave-h) * 0.74);
   }
 
   .montage {
@@ -208,7 +209,7 @@ const cycle = slides.length * 7;
   }
 
   /* The veil. On a phone the photo shows through the band above the words;
-     by the row the eyebrow sits on (about 17% down) it is night at four
+     by the row the eyebrow sits on (about 10% down) it is night at four
      fifths, so every line of text reads over it whichever photo is behind
      (the eyebrow's lavender measured under 4.5:1 over the lightest photo
      before). The wave takes over at the bottom, so the veil never reaches
@@ -220,9 +221,9 @@ const cycle = slides.length * 7;
     background:
       linear-gradient(
         180deg,
-        rgb(27 15 46 / 0.16) 0%,
-        rgb(27 15 46 / 0.3) 10%,
-        rgb(27 15 46 / 0.8) 17%,
+        rgb(27 15 46 / 0.2) 0%,
+        rgb(27 15 46 / 0.34) 5%,
+        rgb(27 15 46 / 0.8) 10%,
         rgb(27 15 46 / 0.86) 45%,
         rgb(27 15 46 / 0.82) 100%
       ),
@@ -272,11 +273,11 @@ const cycle = slides.length * 7;
      italic, each its own block so the accent always starts a line. Greedy
      wrapping (not balance) keeps the reference's breaks. */
   h1 {
-    margin-top: calc(14 * var(--rp));
+    margin-top: calc(10 * var(--rp));
     font-family: var(--font-serif);
     font-weight: 700;
     font-size: calc(33 * var(--rp));
-    line-height: 1.08;
+    line-height: 1.05;
     letter-spacing: -0.012em;
     text-wrap: wrap;
     color: #fff;
@@ -304,10 +305,10 @@ const cycle = slides.length * 7;
   /* Two lines, breaking before "financial": the first line is 13em wide and
      the sentence up to "financial" 17em. */
   .sub {
-    margin-top: calc(12 * var(--rp));
+    margin-top: calc(10 * var(--rp));
     max-width: 15em;
     font-size: calc(18 * var(--rp));
-    line-height: 1.45;
+    line-height: 1.4;
     color: #ece4fb;
     text-shadow: 0 max(1px, calc(1 * var(--rp))) calc(14 * var(--rp)) rgb(27 15 46 / 0.6);
   }
@@ -322,7 +323,7 @@ const cycle = slides.length * 7;
     grid-template-columns: 1fr 1fr;
     grid-auto-rows: 1fr;
     gap: calc(12 * var(--rp));
-    margin-top: calc(20 * var(--rp));
+    margin-top: calc(12 * var(--rp));
   }
 
   .door {
@@ -341,7 +342,7 @@ const cycle = slides.length * 7;
     align-items: center;
     justify-content: flex-start;
     gap: calc(8 * var(--rp));
-    min-height: calc(50 * var(--rp));
+    min-height: calc(48 * var(--rp));
     padding: 0 calc(14 * var(--rp)) 0 calc(24 * var(--rp));
     border-radius: var(--r-pill);
     font-family: var(--font-display);
@@ -455,7 +456,7 @@ const cycle = slides.length * 7;
       --wrap-left: calc((100% - min(100% - 2 * var(--gutter), var(--wide))) / 2);
       display: grid;
       align-content: center;
-      padding-block: calc(36 * var(--rp)) calc(16 * var(--rp) + var(--wave-h) * 0.74);
+      padding-block: calc(36 * var(--rp)) calc(12 * var(--rp) + var(--wave-h) * 0.74);
     }
     .montage {
       left: calc(var(--wrap-left) + 134 * var(--rp));

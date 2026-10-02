@@ -9,15 +9,17 @@ import Programs from "../components/Programs.astro";
 import SeasonalBanner from "../components/SeasonalBanner.astro";
 import SiteFooter from "../components/SiteFooter.astro";
 import SiteHeader from "../components/SiteHeader.astro";
+import { seasonalBanner } from "../data/site";
 import Base from "../layouts/Base.astro";
 ---
 
 <Base preloadItalic>
   <SiteHeader />
   <main id="main">
-    <!-- On desktop these three fill the first screen: the banner takes the
-         slack so the season strip ends exactly at the fold. -->
-    <div class="first-screen">
+    <!-- On desktop these fill the first screen: the banner takes the slack
+         so the program strip (or the season strip, when it is on) ends
+         exactly at the fold. -->
+    <div class:list={["first-screen", { "no-season": !seasonalBanner.active }]}>
       <Hero />
       <ProgramStrip />
       <SeasonalBanner />
@@ -68,9 +70,10 @@ import Base from "../layouts/Base.astro";
   }
 
   /* Desktop: one composition at every screen size. The banner and the strip
-     under it fill the first screen above the season strip, and every size in
-     them is a multiple of --u, one pixel of the reference layout (a 1280 × 800
-     screen, where the banner is 577px tall and the strip 136). Taller screens
+     under it fill the first screen above the season strip (none while it is
+     off), and every size in them is a multiple of --u, one pixel of the
+     reference layout (a 1280 × 800 screen, where the banner is 577px tall and
+     the strip 136). Taller screens
      scale it up, shorter ones down, so the picture is the same on every
      computer. The width bounds it too (a portrait screen such as an iPad Pro
      12.9 upright is tall but narrow), so the text column never outgrows its
@@ -80,6 +83,9 @@ import Base from "../layouts/Base.astro";
      stops with the rest of the site (decision 53), and the photo fills the
      room left. */
   @media (min-width: 56rem) {
+    .first-screen.no-season {
+      --strips-h: 0px;
+    }
     .first-screen {
       --u: clamp(
         0.66px,

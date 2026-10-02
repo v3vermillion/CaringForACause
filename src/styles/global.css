@@ -102,7 +102,8 @@
   --top-chrome: var(--header-h);
   /* What ends the first screen on desktop below the banner and its program
      strip (both in --u, src/pages/index.astro): the season strip, one line
-     (0.6rem padding twice, a 44px link, one border). */
+     (0.6rem padding twice, a 44px link, one border). Zero while the season
+     strip is off (src/pages/index.astro sets it). */
   --strips-h: calc(1.2rem + max(44px, 44 * var(--sp)) + 1px);
 }
 
