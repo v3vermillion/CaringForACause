@@ -702,6 +702,10 @@ a {
    About section, ending in the wave onto the paper below (decision 52). */
 .page-hero {
   position: relative;
+  /* The wave's ground continuation overhangs the opener by a pixel (see
+     .wave-ground); the clip keeps that row from showing through the
+     transparent section below, where it would carry the wash twice. */
+  overflow: clip;
   padding-block: var(--space-l) calc(var(--space-l) + var(--wave-h));
   background:
     radial-gradient(50rem 24rem at 100% 0, rgb(96 8 215 / 0.4), transparent 70%),
@@ -867,6 +871,68 @@ a {
 
 .surface--night::before {
   background: var(--rim-night);
+}
+
+/* The wave's ground continuations (src/components/Wave.astro, decision 67).
+   A wave sits inside one section; the section on the other side of its
+   ribbons is continued under them in a box clipped to the ribbons' edge,
+   painted as that ground is seen from the edge it crosses: the wash that
+   sits at that edge (an ellipse centred on the corner, now whole instead
+   of cut by the section's edge), the vertical gradient's value there, the
+   grain. Each is positioned in rem like the grounds, so it is one picture
+   per class. The box's own edge then lands on the same paint as the
+   section beyond it, and no line shows. */
+.wave-ground {
+  position: absolute;
+  inset: 0;
+  isolation: isolate;
+  pointer-events: none;
+}
+
+/* The box overhangs its section by a pixel on the side it continues, and
+   its clip reaches past that edge, so the clip's antialiased edge lies over
+   the neighbour's own paint instead of on the seam. */
+.wave-ground--above {
+  top: -1px;
+}
+
+.wave-ground--below {
+  bottom: -1px;
+}
+
+.wave-ground::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: var(--grain);
+  background-size: 12.5rem;
+  opacity: 0.07;
+  mix-blend-mode: multiply;
+}
+
+/* Paper below the ribbons: the paper ground's violet wash sits at its top
+   right, which is this box's bottom right. */
+.wave-ground--below.wave-ground--paper {
+  background:
+    radial-gradient(44rem 26rem at 100% 100%, rgb(160 108 255 / 0.24), transparent 70%),
+    var(--paper);
+}
+
+/* Lilac above the ribbons: the lilac ground's rose wash sits at its bottom
+   right (this box's top right), and its vertical gradient has reached its
+   lavender foot. */
+.wave-ground--above.wave-ground--lilac {
+  background:
+    radial-gradient(36rem 24rem at 100% 0, rgb(255 90 134 / 0.16), transparent 70%),
+    linear-gradient(rgb(200 170 250 / 0.22), rgb(200 170 250 / 0.22)), var(--lilac);
+}
+
+/* Lilac below the ribbons (the gallery, when it shows): the violet wash at
+   its top left (this box's bottom left), the gradient at its white head. */
+.wave-ground--below.wave-ground--lilac {
+  background:
+    radial-gradient(44rem 26rem at 0 100%, rgb(160 108 255 / 0.26), transparent 70%),
+    linear-gradient(rgb(255 255 255 / 0.25), rgb(255 255 255 / 0.25)), var(--lilac);
 }
 
 /* A rule of light, where a grey line would do less. */

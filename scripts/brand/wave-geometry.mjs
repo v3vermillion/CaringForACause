@@ -35,6 +35,29 @@ const strip = (chain, a, b) => {
   return `${fwd(top)}L${f(end(bot)[0])},${f(end(bot)[1])}${back(bot)}Z`;
 };
 const below = (chain, a) => `${fwd(off(chain, a))}L1000,100L0,100Z`;
+// The same regions for clipping a ground continuation (Wave.astro's
+// aboveGround and belowGround), in the unit box (objectBoundingBox clip
+// units) so they stretch with the box as the drawing does. Each reaches 1.5
+// units into the ribbon, so no hairline of the box shows where the clip and
+// the band are both antialiased, and 10 units past the box on its far side
+// and both ends, so the clip's antialiased edge never lies on the box's own
+// edge (the box overhangs its section by a pixel there; global.css).
+const unit = (path) =>
+  path.replace(
+    /(-?[\d.]+),(-?[\d.]+)/g,
+    (_, x, y) => `${+(x / 1000).toFixed(4)},${+(y / 100).toFixed(4)}`,
+  );
+const aboveClip = (chain, a) => {
+  const c = off(chain, a);
+  const [s, e] = [c[0][0], end(c)];
+  return unit(`M-10,-10L1010,-10L1010,${f(e[1])}L${f(e[0])},${f(e[1])}${back(c)}L-10,${f(s[1])}Z`);
+};
+const belowClip = (chain, a) => {
+  const c = off(chain, a);
+  const [s, e] = [c[0][0], end(c)];
+  const curve = fwd(c).slice(fwd(c).indexOf("C"));
+  return unit(`M-10,${f(s[1])}L${f(s[0])},${f(s[1])}${curve}L1010,${f(e[1])}L1010,110L-10,110Z`);
+};
 const above = (chain, a) => {
   const c = off(chain, a);
   return `M0,0L1000,0L${f(end(c)[0])},${f(end(c)[1])}${back(c)}Z`;
@@ -58,6 +81,8 @@ const bands = (edge, t, u, rise) => {
   return {
     above: above(edge, () => 0),
     below: below(edge, foot),
+    aboveClip: aboveClip(edge, () => 1.5),
+    belowClip: belowClip(edge, (x) => foot(x) - 1.5),
     top: strip(edge, () => 0, t),
     topLit: strip(
       edge,
@@ -94,6 +119,9 @@ export function waveA() {
   // Under the banner: the photo (or a lighter surface) above, night below.
   // Crimson leads at the left and dives under the violet, which swells to
   // fill the lower right. The cut descends to the right and lifts at the end.
+  // The violet's foot stays inside the box (at most 95 of its 100): a foot
+  // that ran off the bottom ended the ribbon in a flat cut along the box's
+  // edge, which read as a line across the band (decision 67).
   const edge = [
     [
       [0, 26],
@@ -103,13 +131,13 @@ export function waveA() {
     ],
     [
       [520, 66],
-      [700, 70],
-      [860, 62],
-      [1000, 46],
+      [700, 66],
+      [860, 58],
+      [1000, 44],
     ],
   ];
   const crimson = (x) => smooth(x, 0, 30, 640, 0);
-  const violet = (x) => smooth(x, 0, 10, 1000, 42);
+  const violet = (x) => smooth(x, 0, 10, 1000, 34);
   return bands(edge, crimson, violet, [320, 600]);
 }
 
@@ -143,13 +171,26 @@ const paths = (o) =>
 
 // In A the leader ("top") is crimson and the other ribbon violet; in B the
 // leader is violet and the other crimson. The palettes name them by colour.
-const svg = (kind, P, palette, lead, other) => `  <svg
-    class:list={["wave", "wave--${kind}", className]}
-    viewBox="0 0 1000 100"
-    preserveAspectRatio="none"
-    aria-hidden="true"
-    focusable="false"
-  >
+const svg = (
+  kind,
+  P,
+  palette,
+  lead,
+  other,
+) => `  <div class:list={["wave", "wave--${kind}", className]}>
+    {up.ground && (
+      <div
+        class={\`wave-ground wave-ground--above wave-ground--\${up.ground}\`}
+        style={\`clip-path: url(#\${id}-aclip)\`}
+      />
+    )}
+    {down.ground && (
+      <div
+        class={\`wave-ground wave-ground--below wave-ground--\${down.ground}\`}
+        style={\`clip-path: url(#\${id}-bclip)\`}
+      />
+    )}
+    <svg viewBox="0 0 1000 100" preserveAspectRatio="none" aria-hidden="true" focusable="false">
     <defs>
 ${palette}
       <clipPath id={\`\${id}-tclip\`}>
@@ -157,6 +198,12 @@ ${palette}
       </clipPath>
       <clipPath id={\`\${id}-uclip\`}>
         <path d={${P}.under} />
+      </clipPath>
+      <clipPath id={\`\${id}-aclip\`} clipPathUnits="objectBoundingBox">
+        <path d={${P}.aboveClip} />
+      </clipPath>
+      <clipPath id={\`\${id}-bclip\`} clipPathUnits="objectBoundingBox">
+        <path d={${P}.belowClip} />
       </clipPath>
       <filter id={\`\${id}-soft\`} x="-5%" y="-60%" width="110%" height="220%">
         <feGaussianBlur stdDeviation="1.2 3.2" />
@@ -168,14 +215,9 @@ ${palette}
         <feGaussianBlur stdDeviation="4 8" />
       </filter>
     </defs>
-${
-  kind === "night"
-    ? `    {above && <path d={${P}.above} fill={above} />}
-    <path d={${P}.below} fill="#1b0f2e" />`
-    : `    <path d={${P}.above} fill={above ?? "#1b0f2e"} />
-    <path d={${P}.below} fill="#faf7fd" />`
-}
-    <path d={${P}.${lead === "crimson" ? "top" : "under"}} fill="#ff2d6e" opacity="0.4" filter={\`url(#\${id}-spill)\`} />
+    {up.fill && <path d={${P}.above} fill={up.fill} />}
+    {down.fill && <path d={${P}.below} fill={down.fill} />}
+    <path d={${P}.${lead === "crimson" ? "top" : "under"}} fill=${kind === "paper" ? "{`url(#${id}-spillfill)`}" : '"#ff2d6e"'} opacity="0.4" filter={\`url(#\${id}-spill)\`} />
     <path d={${P}.top} fill={\`url(#\${id}-${lead})\`} />
     <g clip-path={\`url(#\${id}-tclip)\`}>
       <path d={${P}.topLit} fill={\`url(#\${id}-${lead}-lit)\`} filter={\`url(#\${id}-soft)\`} />
@@ -195,7 +237,8 @@ ${
     />
     <path d={${P}.edgeTop} fill={\`url(#\${id}-edge)\`} opacity="0.5" />
     <path d={${P}.seam} fill={\`url(#\${id}-seam)\`} />
-  </svg>`;
+    </svg>
+  </div>`;
 
 const stops = (list) =>
   list
@@ -246,6 +289,14 @@ const paletteA = [
   ]),
 ].join("\n");
 const paletteB = [
+  // The crimson's light spill, faded out over the right fifth: there its
+  // foot runs within a blur of the box's bottom, and the blur was cut by the
+  // edge into a line (decision 67).
+  grad("spillfill", [
+    [0, "#ff2d6e"],
+    [0.7, "#ff2d6e"],
+    [0.9, "#ff2d6e", 0],
+  ]),
   grad("violet", [
     [0, "#7a3ce6"],
     [0.35, "#5a24c4"],
@@ -295,6 +346,12 @@ export const component = () => `---
  * the About section it carries the lilac of the section before it.
  * "into-paper" lifts night off paper: violet leads at the left and dives
  * under a crimson that swells to the right.
+ * What lies above and below the ribbons is a flat colour, "none" (the
+ * section the wave sits in shows through), or a ground continued under
+ * the ribbons: a box painted as the neighbouring section's lit ground and
+ * clipped to the ribbons' edge (the classes are in global.css), so a
+ * hand-off between two lit surfaces has no seam at the box's edge
+ * (decision 67).
  * The geometry is drawn once in a 1000 by 100 box and stretched to the box
  * it is given (the parent sets its width and height in the class's
  * reference pixel), so the ribbons cross every screen edge to edge. Each
@@ -312,11 +369,31 @@ type Props = {
   kind: "into-night" | "into-paper";
   /** Unique on the page: the prefix of the gradient and clip ids. */
   id: string;
-  /** The surface above the ribbons, as a CSS colour; none means transparent (the photo shows). */
+  /**
+   * The surface above the ribbons: a CSS colour, or "none" for transparent
+   * (the section the wave sits in shows through). Under the banner the
+   * default is none (the photo shows); off the night band it is night.
+   */
   above?: string;
+  /** The surface below the ribbons, likewise: night under the banner, paper off the band. */
+  below?: string;
+  /**
+   * Instead of a flat colour on that side: the lit ground of the section
+   * beyond the ribbons, continued under them (global.css, .wave-ground).
+   */
+  aboveGround?: "paper" | "lilac";
+  belowGround?: "paper" | "lilac";
   class?: string;
 };
-const { kind, id, above, class: className } = Astro.props;
+const { kind, id, above, below, aboveGround, belowGround, class: className } = Astro.props;
+const flat =
+  kind === "into-night" ? { above: "none", below: "#1b0f2e" } : { above: "#1b0f2e", below: "#faf7fd" };
+const side = (ground: string | undefined, colour: string | undefined, fallback: string) => {
+  const fill = colour ?? fallback;
+  return { ground: ground ?? null, fill: ground || fill === "none" ? null : fill };
+};
+const up = side(aboveGround, above, flat.above);
+const down = side(belowGround, below, flat.below);
 const A = {
 ${paths(waveA())}
 };
@@ -332,10 +409,21 @@ ${svg("paper", "B", paletteB, "violet", "crimson")}
 )}
 
 <style is:global>
+  /* The box is positioned and sized by the section that places it; the
+     drawing and any ground continuation fill it. */
   .wave {
     display: block;
+    position: relative;
     width: 100%;
     pointer-events: none;
+  }
+
+  .wave > svg {
+    position: absolute;
+    inset: 0;
+    display: block;
+    width: 100%;
+    height: 100%;
   }
 </style>
 `;

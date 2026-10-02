@@ -14,7 +14,9 @@ const applyHref = links.familyApplication ?? getHelp.action.href;
 
 <section id="programs" class="section ground" aria-labelledby="programs-title">
   <!-- The wave lifts the night band off the page: night above, paper below. -->
-  <Wave kind="into-paper" id="wb" above="var(--night-2)" class="wave-in" />
+  <!-- Night-2 above the ribbons, as the band ends; below them this section's
+       own ground shows through (decision 67). -->
+  <Wave kind="into-paper" id="wb" above="var(--night-2)" below="none" class="wave-in" />
   <div class="wrap">
     <!-- Her mark as a faint watermark beside the opener, as the reference
          draws it: her flat mark in one lavender tone, nothing redrawn. -->
