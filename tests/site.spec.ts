@@ -1652,6 +1652,8 @@ test.describe("search and sharing", () => {
   }
 
   test("unknown pages return the custom 404", async ({ page }) => {
+    // DRILL, reverted in the next commit: proves one failing part turns the required check red.
+    expect(test.info().project.name, "deliberate CI drill failure").not.toBe("desktop-firefox");
     const response = await page.goto("/this-page-does-not-exist");
     expect(response?.status()).toBe(404);
     await expect(page.getByRole("heading", { level: 1 })).toHaveText("We can't find that page");
