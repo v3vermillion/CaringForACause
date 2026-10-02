@@ -1254,6 +1254,93 @@ test.describe("get involved tabs", () => {
   });
 });
 
+test.describe("the waves", () => {
+  // Every wave hands one lit surface to the next with no line at its box's
+  // edge (decision 67): on each side the paint 2px outside the box matches
+  // the paint 2px inside it. Three columns clear of the Programs watermark
+  // and the giving page's card, which cross those edges by design; the
+  // banner wave's top edge is skipped, since the photo shows through it.
+  // Measured on every engine: WebKit once painted a continuation's washes
+  // nowhere, which Chromium never showed.
+  test("every wave hands over without a seam", async ({ page }, testInfo) => {
+    oncePerEngine(testInfo);
+    const columns = [0.08, 0.25, 0.4];
+    const seams: string[] = [];
+    for (const [width, height] of [
+      [393, 660],
+      [1280, 800],
+    ]) {
+      await page.setViewportSize({ width, height });
+      for (const path of pages) {
+        await page.goto(path);
+        await fontsSettled(page);
+        const waves = page.locator(".wave");
+        for (let i = 0; i < (await waves.count()); i++) {
+          const wave = waves.nth(i);
+          const isBanner = await wave.evaluate((el) => el.classList.contains("hero-wave"));
+          // An instant scroll, then the box is read after the capture and
+          // checked against the box before it: the page settles by a few
+          // pixels after a scroll, and a box read on the wrong side of that
+          // would sample the wrong rows.
+          const place = () =>
+            wave.evaluate(async (el) => {
+              await new Promise((done) => requestAnimationFrame(() => done(null)));
+              const r = el.getBoundingClientRect();
+              return { top: r.top, bottom: r.bottom };
+            });
+          await wave.evaluate((el) => el.scrollIntoView({ block: "center", behavior: "instant" }));
+          let before = await place();
+          let png: Buffer;
+          let box: { top: number; bottom: number };
+          for (let attempt = 0; ; attempt++) {
+            png = await page.screenshot({ scale: "css", animations: "disabled" });
+            box = await place();
+            if (box.top === before.top || attempt === 3) break;
+            before = box;
+          }
+          const steps = await page.evaluate(
+            async ({ data, columns, edges, width }) => {
+              const img = new Image();
+              img.src = data;
+              await img.decode();
+              const canvas = document.createElement("canvas");
+              canvas.width = img.width;
+              canvas.height = img.height;
+              const ctx = canvas.getContext("2d")!;
+              ctx.drawImage(img, 0, 0);
+              const at = (x: number, y: number) => {
+                const p = ctx.getImageData(x, y, 1, 1).data;
+                return [p[0], p[1], p[2]];
+              };
+              const out: string[] = [];
+              for (const edge of edges) {
+                if (edge - 2 < 0 || edge + 2 >= img.height) continue;
+                for (const fx of columns) {
+                  const x = Math.round(width * fx);
+                  const above = at(x, Math.round(edge) - 2);
+                  const below = at(x, Math.round(edge) + 2);
+                  const diff = Math.max(...above.map((v, k) => Math.abs(v - below[k])));
+                  if (diff > 6)
+                    out.push(`x=${fx} edge=${Math.round(edge)} ${above}->${below} (${diff})`);
+                }
+              }
+              return out;
+            },
+            {
+              data: "data:image/png;base64," + png!.toString("base64"),
+              columns,
+              edges: [...(isBanner ? [] : [box!.top]), box!.bottom],
+              width,
+            },
+          );
+          for (const s of steps) seams.push(`${width}px ${path} wave ${i}: ${s}`);
+        }
+      }
+    }
+    expect(seams, "colour steps at a wave box's edge").toEqual([]);
+  });
+});
+
 test.describe("the program strip", () => {
   // The four things the banner promises, each a link to its program, with
   // the proof line under them (decision 58).

@@ -61,10 +61,6 @@ const down = side(belowGround, below, flat.below);
 const A = {
   above: "M0,0L1000,0L1000,44C860,58 700,66 520,66C330,62 180,30 0,26Z",
   below: "M0,66C180,66.3 330,92.4 520,89.3C700,94.8 860,90.7 1000,78L1000,100L0,100Z",
-  aboveClip:
-    "M-0.01,-0.1L1.01,-0.1L1.01,0.455L1,0.455C0.86,0.595 0.7,0.675 0.52,0.675C0.33,0.635 0.18,0.315 0,0.275L-0.01,0.275Z",
-  belowClip:
-    "M-0.01,0.645L0,0.645C0.18,0.648 0.33,0.909 0.52,0.878C0.7,0.933 0.86,0.892 1,0.765L1.01,0.765L1.01,1.1L-0.01,1.1Z",
   top: "M0,26C180,30 330,62 520,66C700,66 860,58 1000,44L1000,44C860,58 700,66 520,68.8C330,76.3 180,54.2 0,56Z",
   topLit:
     "M0,26C180,30 330,62 520,66C700,66 860,58 1000,44L1000,44C860,58 700,66 520,67.2C330,68.4 180,40.9 0,39.5Z",
@@ -85,10 +81,6 @@ const A = {
 const B = {
   above: "M0,0L1000,0L1000,70C860,60 700,54 520,50C330,44 180,26 0,24Z",
   below: "M0,60C180,57.1 330,67.8 520,66.2C700,75 860,86.2 1000,98L1000,100L0,100Z",
-  aboveClip:
-    "M-0.01,-0.1L1.01,-0.1L1.01,0.715L1,0.715C0.86,0.615 0.7,0.555 0.52,0.515C0.33,0.455 0.18,0.275 0,0.255L-0.01,0.255Z",
-  belowClip:
-    "M-0.01,0.585L0,0.585C0.18,0.556 0.33,0.663 0.52,0.647C0.7,0.735 0.86,0.847 1,0.965L1.01,0.965L1.01,1.1L-0.01,1.1Z",
   top: "M0,24C180,26 330,44 520,50C700,54 860,60 1000,70L1000,70C860,60 700,54 520,54.9C330,60.3 180,51.1 0,54Z",
   topLit:
     "M0,24C180,26 330,44 520,50C700,54 860,60 1000,70L1000,70C860,60 700,54 520,52.2C330,51.3 180,37.3 0,37.5Z",
@@ -110,18 +102,8 @@ const B = {
 
 {kind === "into-night" ? (
   <div class:list={["wave", "wave--night", className]}>
-    {up.ground && (
-      <div
-        class={`wave-ground wave-ground--above wave-ground--${up.ground}`}
-        style={`clip-path: url(#${id}-aclip)`}
-      />
-    )}
-    {down.ground && (
-      <div
-        class={`wave-ground wave-ground--below wave-ground--${down.ground}`}
-        style={`clip-path: url(#${id}-bclip)`}
-      />
-    )}
+    {up.ground && <div class={`wave-ground wave-ground--above wave-ground--${up.ground}`} />}
+    {down.ground && <div class={`wave-ground wave-ground--below wave-ground--${down.ground}`} />}
     <svg viewBox="0 0 1000 100" preserveAspectRatio="none" aria-hidden="true" focusable="false">
       <defs>
         <linearGradient id={`${id}-crimson`} x1="0" x2="1" y1="0" y2="0">
@@ -167,12 +149,6 @@ const B = {
         <clipPath id={`${id}-uclip`}>
           <path d={A.under} />
         </clipPath>
-        <clipPath id={`${id}-aclip`} clipPathUnits="objectBoundingBox">
-          <path d={A.aboveClip} />
-        </clipPath>
-        <clipPath id={`${id}-bclip`} clipPathUnits="objectBoundingBox">
-          <path d={A.belowClip} />
-        </clipPath>
         <filter id={`${id}-soft`} x="-5%" y="-60%" width="110%" height="220%">
           <feGaussianBlur stdDeviation="1.2 3.2" />
         </filter>
@@ -209,18 +185,8 @@ const B = {
   </div>
 ) : (
   <div class:list={["wave", "wave--paper", className]}>
-    {up.ground && (
-      <div
-        class={`wave-ground wave-ground--above wave-ground--${up.ground}`}
-        style={`clip-path: url(#${id}-aclip)`}
-      />
-    )}
-    {down.ground && (
-      <div
-        class={`wave-ground wave-ground--below wave-ground--${down.ground}`}
-        style={`clip-path: url(#${id}-bclip)`}
-      />
-    )}
+    {up.ground && <div class={`wave-ground wave-ground--above wave-ground--${up.ground}`} />}
+    {down.ground && <div class={`wave-ground wave-ground--below wave-ground--${down.ground}`} />}
     <svg viewBox="0 0 1000 100" preserveAspectRatio="none" aria-hidden="true" focusable="false">
       <defs>
         <linearGradient id={`${id}-spillfill`} x1="0" x2="1" y1="0" y2="0">
@@ -270,12 +236,6 @@ const B = {
         </clipPath>
         <clipPath id={`${id}-uclip`}>
           <path d={B.under} />
-        </clipPath>
-        <clipPath id={`${id}-aclip`} clipPathUnits="objectBoundingBox">
-          <path d={B.aboveClip} />
-        </clipPath>
-        <clipPath id={`${id}-bclip`} clipPathUnits="objectBoundingBox">
-          <path d={B.belowClip} />
         </clipPath>
         <filter id={`${id}-soft`} x="-5%" y="-60%" width="110%" height="220%">
           <feGaussianBlur stdDeviation="1.2 3.2" />
@@ -329,5 +289,21 @@ const B = {
     display: block;
     width: 100%;
     height: 100%;
+  }
+
+  /* The masks for a ground continued under the ribbons (global.css paints
+     the .wave-ground boxes): the region above or below the ribbons in the
+     drawing's own box, stretched to the element like the drawing. */
+  .wave--night .wave-ground--above {
+    --wave-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1000 100' preserveAspectRatio='none'%3E%3Cpath d='M-10,-10L1010,-10L1010,45.5L1000,45.5C860,59.5 700,67.5 520,67.5C330,63.5 180,31.5 0,27.5L-10,27.5Z'/%3E%3C/svg%3E");
+  }
+  .wave--night .wave-ground--below {
+    --wave-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1000 100' preserveAspectRatio='none'%3E%3Cpath d='M-10,64.5L0,64.5C180,64.8 330,90.9 520,87.8C700,93.3 860,89.2 1000,76.5L1010,76.5L1010,110L-10,110Z'/%3E%3C/svg%3E");
+  }
+  .wave--paper .wave-ground--above {
+    --wave-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1000 100' preserveAspectRatio='none'%3E%3Cpath d='M-10,-10L1010,-10L1010,71.5L1000,71.5C860,61.5 700,55.5 520,51.5C330,45.5 180,27.5 0,25.5L-10,25.5Z'/%3E%3C/svg%3E");
+  }
+  .wave--paper .wave-ground--below {
+    --wave-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1000 100' preserveAspectRatio='none'%3E%3Cpath d='M-10,58.5L0,58.5C180,55.6 330,66.3 520,64.7C700,73.5 860,84.7 1000,96.5L1010,96.5L1010,110L-10,110Z'/%3E%3C/svg%3E");
   }
 </style>

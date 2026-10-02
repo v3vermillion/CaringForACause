@@ -123,7 +123,14 @@ const cycle = slides.length * 7;
     --wave-h: calc(64 * var(--rp));
     position: relative;
     isolation: isolate;
+    /* Clip, not hidden: a hidden box is still a scroll container, and the
+       photo (scaled 2% larger than the banner) gave it 4px of hidden
+       overflow, so scrolling anything inside the banner into view (a
+       keyboard focus, a test) slid its contents up and showed a band of
+       photo under the wave. A clipped box cannot scroll. Hidden stays as
+       the fallback for Safari 15. */
     overflow: hidden;
+    overflow: clip;
     background: var(--night);
     /* The bottom padding clears the wave's ribbons where they sit highest,
        at the left edge (26% of the wave's height from its top), plus a gap. */

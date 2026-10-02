@@ -155,7 +155,11 @@ const applyHref = links.familyApplication ?? getHelp.action.href;
      top padding is the wave plus the usual section space. */
   #programs {
     position: relative;
-    overflow: hidden; /* the watermark bleeds past the column */
+    /* The watermark bleeds past the column; clipped (not hidden) so the
+       section is not a scroll container with the watermark's width of
+       hidden overflow (see the banner). */
+    overflow: hidden;
+    overflow: clip;
     /* The space above the opener is measured from the ribbons' foot (the
        paper starts at 74% of the wave's box), not from the box. */
     padding-top: calc(var(--wave-h) * 0.74 + var(--space-l));

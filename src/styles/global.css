@@ -884,22 +884,37 @@ a {
 
 /* The wave's ground continuations (src/components/Wave.astro, decision 67).
    A wave sits inside one section; the section on the other side of its
-   ribbons is continued under them in a box clipped to the ribbons' edge,
+   ribbons is continued under them in a box masked to the ribbons' edge
+   (the mask is the drawing's own shape, set by Wave.astro as --wave-mask),
    painted as that ground is seen from the edge it crosses: the wash that
    sits at that edge (an ellipse centred on the corner, now whole instead
    of cut by the section's edge), the vertical gradient's value there, the
    grain. Each is positioned in rem like the grounds, so it is one picture
    per class. The box's own edge then lands on the same paint as the
-   section beyond it, and no line shows. */
+   section beyond it, and no line shows.
+
+   Written the plain way on purpose: the colour as a longhand on the box,
+   the washes as background images on ::before, the grain on ::after with
+   no blend mode (at 7% a dark noise laid over a light ground darkens it
+   as multiplying would), and a mask image rather than a clip-path
+   reference. WebKit had painted the first version's gradient layers
+   nowhere and its flat colour everywhere, which put a seam back on every
+   iPhone that Chromium never showed; a browser test now walks every
+   wave's edges on all three engines. */
 .wave-ground {
   position: absolute;
   inset: 0;
-  isolation: isolate;
   pointer-events: none;
+  -webkit-mask-image: var(--wave-mask);
+  mask-image: var(--wave-mask);
+  -webkit-mask-size: 100% 100%;
+  mask-size: 100% 100%;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
 }
 
 /* The box overhangs its section by a pixel on the side it continues, and
-   its clip reaches past that edge, so the clip's antialiased edge lies over
+   its mask reaches past that edge, so the mask's antialiased edge lies over
    the neighbour's own paint instead of on the seam. */
 .wave-ground--above {
   top: -1px;
@@ -909,39 +924,52 @@ a {
   bottom: -1px;
 }
 
+.wave-ground::before,
 .wave-ground::after {
   content: "";
   position: absolute;
   inset: 0;
+}
+
+.wave-ground::after {
   background-image: var(--grain);
   background-size: 12.5rem;
   opacity: 0.07;
-  mix-blend-mode: multiply;
+}
+
+.wave-ground--paper {
+  background-color: var(--paper);
+}
+
+.wave-ground--lilac {
+  background-color: var(--lilac);
 }
 
 /* Paper below the ribbons: the paper ground's violet wash sits at its top
    right, which is this box's bottom right. */
-.wave-ground--below.wave-ground--paper {
-  background:
-    radial-gradient(44rem 26rem at 100% 100%, rgb(160 108 255 / 0.24), transparent 70%),
-    var(--paper);
+.wave-ground--below.wave-ground--paper::before {
+  background-image: radial-gradient(
+    44rem 26rem at 100% 100%,
+    rgb(160 108 255 / 0.24),
+    transparent 70%
+  );
 }
 
 /* Lilac above the ribbons: the lilac ground's rose wash sits at its bottom
    right (this box's top right), and its vertical gradient has reached its
    lavender foot. */
-.wave-ground--above.wave-ground--lilac {
-  background:
+.wave-ground--above.wave-ground--lilac::before {
+  background-image:
     radial-gradient(36rem 24rem at 100% 0, rgb(255 90 134 / 0.16), transparent 70%),
-    linear-gradient(rgb(200 170 250 / 0.22), rgb(200 170 250 / 0.22)), var(--lilac);
+    linear-gradient(rgb(200 170 250 / 0.22), rgb(200 170 250 / 0.22));
 }
 
 /* Lilac below the ribbons (the gallery, when it shows): the violet wash at
    its top left (this box's bottom left), the gradient at its white head. */
-.wave-ground--below.wave-ground--lilac {
-  background:
+.wave-ground--below.wave-ground--lilac::before {
+  background-image:
     radial-gradient(44rem 26rem at 0 100%, rgb(160 108 255 / 0.26), transparent 70%),
-    linear-gradient(rgb(255 255 255 / 0.25), rgb(255 255 255 / 0.25)), var(--lilac);
+    linear-gradient(rgb(255 255 255 / 0.25), rgb(255 255 255 / 0.25));
 }
 
 /* A rule of light, where a grey line would do less. */

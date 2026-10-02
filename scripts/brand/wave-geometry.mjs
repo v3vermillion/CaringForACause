@@ -35,29 +35,29 @@ const strip = (chain, a, b) => {
   return `${fwd(top)}L${f(end(bot)[0])},${f(end(bot)[1])}${back(bot)}Z`;
 };
 const below = (chain, a) => `${fwd(off(chain, a))}L1000,100L0,100Z`;
-// The same regions for clipping a ground continuation (Wave.astro's
-// aboveGround and belowGround), in the unit box (objectBoundingBox clip
-// units) so they stretch with the box as the drawing does. Each reaches 1.5
-// units into the ribbon, so no hairline of the box shows where the clip and
-// the band are both antialiased, and 10 units past the box on its far side
-// and both ends, so the clip's antialiased edge never lies on the box's own
-// edge (the box overhangs its section by a pixel there; global.css).
-const unit = (path) =>
-  path.replace(
-    /(-?[\d.]+),(-?[\d.]+)/g,
-    (_, x, y) => `${+(x / 1000).toFixed(4)},${+(y / 100).toFixed(4)}`,
-  );
+// The same regions as masks for a ground continuation (Wave.astro's
+// aboveGround and belowGround): each reaches 1.5 units into the ribbon, so
+// no hairline of the box shows where the mask and the band are both
+// antialiased, and 10 units past the box on its far side and both ends, so
+// the mask's antialiased edge never lies on the box's own edge (the box
+// overhangs its section by a pixel there; global.css). A CSS mask image
+// (an SVG in the drawing's own box, stretched to the element) rather than
+// a clip-path reference: WebKit painted a clipped element's gradient
+// layers nowhere, leaving its flat colour, which was a seam of its own on
+// every iPhone (decision 67).
 const aboveClip = (chain, a) => {
   const c = off(chain, a);
   const [s, e] = [c[0][0], end(c)];
-  return unit(`M-10,-10L1010,-10L1010,${f(e[1])}L${f(e[0])},${f(e[1])}${back(c)}L-10,${f(s[1])}Z`);
+  return `M-10,-10L1010,-10L1010,${f(e[1])}L${f(e[0])},${f(e[1])}${back(c)}L-10,${f(s[1])}Z`;
 };
 const belowClip = (chain, a) => {
   const c = off(chain, a);
   const [s, e] = [c[0][0], end(c)];
   const curve = fwd(c).slice(fwd(c).indexOf("C"));
-  return unit(`M-10,${f(s[1])}L${f(s[0])},${f(s[1])}${curve}L1010,${f(e[1])}L1010,110L-10,110Z`);
+  return `M-10,${f(s[1])}L${f(s[0])},${f(s[1])}${curve}L1010,${f(e[1])}L1010,110L-10,110Z`;
 };
+const mask = (path) =>
+  `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1000 100' preserveAspectRatio='none'%3E%3Cpath d='${path}'/%3E%3C/svg%3E")`;
 const above = (chain, a) => {
   const c = off(chain, a);
   return `M0,0L1000,0L${f(end(c)[0])},${f(end(c)[1])}${back(c)}Z`;
@@ -166,6 +166,7 @@ export function waveB() {
 
 const paths = (o) =>
   Object.entries(o)
+    .filter(([k]) => !k.endsWith("Clip"))
     .map(([k, v]) => `  ${k}: "${v}",`)
     .join("\n");
 
@@ -178,18 +179,8 @@ const svg = (
   lead,
   other,
 ) => `  <div class:list={["wave", "wave--${kind}", className]}>
-    {up.ground && (
-      <div
-        class={\`wave-ground wave-ground--above wave-ground--\${up.ground}\`}
-        style={\`clip-path: url(#\${id}-aclip)\`}
-      />
-    )}
-    {down.ground && (
-      <div
-        class={\`wave-ground wave-ground--below wave-ground--\${down.ground}\`}
-        style={\`clip-path: url(#\${id}-bclip)\`}
-      />
-    )}
+    {up.ground && <div class={\`wave-ground wave-ground--above wave-ground--\${up.ground}\`} />}
+    {down.ground && <div class={\`wave-ground wave-ground--below wave-ground--\${down.ground}\`} />}
     <svg viewBox="0 0 1000 100" preserveAspectRatio="none" aria-hidden="true" focusable="false">
     <defs>
 ${palette}
@@ -198,12 +189,6 @@ ${palette}
       </clipPath>
       <clipPath id={\`\${id}-uclip\`}>
         <path d={${P}.under} />
-      </clipPath>
-      <clipPath id={\`\${id}-aclip\`} clipPathUnits="objectBoundingBox">
-        <path d={${P}.aboveClip} />
-      </clipPath>
-      <clipPath id={\`\${id}-bclip\`} clipPathUnits="objectBoundingBox">
-        <path d={${P}.belowClip} />
       </clipPath>
       <filter id={\`\${id}-soft\`} x="-5%" y="-60%" width="110%" height="220%">
         <feGaussianBlur stdDeviation="1.2 3.2" />
@@ -424,6 +409,22 @@ ${svg("paper", "B", paletteB, "violet", "crimson")}
     display: block;
     width: 100%;
     height: 100%;
+  }
+
+  /* The masks for a ground continued under the ribbons (global.css paints
+     the .wave-ground boxes): the region above or below the ribbons in the
+     drawing's own box, stretched to the element like the drawing. */
+  .wave--night .wave-ground--above {
+    --wave-mask: ${mask(waveA().aboveClip)};
+  }
+  .wave--night .wave-ground--below {
+    --wave-mask: ${mask(waveA().belowClip)};
+  }
+  .wave--paper .wave-ground--above {
+    --wave-mask: ${mask(waveB().aboveClip)};
+  }
+  .wave--paper .wave-ground--below {
+    --wave-mask: ${mask(waveB().belowClip)};
   }
 </style>
 `;
