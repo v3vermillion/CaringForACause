@@ -98,29 +98,35 @@ const applyHref = links.familyApplication ?? getHelp.action.href;
                 ))}
               </ul>
             )}
-            {program.link && (
-              <p class="next">
-                <a class="arrow-link" href={program.link.href}>
-                  {program.link.label}
-                </a>
-              </p>
-            )}
-            {program.checklist && (
-              <details class="checklist">
-                <summary>{program.checklist.title}</summary>
-                <div class="groups">
-                  {program.checklist.groups.map((group) => (
-                    <div>
-                      <h4>{group.heading}</h4>
-                      <ul>
-                        {group.items.map((item) => (
-                          <li>{item}</li>
-                        ))}
-                      </ul>
+            <!-- The row's one next step closes the copy under a short lit
+                 rule, as the eyebrow opens it over one (decision 68). -->
+            {(program.link || program.checklist) && (
+              <div class="step">
+                {program.link && (
+                  <p class="next">
+                    <a class="arrow-link" href={program.link.href}>
+                      {program.link.label}
+                    </a>
+                  </p>
+                )}
+                {program.checklist && (
+                  <details class="checklist">
+                    <summary>{program.checklist.title}</summary>
+                    <div class="groups">
+                      {program.checklist.groups.map((group) => (
+                        <div>
+                          <h4>{group.heading}</h4>
+                          <ul>
+                            {group.items.map((item) => (
+                              <li>{item}</li>
+                            ))}
+                          </ul>
+                        </div>
+                      ))}
                     </div>
-                  ))}
-                </div>
-              </details>
+                  </details>
+                )}
+              </div>
             )}
           </div>
           {program.video ? (
@@ -335,10 +341,13 @@ const applyHref = links.familyApplication ?? getHelp.action.href;
     gap: var(--space-xs) var(--space-s);
   }
 
-  /* Program rows: photo above text on phones; sides alternate on desktop. */
+  /* Program rows: photo above text on phones; sides alternate on desktop.
+     On phones the rows stand 2rem either side of the rule between them
+     (the row's own gap, and the next row's top padding); from tablets up,
+     where a row is a spread, the usual section space. */
   .list {
     display: grid;
-    gap: var(--space-l);
+    gap: 2rem;
   }
 
   /* Each row is a spread: a rule of light above it, its number set large and
@@ -348,7 +357,7 @@ const applyHref = links.familyApplication ?? getHelp.action.href;
     position: relative;
     display: grid;
     gap: var(--space-m);
-    padding-top: var(--space-l);
+    padding-top: 2rem;
   }
 
   .row::before {
@@ -395,11 +404,27 @@ const applyHref = links.familyApplication ?? getHelp.action.href;
     user-select: none;
   }
 
-  /* The row's one next step stands on its own short rule. */
-  .copy > .next {
+  /* The row's one next step (the link, or the checklist's summary, or
+     both) closes the copy under a short lit rule, the mirror of the
+     eyebrow's rule that opens it. It had stood under a full-width
+     hairline, which with the rule of light between the rows framed the
+     link between two lines (decision 68). */
+  .step {
     margin-top: var(--space-m);
-    padding-top: var(--space-s);
-    border-top: var(--hairline) solid rgb(96 8 215 / 0.14);
+  }
+
+  .step::before {
+    content: "";
+    display: block;
+    width: 2.25rem;
+    height: 0.1875rem;
+    margin-bottom: 0.75rem;
+    border-radius: 0.125rem;
+    background: linear-gradient(90deg, var(--purple), #d43a92);
+  }
+
+  .step > * + * {
+    margin-top: 0.25rem;
   }
 
   .details li::marker {
@@ -549,6 +574,12 @@ const applyHref = links.familyApplication ?? getHelp.action.href;
      photos' own shape (they are phone pictures, 3 by 4), so no head is
      cropped and the row reads as a spread; sides alternate. */
   @media (min-width: 36rem) {
+    .list {
+      gap: var(--space-l);
+    }
+    .row {
+      padding-top: var(--space-l);
+    }
     .row.has-media {
       grid-template-columns: 7fr 5fr;
       gap: var(--space-l);

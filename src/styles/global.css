@@ -806,15 +806,18 @@ a {
 }
 
 /* A plate: the offset slab of colour behind a photo, one step down and out,
-   so the photo stands off the ground. */
+   so the photo stands off the ground. The step is 0.75rem on phones, where
+   a photo fills the column and a 1.25rem step ran the slab to the screen's
+   edge (decision 68), and 1.25rem from tablets up. */
 .plate {
+  --plate: 0.75rem;
   position: relative;
 }
 
 .plate::before {
   content: "";
   position: absolute;
-  inset: 1.25rem -1.25rem -1.25rem 1.25rem;
+  inset: var(--plate) calc(-1 * var(--plate)) calc(-1 * var(--plate)) var(--plate);
   z-index: -1;
   border-radius: var(--r-img);
   background: linear-gradient(135deg, rgb(160 108 255 / 0.38), rgb(255 90 134 / 0.3));
@@ -822,7 +825,13 @@ a {
 }
 
 .plate--left::before {
-  inset: 1.25rem 1.25rem -1.25rem -1.25rem;
+  inset: var(--plate) var(--plate) calc(-1 * var(--plate)) calc(-1 * var(--plate));
+}
+
+@media (min-width: 36rem) {
+  .plate {
+    --plate: 1.25rem;
+  }
 }
 
 /* A surface on paper or lilac: white, lifted, with a rim of light. */
