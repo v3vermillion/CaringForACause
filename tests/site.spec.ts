@@ -1408,6 +1408,12 @@ test.describe("application page", () => {
   });
 
   test("walks through four steps, validates each, and sends by email", async ({ page }) => {
+    // The longest test in the suite: four steps, every field, the review and
+    // the send. Since the form redesign (decision 62) it takes 20 to 28 s on
+    // the iPhone projects in CI, too close to the 30 s default, so it gets
+    // Playwright's standard allowance for slow tests (three times the limit).
+    // A real hang still fails.
+    test.slow();
     await page.goto("/apply");
     const form = page.locator("[data-apply]");
     await expect(form).toBeVisible();
