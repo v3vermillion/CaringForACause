@@ -19,20 +19,20 @@ See `docs/APPROACH.md` for how decisions are made and `CLAUDE.md` for the rules 
 5. Before merging, confirm the pull request's list of changed files matches the intended change. Anything unexpected means the branch started from the wrong place; stop and fix that first.
 6. Wait for the required check. If it fails, CI posts a summary to the open `ci-failure` issue; fix and push again.
 7. Squash-merge once the check passes.
-8. Delete the branch right after merging (automatic branch deletion is intentionally off; deleting is part of this step).
+8. The branch deletes itself when the pull request merges (automatic branch deletion is on). A branch whose pull request is closed without merging, or that never had one, is deleted by hand.
 9. Confirm the `Live site check` run for the merge commit passes. Results are posted to the open `live-check` issue.
 
 ## Dependency updates
 
 `.github/dependabot.yml` opens pull requests on a monthly schedule: one grouped pull request for minor and patch npm updates, one per major npm update, and one grouped pull request for GitHub Actions. New releases wait 7 days (30 for major npm versions) before Dependabot proposes them; security fixes are never delayed. Each pull request must pass the required check like any other change.
 
-To handle one: confirm the changed files are only `package.json`, `package-lock.json`, or workflow files, wait for the check, then squash-merge and delete the branch. For a major update, read the package's release notes first. If a Dependabot branch falls behind `main`, comment `@dependabot rebase` on the pull request.
+To handle one: confirm the changed files are only `package.json`, `package-lock.json`, or workflow files, wait for the check, then squash-merge (the branch deletes itself). For a major update, read the package's release notes first. If a Dependabot branch falls behind `main`, comment `@dependabot rebase` on the pull request.
 
 Two packages are held at their current major version in `.github/dependabot.yml`: `typescript` (the type checker, `@astrojs/check`, supports TypeScript 5 and 6 only) and `@types/node` (its major must match the Node version in `.nvmrc`). Lift each hold when that constraint changes. One release is skipped outright: `prettier-plugin-astro` 1.0.1, which indents comment lines inside nested CSS rules two more spaces on every run, so the format check can never pass with it.
 
 ## When something fails
 
-- **Required check fails:** the change cannot merge. Read the `ci-failure` issue, fix on the same branch, push. A failing browser test leaves a screenshot and a trace in the run's `playwright-report` artifact; a test marked skipped is not a failure (see README, browser tests).
+- **Required check fails:** the change cannot merge. Read the `ci-failure` issue, fix on the same branch, push. A failing browser test leaves a screenshot and a trace in its part's `test-results-<part>` artifact (the part's devices are in its name on the pull request); a test marked skipped is not a failure (see README, browser tests).
 - **Cloudflare build fails (publish gate):** nothing is published and the site keeps the last good version. The `Live site check` run fails at "Wait for Cloudflare to publish this commit". Read the build log in Cloudflare → Workers & Pages → caring-for-a-cause → Deployments, fix on a new branch.
 - **Live check fails after a successful deploy:** the change is live. Fix forward on a new branch, or revert the merge commit through a pull request.
 - **Emergency:** a repository admin can temporarily disable the ruleset (Settings → Rules → Rulesets). Re-enable it immediately after.
