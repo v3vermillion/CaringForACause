@@ -43,8 +43,8 @@ Everything visitors read lives in **`src/data/site.ts`**. Common updates:
 
 | To change                                          | Edit                                                                             |
 | -------------------------------------------------- | -------------------------------------------------------------------------------- |
-| The four programs under the banner (icons, lines)  | `programStrip`                                                                   |
-| The season strip below them                        | `seasonalBanner` (set `active: false` to hide it)                                |
+| The four programs under the banner (icons, titles) | `programStrip` (the `body` lines show on the giving page, not in the strip)      |
+| The season strip below them (off, decision 66)     | `seasonalBanner` (set `active: true` to show it)                                 |
 | Phone, email, Facebook, city                       | `facts`                                                                          |
 | Banner words (headline in two parts) and the doors | `hero`                                                                           |
 | Menu and header links                              | `navigation`                                                                     |
@@ -53,7 +53,7 @@ Everything visitors read lives in **`src/data/site.ts`**. Common updates:
 | Application steps, kinds of help, counties, sizes  | `applyPage` (`needs` are the cards on step 3; `photo` opens the page on desktop) |
 | A program's text, or hide a program                | `programs` (set `active: false`)                                                 |
 | Get involved tabs                                  | `getInvolved.tabs`                                                               |
-| About and the contact section                      | `about`, `contact`                                                               |
+| About                                              | `about`                                                                          |
 | The page for a missing address                     | `notFoundPage`                                                                   |
 | Gallery photos                                     | Add files to `src/assets/photos/`, then list them in `gallery` (shows at 4+)     |
 

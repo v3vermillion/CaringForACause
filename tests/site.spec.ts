@@ -98,7 +98,6 @@ test.describe("device compatibility", () => {
       ".yt-link",
       ".arrow-link",
       ".tile",
-      "#contact .card",
     ];
     for (const selector of selectors) {
       // A renamed class would otherwise drop out of this check silently.
@@ -294,7 +293,12 @@ test.describe("scrolling stability", () => {
         helpBottom: r(".door--help")!.bottom,
         giveBottom: r(".door--give")!.bottom,
         sideBySide: r(".door--help")!.top === r(".door--give")!.top,
-        stripBottom: r("aside.banner")?.bottom ?? null,
+        seasonBottom: r("aside.banner")?.bottom ?? null,
+        // The proof line's closing rule: the strip's bottom less its padding.
+        proofBottom:
+          r(".strip .facts")!.bottom -
+          parseFloat(getComputedStyle(document.querySelector(".strip .facts")!).paddingBottom),
+        stripBottom: r(".strip")!.bottom,
         // The reference's line breaks: "Holiday meals," / "gifts, and diapers"
         // / "for Central Indiana" / "families." (decision 51).
         headline: [lines(".hero h1 .lead"), lines(".hero h1 .accent")],
@@ -306,41 +310,59 @@ test.describe("scrolling stability", () => {
     expect(m.sideBySide).toBe(true);
     expect(m.headline).toEqual([2, 2]);
     expect(m.sub).toBe(2);
+    // What ends the first screen on tablets and desktop: the season strip
+    // when it is on, otherwise the program strip (decision 66).
+    const endsAt = seasonalBanner.active ? m.seasonBottom : m.stripBottom;
+    if (seasonalBanner.active) expect(m.seasonBottom, "the season strip").not.toBeNull();
     if (m.width >= 896) {
       // Desktop: the scaled banner (the words sit 36 reference pixels under
       // the header, at most double), and the strip ends the first screen.
       expect(m.wordsUnderHeader).toBeLessThan(90);
-      if (seasonalBanner.active) expect(m.stripBottom, "the season strip").not.toBeNull();
-      if (m.stripBottom !== null) expect(Math.abs(m.stripBottom - m.height)).toBeLessThanOrEqual(2);
+      expect(Math.abs(endsAt! - m.height)).toBeLessThanOrEqual(2);
     } else if (m.width >= 576) {
       // Tablets: the phone's words beside the photo, both doors on screen, and
       // the strip ends the first screen.
       expect(m.helpBottom).toBeLessThanOrEqual(m.height);
       expect(m.giveBottom).toBeLessThanOrEqual(m.height);
-      if (seasonalBanner.active) expect(m.stripBottom, "the season strip").not.toBeNull();
-      if (m.stripBottom !== null) expect(Math.abs(m.stripBottom - m.height)).toBeLessThanOrEqual(2);
+      expect(Math.abs(endsAt! - m.height)).toBeLessThanOrEqual(2);
     } else {
-      // Phones: a band of her photo above the words (96 reference pixels,
-      // scaled by the width between 320 and 450px) and both doors fit.
-      expect(m.wordsUnderHeader).toBeGreaterThan(70);
-      expect(m.wordsUnderHeader).toBeLessThan(120);
+      // Phones: a band of her photo above the words (40 reference pixels,
+      // scaled by the width between 320 and 450px), both doors, and the
+      // program strip with its proof line all fit (decision 66).
+      expect(m.wordsUnderHeader).toBeGreaterThan(30);
+      expect(m.wordsUnderHeader).toBeLessThan(60);
       expect(m.helpBottom).toBeLessThanOrEqual(m.height);
       expect(m.giveBottom).toBeLessThanOrEqual(m.height);
+      expect(m.proofBottom, "the proof line").toBeLessThanOrEqual(m.height);
     }
   });
 
+  // A phone's Safari screen with its bars showing: both doors, the four
+  // programs, and the proof line all fit, with the strip ending at the fold
+  // or just under it (decision 66).
   for (const [name, width, height] of [
     ["iPhone 12 mini", 375, 629],
     ["iPhone 15", 393, 660],
   ] as const) {
-    test(`both doors fit on an ${name} Safari screen`, async ({ page }, testInfo) => {
+    test(`the banner and the proof line fit on an ${name} Safari screen`, async ({
+      page,
+    }, testInfo) => {
       oncePerEngine(testInfo);
       await page.setViewportSize({ width, height });
       await page.goto("/");
+      await fontsSettled(page);
       const help = await page.locator(".door--help").boundingBox();
       const give = await page.locator(".door--give").boundingBox();
       expect(help!.y + help!.height).toBeLessThanOrEqual(height);
       expect(give!.y + give!.height).toBeLessThanOrEqual(height);
+      const proof = page.locator(".strip .facts");
+      const box = (await proof.boundingBox())!;
+      const padding = await proof.evaluate((el) => parseFloat(getComputedStyle(el).paddingBottom));
+      expect(box.y + box.height - padding, "the proof line's closing rule").toBeLessThanOrEqual(
+        height,
+      );
+      const strip = (await page.locator(".strip").boundingBox())!;
+      expect(strip.y + strip.height, "the strip's end").toBeLessThanOrEqual(height + 8);
     });
   }
 
@@ -355,8 +377,9 @@ test.describe("scrolling stability", () => {
     expect(give!.y + give!.height).toBeLessThanOrEqual(657);
   });
 
-  // On desktop the banner, the program strip, and the season strip fill the
-  // first screen exactly, whatever the screen height (decisions 39 and 58).
+  // On desktop the banner, the program strip, and the season strip (while it
+  // is on; decision 66) fill the first screen exactly, whatever the screen
+  // height (decisions 39 and 58).
   for (const [width, height] of [
     [1024, 768], // an iPad in landscape
     [1024, 1366], // an iPad Pro 12.9 upright: tall, so the width bounds the scale
@@ -365,16 +388,16 @@ test.describe("scrolling stability", () => {
     [1536, 730],
     [1920, 950],
   ]) {
-    test(`the first screen ends with the season strip at ${width} × ${height}`, async ({
+    const last = seasonalBanner.active ? "the season strip" : "the program strip";
+    test(`the first screen ends with ${last} at ${width} × ${height}`, async ({
       page,
     }, testInfo) => {
       oncePerEngine(testInfo);
-      // The strip is seasonal content: off, the test is skipped and says so
-      // instead of passing with nothing measured.
-      test.skip(!seasonalBanner.active, "the season strip is off this season");
       await page.setViewportSize({ width, height });
       await page.goto("/");
-      const strip = page.locator("aside.banner");
+      // The season strip is seasonal content: while it is off, the program
+      // strip ends the first screen instead.
+      const strip = page.locator(seasonalBanner.active ? "aside.banner" : ".strip");
       await expect(strip).toHaveCount(1);
       const box = await strip.boundingBox();
       expect(Math.abs(box!.y + box!.height - height)).toBeLessThanOrEqual(2);
@@ -959,12 +982,15 @@ test.describe("navigation", () => {
     await expect(page.locator("#get-involved")).toBeInViewport();
   });
 
+  // The footer's Explore is the map less Contact: its Connect column is the
+  // Contact, and carries the id the Contact links lead to (decision 70).
   test("the footer draws the same map, with Donate as its one action", async ({ page }) => {
     await page.goto("/");
     await expect(page.locator(".site-footer nav a")).toHaveText([
       navigation.help.label,
-      ...sectionLabels,
+      ...sectionLabels.filter((label) => label !== "Contact"),
     ]);
+    await expect(page.locator(".site-footer #contact")).toHaveCount(1);
     const donate = page.locator(".site-footer .donate");
     await expect(donate).toHaveText(navigation.donate.label);
     await expect(donate).toHaveAttribute("href", navigation.donate.href);
@@ -1111,15 +1137,22 @@ test.describe("get involved tabs", () => {
     expect(await page.evaluate(() => window.scrollY)).toBe(0);
   });
 
-  // Section links scroll smoothly; wait until the page has stopped moving.
+  // Section links scroll smoothly; wait until the page has stopped moving:
+  // the same position three samples in a row, 120ms apart. (A waitForFunction
+  // whose function returns a promise counts the promise itself as true and
+  // waits for nothing; this runs inside the page instead.)
   const settled = (page: import("@playwright/test").Page) =>
-    page.waitForFunction(
-      () =>
-        new Promise<boolean>((resolve) => {
-          const y = window.scrollY;
-          setTimeout(() => resolve(window.scrollY === y), 250);
-        }),
-    );
+    page.evaluate(async () => {
+      const wait = (ms: number) => new Promise((done) => setTimeout(done, ms));
+      let same = 0;
+      let last = window.scrollY;
+      for (let i = 0; i < 60 && same < 3; i++) {
+        await wait(120);
+        if (window.scrollY === last) same++;
+        else same = 0;
+        last = window.scrollY;
+      }
+    });
   // Back to the top the way a reader gets there, with a key (after a section
   // link, a browser keeps the page on the section until the reader scrolls;
   // a script scroll does not count), then by script where the key does not
@@ -1133,12 +1166,75 @@ test.describe("get involved tabs", () => {
     expect(await page.evaluate(() => window.scrollY)).toBe(0);
   };
 
+  // A section link: inline in the header on wide screens, in the menu on
+  // phones and tablets, where the menu is opened first.
+  const followSection = async (page: import("@playwright/test").Page, id: string) => {
+    if ((await page.locator(`a[href="/#${id}"]:visible`).count()) === 0) {
+      await page.locator("[data-menu-open]").click();
+    }
+    await page.locator(`a[href="/#${id}"]:visible`).first().click();
+  };
+  const followContact = (page: import("@playwright/test").Page) => followSection(page, "contact");
+
+  // A section link lands on the section's own surface, with its content a
+  // short way under the bar: the wave or the diagonal cut that opens the
+  // section is scrolled under the bar, never shown first as a band under it
+  // (decision 71). Contact is the footer's column at the page's end, where
+  // the page lands as far as it can; it is checked by the tests above.
+  test("a section link lands on the section's content, under the bar", async ({ page }) => {
+    await page.goto("/");
+    await fontsSettled(page);
+    // The section is the link's target (an item's id can differ from it).
+    const ids = navigation.items
+      .filter((item) => item.id !== "contact")
+      .map((item) => item.href.replace("/#", ""));
+    // Where the page stands once it has stopped moving (two samples 150ms
+    // apart agree): "landed" when the section's box (its wave or cut) starts
+    // above the bar's edge and its content within a section space of the
+    // bar, else the measurements, which the failure then shows.
+    const landed = (id: string) =>
+      page.evaluate(async (id) => {
+        const wait = (ms: number) => new Promise((done) => setTimeout(done, ms));
+        const before = window.scrollY;
+        await wait(150);
+        if (window.scrollY !== before) return "moving";
+        const bar = document.querySelector(".site-header")!.getBoundingClientRect().bottom;
+        const section = document.getElementById(id)!;
+        const content = section.querySelector(".wrap")!;
+        const m = {
+          sectionTop: section.getBoundingClientRect().top - bar,
+          contentTop: content.getBoundingClientRect().top - bar,
+          bar,
+          scrollY: window.scrollY,
+          pageHeight: document.documentElement.scrollHeight,
+          viewportHeight: window.innerHeight,
+          menuOpen: (document.getElementById("menu") as HTMLDialogElement).open,
+        };
+        const ok = m.sectionTop <= 0 && m.contentTop >= 16 && m.contentTop <= 120;
+        return ok ? "landed" : JSON.stringify(m);
+      }, id);
+    for (const id of ids) {
+      await followSection(page, id);
+      // The scroll is smooth, and an engine may settle in steps: poll until
+      // the page has stopped in the right place (a sample taken mid-scroll
+      // reads as moving, never as landed).
+      await expect
+        .poll(() => landed(id), {
+          message: `${id}: the section's content lands under the bar`,
+          timeout: 10_000,
+          intervals: [200, 300, 500],
+        })
+        .toBe("landed");
+    }
+  });
+
   // After a section link the fragment stays in the address, and a refresh
   // keeps the reader where they were instead of jumping back to the section
-  // (on a phone, Contact is the bottom of the page). See decision 50.
+  // (Contact is the footer's contact column, the bottom of the page; decision
+  // 70). See decision 50.
   test("a refresh after a section link keeps the reader where they were", async ({ page }) => {
     await page.goto("/");
-    await page.locator('a[href="/#contact"]:visible').first().click();
+    await followContact(page);
     await expect(page.locator("#contact")).toBeInViewport();
     expect(new URL(page.url()).hash).toBe("#contact");
     await toTop(page);
@@ -1151,7 +1247,7 @@ test.describe("get involved tabs", () => {
 
   test("a refresh on the section a link led to stays there", async ({ page }) => {
     await page.goto("/");
-    await page.locator('a[href="/#contact"]:visible').first().click();
+    await followContact(page);
     await expect(page.locator("#contact")).toBeInViewport();
     await settled(page);
     await page.reload();
@@ -1227,6 +1323,93 @@ test.describe("get involved tabs", () => {
     await page.locator("#tab-sponsor").focus();
     await page.keyboard.press("Tab");
     await expect(page.locator("#sponsor a.button")).toBeFocused();
+  });
+});
+
+test.describe("the waves", () => {
+  // Every wave hands one lit surface to the next with no line at its box's
+  // edge (decision 67): on each side the paint 2px outside the box matches
+  // the paint 2px inside it. Three columns clear of the Programs watermark
+  // and the giving page's card, which cross those edges by design; the
+  // banner wave's top edge is skipped, since the photo shows through it.
+  // Measured on every engine: WebKit once painted a continuation's washes
+  // nowhere, which Chromium never showed.
+  test("every wave hands over without a seam", async ({ page }, testInfo) => {
+    oncePerEngine(testInfo);
+    const columns = [0.08, 0.25, 0.4];
+    const seams: string[] = [];
+    for (const [width, height] of [
+      [393, 660],
+      [1280, 800],
+    ]) {
+      await page.setViewportSize({ width, height });
+      for (const path of pages) {
+        await page.goto(path);
+        await fontsSettled(page);
+        const waves = page.locator(".wave");
+        for (let i = 0; i < (await waves.count()); i++) {
+          const wave = waves.nth(i);
+          const isBanner = await wave.evaluate((el) => el.classList.contains("hero-wave"));
+          // An instant scroll, then the box is read after the capture and
+          // checked against the box before it: the page settles by a few
+          // pixels after a scroll, and a box read on the wrong side of that
+          // would sample the wrong rows.
+          const place = () =>
+            wave.evaluate(async (el) => {
+              await new Promise((done) => requestAnimationFrame(() => done(null)));
+              const r = el.getBoundingClientRect();
+              return { top: r.top, bottom: r.bottom };
+            });
+          await wave.evaluate((el) => el.scrollIntoView({ block: "center", behavior: "instant" }));
+          let before = await place();
+          let png: Buffer;
+          let box: { top: number; bottom: number };
+          for (let attempt = 0; ; attempt++) {
+            png = await page.screenshot({ scale: "css", animations: "disabled" });
+            box = await place();
+            if (box.top === before.top || attempt === 3) break;
+            before = box;
+          }
+          const steps = await page.evaluate(
+            async ({ data, columns, edges, width }) => {
+              const img = new Image();
+              img.src = data;
+              await img.decode();
+              const canvas = document.createElement("canvas");
+              canvas.width = img.width;
+              canvas.height = img.height;
+              const ctx = canvas.getContext("2d")!;
+              ctx.drawImage(img, 0, 0);
+              const at = (x: number, y: number) => {
+                const p = ctx.getImageData(x, y, 1, 1).data;
+                return [p[0], p[1], p[2]];
+              };
+              const out: string[] = [];
+              for (const edge of edges) {
+                if (edge - 2 < 0 || edge + 2 >= img.height) continue;
+                for (const fx of columns) {
+                  const x = Math.round(width * fx);
+                  const above = at(x, Math.round(edge) - 2);
+                  const below = at(x, Math.round(edge) + 2);
+                  const diff = Math.max(...above.map((v, k) => Math.abs(v - below[k])));
+                  if (diff > 6)
+                    out.push(`x=${fx} edge=${Math.round(edge)} ${above}->${below} (${diff})`);
+                }
+              }
+              return out;
+            },
+            {
+              data: "data:image/png;base64," + png!.toString("base64"),
+              columns,
+              edges: [...(isBanner ? [] : [box!.top]), box!.bottom],
+              width,
+            },
+          );
+          for (const s of steps) seams.push(`${width}px ${path} wave ${i}: ${s}`);
+        }
+      }
+    }
+    expect(seams, "colour steps at a wave box's edge").toEqual([]);
   });
 });
 

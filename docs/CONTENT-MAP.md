@@ -72,13 +72,12 @@ The site is organized by what a visitor came to do, not by org chart. Two audien
 HEADER        mark + her lockup · About · Programs · Get involved · Contact · Donate
 BANNER        her photos + tagline + headline + one sentence + Help me / Donate, then the wave     choose your path
 TRUST         since 2015 · 501(c)(3) · Toys for Tots                      proof, in a glance (night band)
-SEASON        one line: what's needed now + one link, then the wave       urgency, changes each season
+SEASON        one line: what's needed now + one link, then the wave       optional, off (decision 66); urgency, changes each season
 PROGRAMS      tiles, Get help card, then 4 programs as rows               what exists, who qualifies, how to apply
 GET INVOLVED  4 tabs: Sponsor · Donate · Volunteer · Partner              one action per supporter
 ABOUT         her portrait + story + "Do More" video on request           why to trust it
 MOMENTS       photo gallery (hidden until 4+ photos)                      the work, unposed
-CONTACT       call · email · Facebook · start an application              reach her
-FOOTER        lit mark · wordmark · Donate · "Never give up." · Explore · phone · email · Facebook · legal line   reach her, verify her
+FOOTER        lit mark · wordmark · Donate · "Never give up." · Explore · phone · email · Facebook (the page's Contact) · legal line   reach her, verify her
 
 /apply        four-step application, sent by email                        families
 /donate       frequency + amount, then the payment page or an email       donors

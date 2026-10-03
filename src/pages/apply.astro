@@ -64,7 +64,7 @@ const sideBody = getHelp.talk.body;
           />
         </div>
       </div>
-      <Wave kind="into-paper" id="wp" class="page-wave" />
+      <Wave kind="into-paper" id="wp" above="none" belowGround="paper" class="page-wave" />
     </section>
 
     <section class="section ground" aria-labelledby="form-title">
@@ -907,7 +907,7 @@ const sideBody = getHelp.talk.body;
     gap: var(--space-m);
     /* A step change scrolls the form's top to just under the bar. The page's
        scroll-padding (5rem) already clears the bar, so only the rest is added. */
-    scroll-margin-top: max(0px, calc(var(--header-h) + var(--space-s) - 5rem));
+    scroll-margin-top: max(0px, calc(var(--header-h) + var(--space-s) - var(--scroll-pad)));
   }
 
   /* The form needs JavaScript. It is shown from the first paint when the

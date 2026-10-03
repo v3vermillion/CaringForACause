@@ -15,12 +15,15 @@ const proof = [
 
 <!--
   The four programs the banner promises, on the night band its wave lands on
-  (decision 58): her reference's row of neon icons, each with a title and one
-  line, hairlines between them, and under them the proof line between two
-  rules. Each item is a link to its program. On desktop the strip is part of
-  the first screen and is sized in --u like the banner, 126 reference pixels
-  tall, so the season strip still ends at the fold; on phones and tablets it
-  is sized in the class's reference pixel and stacks as the reference shows.
+  (decision 58): her reference's row of neon icons, each with its title,
+  hairlines between them, and under them the proof line between two rules.
+  The one-line descriptions left the strip (decision 66); the giving page
+  still shows them beside the same icons. Each item is a link to its
+  program. On desktop the strip is part of the first screen and is sized in
+  --u like the banner, 136 reference pixels tall, so the first screen ends
+  at the fold; on phones and tablets it is sized in the class's reference
+  pixel and stacks as the reference shows, and on a phone it fits under the
+  banner on the first screen.
 -->
 <section class="strip on-dark" aria-label="What we do">
   <ProgramIconDefs />
@@ -35,7 +38,6 @@ const proof = [
             </span>
             <span class="words">
               <span class="name">{item.title}</span>
-              <span class="line">{item.body}</span>
             </span>
           </a>
         </li>
@@ -58,9 +60,13 @@ const proof = [
 
 <style>
   /* The band is lit from the wave and falls off to the deeper night, as the
-     reference's does: a gradient down to --night-2 (the season strip and the
-     wave out of the band continue it) and a violet bloom centred on the seam
-     with the wave, straddling it so no edge shows. */
+     reference's does: a gradient down to --night-2 (the wave out of the band
+     continues it) and a violet bloom centred on the seam with the wave,
+     straddling it. The bloom's box reaches 1.2 wave heights above the seam
+     and its ellipse fades out at 1.12 (70% of a radius of 1.6), so it is
+     fully transparent before the box's edge: a box that cut the gradient
+     while it still had colour drew a hard horizontal line across the band
+     under the ribbons (decision 66). */
   .strip {
     position: relative;
     isolation: isolate;
@@ -73,23 +79,23 @@ const proof = [
     z-index: -1;
     left: 0;
     right: 0;
-    top: calc(-0.34 * var(--wave-h));
-    height: calc(0.34 * var(--wave-h) + 9rem);
+    top: calc(-1.2 * var(--wave-h));
+    height: calc(1.2 * var(--wave-h) + 9rem);
     pointer-events: none;
     background: radial-gradient(
-      ellipse 58% 100% at 50% calc(0.34 * var(--wave-h)),
+      ellipse 58% calc(1.6 * var(--wave-h)) at 50% calc(1.2 * var(--wave-h)),
       rgb(116 60 232 / 0.26),
       rgb(116 60 232 / 0) 70%
     );
   }
 
   /* Phones: the reference's four columns, sized in --rp (one pixel of the
-     393px reference), the icons about 48 tall, the title in the serif over a
-     three-line body. */
+     393px reference), the icons about 48 tall, the title in the serif under
+     each. */
   .items {
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
-    padding: calc(30 * var(--rp)) 0 0;
+    padding: calc(16 * var(--rp)) 0 0;
     margin: 0;
     list-style: none;
   }
@@ -99,7 +105,7 @@ const proof = [
   }
 
   /* Hairlines between the columns, lit violet to rose like the rules of her
-     references, from the icons' top to the bodies' end. */
+     references, from the icons' top to the titles' end. */
   li + li::before {
     content: "";
     position: absolute;
@@ -118,7 +124,7 @@ const proof = [
   .item {
     display: grid;
     justify-items: center;
-    gap: calc(11 * var(--rp)) 0;
+    gap: calc(10 * var(--rp)) 0;
     height: 100%;
     padding: 0 calc(5 * var(--rp));
     text-align: center;
@@ -164,13 +170,6 @@ const proof = [
     transition: color 0.25s ease;
   }
 
-  .line {
-    font-size: calc(11.5 * var(--rp));
-    line-height: 1.35;
-    color: var(--night-soft);
-    text-wrap: pretty;
-  }
-
   .item:hover .name,
   .item:focus-visible .name {
     color: #e2d3ff;
@@ -194,12 +193,12 @@ const proof = [
     justify-items: center;
     gap: calc(2 * var(--rp));
     max-width: none;
-    margin: calc(20 * var(--rp)) 0 0;
-    padding: 0 0 calc(22 * var(--rp));
+    margin: calc(10 * var(--rp)) 0 0;
+    padding: 0 0 calc(12 * var(--rp));
     font-family: var(--font-display);
     font-weight: 500;
     font-size: calc(12.5 * var(--rp));
-    line-height: 1.5;
+    line-height: 1.4;
     letter-spacing: 0.01em;
     color: rgb(201 182 242 / 0.85);
     text-align: center;
@@ -210,7 +209,7 @@ const proof = [
     content: "";
     width: calc(72 * var(--rp));
     height: 1px;
-    margin: calc(6 * var(--rp)) 0;
+    margin: calc(4 * var(--rp)) 0;
     background: linear-gradient(
       90deg,
       rgb(160 108 255 / 0),
@@ -250,9 +249,6 @@ const proof = [
     .name {
       font-size: calc(19 * var(--sp));
     }
-    .line {
-      font-size: calc(13 * var(--sp));
-    }
     .facts {
       display: flex;
       flex-wrap: wrap;
@@ -284,8 +280,8 @@ const proof = [
   }
 
   /* Desktop: part of the first screen, sized in --u like the banner (see
-     src/pages/index.astro): 22 above, a 64 row of icon beside words, 14, an
-     18 line of proof, 18 below: 136 reference pixels, the number the
+     src/pages/index.astro): 22 above, a 64 row of icon beside its title, 14,
+     an 18 line of proof, 18 below: 136 reference pixels, the number the
      first screen's arithmetic uses. Every height here is fixed so the sum
      holds whatever the words do. */
   @media (min-width: 56rem) {
@@ -298,17 +294,20 @@ const proof = [
       top: calc(4 * var(--u));
       bottom: calc(4 * var(--u));
     }
-    /* Each icon-and-words pair is centred in its cell (icon 70, gap 14,
-       words 150 of the 288 at 1280), so the hairlines fall midway between
-       neighbours instead of hugging the icon on their right. */
+    /* Each icon-and-title pair is centred in its cell on its own width
+       (the icon's 70 box, a 16 gap, the title as wide as its word), so a
+       short title such as "Gifts" sits as centred in its cell as a long
+       one, and the hairlines fall midway between neighbours. A fixed word
+       column had left the short titles' pairs leaning left (decision 66). */
     .item {
-      grid-template-columns: auto minmax(0, calc(150 * var(--u)));
+      grid-template-columns: auto auto;
       align-items: center;
       justify-content: center;
       justify-items: start;
-      gap: 0 calc(14 * var(--u));
+      gap: 0 calc(16 * var(--u));
       padding: 0 calc(12 * var(--u));
       text-align: left;
+      white-space: nowrap;
       border-radius: calc(8 * var(--u));
     }
     .icon {
@@ -319,13 +318,11 @@ const proof = [
     .words {
       gap: calc(3 * var(--u));
     }
+    /* The title stands a little taller beside its icon now that it is the
+       pair's only words; the row's 64 is unchanged. */
     .name {
-      font-size: calc(18 * var(--u));
-      line-height: calc(21 * var(--u));
-    }
-    .line {
-      font-size: calc(13 * var(--u));
-      line-height: calc(17 * var(--u));
+      font-size: calc(21 * var(--u));
+      line-height: calc(24 * var(--u));
     }
     .facts {
       flex-wrap: nowrap;

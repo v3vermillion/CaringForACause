@@ -14,7 +14,9 @@ const applyHref = links.familyApplication ?? getHelp.action.href;
 
 <section id="programs" class="section ground" aria-labelledby="programs-title">
   <!-- The wave lifts the night band off the page: night above, paper below. -->
-  <Wave kind="into-paper" id="wb" above="var(--night-2)" class="wave-in" />
+  <!-- Night-2 above the ribbons, as the band ends; below them this section's
+       own ground shows through (decision 67). -->
+  <Wave kind="into-paper" id="wb" above="var(--night-2)" below="none" class="wave-in" />
   <div class="wrap">
     <!-- Her mark as a faint watermark beside the opener, as the reference
          draws it: her flat mark in one lavender tone, nothing redrawn. -->
@@ -96,29 +98,35 @@ const applyHref = links.familyApplication ?? getHelp.action.href;
                 ))}
               </ul>
             )}
-            {program.link && (
-              <p class="next">
-                <a class="arrow-link" href={program.link.href}>
-                  {program.link.label}
-                </a>
-              </p>
-            )}
-            {program.checklist && (
-              <details class="checklist">
-                <summary>{program.checklist.title}</summary>
-                <div class="groups">
-                  {program.checklist.groups.map((group) => (
-                    <div>
-                      <h4>{group.heading}</h4>
-                      <ul>
-                        {group.items.map((item) => (
-                          <li>{item}</li>
-                        ))}
-                      </ul>
+            <!-- The row's one next step closes the copy under a short lit
+                 rule, as the eyebrow opens it over one (decision 68). -->
+            {(program.link || program.checklist) && (
+              <div class="step">
+                {program.link && (
+                  <p class="next">
+                    <a class="arrow-link" href={program.link.href}>
+                      {program.link.label}
+                    </a>
+                  </p>
+                )}
+                {program.checklist && (
+                  <details class="checklist">
+                    <summary>{program.checklist.title}</summary>
+                    <div class="groups">
+                      {program.checklist.groups.map((group) => (
+                        <div>
+                          <h4>{group.heading}</h4>
+                          <ul>
+                            {group.items.map((item) => (
+                              <li>{item}</li>
+                            ))}
+                          </ul>
+                        </div>
+                      ))}
                     </div>
-                  ))}
-                </div>
-              </details>
+                  </details>
+                )}
+              </div>
             )}
           </div>
           {program.video ? (
@@ -146,11 +154,22 @@ const applyHref = links.familyApplication ?? getHelp.action.href;
   /* The section starts under the wave from the night band (--wave-h), so its
      top padding is the wave plus the usual section space. */
   #programs {
+    /* A link to the section lands on its words, not on the wave that opens
+       it: the wave scrolls under the bar (its box's foot a few pixels above
+       the bar's edge) and the paper starts there, with the eyebrow a section
+       space below (decision 71). */
+    scroll-margin-top: calc(var(--header-h) - var(--scroll-pad) - var(--wave-h) - 0.25rem);
     position: relative;
-    overflow: hidden; /* the watermark bleeds past the column */
-    /* The space above the opener is measured from the ribbons' foot (the
-       paper starts at 74% of the wave's box), not from the box. */
-    padding-top: calc(var(--wave-h) * 0.74 + var(--space-l));
+    /* The watermark bleeds past the column; clipped (not hidden) so the
+       section is not a scroll container with the watermark's width of
+       hidden overflow (see the banner). */
+    overflow: hidden;
+    overflow: clip;
+    /* The space above the opener is measured from the wave's box, so that a
+       link landing with the wave under the bar still finds the opener a
+       section space below it (decision 71; decision 53 had measured it from
+       the ribbons' foot). */
+    padding-top: calc(var(--wave-h) + var(--space-l));
     /* The Get involved wedge cuts --wedge into this section's foot, so the
        foot carries it: its high corner sits a full section space under the
        last row. */
@@ -200,11 +219,17 @@ const applyHref = links.familyApplication ?? getHelp.action.href;
      The strip bleeds into the gutters and fades at both edges, so a cut tile
      dissolves instead of chopping; at rest the tiles start where the fade
      ends, so nothing at rest is dimmed. */
+  /* The strip scrolls sideways, which makes it clip vertically too, and a
+     tile's shadow cut at the strip's edge drew a line across the page
+     under the tiles (decision 67). The strip's box reaches 2rem above and
+     3rem below the tiles (past the farthest shadow), with margins that
+     take all but the 0.25rem and 0.75rem it always kept back, so the
+     tiles sit where they did and the shadows fall whole. */
   .tiles ul {
     display: flex;
     gap: var(--space-xs);
-    padding: 0.25rem var(--gutter) 0.75rem;
-    margin: 0 calc(-1 * var(--gutter));
+    padding: 2rem var(--gutter) 3rem;
+    margin: -1.75rem calc(-1 * var(--gutter)) -2.25rem;
     list-style: none;
     overflow-x: auto;
     scroll-snap-type: x mandatory;
@@ -327,41 +352,23 @@ const applyHref = links.familyApplication ?? getHelp.action.href;
     gap: var(--space-xs) var(--space-s);
   }
 
-  /* Program rows: photo above text on phones; sides alternate on desktop. */
+  /* Program rows: photo above text on phones; sides alternate on desktop.
+     Rows are parted by space alone (a section space from tablets up, a
+     little less on phones) and told apart by their chapter numbers and the
+     photo changing sides; the rule of light that lay between them read as
+     a line cut across the page (decision 72). */
   .list {
     display: grid;
     gap: var(--space-l);
   }
 
-  /* Each row is a spread: a rule of light above it, its number set large and
-     faint behind the words, the copy a column that starts where the photo
-     starts and ends, with its one next step, where the photo ends. */
+  /* Each row is a spread: its chapter number over the eyebrow, the copy a
+     column that starts where the photo starts and ends, with its one next
+     step, where the photo ends. */
   .row {
     position: relative;
     display: grid;
     gap: var(--space-m);
-    padding-top: var(--space-l);
-  }
-
-  .row::before {
-    content: "";
-    position: absolute;
-    inset: 0 0 auto 0;
-    height: var(--hairline);
-    background: linear-gradient(
-      90deg,
-      rgb(160 108 255 / 0.55),
-      rgb(255 90 134 / 0.45) 55%,
-      rgb(160 108 255 / 0) 100%
-    );
-  }
-
-  .row:first-child {
-    padding-top: 0;
-  }
-
-  .row:first-child::before {
-    display: none;
   }
 
   .copy {
@@ -372,8 +379,9 @@ const applyHref = links.familyApplication ?? getHelp.action.href;
   }
 
   /* The program's number in the reference's serif: a chapter number over
-     the eyebrow on phones; from tablets up, set large and so faint behind
-     the eyebrow that it is a texture rather than a figure. */
+     the eyebrow, in a lavender that stands back from the words, on every
+     class. (It had been set nine rem tall and faint behind the eyebrow and
+     the heading from tablets up, where it tangled with them; decision 72.) */
   .index {
     display: block;
     margin-bottom: 0.25rem;
@@ -387,11 +395,27 @@ const applyHref = links.familyApplication ?? getHelp.action.href;
     user-select: none;
   }
 
-  /* The row's one next step stands on its own short rule. */
-  .copy > .next {
+  /* The row's one next step (the link, or the checklist's summary, or
+     both) closes the copy under a short lit rule, the mirror of the
+     eyebrow's rule that opens it. It had stood under a full-width
+     hairline, which with the rule of light between the rows framed the
+     link between two lines (decision 68). */
+  .step {
     margin-top: var(--space-m);
-    padding-top: var(--space-s);
-    border-top: var(--hairline) solid rgb(96 8 215 / 0.14);
+  }
+
+  .step::before {
+    content: "";
+    display: block;
+    width: 2.25rem;
+    height: 0.1875rem;
+    margin-bottom: 0.75rem;
+    border-radius: 0.125rem;
+    background: linear-gradient(90deg, var(--purple), #d43a92);
+  }
+
+  .step > * + * {
+    margin-top: 0.25rem;
   }
 
   .details li::marker {
@@ -400,6 +424,25 @@ const applyHref = links.familyApplication ?? getHelp.action.href;
 
   .media {
     order: 0;
+    position: relative;
+  }
+
+  /* A pool of light behind each photo, as the About portrait stands in one:
+     violet with a breath of rose, sized from the photo in rem so it is one
+     picture per class, under the plate (decision 72). */
+  .media::after {
+    content: "";
+    position: absolute;
+    inset: -12% -14% -16% -14%;
+    z-index: -2;
+    border-radius: 50%;
+    background: radial-gradient(
+      closest-side,
+      rgb(160 108 255 / 0.3),
+      rgb(255 90 134 / 0.12) 58%,
+      transparent 80%
+    );
+    pointer-events: none;
   }
 
   /* A program's name is a step under the section's title. */
@@ -541,6 +584,9 @@ const applyHref = links.familyApplication ?? getHelp.action.href;
      photos' own shape (they are phone pictures, 3 by 4), so no head is
      cropped and the row reads as a spread; sides alternate. */
   @media (min-width: 36rem) {
+    .list {
+      gap: var(--space-xl);
+    }
     .row.has-media {
       grid-template-columns: 7fr 5fr;
       gap: var(--space-l);
@@ -555,14 +601,7 @@ const applyHref = links.familyApplication ?? getHelp.action.href;
       align-self: center;
     }
     .index {
-      position: absolute;
-      top: -0.55em;
-      left: -0.08em;
-      z-index: -1;
-      margin: 0;
-      font-size: 9rem;
-      line-height: 1;
-      color: rgb(96 8 215 / 0.09);
+      font-size: 3.5rem;
     }
     .copy,
     .media {
@@ -590,8 +629,12 @@ const applyHref = links.familyApplication ?? getHelp.action.href;
   }
 
   @media (min-width: 56rem) {
+    /* Square on desktop too: a 5 by 4 crop of these portrait photos showed
+       three fifths of each and trimmed heads; square shows three quarters,
+       and the copy, with its chapter number, stands about as tall
+       (decision 72). */
     .media {
-      --photo-ratio: 5 / 4;
+      --photo-ratio: 1 / 1;
     }
     #programs :global(.watermark) {
       top: -2.5rem;
@@ -622,6 +665,11 @@ const applyHref = links.familyApplication ?? getHelp.action.href;
     }
     .row.has-media {
       gap: var(--space-xl);
+    }
+    /* The words keep a reading measure (about 65 characters of body text)
+       rather than filling the wide column, where a line ran past 75. */
+    .copy {
+      max-width: 38rem;
     }
   }
 </style>

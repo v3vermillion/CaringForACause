@@ -7,7 +7,9 @@ const phone = show(facts.phone);
 const email = show(facts.email);
 
 /** The same map the header and the phone menu draw (decision 38). */
-const explore = [navigation.help, ...navigation.items];
+// Explore is the site's map less Contact, which is the column beside it
+// (decision 70).
+const explore = [navigation.help, ...navigation.items.filter((item) => item.id !== "contact")];
 const { donate } = navigation;
 
 const year = new Date().getFullYear();
@@ -72,7 +74,9 @@ const year = new Date().getFullYear();
         </ul>
       </nav>
 
-      <section class="col col--connect" aria-labelledby="connect-title">
+      <!-- The page's Contact: where the header's and the menu's Contact link
+           and /#contact land (decision 70). -->
+      <section id="contact" class="col col--connect" aria-labelledby="connect-title">
         <h2 id="connect-title" class="col-title">
           Connect with us
         </h2>
@@ -541,9 +545,10 @@ const year = new Date().getFullYear();
 
   /* The record: on a step bluer ground, over a faint hairline and a lit
      lower edge. The hairline's place is the record's own height less the
-     band under it. */
+     band under it; the band is zero (decision 69), so the page ends on the
+     hairline under the copyright line. */
   .record {
-    --band: 2.6rem;
+    --band: 0rem;
     position: relative;
     padding-bottom: var(--band);
     background:
@@ -765,7 +770,7 @@ const year = new Date().getFullYear();
     }
 
     .record {
-      --band: 2.8rem;
+      --band: 0rem;
     }
 
     .legal {
@@ -935,9 +940,10 @@ const year = new Date().getFullYear();
       height: 2.4rem;
     }
 
+    /* The record's one line (5.9rem) and no band under it (decision 69). */
     .record {
-      --band: 3.35rem;
-      height: 9.25rem;
+      --band: 0rem;
+      height: 5.9rem;
       padding: 0;
     }
 

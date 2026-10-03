@@ -100,9 +100,16 @@
      taller bar below. */
   --header-h: calc(max(60 * var(--sp), 44px) + 1px);
   --top-chrome: var(--header-h);
+  /* Where a link to a section lands: this far below the top of the window,
+     clear of the bar. A section that opens with a decoration (a wave, the
+     diagonal cut) takes it off its own landing with a scroll margin, so the
+     decoration scrolls under the bar and the section's surface starts there
+     (decision 71). */
+  --scroll-pad: 5rem;
   /* What ends the first screen on desktop below the banner and its program
      strip (both in --u, src/pages/index.astro): the season strip, one line
-     (0.6rem padding twice, a 44px link, one border). */
+     (0.6rem padding twice, a 44px link, one border). Zero while the season
+     strip is off (src/pages/index.astro sets it). */
   --strips-h: calc(1.2rem + max(44px, 44 * var(--sp)) + 1px);
 }
 
@@ -205,10 +212,15 @@ html {
      viewport unit: the publish gate rejects those outside a min-width block,
      because a phone's address bar resizes them mid-scroll. */
   height: 100%;
+  /* The canvas behind the page, seen only where a phone's browser pulls the
+     page past its end and shows what lies beyond: the footer's navy, so the
+     page ends on the footer rather than on a flash of paper (decision 69).
+     The body keeps the paper. */
+  background-color: #03012a;
   -webkit-text-size-adjust: 100%;
   text-size-adjust: 100%;
   scroll-behavior: smooth;
-  scroll-padding-top: 5rem;
+  scroll-padding-top: var(--scroll-pad);
 }
 
 /* Moving between pages cross-fades the page under a bar that stays put
@@ -701,6 +713,10 @@ a {
    About section, ending in the wave onto the paper below (decision 52). */
 .page-hero {
   position: relative;
+  /* The wave's ground continuation overhangs the opener by a pixel (see
+     .wave-ground); the clip keeps that row from showing through the
+     transparent section below, where it would carry the wash twice. */
+  overflow: clip;
   padding-block: var(--space-l) calc(var(--space-l) + var(--wave-h));
   background:
     radial-gradient(50rem 24rem at 100% 0, rgb(96 8 215 / 0.4), transparent 70%),
@@ -757,11 +773,16 @@ a {
   isolation: isolate;
 }
 
+/* The washes and the grain reach a pixel past the section's foot: a
+   section's edge falls on a fraction of a device pixel, and a wash that
+   stopped exactly there left a part-row of the section's plain fill that
+   showed as a lighter line against the next section's continuation of it
+   (decision 72). The next section paints over the overhang. */
 .ground::before,
 .ground::after {
   content: "";
   position: absolute;
-  inset: 0;
+  inset: 0 0 -1px;
   z-index: -1;
   pointer-events: none;
 }
@@ -801,15 +822,18 @@ a {
 }
 
 /* A plate: the offset slab of colour behind a photo, one step down and out,
-   so the photo stands off the ground. */
+   so the photo stands off the ground. The step is 0.75rem on phones, where
+   a photo fills the column and a 1.25rem step ran the slab to the screen's
+   edge (decision 68), and 1.25rem from tablets up. */
 .plate {
+  --plate: 0.75rem;
   position: relative;
 }
 
 .plate::before {
   content: "";
   position: absolute;
-  inset: 1.25rem -1.25rem -1.25rem 1.25rem;
+  inset: var(--plate) calc(-1 * var(--plate)) calc(-1 * var(--plate)) var(--plate);
   z-index: -1;
   border-radius: var(--r-img);
   background: linear-gradient(135deg, rgb(160 108 255 / 0.38), rgb(255 90 134 / 0.3));
@@ -817,7 +841,13 @@ a {
 }
 
 .plate--left::before {
-  inset: 1.25rem 1.25rem -1.25rem -1.25rem;
+  inset: var(--plate) var(--plate) calc(-1 * var(--plate)) calc(-1 * var(--plate));
+}
+
+@media (min-width: 36rem) {
+  .plate {
+    --plate: 1.25rem;
+  }
 }
 
 /* A surface on paper or lilac: white, lifted, with a rim of light. */
@@ -866,6 +896,141 @@ a {
 
 .surface--night::before {
   background: var(--rim-night);
+}
+
+/* The wave's ground continuations (src/components/Wave.astro, decision 67).
+   A wave sits inside one section; the section on the other side of its
+   ribbons is continued under them in a box masked to the ribbons' edge
+   (the mask is the drawing's own shape, set by Wave.astro as --wave-mask),
+   painted as that ground is seen from the edge it crosses: the wash that
+   sits at that edge (an ellipse centred on the corner, now whole instead
+   of cut by the section's edge), the vertical gradient's value there, the
+   grain. Each is positioned in rem like the grounds, so it is one picture
+   per class. The box's own edge then lands on the same paint as the
+   section beyond it, and no line shows.
+
+   Written the plain way on purpose: the colour as a longhand on the box,
+   the washes as background images on ::before, the grain on ::after with
+   no blend mode (at 7% a dark noise laid over a light ground darkens it
+   as multiplying would), and a mask image rather than a clip-path
+   reference. WebKit had painted the first version's gradient layers
+   nowhere and its flat colour everywhere, which put a seam back on every
+   iPhone that Chromium never showed; a browser test now walks every
+   wave's edges on all three engines. */
+.wave-ground {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  -webkit-mask-image: var(--wave-mask);
+  mask-image: var(--wave-mask);
+  -webkit-mask-size: 100% 100%;
+  mask-size: 100% 100%;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+}
+
+/* The box overhangs its section by a pixel on the side it continues, and
+   its mask reaches past that edge, so the mask's antialiased edge lies over
+   the neighbour's own paint instead of on the seam. */
+.wave-ground--above {
+  top: -1px;
+}
+
+.wave-ground--below {
+  bottom: -1px;
+}
+
+.wave-ground::before,
+.wave-ground::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+}
+
+.wave-ground::after {
+  background-image: var(--grain);
+  background-size: 12.5rem;
+  opacity: 0.07;
+}
+
+.wave-ground--paper {
+  background-color: var(--paper);
+}
+
+.wave-ground--lilac {
+  background-color: var(--lilac);
+}
+
+/* Paper below the ribbons: the paper ground's violet wash sits at its top
+   right, which is this box's bottom right. */
+.wave-ground--below.wave-ground--paper::before {
+  background-image: radial-gradient(
+    44rem 26rem at 100% 100%,
+    rgb(160 108 255 / 0.24),
+    transparent 70%
+  );
+}
+
+/* Lilac above the ribbons: the lilac ground's rose wash sits at its bottom
+   right (this box's top right), and its vertical gradient has reached its
+   lavender foot. */
+.wave-ground--above.wave-ground--lilac::before {
+  background-image:
+    radial-gradient(36rem 24rem at 100% 0, rgb(255 90 134 / 0.16), transparent 70%),
+    linear-gradient(rgb(200 170 250 / 0.22), rgb(200 170 250 / 0.22));
+}
+
+/* The footer below the ribbons (decision 70): its darkest navy, lit along
+   its top edge and at its top corners (src/components/SiteFooter.astro,
+   .top), seen from the edge it crosses: the glows at this box's bottom
+   corners and the lit edge rising from its foot. The glows are the
+   footer's own sizes per class. */
+.wave-ground--footer {
+  --glow-top-w: 14rem;
+  --glow-top-h: 4rem;
+  background-color: #020018;
+}
+
+.wave-ground--below.wave-ground--footer::before {
+  background-image:
+    radial-gradient(
+      var(--glow-top-w) var(--glow-top-h) at 100% 100%,
+      rgb(175 40 185 / 0.42),
+      transparent 100%
+    ),
+    radial-gradient(
+      var(--glow-top-w) var(--glow-top-h) at 0 100%,
+      rgb(105 20 175 / 0.32),
+      transparent 100%
+    ),
+    linear-gradient(0deg, rgb(85 14 140 / 0.22) 0, rgb(50 8 100 / 0.1) 1.8rem, transparent 4.5rem);
+}
+
+/* The footer paints no grain. */
+.wave-ground--footer::after {
+  display: none;
+}
+
+@media (min-width: 36rem) {
+  .wave-ground--footer {
+    --glow-top-w: 24rem;
+    --glow-top-h: 5rem;
+  }
+}
+
+@media (min-width: 56rem) {
+  .wave-ground--footer {
+    --glow-top-w: 40rem;
+    --glow-top-h: 6.5rem;
+  }
+}
+
+/* Lilac below the ribbons (the gallery, when it shows): the violet wash at
+   its top left (this box's bottom left), the gradient at its white head. */
+.wave-ground--below.wave-ground--lilac::before {
+  background-image:
+    radial-gradient(44rem 26rem at 0 100%, rgb(160 108 255 / 0.26), transparent 70%),
+    linear-gradient(rgb(255 255 255 / 0.25), rgb(255 255 255 / 0.25));
 }
 
 /* A rule of light, where a grey line would do less. */

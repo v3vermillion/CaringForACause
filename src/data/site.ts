@@ -152,9 +152,13 @@ export const links = {
   volunteerForm: "https://forms.gle/HPL8HgMWvVsk9oAt5",
 } as const;
 
-/** The strip under the hero. Change each season, or set `active: false`. */
+/**
+ * The season's one ask, a bar under the program strip. Off (decision 66):
+ * the first screen ends with the proof line, on phones too. Set `active`
+ * to true to show it again; the first screen makes room for it.
+ */
 export const seasonalBanner = {
-  active: true,
+  active: false,
   message: "Families need holiday sponsors for Thanksgiving and Christmas.",
   action: { label: "Sponsor a family", href: "/#sponsor" },
 };
@@ -374,13 +378,6 @@ export const donatePage = {
   emailLabel: "Donate by email",
   emailNote:
     "We don't take card payments on this site yet. This button opens an email to us with your gift written in, and we'll reply with the easiest way to send it.",
-};
-
-/** The contact section on the home page. */
-export const contact = {
-  eyebrow: "Contact",
-  heading: "Reach us",
-  intro: "Whether you need help or want to give it, start here.",
 };
 
 /** The page shown for an address that doesn't exist. */

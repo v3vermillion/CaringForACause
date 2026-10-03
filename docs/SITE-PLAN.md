@@ -13,13 +13,13 @@ The site is delivered to Tamara as a finished gift. Contact with her is kept to 
 
 ## Audiences, in priority order
 
-| Audience                | What they need                                          | Where they land                         |
-| ----------------------- | ------------------------------------------------------- | --------------------------------------- |
-| Families in need        | What programs exist, whether they qualify, how to apply | Hero "I need help" → Get help           |
-| Holiday sponsors        | How to sponsor a family, right now                      | Seasonal banner → Sponsor tab           |
-| Donors                  | A way to give, proof it's a real nonprofit              | Donate button → Donate tab, proof line  |
-| Volunteers and stylists | How to sign up                                          | Get involved → Volunteer or Partner tab |
-| Funders and press       | Who runs it, mission, EIN                               | About, trust strip                      |
+| Audience                | What they need                                          | Where they land                                        |
+| ----------------------- | ------------------------------------------------------- | ------------------------------------------------------ |
+| Families in need        | What programs exist, whether they qualify, how to apply | Hero "I need help" → Get help                          |
+| Holiday sponsors        | How to sponsor a family, right now                      | Get involved → Sponsor tab (the season strip, when on) |
+| Donors                  | A way to give, proof it's a real nonprofit              | Donate button → Donate tab, proof line                 |
+| Volunteers and stylists | How to sign up                                          | Get involved → Volunteer or Partner tab                |
+| Funders and press       | Who runs it, mission, EIN                               | About, trust strip                                     |
 
 ## Grouping logic
 
@@ -47,9 +47,9 @@ Three pages. The home page is the route map; the two doors lead to their own pag
 │ ~~~ wave: violet and crimson ribbons ~~~~~~~~ │
 ├───────────────────────────────────────────────┤
 │ Holiday Meals · Gifts · Diapers · School      │  night band: program strip
-│  Supplies (her neon icons, a line each)       │  → each opens its program
-│ — since 2015 · 501(c)(3) + EIN · Toys for Tots — │  proof line
-│ Seasonal strip (night)     Sponsor a family → │  optional
+│  Supplies (her neon icons, a title each)      │  → each opens its program
+│ — since 2015 · 501(c)(3) + EIN · Toys for Tots — │  proof line; ends a phone's first screen
+│ Seasonal strip (night)     Sponsor a family → │  optional, off (decision 66)
 │ ~~~ wave ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ │
 ├───────────────────────────────────────────────┤
 │ OUR PROGRAMS (paper, her mark as a watermark) │
@@ -71,12 +71,10 @@ Three pages. The home page is the route map; the two doors lead to their own pag
 ├───────────────────────────────────────────────┤
 │ Gallery strip (hidden until 4+ photos)        │
 ├───────────────────────────────────────────────┤
-│ CONTACT: Call · Email · Facebook · Need help? │  #contact
-├───────────────────────────────────────────────┤
-│ FOOTER (near-black, from her reference):      │
+│ FOOTER (near-black, from her reference):      │  #contact is its Connect column
 │ lit mark · her lockup artwork · [Donate] ·    │
 │ Never give up.  │  Explore: Help me · About ·│
-│ Programs · Get involved · Contact │           │
+│ Programs · Get involved │                     │
 │ Connect with us: phone · email · Facebook     │
 │ ── lit rule ── mark │ legal name │ city ·     │
 │ serving area │ © year                         │
