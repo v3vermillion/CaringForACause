@@ -666,5 +666,10 @@ const applyHref = links.familyApplication ?? getHelp.action.href;
     .row.has-media {
       gap: var(--space-xl);
     }
+    /* The words keep a reading measure (about 65 characters of body text)
+       rather than filling the wide column, where a line ran past 75. */
+    .copy {
+      max-width: 38rem;
+    }
   }
 </style>
