@@ -97,16 +97,6 @@ const bands = (edge, t, u, rise) => {
       (x) => ut(x) + u(x) * 0.6,
       (x) => ut(x) + u(x),
     ),
-    edgeTop: strip(
-      edge,
-      () => -1.2,
-      () => 1.6,
-    ),
-    seam: strip(
-      edge,
-      (x) => ut(x) - 1.2,
-      (x) => ut(x) + 1.2,
-    ),
     glowTop: strip(
       edge,
       () => -7,
@@ -122,23 +112,26 @@ export function waveA() {
   // The violet's foot stays inside the box (at most 95 of its 100): a foot
   // that ran off the bottom ended the ribbon in a flat cut along the box's
   // edge, which read as a line across the band (decision 67).
+  // The two segments meet with one tangent (the second's first control
+  // point continues the first's last direction), so the edge has no kink
+  // where they join (decision 72).
   const edge = [
     [
       [0, 26],
       [180, 30],
-      [330, 62],
-      [520, 66],
+      [330, 60],
+      [520, 64],
     ],
     [
-      [520, 66],
-      [700, 66],
-      [860, 58],
+      [520, 64],
+      [710, 68],
+      [860, 60],
       [1000, 44],
     ],
   ];
   const crimson = (x) => smooth(x, 0, 30, 640, 0);
   const violet = (x) => smooth(x, 0, 10, 1000, 34);
-  return bands(edge, crimson, violet, [320, 600]);
+  return bands(edge, crimson, violet, [260, 700]);
 }
 
 export function waveB() {
@@ -154,14 +147,17 @@ export function waveB() {
     ],
     [
       [520, 50],
-      [700, 54],
+      [700, 55.7],
       [860, 60],
       [1000, 70],
     ],
   ];
-  const violet = (x) => smooth(x, 0, 30, 700, 0);
+  // The violet thins across the whole width and slides under the crimson
+  // over the middle three fifths, so the crimson's top edge rises to the
+  // crest in one long sweep rather than a shoulder (decision 72).
+  const violet = (x) => smooth(x, 0, 30, 1000, 0);
   const crimson = (x) => smooth(x, 200, 6, 1000, 28);
-  return bands(edge, violet, crimson, [380, 660]);
+  return bands(edge, violet, crimson, [300, 900]);
 }
 
 const paths = (o) =>
@@ -191,7 +187,7 @@ ${palette}
         <path d={${P}.under} />
       </clipPath>
       <filter id={\`\${id}-soft\`} x="-5%" y="-60%" width="110%" height="220%">
-        <feGaussianBlur stdDeviation="1.2 3.2" />
+        <feGaussianBlur stdDeviation="2 4" />
       </filter>
       <filter id={\`\${id}-glow\`} x="-5%" y="-50%" width="110%" height="200%">
         <feGaussianBlur stdDeviation="2 5" />
@@ -220,8 +216,6 @@ ${palette}
       filter={\`url(#\${id}-glow)\`}
       style="mix-blend-mode: screen"
     />
-    <path d={${P}.edgeTop} fill={\`url(#\${id}-edge)\`} opacity="0.5" />
-    <path d={${P}.seam} fill={\`url(#\${id}-seam)\`} />
     </svg>
   </div>`;
 
@@ -255,17 +249,6 @@ const paletteA = [
     [0, "#c9a6ff", 0.35],
     [0.55, "#d9c2ff", 0.55],
     [1, "#b48cff", 0.3],
-  ]),
-  grad("edge", [
-    [0, "#ffd6e6", 0.7],
-    [0.45, "#ffc2ec", 0.4],
-    [0.7, "#e0c0ff", 0.15],
-    [1, "#b48cff", 0],
-  ]),
-  grad("seam", [
-    [0, "#ff9ab2", 0.7],
-    [0.35, "#ff7aa0", 0.4],
-    [0.6, "#ff7aa0", 0],
   ]),
   grad("light", [
     [0, "#ff7ab8"],
@@ -303,17 +286,6 @@ const paletteB = [
     [0.6, "#ff9ab0", 0.4],
     [1, "#ffb3bf", 0.5],
   ]),
-  grad("edge", [
-    [0, "#dcc8ff", 0],
-    [0.3, "#e0c0ff", 0.15],
-    [0.55, "#ffc2ec", 0.4],
-    [1, "#ffd6e6", 0.7],
-  ]),
-  grad("seam", [
-    [0.3, "#c9a6ff", 0],
-    [0.55, "#d9b8ff", 0.4],
-    [0.8, "#ff9ab2", 0.6],
-  ]),
   grad("light", [
     [0, "#7a48ff"],
     [0.6, "#c07cff"],
@@ -341,7 +313,9 @@ export const component = () => `---
  * it is given (the parent sets its width and height in the class's
  * reference pixel), so the ribbons cross every screen edge to edge. Each
  * band carries a soft highlight along its crest and a shade along its foot,
- * clipped to the band, so it reads as satin. Decorative: hidden from
+ * clipped to the band, so it reads as satin; no hairline is drawn along
+ * an edge (a one-pixel stroke on a near-horizontal curve rendered as a
+ * sketched line on a phone, decision 72). Decorative: hidden from
  * assistive technology.
  *
  * Every copy on a page needs its own id prefix, because the gradients and

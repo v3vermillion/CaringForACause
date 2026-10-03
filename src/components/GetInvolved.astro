@@ -312,9 +312,16 @@ const mailto = (subject: string) =>
      violet glow at its top right, sized in rem from that corner. */
   #get-involved {
     --cut: var(--wedge);
+    /* A link lands with the diagonal cut under the bar, on the lilac
+       (decision 71). */
+    scroll-margin-top: calc(var(--header-h) - var(--scroll-pad) - var(--cut) - 0.25rem);
     margin-top: calc(-1 * var(--cut));
     padding-top: calc(var(--space-xl) + var(--cut));
-    clip-path: polygon(0 var(--cut), 100% 0, 100% 100%, 0 100%);
+    /* The cut's shape reaches past the section's foot, so the clip's edge
+       is not antialiased on the same fraction of a pixel as the section
+       below, where the two edges met with a sliver of paper between them
+       (decision 72). */
+    clip-path: polygon(0 var(--cut), 100% 0, 100% calc(100% + 2px), 0 calc(100% + 2px));
     background:
       radial-gradient(40rem 22rem at 100% 0, rgb(200 170 255 / 0.4), transparent 70%), var(--lilac);
   }

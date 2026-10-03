@@ -1137,15 +1137,22 @@ test.describe("get involved tabs", () => {
     expect(await page.evaluate(() => window.scrollY)).toBe(0);
   });
 
-  // Section links scroll smoothly; wait until the page has stopped moving.
+  // Section links scroll smoothly; wait until the page has stopped moving:
+  // the same position three samples in a row, 120ms apart. (A waitForFunction
+  // whose function returns a promise counts the promise itself as true and
+  // waits for nothing; this runs inside the page instead.)
   const settled = (page: import("@playwright/test").Page) =>
-    page.waitForFunction(
-      () =>
-        new Promise<boolean>((resolve) => {
-          const y = window.scrollY;
-          setTimeout(() => resolve(window.scrollY === y), 250);
-        }),
-    );
+    page.evaluate(async () => {
+      const wait = (ms: number) => new Promise((done) => setTimeout(done, ms));
+      let same = 0;
+      let last = window.scrollY;
+      for (let i = 0; i < 60 && same < 3; i++) {
+        await wait(120);
+        if (window.scrollY === last) same++;
+        else same = 0;
+        last = window.scrollY;
+      }
+    });
   // Back to the top the way a reader gets there, with a key (after a section
   // link, a browser keeps the page on the section until the reader scrolls;
   // a script scroll does not count), then by script where the key does not
@@ -1159,14 +1166,48 @@ test.describe("get involved tabs", () => {
     expect(await page.evaluate(() => window.scrollY)).toBe(0);
   };
 
-  // The Contact link: inline in the header on wide screens, in the menu on
+  // A section link: inline in the header on wide screens, in the menu on
   // phones and tablets, where the menu is opened first.
-  const followContact = async (page: import("@playwright/test").Page) => {
-    if ((await page.locator('a[href="/#contact"]:visible').count()) === 0) {
+  const followSection = async (page: import("@playwright/test").Page, id: string) => {
+    if ((await page.locator(`a[href="/#${id}"]:visible`).count()) === 0) {
       await page.locator("[data-menu-open]").click();
     }
-    await page.locator('a[href="/#contact"]:visible').first().click();
+    await page.locator(`a[href="/#${id}"]:visible`).first().click();
   };
+  const followContact = (page: import("@playwright/test").Page) => followSection(page, "contact");
+
+  // A section link lands on the section's own surface, with its content a
+  // short way under the bar: the wave or the diagonal cut that opens the
+  // section is scrolled under the bar, never shown first as a band under it
+  // (decision 71). Contact is the footer's column at the page's end, where
+  // the page lands as far as it can; it is checked by the tests above.
+  test("a section link lands on the section's content, under the bar", async ({ page }) => {
+    await page.goto("/");
+    await fontsSettled(page);
+    // The section is the link's target (an item's id can differ from it).
+    const ids = navigation.items
+      .filter((item) => item.id !== "contact")
+      .map((item) => item.href.replace("/#", ""));
+    for (const id of ids) {
+      await followSection(page, id);
+      // The scroll is smooth: wait for it to stop.
+      await settled(page);
+      const m = await page.evaluate((id) => {
+        const bar = document.querySelector(".site-header")!.getBoundingClientRect().bottom;
+        const section = document.getElementById(id)!;
+        const content = section.querySelector(".wrap")!;
+        return {
+          sectionTop: section.getBoundingClientRect().top - bar,
+          contentTop: content.getBoundingClientRect().top - bar,
+        };
+      }, id);
+      // The section's box (its wave or cut) starts above the bar's edge, and
+      // its content starts within a section space of the bar.
+      expect(m.sectionTop, `${id}: the section's decoration under the bar`).toBeLessThanOrEqual(0);
+      expect(m.contentTop, `${id}: content too close to the bar`).toBeGreaterThanOrEqual(16);
+      expect(m.contentTop, `${id}: content too far from the bar`).toBeLessThanOrEqual(120);
+    }
+  });
 
   // After a section link the fragment stays in the address, and a refresh
   // keeps the reader where they were instead of jumping back to the section

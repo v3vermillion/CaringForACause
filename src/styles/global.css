@@ -100,6 +100,12 @@
      taller bar below. */
   --header-h: calc(max(60 * var(--sp), 44px) + 1px);
   --top-chrome: var(--header-h);
+  /* Where a link to a section lands: this far below the top of the window,
+     clear of the bar. A section that opens with a decoration (a wave, the
+     diagonal cut) takes it off its own landing with a scroll margin, so the
+     decoration scrolls under the bar and the section's surface starts there
+     (decision 71). */
+  --scroll-pad: 5rem;
   /* What ends the first screen on desktop below the banner and its program
      strip (both in --u, src/pages/index.astro): the season strip, one line
      (0.6rem padding twice, a 44px link, one border). Zero while the season
@@ -214,7 +220,7 @@ html {
   -webkit-text-size-adjust: 100%;
   text-size-adjust: 100%;
   scroll-behavior: smooth;
-  scroll-padding-top: 5rem;
+  scroll-padding-top: var(--scroll-pad);
 }
 
 /* Moving between pages cross-fades the page under a bar that stays put
@@ -767,11 +773,16 @@ a {
   isolation: isolate;
 }
 
+/* The washes and the grain reach a pixel past the section's foot: a
+   section's edge falls on a fraction of a device pixel, and a wash that
+   stopped exactly there left a part-row of the section's plain fill that
+   showed as a lighter line against the next section's continuation of it
+   (decision 72). The next section paints over the overhang. */
 .ground::before,
 .ground::after {
   content: "";
   position: absolute;
-  inset: 0;
+  inset: 0 0 -1px;
   z-index: -1;
   pointer-events: none;
 }

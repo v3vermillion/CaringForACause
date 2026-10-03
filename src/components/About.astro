@@ -106,6 +106,9 @@ const nextGround = gallery.length >= 4 ? "lilac" : "footer";
   /* A night ground (global.css): lit violet at the top right, a little
      magenta at the bottom left, and grained. */
   #about {
+    /* A link lands with the wave that opens the section under the bar, on
+       its night (decision 71). */
+    scroll-margin-top: calc(var(--header-h) - var(--scroll-pad) - var(--wave-h) - 0.25rem);
     overflow: clip; /* the portrait's pool of light bleeds past the column */
     padding-block: calc(var(--space-xl) + var(--wave-h));
   }

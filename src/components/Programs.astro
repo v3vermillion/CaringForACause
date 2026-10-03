@@ -154,15 +154,22 @@ const applyHref = links.familyApplication ?? getHelp.action.href;
   /* The section starts under the wave from the night band (--wave-h), so its
      top padding is the wave plus the usual section space. */
   #programs {
+    /* A link to the section lands on its words, not on the wave that opens
+       it: the wave scrolls under the bar (its box's foot a few pixels above
+       the bar's edge) and the paper starts there, with the eyebrow a section
+       space below (decision 71). */
+    scroll-margin-top: calc(var(--header-h) - var(--scroll-pad) - var(--wave-h) - 0.25rem);
     position: relative;
     /* The watermark bleeds past the column; clipped (not hidden) so the
        section is not a scroll container with the watermark's width of
        hidden overflow (see the banner). */
     overflow: hidden;
     overflow: clip;
-    /* The space above the opener is measured from the ribbons' foot (the
-       paper starts at 74% of the wave's box), not from the box. */
-    padding-top: calc(var(--wave-h) * 0.74 + var(--space-l));
+    /* The space above the opener is measured from the wave's box, so that a
+       link landing with the wave under the bar still finds the opener a
+       section space below it (decision 71; decision 53 had measured it from
+       the ribbons' foot). */
+    padding-top: calc(var(--wave-h) + var(--space-l));
     /* The Get involved wedge cuts --wedge into this section's foot, so the
        foot carries it: its high corner sits a full section space under the
        last row. */
@@ -346,43 +353,22 @@ const applyHref = links.familyApplication ?? getHelp.action.href;
   }
 
   /* Program rows: photo above text on phones; sides alternate on desktop.
-     On phones the rows stand 2rem either side of the rule between them
-     (the row's own gap, and the next row's top padding); from tablets up,
-     where a row is a spread, the usual section space. */
+     Rows are parted by space alone (a section space from tablets up, a
+     little less on phones) and told apart by their chapter numbers and the
+     photo changing sides; the rule of light that lay between them read as
+     a line cut across the page (decision 72). */
   .list {
     display: grid;
-    gap: 2rem;
+    gap: var(--space-l);
   }
 
-  /* Each row is a spread: a rule of light above it, its number set large and
-     faint behind the words, the copy a column that starts where the photo
-     starts and ends, with its one next step, where the photo ends. */
+  /* Each row is a spread: its chapter number over the eyebrow, the copy a
+     column that starts where the photo starts and ends, with its one next
+     step, where the photo ends. */
   .row {
     position: relative;
     display: grid;
     gap: var(--space-m);
-    padding-top: 2rem;
-  }
-
-  .row::before {
-    content: "";
-    position: absolute;
-    inset: 0 0 auto 0;
-    height: var(--hairline);
-    background: linear-gradient(
-      90deg,
-      rgb(160 108 255 / 0.55),
-      rgb(255 90 134 / 0.45) 55%,
-      rgb(160 108 255 / 0) 100%
-    );
-  }
-
-  .row:first-child {
-    padding-top: 0;
-  }
-
-  .row:first-child::before {
-    display: none;
   }
 
   .copy {
@@ -393,8 +379,9 @@ const applyHref = links.familyApplication ?? getHelp.action.href;
   }
 
   /* The program's number in the reference's serif: a chapter number over
-     the eyebrow on phones; from tablets up, set large and so faint behind
-     the eyebrow that it is a texture rather than a figure. */
+     the eyebrow, in a lavender that stands back from the words, on every
+     class. (It had been set nine rem tall and faint behind the eyebrow and
+     the heading from tablets up, where it tangled with them; decision 72.) */
   .index {
     display: block;
     margin-bottom: 0.25rem;
@@ -437,6 +424,25 @@ const applyHref = links.familyApplication ?? getHelp.action.href;
 
   .media {
     order: 0;
+    position: relative;
+  }
+
+  /* A pool of light behind each photo, as the About portrait stands in one:
+     violet with a breath of rose, sized from the photo in rem so it is one
+     picture per class, under the plate (decision 72). */
+  .media::after {
+    content: "";
+    position: absolute;
+    inset: -12% -14% -16% -14%;
+    z-index: -2;
+    border-radius: 50%;
+    background: radial-gradient(
+      closest-side,
+      rgb(160 108 255 / 0.3),
+      rgb(255 90 134 / 0.12) 58%,
+      transparent 80%
+    );
+    pointer-events: none;
   }
 
   /* A program's name is a step under the section's title. */
@@ -579,10 +585,7 @@ const applyHref = links.familyApplication ?? getHelp.action.href;
      cropped and the row reads as a spread; sides alternate. */
   @media (min-width: 36rem) {
     .list {
-      gap: var(--space-l);
-    }
-    .row {
-      padding-top: var(--space-l);
+      gap: var(--space-xl);
     }
     .row.has-media {
       grid-template-columns: 7fr 5fr;
@@ -598,14 +601,7 @@ const applyHref = links.familyApplication ?? getHelp.action.href;
       align-self: center;
     }
     .index {
-      position: absolute;
-      top: -0.55em;
-      left: -0.08em;
-      z-index: -1;
-      margin: 0;
-      font-size: 9rem;
-      line-height: 1;
-      color: rgb(96 8 215 / 0.09);
+      font-size: 3.5rem;
     }
     .copy,
     .media {
@@ -633,8 +629,12 @@ const applyHref = links.familyApplication ?? getHelp.action.href;
   }
 
   @media (min-width: 56rem) {
+    /* Square on desktop too: a 5 by 4 crop of these portrait photos showed
+       three fifths of each and trimmed heads; square shows three quarters,
+       and the copy, with its chapter number, stands about as tall
+       (decision 72). */
     .media {
-      --photo-ratio: 5 / 4;
+      --photo-ratio: 1 / 1;
     }
     #programs :global(.watermark) {
       top: -2.5rem;
