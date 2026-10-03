@@ -1188,24 +1188,43 @@ test.describe("get involved tabs", () => {
     const ids = navigation.items
       .filter((item) => item.id !== "contact")
       .map((item) => item.href.replace("/#", ""));
-    for (const id of ids) {
-      await followSection(page, id);
-      // The scroll is smooth: wait for it to stop.
-      await settled(page);
-      const m = await page.evaluate((id) => {
+    // Where the page stands once it has stopped moving (two samples 150ms
+    // apart agree): "landed" when the section's box (its wave or cut) starts
+    // above the bar's edge and its content within a section space of the
+    // bar, else the measurements, which the failure then shows.
+    const landed = (id: string) =>
+      page.evaluate(async (id) => {
+        const wait = (ms: number) => new Promise((done) => setTimeout(done, ms));
+        const before = window.scrollY;
+        await wait(150);
+        if (window.scrollY !== before) return "moving";
         const bar = document.querySelector(".site-header")!.getBoundingClientRect().bottom;
         const section = document.getElementById(id)!;
         const content = section.querySelector(".wrap")!;
-        return {
+        const m = {
           sectionTop: section.getBoundingClientRect().top - bar,
           contentTop: content.getBoundingClientRect().top - bar,
+          bar,
+          scrollY: window.scrollY,
+          pageHeight: document.documentElement.scrollHeight,
+          viewportHeight: window.innerHeight,
+          menuOpen: (document.getElementById("menu") as HTMLDialogElement).open,
         };
+        const ok = m.sectionTop <= 0 && m.contentTop >= 16 && m.contentTop <= 120;
+        return ok ? "landed" : JSON.stringify(m);
       }, id);
-      // The section's box (its wave or cut) starts above the bar's edge, and
-      // its content starts within a section space of the bar.
-      expect(m.sectionTop, `${id}: the section's decoration under the bar`).toBeLessThanOrEqual(0);
-      expect(m.contentTop, `${id}: content too close to the bar`).toBeGreaterThanOrEqual(16);
-      expect(m.contentTop, `${id}: content too far from the bar`).toBeLessThanOrEqual(120);
+    for (const id of ids) {
+      await followSection(page, id);
+      // The scroll is smooth, and an engine may settle in steps: poll until
+      // the page has stopped in the right place (a sample taken mid-scroll
+      // reads as moving, never as landed).
+      await expect
+        .poll(() => landed(id), {
+          message: `${id}: the section's content lands under the bar`,
+          timeout: 10_000,
+          intervals: [200, 300, 500],
+        })
+        .toBe("landed");
     }
   });
 

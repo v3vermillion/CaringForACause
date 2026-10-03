@@ -282,7 +282,12 @@ const current = (href: string) => (href.replace(/\/+$/, "") === here ? "page" : 
       menu.focus({ preventScroll: true });
       document.documentElement.classList.add("menu-open");
     };
+    // The page's scroll lock lifts here, before a chosen link's fragment
+    // navigation starts its smooth scroll (the dialog's close event, which
+    // also lifts it, is queued and arrives after), so no engine starts the
+    // scroll while the root is overflow: hidden.
     const close = () => {
+      document.documentElement.classList.remove("menu-open");
       if (menu.open) menu.close();
     };
     openButton.addEventListener("click", open);
