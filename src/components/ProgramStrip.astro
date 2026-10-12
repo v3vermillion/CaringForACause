@@ -62,11 +62,15 @@ const proof = [
   /* The band is lit from the wave and falls off to the deeper night, as the
      reference's does: a gradient down to --night-2 (the wave out of the band
      continues it) and a violet bloom centred on the seam with the wave,
-     straddling it. The bloom's box reaches 1.2 wave heights above the seam
-     and its ellipse fades out at 1.12 (70% of a radius of 1.6), so it is
-     fully transparent before the box's edge: a box that cut the gradient
-     while it still had colour drew a hard horizontal line across the band
-     under the ribbons (decision 66). */
+     straddling it. Each section paints its own half: the banner the half
+     above the seam (Hero.astro), the strip the half below, from the same
+     ellipse, so they meet without a step. A strip box that reached up over
+     the banner was drawn over it in one frame and under it in the next by
+     iOS Safari, while the banner's photos animated, and the seam flickered
+     between lit and hard (decision 73). The ellipse fades out at 1.12 wave
+     heights (70% of a radius of 1.6), so it is fully transparent before the
+     box's edge: a box that cut the gradient while it still had colour drew a
+     hard horizontal line across the band (decision 66). */
   .strip {
     position: relative;
     isolation: isolate;
@@ -79,11 +83,11 @@ const proof = [
     z-index: -1;
     left: 0;
     right: 0;
-    top: calc(-1.2 * var(--wave-h));
-    height: calc(1.2 * var(--wave-h) + 9rem);
+    top: 0;
+    height: 9rem;
     pointer-events: none;
     background: radial-gradient(
-      ellipse 58% calc(1.6 * var(--wave-h)) at 50% calc(1.2 * var(--wave-h)),
+      ellipse 58% calc(1.6 * var(--strip-bloom)) at 50% 0,
       rgb(116 60 232 / 0.26),
       rgb(116 60 232 / 0) 70%
     );

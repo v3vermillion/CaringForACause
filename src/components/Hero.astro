@@ -456,7 +456,7 @@ const cycle = slides.length * 7;
      snapped to the banner's edge like the strip below it and sits wholly
      under the wave's solid night (which fills at least the bottom fifth of
      the wave), so it is never seen except where it closes that row. */
-  .hero::after {
+  .hero::before {
     content: "";
     position: absolute;
     left: 0;
@@ -465,6 +465,26 @@ const cycle = slides.length * 7;
     z-index: -1;
     height: calc(var(--wave-h) * 0.15);
     background: var(--night);
+    pointer-events: none;
+  }
+
+  /* The upper half of the program strip's bloom (ProgramStrip.astro paints
+     the lower half from the same ellipse), over the wave and the foot of the
+     doors as the strip's whole bloom was. It is the banner's own paint, so
+     no engine can order it under the banner (decision 73). */
+  .hero::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 2;
+    height: calc(1.2 * var(--strip-bloom));
+    background: radial-gradient(
+      ellipse 58% calc(1.6 * var(--strip-bloom)) at 50% 100%,
+      rgb(116 60 232 / 0.26),
+      rgb(116 60 232 / 0) 70%
+    );
     pointer-events: none;
   }
 

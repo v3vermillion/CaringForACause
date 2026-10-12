@@ -1412,6 +1412,19 @@ test.describe("the waves", () => {
     expect(seams, "colour steps at a wave box's edge").toEqual([]);
   });
 
+  // No paint of the program strip reaches up over the banner (decision 73):
+  // iOS Safari drew such a box over the animated banner in one frame and
+  // under it in the next, so the seam flickered. Each section paints its own
+  // half of the bloom.
+  test("the strip's bloom stays inside the strip", async ({ page }, testInfo) => {
+    oncePerEngine(testInfo);
+    await page.goto("/");
+    const top = await page.evaluate(
+      () => getComputedStyle(document.querySelector(".strip")!, "::before").top,
+    );
+    expect(top).toBe("0px");
+  });
+
   // The banner's photo never shows through its last device pixel row under
   // the wave (decision 73): on a phone that row let each crossfading photo
   // through as a hairline above the program strip that changed with every
