@@ -448,6 +448,26 @@ const cycle = slides.length * 7;
     height: var(--wave-h);
   }
 
+  /* Night under the wave's foot, over the photo and its veils. The wave's
+     night is a stretched drawing, and an engine can leave the banner's last
+     device pixel row half covered where the drawing's edge falls between
+     pixels; the photo showed through that row as a hairline across the
+     screen that changed with every crossfade (decision 73). This box is
+     snapped to the banner's edge like the strip below it and sits wholly
+     under the wave's solid night (which fills at least the bottom fifth of
+     the wave), so it is never seen except where it closes that row. */
+  .hero::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: -1;
+    height: calc(var(--wave-h) * 0.15);
+    background: var(--night);
+    pointer-events: none;
+  }
+
   .wrap {
     position: relative;
     z-index: 1;
