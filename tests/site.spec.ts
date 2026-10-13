@@ -1412,6 +1412,34 @@ test.describe("the waves", () => {
     expect(seams, "colour steps at a wave box's edge").toEqual([]);
   });
 
+  // The four program icons sit on the same fraction of a pixel (decision
+  // 75): each is sized and placed in its box in whole pixels, so a screen
+  // that rounds them cannot round one a pixel away from its neighbours, as
+  // iOS Safari did to the middle two from one load to the next.
+  test("the program icons share one pixel grid", async ({ page }, testInfo) => {
+    oncePerEngine(testInfo);
+    const off: string[] = [];
+    for (const width of [375, 390, 393, 430, 768, 1024, 1280]) {
+      await page.setViewportSize({ width, height: 844 });
+      await page.goto("/");
+      await fontsSettled(page);
+      const boxes = await page.evaluate(() =>
+        [...document.querySelectorAll(".strip .pi")].map((el) => {
+          const r = el.getBoundingClientRect();
+          return { top: r.top, width: r.width, height: r.height };
+        }),
+      );
+      const whole = (v: number) => Math.abs(v - Math.round(v)) < 0.01;
+      for (const [i, b] of boxes.entries()) {
+        if (!whole(b.width) || !whole(b.height))
+          off.push(`${width}px icon ${i}: ${b.width} by ${b.height}`);
+        if (!whole(b.top - boxes[0].top))
+          off.push(`${width}px icon ${i}: ${b.top - boxes[0].top} below the first`);
+      }
+    }
+    expect(off, "icons off the shared pixel grid").toEqual([]);
+  });
+
   // No paint of the program strip reaches up over the banner (decision 73):
   // iOS Safari drew such a box over the animated banner in one frame and
   // under it in the next, so the seam flickered. Each section paints its own

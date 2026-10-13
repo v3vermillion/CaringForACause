@@ -141,11 +141,13 @@ const proof = [
      resolves as auto, and the icon would take its width's height instead. */
   .icon {
     --k: calc(48 / 81 * var(--rp));
+    --box-h: calc(48 * var(--rp));
+    --box-w: calc(70 * var(--rp));
     display: flex;
     align-items: center;
     justify-content: center;
-    height: calc(48 * var(--rp));
-    width: calc(70 * var(--rp));
+    height: var(--box-h);
+    width: var(--box-w);
     transition: filter 0.25s ease;
   }
 
@@ -157,6 +159,30 @@ const proof = [
     width: calc(var(--pi-w) * var(--k));
     height: auto;
     max-width: 100%;
+  }
+
+  /* Every icon in whole pixels: its box, its size and its offset in the box
+     are rounded, so the four sit on the same fraction of a pixel as each
+     other and as the strip. Centred at a fraction of a pixel of its own (the
+     gift's 1.5, the diaper's 4.2 at 393 wide), each icon was rounded to the
+     screen's pixels its own way, and iOS Safari rounded them differently
+     from one load to the next: on a refresh the middle two jumped a pixel or
+     two against their neighbours (decision 75). */
+  @supports (width: round(1.5px, 1px)) {
+    .icon {
+      display: block;
+      height: round(var(--box-h), 1px);
+      width: round(var(--box-w), 1px);
+    }
+    .icon :global(.pi) {
+      --w: round(calc(var(--pi-w) * var(--k)), 1px);
+      --h: round(calc(var(--pi-h) * var(--k)), 1px);
+      display: block;
+      width: var(--w);
+      height: var(--h);
+      margin-left: round(down, calc((round(var(--box-w), 1px) - var(--w)) / 2), 1px);
+      margin-top: round(down, calc((round(var(--box-h), 1px) - var(--h)) / 2), 1px);
+    }
   }
 
   .words {
@@ -244,8 +270,8 @@ const proof = [
     }
     .icon {
       --k: calc(54 / 81 * var(--sp));
-      height: calc(54 * var(--sp));
-      width: calc(80 * var(--sp));
+      --box-h: calc(54 * var(--sp));
+      --box-w: calc(80 * var(--sp));
     }
     .words {
       gap: calc(7 * var(--sp));
@@ -316,8 +342,8 @@ const proof = [
     }
     .icon {
       --k: calc(52 / 81 * var(--u));
-      height: calc(52 * var(--u));
-      width: calc(70 * var(--u));
+      --box-h: calc(52 * var(--u));
+      --box-w: calc(70 * var(--u));
     }
     .words {
       gap: calc(3 * var(--u));
