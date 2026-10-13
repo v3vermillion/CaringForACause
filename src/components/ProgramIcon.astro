@@ -25,12 +25,14 @@ const boxes: Record<ProgramIconKind, string> = {
 };
 /* The box's width, for the strip to size each icon by one shared scale. */
 const widths: Record<ProgramIconKind, number> = { meals: 103, gifts: 70, diapers: 75, school: 77 };
+/* And its height, for the strip to size each icon in whole pixels. */
+const heights: Record<ProgramIconKind, number> = { meals: 69, gifts: 76, diapers: 67, school: 81 };
 ---
 
 <svg
   viewBox={boxes[kind]}
   class:list={["pi", `pi--${kind}`, className]}
-  style={`--pi-w: ${widths[kind]}`}
+  style={`--pi-w: ${widths[kind]}; --pi-h: ${heights[kind]}`}
   aria-hidden="true"
   focusable="false"
 >
