@@ -1411,6 +1411,99 @@ test.describe("the waves", () => {
     }
     expect(seams, "colour steps at a wave box's edge").toEqual([]);
   });
+
+  // No paint of the program strip reaches up over the banner (decision 73):
+  // iOS Safari drew such a box over the animated banner in one frame and
+  // under it in the next, so the seam flickered. Each section paints its own
+  // half of the bloom.
+  test("the strip's bloom stays inside the strip", async ({ page }, testInfo) => {
+    oncePerEngine(testInfo);
+    await page.goto("/");
+    const top = await page.evaluate(
+      () => getComputedStyle(document.querySelector(".strip")!, "::before").top,
+    );
+    expect(top).toBe("0px");
+  });
+
+  // What lies behind a wave's flat colour never shows through the edge row
+  // of its box (decision 73). The drawing is stretched to a box that can end
+  // on a fraction of a device pixel, and iOS Safari left that row part
+  // covered: the banner's crossfading photos flickered through it as a
+  // hairline above the program strip, and the paper showed as a white line
+  // where the night band hands over to the programs. What lies behind is
+  // painted white here so any leak is bright, the ribbons are hidden (their
+  // foot can dip into the rows read) and the wave's flat colour, its first
+  // path, stays; the rows are read at a phone's three device pixels to a CSS
+  // pixel, at widths whose edges fall on different fractions of a pixel.
+  test("no wave's edge lets what lies behind show through", async ({ browser }, testInfo) => {
+    oncePerEngine(testInfo);
+    const context = await browser.newContext({
+      deviceScaleFactor: 3,
+      baseURL: testInfo.project.use.baseURL,
+    });
+    const page = await context.newPage();
+    const ribbonsOff = (wave: string) =>
+      `${wave} svg > g, ${wave} svg > path:not(:first-of-type) { visibility: hidden !important; }`;
+    const edges = [
+      {
+        name: "the banner's foot",
+        css:
+          ".montage { background: #fff !important; } .montage picture, .tint, .scrim { visibility: hidden !important; }" +
+          ribbonsOff(".hero-wave"),
+        y: () => document.querySelector(".hero")!.getBoundingClientRect().bottom,
+      },
+      {
+        name: "the programs' top",
+        css:
+          "#programs { background: #fff !important; } #programs::before, #programs::after { visibility: hidden !important; }" +
+          ribbonsOff("#programs .wave-in"),
+        y: () => document.querySelector("#programs")!.getBoundingClientRect().top,
+      },
+    ];
+    const leaks: string[] = [];
+    for (const edge of edges) {
+      for (const width of [375, 390, 393, 414, 430, 768, 1280]) {
+        await page.setViewportSize({ width, height: width > 900 ? 800 : 844 });
+        await page.goto("/");
+        await fontsSettled(page);
+        await page.addStyleTag({ content: edge.css });
+        await page.evaluate(
+          `window.scrollTo({ top: scrollY + (${edge.y.toString()})() - 200, behavior: "instant" })`,
+        );
+        const y = await page.evaluate(async (fn) => {
+          await new Promise((done) => requestAnimationFrame(() => done(null)));
+          return (0, eval)(`(${fn})()`) as number;
+        }, edge.y.toString());
+        const png = await page.screenshot({
+          clip: { x: 0, y: Math.floor(y) - 4, width, height: 8 },
+          animations: "disabled",
+        });
+        const light = await page.evaluate(
+          async (data) => {
+            const img = new Image();
+            img.src = data;
+            await img.decode();
+            const canvas = document.createElement("canvas");
+            canvas.width = img.width;
+            canvas.height = img.height;
+            const ctx = canvas.getContext("2d")!;
+            ctx.drawImage(img, 0, 0);
+            const px = ctx.getImageData(0, 0, img.width, img.height).data;
+            let worst = 0;
+            for (let i = 0; i < px.length; i += 4)
+              worst = Math.max(worst, px[i] + px[i + 1] + px[i + 2]);
+            return worst;
+          },
+          "data:image/png;base64," + png.toString("base64"),
+        );
+        // The night and the strip's bloom sum to under 200; a leak of the
+        // white behind reaches several hundred.
+        if (light > 260) leaks.push(`${width}px: brightest ${light} at ${edge.name}`);
+      }
+    }
+    await context.close();
+    expect(leaks, "white behind a wave showing at its edge").toEqual([]);
+  });
 });
 
 test.describe("the program strip", () => {

@@ -62,6 +62,11 @@
   /* The wave between surfaces (src/components/Wave.astro): the banner's 84
      reference px on phones and tablets, 92 on desktop. */
   --wave-h: 5.25rem;
+  /* The program strip's bloom, centred on the seam between the banner and
+     the strip (src/components/ProgramStrip.astro, Hero.astro): sized from the
+     page's wave height, which the banner overrides for its own wave, so each
+     half reads the same value (decision 73). */
+  --strip-bloom: var(--wave-h);
   /* The Get involved section's diagonal cut into the section above it
      (src/components/GetInvolved.astro), which that section pays for. */
   --wedge: 3rem;
