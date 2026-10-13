@@ -3,15 +3,53 @@
 //   node scripts/brand/wave-geometry.mjs        writes src/components/Wave.astro
 //
 // Coordinates: x 0..1000 across the screen, y 0..100 down the band's height.
-// Each band is the edge curve (a chain of cubic Béziers) forward, then the
-// same chain back with each point pushed down by a thickness, so the ribbons
-// taper. Offsetting control points is not a true offset curve, but for these
-// gentle strips it is indistinguishable and costs a tenth of the bytes.
+// Each band is the edge curve pushed down by one thickness, forward, then
+// by another, back, so the ribbons taper. Each pushed curve is sampled from
+// the edge every 40 units across and drawn as a smooth spline through the
+// samples (a Catmull-Rom chain written as cubic Béziers), so it follows the
+// thickness exactly and has one tangent at every join. Pushing the edge's
+// own control points down had bent each band where two segments met and the
+// thickness changed pace, a kink that read as a hand-drawn line on a phone
+// (decision 74).
 import { writeFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 
+const end = (chain) => chain[chain.length - 1][3];
 const f = (n) => (Math.round(n * 10) / 10).toString();
-const off = (chain, t) => chain.map((seg) => seg.map(([x, y]) => [x, y + t(x)]));
+// The edge's height at x: each segment's x runs one way, so its parameter
+// is found by bisection.
+const bez = (a, b, c, d, s) =>
+  (1 - s) ** 3 * a + 3 * (1 - s) ** 2 * s * b + 3 * (1 - s) * s ** 2 * c + s ** 3 * d;
+const edgeAt = (chain, x) => {
+  const seg = chain.find((g) => x <= g[3][0]) ?? chain[chain.length - 1];
+  const [p0, c1, c2, p3] = seg;
+  let [lo, hi] = [0, 1];
+  for (let i = 0; i < 40; i++) {
+    const mid = (lo + hi) / 2;
+    if (bez(p0[0], c1[0], c2[0], p3[0], mid) < x) lo = mid;
+    else hi = mid;
+  }
+  return bez(p0[1], c1[1], c2[1], p3[1], (lo + hi) / 2);
+};
+const STEP = 40;
+const off = (chain, t) => {
+  const x0 = chain[0][0][0];
+  const x1 = end(chain)[0];
+  const pts = [];
+  for (let x = x0; x < x1 + 1e-9; x += STEP) pts.push([x, edgeAt(chain, x) + t(x)]);
+  const at = (i) => pts[Math.max(0, Math.min(pts.length - 1, i))];
+  const segs = [];
+  for (let i = 0; i < pts.length - 1; i++) {
+    const [p0, p1, p2, p3] = [at(i - 1), at(i), at(i + 1), at(i + 2)];
+    segs.push([
+      p1,
+      [p1[0] + (p2[0] - p0[0]) / 6, p1[1] + (p2[1] - p0[1]) / 6],
+      [p2[0] - (p3[0] - p1[0]) / 6, p2[1] - (p3[1] - p1[1]) / 6],
+      p2,
+    ]);
+  }
+  return segs;
+};
 const fwd = (chain) =>
   `M${f(chain[0][0][0])},${f(chain[0][0][1])}` +
   chain
@@ -27,7 +65,6 @@ const back = (chain) =>
       ([p0, c1, c2]) => `C${f(c2[0])},${f(c2[1])} ${f(c1[0])},${f(c1[1])} ${f(p0[0])},${f(p0[1])}`,
     )
     .join("");
-const end = (chain) => chain[chain.length - 1][3];
 // A strip between edge+a and edge+b.
 const strip = (chain, a, b) => {
   const top = off(chain, a);
@@ -74,7 +111,10 @@ const smooth = (x, x0, y0, x1, y1) => {
 // over `rise`, where the leader has thinned to nothing. Each band also gets
 // a highlight along its crest and a shade along its foot (blurred and
 // clipped to the band in the component), so the ribbons read as satin
-// rather than as flat stripes.
+// rather than as flat stripes. The bands themselves are feathered by a
+// third of a unit up and down (about half a device pixel on a phone), so a
+// near-level edge fades across its pixel rows instead of stepping along
+// them (decision 74).
 const bands = (edge, t, u, rise) => {
   const ut = (x) => t(x) * (1 - smooth(x, rise[0], 0, rise[1], 1)); // the other ribbon's top
   const foot = (x) => Math.max(t(x), ut(x) + u(x)); // where the surface below begins
@@ -197,16 +237,19 @@ ${palette}
       <filter id={\`\${id}-spill\`} x="-5%" y="-60%" width="110%" height="220%">
         <feGaussianBlur stdDeviation="4 8" />
       </filter>
+      <filter id={\`\${id}-edge\`} x="0" y="-10%" width="100%" height="120%">
+        <feGaussianBlur stdDeviation="0 0.3" />
+      </filter>
     </defs>
     {up.fill && <path d={${P}.above} fill={up.fill} />}
     {down.fill && <path d={${P}.below} fill={down.fill} />}
     <path d={${P}.${lead === "crimson" ? "top" : "under"}} fill=${kind === "paper" ? "{`url(#${id}-spillfill)`}" : '"#ff2d6e"'} opacity="0.4" filter={\`url(#\${id}-spill)\`} />
-    <path d={${P}.top} fill={\`url(#\${id}-${lead})\`} />
+    <path d={${P}.top} fill={\`url(#\${id}-${lead})\`} filter={\`url(#\${id}-edge)\`} />
     <g clip-path={\`url(#\${id}-tclip)\`}>
       <path d={${P}.topLit} fill={\`url(#\${id}-${lead}-lit)\`} filter={\`url(#\${id}-soft)\`} />
       <path d={${P}.topShade} fill="${lead === "crimson" ? "#5a0420" : "#2a0c7a"}" opacity="0.4" filter={\`url(#\${id}-soft)\`} />
     </g>
-    <path d={${P}.under} fill={\`url(#\${id}-${other})\`} />
+    <path d={${P}.under} fill={\`url(#\${id}-${other})\`} filter={\`url(#\${id}-edge)\`} />
     <g clip-path={\`url(#\${id}-uclip)\`}>
       <path d={${P}.underLit} fill={\`url(#\${id}-${other}-lit)\`} filter={\`url(#\${id}-soft)\`} />
       <path d={${P}.underShade} fill="${other === "crimson" ? "#5a0420" : "#2a0c7a"}" opacity="0.4" filter={\`url(#\${id}-soft)\`} />
