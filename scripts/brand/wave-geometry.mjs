@@ -177,6 +177,8 @@ const svg = (
 ) => `  <div class:list={["wave", "wave--${kind}", className]}>
     {up.ground && <div class={\`wave-ground wave-ground--above wave-ground--\${up.ground}\`} />}
     {down.ground && <div class={\`wave-ground wave-ground--below wave-ground--\${down.ground}\`} />}
+    {up.fill && <div class="wave-edge wave-edge--above" style={{ background: up.fill }} />}
+    {down.fill && <div class="wave-edge wave-edge--below" style={{ background: down.fill }} />}
     <svg viewBox="0 0 1000 100" preserveAspectRatio="none" aria-hidden="true" focusable="false">
     <defs>
 ${palette}
@@ -384,6 +386,34 @@ ${svg("paper", "B", paletteB, "violet", "crimson")}
     display: block;
     width: 100%;
     height: 100%;
+  }
+
+  /* A flat colour above or below the ribbons is also laid as a plain box
+     along the box's edge, under the drawing. The drawing is stretched to a
+     box that can end on a fraction of a device pixel, and iOS Safari left
+     the edge row only part covered, so the section behind showed through as
+     a hairline across the screen: the paper as a white line under the night
+     band, the banner's photo as a flickering one (decision 73). A box is
+     snapped to the edge as the section's own background is. Each lies
+     wholly under the drawing's solid colour: the region above the ribbons
+     is at least 24% of the box everywhere; the region below is at least 22%
+     on the night wave but only 2% at the paper wave's right edge, so that
+     one is a pixel. */
+  .wave-edge {
+    position: absolute;
+    left: 0;
+    right: 0;
+  }
+  .wave-edge--above {
+    top: 0;
+    height: 15%;
+  }
+  .wave-edge--below {
+    bottom: 0;
+    height: 15%;
+  }
+  .wave--paper .wave-edge--below {
+    height: 1px;
   }
 
   /* The masks for a ground continued under the ribbons (global.css paints
