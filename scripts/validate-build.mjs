@@ -71,6 +71,36 @@ export function viewportUnitsOutsideDesktop(html) {
 }
 
 /**
+ * Every `overflow: clip` in the CSS that is not inside an
+ * `@supports (overflow: clip)` block. Safari before 16 (every iPhone that
+ * stops at iOS 15) has no clip, and the minifier keeps only the last of two
+ * overflow declarations, so a `hidden` fallback written beside `clip` is
+ * dropped from the build; the fallback must be the plain rule and clip the
+ * @supports one.
+ */
+export function overflowClipWithoutFallback(html) {
+  const ranges = [];
+  const supports = /@supports\s*\(\s*overflow\s*:\s*clip\s*\)\s*\{/gi;
+  let m;
+  while ((m = supports.exec(html))) {
+    let depth = 1;
+    let i = m.index + m[0].length;
+    while (i < html.length && depth > 0) {
+      if (html[i] === "{") depth++;
+      else if (html[i] === "}") depth--;
+      i++;
+    }
+    ranges.push([m.index, i]);
+  }
+  const found = [];
+  const clip = /overflow(?:-[xy])?\s*:\s*clip\b/gi;
+  while ((m = clip.exec(html))) {
+    if (!ranges.some(([a, b]) => m.index > a && m.index < b)) found.push(m[0]);
+  }
+  return found;
+}
+
+/**
  * @param {string} dist  Path to the built site.
  * @param {{ allowIndexing: boolean }} options
  * @returns {string[]} Problems found. Empty means the build may publish.
@@ -217,6 +247,12 @@ export function validateBuild(dist, { allowIndexing }) {
     if (cssUnits.length > 0)
       fail(
         `${name}: viewport-height units in CSS cause scroll zoom on phones: ${[...new Set(cssUnits)].join(", ")}`,
+      );
+
+    // overflow: clip without a hidden fallback scrolls an iOS 15 iPhone sideways.
+    if (overflowClipWithoutFallback(raw).length > 0)
+      fail(
+        `${name}: overflow: clip outside @supports (overflow: clip); Safari 15 has no clip. Write overflow: hidden, then clip under @supports.`,
       );
   }
 

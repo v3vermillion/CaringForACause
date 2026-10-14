@@ -123,6 +123,20 @@ describe("publish gate", () => {
     expectError(dir, /viewport-height units/i);
   });
 
+  it("blocks overflow: clip that Safari 15 would ignore", () => {
+    const dir = brokenBuild("index.html", (h) =>
+      h.replace("</style>", ".x{overflow:clip}</style>"),
+    );
+    expectError(dir, /overflow: clip outside @supports/);
+    const fallback = brokenBuild("index.html", (h) =>
+      h.replace(
+        "</style>",
+        ".x{overflow:hidden}@supports (overflow:clip){.x{overflow:clip}}</style>",
+      ),
+    );
+    assert.ok(!validateBuild(fallback, { allowIndexing: false }).some((e) => /overflow/.test(e)));
+  });
+
   it("blocks missing security headers", () => {
     const dir = brokenBuild("_headers", (h) => h.replace(/Content-Security-Policy:.*\n/, ""));
     expectError(dir, /missing Content-Security-Policy/);

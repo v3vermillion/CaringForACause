@@ -446,6 +446,15 @@ const mailto = (subject: string) =>
     outline-offset: 0.0625rem;
   }
 
+  /* High contrast drops the thumb's fill, which is the only mark of the
+     chosen tab: give it an edge in the system's highlight colour. */
+  @media (forced-colors: active) {
+    [role="tab"][aria-selected="true"] {
+      outline: 3px solid Highlight;
+      outline-offset: -3px;
+    }
+  }
+
   /* The stage: the panels' room. Its height eases between panels (set by
      the script), and a sideways swipe on it turns the panel while vertical
      scrolling stays the browser's. */

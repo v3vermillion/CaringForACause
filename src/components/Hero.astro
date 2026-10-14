@@ -127,14 +127,21 @@ const cycle = slides.length * 7;
        photo (scaled 2% larger than the banner) gave it 4px of hidden
        overflow, so scrolling anything inside the banner into view (a
        keyboard focus, a test) slid its contents up and showed a band of
-       photo under the wave. A clipped box cannot scroll. Hidden stays as
-       the fallback for Safari 15. */
+       photo under the wave. A clipped box cannot scroll. Hidden is the
+       fallback for Safari 15, written apart under @supports because the
+       minifier keeps only the last of two overflow declarations (it had
+       shipped clip alone, and an iPhone on iOS 15 scrolled sideways). */
     overflow: hidden;
-    overflow: clip;
     background: var(--night);
     /* The bottom padding clears the wave's ribbons where they sit highest,
        at the left edge (26% of the wave's height from its top), plus a gap. */
     padding-block: calc(40 * var(--rp)) calc(12 * var(--rp) + var(--wave-h) * 0.74);
+  }
+
+  @supports (overflow: clip) {
+    .hero {
+      overflow: clip;
+    }
   }
 
   .montage {
@@ -325,7 +332,10 @@ const cycle = slides.length * 7;
      other is an outlined pill. The whole door is the link and is never
      shorter than 44px; the pill itself carries no floor, so it scales with
      the class like everything else (a floor on it changed the composition on
-     short laptops). */
+     short laptops). Where the scale makes the pill shorter than 44px (a
+     320px phone, a short laptop window), the door's extra height hangs
+     equally above and below it (a negative block margin, the season strip's
+     device), so the tap target holds its floor and nothing around it moves. */
   .doors {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -335,10 +345,13 @@ const cycle = slides.length * 7;
   }
 
   .door {
+    --pill-h: calc(48 * var(--rp));
     display: grid;
-    align-content: start;
+    align-content: center;
     gap: calc(8 * var(--rp));
     min-width: 0;
+    min-height: max(44px, var(--pill-h));
+    margin-block: calc((var(--pill-h) - max(44px, var(--pill-h))) / 2);
     color: #fff;
     text-decoration: none;
   }
@@ -350,7 +363,7 @@ const cycle = slides.length * 7;
     align-items: center;
     justify-content: flex-start;
     gap: calc(8 * var(--rp));
-    min-height: calc(48 * var(--rp));
+    min-height: var(--pill-h);
     padding: 0 calc(14 * var(--rp)) 0 calc(24 * var(--rp));
     border-radius: var(--r-pill);
     font-family: var(--font-display);
@@ -582,11 +595,11 @@ const cycle = slides.length * 7;
       margin-top: calc(24 * var(--u));
     }
     .door {
+      --pill-h: calc(54 * var(--u));
       gap: calc(10 * var(--u));
     }
     .door-pill {
       gap: calc(8 * var(--u));
-      min-height: calc(54 * var(--u));
       padding: 0 calc(16 * var(--u)) 0 calc(28 * var(--u));
       font-size: calc(20 * var(--u));
     }

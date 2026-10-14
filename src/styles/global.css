@@ -578,6 +578,14 @@ a {
   transition: transform 150ms ease;
 }
 
+/* The arrow is decoration: where the browser takes alternative text for
+   generated content, it is given none, so "Email us →" is read "Email us". */
+@supports (content: "x" / "") {
+  .arrow-link::after {
+    content: "→" / "";
+  }
+}
+
 .arrow-link:hover {
   text-decoration: underline;
 }
@@ -639,13 +647,29 @@ legend.label {
   border-color: var(--purple);
 }
 
+/* The colour alone: the background shorthand would also remove a select's
+   arrow, which is its background image. */
 .input:focus,
 .select:focus,
 .textarea:focus {
   border-color: var(--purple);
-  background: #fff;
+  background-color: #fff;
   outline: none;
   box-shadow: 0 0 0 0.1875rem rgb(96 8 215 / 0.2);
+}
+
+/* iOS zooms the page into a field whose text is under 16px when it is
+   focused, and the class scale puts it there on a 320px phone (including an
+   iPhone in Display Zoom) and on 576 to 682px screens (a phone on its side,
+   split view). Under a finger the text holds 16px; the field's box is
+   floored at 44px already, so nothing around it moves. Not at every width:
+   a mouse has no zoom to avoid, and there the field scales with the class. */
+@media (pointer: coarse) {
+  .input,
+  .select,
+  .textarea {
+    font-size: max(16px, 1em);
+  }
 }
 
 .input[aria-invalid="true"],
@@ -715,18 +739,53 @@ legend.label {
   outline-offset: 0.1875rem;
 }
 
+/* A browser without :has() (Firefox before 121, Chrome before 105, Safari
+   before 15.4) cannot draw the chip's chosen state or its focus ring, and
+   the radio inside is invisible, so the choice would not show at all. There
+   the radio itself shows, beside its label. */
+@supports not selector(:has(*)) {
+  .choice input {
+    position: static;
+    width: auto;
+    height: auto;
+    opacity: 1;
+    accent-color: var(--purple);
+  }
+}
+
+/* Windows high contrast (forced colours) drops backgrounds and box shadows,
+   which carry the chips' rings and chosen state and the buttons' edges:
+   give each a border or outline in the system's colours instead. */
+@media (forced-colors: active) {
+  .button,
+  .choice {
+    border: 1px solid ButtonText;
+  }
+  .choice:has(input:checked) {
+    outline: 3px solid Highlight;
+    outline-offset: 2px;
+  }
+}
+
 /* Page openers for the donation and application pages: night, lit like the
    About section, ending in the wave onto the paper below (decision 52). */
 .page-hero {
   position: relative;
   /* The wave's ground continuation overhangs the opener by a pixel (see
      .wave-ground); the clip keeps that row from showing through the
-     transparent section below, where it would carry the wash twice. */
-  overflow: clip;
+     transparent section below, where it would carry the wash twice.
+     Hidden for browsers without clip (Safari 15), clip where it exists. */
+  overflow: hidden;
   padding-block: var(--space-l) calc(var(--space-l) + var(--wave-h));
   background:
     radial-gradient(50rem 24rem at 100% 0, rgb(96 8 215 / 0.4), transparent 70%),
     radial-gradient(30rem 16rem at 0 100%, rgb(200 40 120 / 0.2), transparent 70%), var(--night);
+}
+
+@supports (overflow: clip) {
+  .page-hero {
+    overflow: clip;
+  }
 }
 
 .page-hero .page-wave {

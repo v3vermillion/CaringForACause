@@ -378,9 +378,24 @@ const mailtoAny = mailLink(
     opacity: 1;
     font: inherit;
     color: inherit;
-    outline: none;
     appearance: textfield;
     -moz-appearance: textfield;
+  }
+
+  /* The pill draws the ring (global.css, .choice:has(input:focus-visible));
+     without :has() the field keeps the browser's own. */
+  @supports selector(:has(*)) {
+    .amounts .choice--other input {
+      outline: none;
+    }
+  }
+
+  /* Under a finger the typed amount holds 16px, so focusing the field
+     doesn't zoom an iPhone (global.css explains). */
+  @media (pointer: coarse) {
+    .amounts .choice--other input {
+      font-size: max(16px, 1em);
+    }
   }
 
   .amounts .choice--other input::-webkit-inner-spin-button,

@@ -162,9 +162,8 @@ const applyHref = links.familyApplication ?? getHelp.action.href;
     position: relative;
     /* The watermark bleeds past the column; clipped (not hidden) so the
        section is not a scroll container with the watermark's width of
-       hidden overflow (see the banner). */
+       hidden overflow (see the banner, and its note on the fallback). */
     overflow: hidden;
-    overflow: clip;
     /* The space above the opener is measured from the wave's box, so that a
        link landing with the wave under the bar still finds the opener a
        section space below it (decision 71; decision 53 had measured it from
@@ -174,6 +173,12 @@ const applyHref = links.familyApplication ?? getHelp.action.href;
        foot carries it: its high corner sits a full section space under the
        last row. */
     padding-bottom: calc(var(--space-xl) + var(--wedge));
+  }
+
+  @supports (overflow: clip) {
+    #programs {
+      overflow: clip;
+    }
   }
 
   #programs > .wrap {
@@ -503,7 +508,7 @@ const applyHref = links.familyApplication ?? getHelp.action.href;
 
   .checklist::details-content {
     block-size: 0;
-    overflow: clip;
+    overflow: hidden;
     opacity: 0;
     transition:
       block-size 260ms cubic-bezier(0.2, 0.8, 0.2, 1),

@@ -43,6 +43,12 @@ test.describe("accessibility", () => {
     expect(results.violations.map((v) => v.id)).toEqual([]);
   });
 
+  // A link's arrow and an error's "!" are decoration: not part of the name.
+  test("decorative arrows are not read aloud", async ({ page }) => {
+    await page.goto("/apply");
+    await expect(page.locator(".side .arrow-link")).toHaveAccessibleName("Email us");
+  });
+
   test("skip link is the first thing keyboard users reach", async ({ page, browserName }) => {
     await page.goto("/");
     // Safari only tabs to links with Option+Tab unless the user changes a setting.
@@ -70,6 +76,41 @@ test.describe("accessibility", () => {
       expect(repeated).toEqual([]);
     });
   }
+});
+
+// Windows high contrast (forced colours) drops backgrounds and shadows. The
+// phone menu's button, a chosen chip and the chosen tab must still show.
+// Chromium emulates forced colours; the stylesheet is the same everywhere.
+test.describe("high contrast", () => {
+  test.use({ forcedColors: "active" });
+
+  test("keeps the menu button, the chosen tab and chosen chips visible", async ({
+    page,
+    browserName,
+  }, testInfo) => {
+    oncePerEngine(testInfo);
+    test.skip(browserName !== "chromium", "forced colours are emulated in Chromium");
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto("/");
+    const [line, bar] = await page
+      .locator("[data-menu-open] .lines i")
+      .first()
+      .evaluate((el) => [
+        getComputedStyle(el).backgroundColor,
+        getComputedStyle(el.closest(".site-header")!).backgroundColor,
+      ]);
+    expect(line, "the menu button's lines").not.toBe(bar);
+    await expect(page.locator("[role=tab][aria-selected=true]")).toHaveCSS(
+      "outline-style",
+      "solid",
+    );
+    await page.goto("/donate");
+    await expect(page.locator(".choice:has(input[name=frequency]:checked)")).toHaveCSS(
+      "outline-style",
+      "solid",
+    );
+    await expect(page.locator(".card .go")).not.toHaveCSS("border-top-width", "0px");
+  });
 });
 
 test.describe("device compatibility", () => {
@@ -184,6 +225,72 @@ test.describe("device compatibility", () => {
       expect(errors).toEqual([]);
     });
   }
+
+  // The banner's doors are links and hold the 44px floor wherever the scale
+  // would make their pills shorter (a 320px phone, a short laptop window);
+  // the composition and fold tests check that nothing moves for it.
+  test("the doors are never shorter than 44px", async ({ page }, testInfo) => {
+    oncePerEngine(testInfo);
+    for (const [width, height] of [
+      [320, 640],
+      [896, 600],
+      [1024, 600],
+      [1366, 657],
+    ] as const) {
+      await page.setViewportSize({ width, height });
+      await page.goto("/");
+      for (const door of [".door--help", ".door--give"]) {
+        const box = (await page.locator(door).boundingBox())!;
+        expect(box.height, `${door} at ${width} × ${height}`).toBeGreaterThanOrEqual(43.5);
+      }
+    }
+  });
+
+  // iOS zooms into a field whose text is under 16px when it is focused. Under
+  // a finger every field holds 16px, at the narrowest phone and on a phone
+  // on its side, including the application's copy box and the gift's amount.
+  test("no field makes iOS zoom when it is focused", async ({ page, isMobile }) => {
+    test.skip(!isMobile, "only a touch screen zooms into a field");
+    for (const [width, height] of [
+      [320, 640],
+      [640, 360],
+    ] as const) {
+      await page.setViewportSize({ width, height });
+      for (const path of ["/apply", "/donate"]) {
+        await page.goto(path);
+        const sizes = await page.evaluate(() => {
+          document.querySelector<HTMLElement>("[data-done]")?.removeAttribute("hidden");
+          return [
+            ...document.querySelectorAll(
+              "input:not([type=radio]):not([type=checkbox]), select, textarea",
+            ),
+          ].map(
+            (el) =>
+              `${el.id || el.getAttribute("name") || el.tagName} ${parseFloat(getComputedStyle(el).fontSize)}`,
+          );
+        });
+        for (const entry of sizes) {
+          expect(
+            Number(entry.split(" ").pop()),
+            `${path} ${entry} at ${width}`,
+          ).toBeGreaterThanOrEqual(16);
+        }
+      }
+    }
+  });
+
+  // The focus rule changes the field's colour, not its whole background: a
+  // dropdown's arrow is its background image.
+  test("a dropdown keeps its arrow when it is focused", async ({ page }) => {
+    await page.goto("/apply");
+    const arrow = await page.evaluate(() => {
+      document.querySelector<HTMLElement>("[data-step=household]")!.hidden = false;
+      const select = document.querySelector<HTMLSelectElement>("#county")!;
+      select.focus();
+      return getComputedStyle(select).backgroundImage;
+    });
+    expect(arrow).toContain("svg");
+  });
 
   test("the sticky header stays visible after scrolling", async ({ page }) => {
     await page.goto("/");

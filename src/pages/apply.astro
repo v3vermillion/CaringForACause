@@ -1037,7 +1037,13 @@ const sideBody = getHelp.talk.body;
   /* One sheet, a surface (global.css), holds the four steps and the
      buttons that move between them. */
   .sheet {
-    overflow: clip;
+    overflow: hidden;
+  }
+
+  @supports (overflow: clip) {
+    .sheet {
+      overflow: clip;
+    }
   }
 
   .step {
@@ -1136,6 +1142,14 @@ const sideBody = getHelp.talk.body;
     color: #fff;
     font-size: 0.8em;
     line-height: 1;
+  }
+
+  /* The mark is decoration (the message says it all), so where generated
+     content takes alternative text it is given none and is not read aloud. */
+  @supports (content: "x" / "") {
+    .apply :global(.error::before) {
+      content: "!" / "";
+    }
   }
 
   .children {
@@ -1241,9 +1255,18 @@ const sideBody = getHelp.talk.body;
     cursor: pointer;
   }
 
-  /* The card carries the ring; the box inside does not need a second one. */
-  .need-card input:focus-visible {
-    outline: none;
+  /* The card carries the ring; the box inside does not need a second one.
+     Only where the card can draw it: without :has() the box keeps its own. */
+  @supports selector(:has(*)) {
+    .need-card input:focus-visible {
+      outline: none;
+    }
+  }
+
+  @media (forced-colors: active) {
+    .need:has(input[name="need"]:checked) {
+      outline: 3px solid Highlight;
+    }
   }
 
   .need-title {
@@ -1425,6 +1448,14 @@ const sideBody = getHelp.talk.body;
   .done .textarea:focus-visible {
     outline: max(2px, 0.1875rem) solid var(--focus);
     outline-offset: 0.1875rem;
+  }
+
+  /* Its smaller text holds 16px under a finger, as every field's does
+     (global.css), so focusing it to copy doesn't zoom an iPhone. */
+  @media (pointer: coarse) {
+    .done .textarea {
+      font-size: max(16px, var(--step--1));
+    }
   }
 
   /* The night aside: a night surface, the home page's Get help card. */

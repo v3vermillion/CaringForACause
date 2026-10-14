@@ -773,6 +773,19 @@ const current = (href: string) => (href.replace(/\/+$/, "") === here ? "page" : 
     width: 70%;
   }
 
+  /* High contrast replaces the wedge's fills and the lines' white with the
+     page's background, which left the menu button blank: the lines keep
+     the system's text colour, so the button can still be found. */
+  @media (forced-colors: active) {
+    .lines i {
+      forced-color-adjust: none;
+      background: CanvasText;
+    }
+    .menu-button {
+      border: 1px solid ButtonText;
+    }
+  }
+
   /* Tablets: the lockup at the 768px reference's size, and the pill's chevron. */
   @media (min-width: 36rem) {
     .brand :global(.brand-icon) {
