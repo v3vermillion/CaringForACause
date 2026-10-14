@@ -1,8 +1,12 @@
 ---
 import { claim } from "../data/facts.ts";
-import { facts, programStrip } from "../data/site";
+import { visibleStrip } from "../data/derive.ts";
+import { facts, programStrip, programs } from "../data/site";
 import ProgramIcon from "./ProgramIcon.astro";
 import ProgramIconDefs from "./ProgramIconDefs.astro";
+
+// A hidden program (active: false) takes its items with it.
+const items = visibleStrip(programStrip, programs);
 
 // Proof in one line under the four programs, as the reference's line between
 // two rules; every item is a claim with a source (src/data/facts.ts).
@@ -29,8 +33,8 @@ const proof = [
   <ProgramIconDefs />
 
   <div class="wrap">
-    <ul class="items">
-      {programStrip.map((item) => (
+    <ul class="items" style={`--n: ${items.length};`}>
+      {items.map((item) => (
         <li>
           <a class="item" href={item.href}>
             <span class="icon">
@@ -47,9 +51,12 @@ const proof = [
       {proof.map((item, i) => (
         <>
           {i > 0 && (
-            <span class="sep" aria-hidden="true">
-              ·
-            </span>
+            <>
+              {" "}
+              <span class="sep" aria-hidden="true">
+                ·
+              </span>{" "}
+            </>
           )}
           <span>{item}</span>
         </>
@@ -98,7 +105,7 @@ const proof = [
      each. */
   .items {
     display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-columns: repeat(var(--n, 4), minmax(0, 1fr));
     padding: calc(16 * var(--rp)) 0 0;
     margin: 0;
     list-style: none;

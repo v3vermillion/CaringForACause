@@ -204,7 +204,7 @@ export const hero = {
   ] satisfies Photo[],
   /**
    * What the organization is, from her mission statement. The headline names
-   * the service area and the trust strip has the year, so neither is repeated.
+   * the service area and the proof line has the year, so neither is repeated.
    * The city is still unconfirmed (see facts.city), so it stays out of here.
    */
   subhead: "A nonprofit for households facing financial hardship.",
@@ -214,16 +214,17 @@ export const hero = {
    * page says how giving works (decision 61).
    */
   doors: {
-    getHelp: { title: "Help me", href: "/apply" },
-    donate: { title: "Donate", href: "/donate" },
+    getHelp: { title: "Help me", href: "/apply/" },
+    donate: { title: "Donate", href: "/donate/" },
   },
 };
 
 /**
  * The strip under the banner (decision 58): the four things the banner
- * promises, each with its icon from her reference, a title, one line, and
- * the program it opens. The lines are the programs' own words (see
- * `programs`), cut to fit a phone's column of four.
+ * promises, each with its icon from her reference, a title, and the program
+ * it opens. Each also has one line, the programs' own words (see
+ * `programs`), which the giving page shows beside the same icons; the strip
+ * shows the titles alone (decision 66).
  */
 export const programStrip = [
   {
@@ -270,8 +271,8 @@ export const navigation = {
     { id: "involved", label: "Get involved", href: "/#get-involved" },
     { id: "contact", label: "Contact", href: "/#contact" },
   ] satisfies NavItem[],
-  donate: { label: "Donate", href: "/donate" },
-  help: { label: "Help me", href: "/apply" },
+  donate: { label: "Donate", href: "/donate/" },
+  help: { label: "Help me", href: "/apply/" },
 };
 
 export const getHelp = {
@@ -282,7 +283,7 @@ export const getHelp = {
     "Prefer to talk to someone first? Call or email us and we'll send you an application.",
   /** The aside beside the application form on desktop: the same offer under its own heading. */
   talk: { heading: "Prefer to talk?", body: "Call or email us and we'll send you an application." },
-  action: { label: "Start an application", href: "/apply" },
+  action: { label: "Start an application", href: "/apply/" },
 };
 
 /** The application page (/apply). Field choices live here so they can be edited without touching layout. */
@@ -546,7 +547,7 @@ export const getInvolved = {
       body: [
         "Give once or monthly. Your gift helps provide holiday meals, gifts, diapers, and school supplies for local families.",
       ],
-      action: { label: "Donate", href: "/donate", fallbackLabel: "Donate" },
+      action: { label: "Donate", href: "/donate/", fallbackLabel: "Donate" },
       photo: {
         file: "face-paint-closeup.jpg",
         alt: "A child with a colorful painted face at a community event",
@@ -557,8 +558,9 @@ export const getInvolved = {
       id: "volunteer",
       label: "Volunteer",
       heading: "Volunteer your time",
+      /** Her website: "We have amazing part-time volunteers that are committed to helping others. We are always looking for more help." */
       body: [
-        "Our volunteers are part-time and help run every program. We're always looking for more.",
+        "Our part-time volunteers are committed to helping others, and we're always looking for more.",
       ],
       action: {
         label: "Fill out the volunteer form",
@@ -598,7 +600,9 @@ export const about = {
   heading: `Meet ${claim(facts.founder)}`,
   body: [
     `${claim(facts.founder).split(" ")[0]} founded ${org.shortName} in ${claim(facts.founded)} to support families in ${claim(facts.serviceArea)} who are facing financial hardship.`,
-    "Part-time volunteers help run every program, and the organization has grown thanks to the helping hands of this community.",
+    // Her website's "Our Team" and "Our History": part-time volunteers
+    // committed to helping others; grown thanks to the community's helping hands.
+    "Its part-time volunteers are committed to helping others, and the organization has grown thanks to the helping hands of this community.",
   ],
   /** A still from her "Do More" feature, cropped to leave out the program's caption. */
   portrait: {

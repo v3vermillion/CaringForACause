@@ -88,6 +88,13 @@ if (!poster) {
     border: 0;
   }
 
+  /* The player clips at its rounded edge, so the keyboard ring on the
+     poster's link is drawn inside it. */
+  .yt-link:focus-visible {
+    outline-offset: calc(-1 * max(2px, 0.1875rem));
+    border-radius: inherit;
+  }
+
   /* The player sits over the poster, see-through until its page paints. */
   .yt :global(iframe) {
     z-index: 1;

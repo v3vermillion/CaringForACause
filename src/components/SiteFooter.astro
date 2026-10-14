@@ -19,8 +19,9 @@ const year = new Date().getFullYear();
   The end of the page, built from the owner's reference picture (decision
   48): her marks and the one action, the same navigation map the header
   draws, how to reach her, a glowing rule, and the legal record as one line.
-  The EIN and deductibility line live where a donor decides (the trust strip
-  and the donation card), not here. Every size below is rem, so the footer is
+  The EIN lives where a donor decides (the proof line under the program
+  strip, and the donation card, which also says gifts are deductible), not
+  here. Every size below is rem, so the footer is
   one picture per device class (decision 40); the desktop numbers are the
   reference's, converted at 1152 / 949 (the content column over the
   reference's), the phone and tablet compositions are drawn from them.
@@ -584,9 +585,12 @@ const year = new Date().getFullYear();
     gap: 0.85rem;
   }
 
+  /* Each part keeps to one line while it fits. A longer part (a longer
+     city, or text a reader has spaced wider) wraps instead of pushing the
+     page sideways: the place's parts move to a second line first. */
   .legal p {
-    max-width: none;
-    white-space: nowrap;
+    max-width: 100%;
+    text-align: center;
   }
 
   /* Her mark drawn in lines: the silhouette and the keylines in lavender,
@@ -609,7 +613,9 @@ const year = new Date().getFullYear();
 
   .where {
     display: flex;
+    flex-wrap: wrap;
     align-items: center;
+    justify-content: center;
     gap: 0.6rem;
     color: #d7cdf3;
   }
@@ -972,8 +978,12 @@ const year = new Date().getFullYear();
       width: 2.96rem;
     }
 
+    /* The name ends before the rule at 31.41rem (it takes about 20.7rem),
+       so text a reader has spaced wider wraps there instead of crossing it. */
     .legal .name {
       left: 6.9rem;
+      max-width: 24rem;
+      text-align: left;
     }
 
     .legal .name,
@@ -986,9 +996,14 @@ const year = new Date().getFullYear();
       display: none;
     }
 
+    /* The place ends before the rule ahead of the copyright (7rem from the
+       right), so a longer one wraps there instead of running over it. */
     .where {
       left: 34.9rem;
-      gap: 0;
+      right: 7rem;
+      justify-content: flex-start;
+      gap: 0.35rem 0;
+      text-align: left;
     }
 
     .where .city {

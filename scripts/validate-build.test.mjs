@@ -123,9 +123,112 @@ describe("publish gate", () => {
     expectError(dir, /viewport-height units/i);
   });
 
+  it("reads a media query's every branch before allowing vh in it", () => {
+    for (const query of [
+      "(max-width:30rem),(min-width:56rem)",
+      "not all and (min-width:56rem)",
+      "(min-width:56rem) or (max-width:30rem)",
+    ]) {
+      const dir = brokenBuild("index.html", (h) =>
+        h.replace("</style>", `@media ${query}{.x{height:100vh}}</style>`),
+      );
+      expectError(dir, /viewport-height units/i);
+    }
+  });
+
+  it("blocks viewport units however they are written", () => {
+    for (const css of [".x{height:100VH}", ".x{height:50dvb}", ".x{block-size:100svb}"]) {
+      const dir = brokenBuild("index.html", (h) => h.replace("</style>", `${css}</style>`));
+      expectError(dir, /viewport-height units/i);
+    }
+  });
+
+  it("allows vh in a desktop block written in range syntax or in capitals", () => {
+    for (const query of [
+      "(width >= 56rem)",
+      "(36rem <= width)",
+      "(MIN-WIDTH: 56REM)",
+      "screen and (min-width:600px)",
+    ]) {
+      const dir = brokenBuild("index.html", (h) =>
+        h.replace("</style>", `@media ${query}{.x{height:100vh;block-size:100vb}}</style>`),
+      );
+      assert.deepEqual(
+        validateBuild(dir, { allowIndexing: false }).filter((e) => /viewport/.test(e)),
+        [],
+        query,
+      );
+    }
+  });
+
+  it("blocks overflow: clip that Safari 15 would ignore", () => {
+    const dir = brokenBuild("index.html", (h) =>
+      h.replace("</style>", ".x{overflow:clip}</style>"),
+    );
+    expectError(dir, /overflow: clip outside @supports/);
+    const fallback = brokenBuild("index.html", (h) =>
+      h.replace(
+        "</style>",
+        ".x{overflow:hidden}@supports (overflow:clip){.x{overflow:clip}}</style>",
+      ),
+    );
+    assert.ok(!validateBuild(fallback, { allowIndexing: false }).some((e) => /overflow/.test(e)));
+  });
+
   it("blocks missing security headers", () => {
     const dir = brokenBuild("_headers", (h) => h.replace(/Content-Security-Policy:.*\n/, ""));
     expectError(dir, /missing Content-Security-Policy/);
+  });
+
+  it("blocks a link to a page that the host would redirect", () => {
+    // Cloudflare answers /donate with a redirect to /donate/, the page itself.
+    const dir = brokenBuild("index.html", (h) => h.replace('href="/donate/"', 'href="/donate"'));
+    expectError(dir, /link \/donate is redirected by the host; write \/donate\//);
+    const missing = brokenBuild("index.html", (h) =>
+      h.replace('href="/donate/"', 'href="/donations/"'),
+    );
+    expectError(missing, /link \/donations\/ leads to no page in the build/);
+  });
+
+  it("blocks fonts served outside the hashed, long-cached assets", () => {
+    const dir = brokenBuild("index.html", (h) =>
+      h.replace(
+        "</head>",
+        '<link rel="preload" href="/fonts/x.woff2" as="font" type="font/woff2" crossorigin></head>',
+      ),
+    );
+    expectError(dir, /font \/fonts\/x\.woff2 is not in \/_astro\//);
+    const css = brokenBuild("index.html", (h) =>
+      h.replace("</style>", '@font-face{font-family:X;src:url("/fonts/x.woff2")}</style>'),
+    );
+    expectError(css, /font \/fonts\/x\.woff2 is not in \/_astro\//);
+  });
+
+  it("keeps the not-found page out of search, with no address of its own", () => {
+    const canonical = brokenBuild("404.html", (h) =>
+      h.replace(
+        "</head>",
+        '<link rel="canonical" href="https://caring4acausesupportiveservices.com/404/"></head>',
+      ),
+    );
+    expectError(canonical, /404\.html: the not-found page must not name a canonical URL/);
+    const indexed = brokenBuild("404.html", (h) => h.replace("noindex, nofollow", "index, follow"));
+    expectError(indexed, /404\.html: the not-found page must never be indexed/, {
+      allowIndexing: true,
+    });
+  });
+
+  it("blocks structured data that could end its script early", () => {
+    // "</script>" ends it at once (and leaves broken JSON); "<!--" changes
+    // how the rest of the script is read. Either is written \u003c.
+    const closed = brokenBuild("index.html", (h) =>
+      h.replace('"@type":"NGO"', '"@type":"NGO","note":"</script>"'),
+    );
+    expectError(closed, /structured data is missing or is not valid JSON/);
+    const comment = brokenBuild("index.html", (h) =>
+      h.replace('"@type":"NGO"', '"@type":"NGO","note":"<!--"'),
+    );
+    expectError(comment, /structured data has an unescaped "<"/);
   });
 
   it("blocks duplicate ids and a second h1", () => {

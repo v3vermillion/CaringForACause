@@ -75,9 +75,10 @@ import Base from "../layouts/Base.astro";
      scale it up, shorter ones down, so the picture is the same on every
      computer. The width bounds it too (a portrait screen such as an iPad Pro
      12.9 upright is tall but narrow), so the text column never outgrows its
-     45% of the screen and the headline keeps its four lines. Below two thirds
-     the type would get too small, so the scale stops there and the season
-     strip drops just under the fold instead; above 1.25 (a 1600px screen) it
+     45% of the screen and the headline keeps its four lines. Below 0.66
+     (a window shorter than about 520 to 560px, by its width) the type would
+     get too small, so the scale stops there and the program strip (the
+     season strip, when it is on) drops just under the fold instead; above 1.25 (a 1600px screen) it
      stops with the rest of the site (decision 53), and the photo fills the
      room left. */
   @media (min-width: 56rem) {

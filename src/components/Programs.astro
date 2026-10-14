@@ -162,9 +162,8 @@ const applyHref = links.familyApplication ?? getHelp.action.href;
     position: relative;
     /* The watermark bleeds past the column; clipped (not hidden) so the
        section is not a scroll container with the watermark's width of
-       hidden overflow (see the banner). */
+       hidden overflow (see the banner, and its note on the fallback). */
     overflow: hidden;
-    overflow: clip;
     /* The space above the opener is measured from the wave's box, so that a
        link landing with the wave under the bar still finds the opener a
        section space below it (decision 71; decision 53 had measured it from
@@ -174,6 +173,12 @@ const applyHref = links.familyApplication ?? getHelp.action.href;
        foot carries it: its high corner sits a full section space under the
        last row. */
     padding-bottom: calc(var(--space-xl) + var(--wedge));
+  }
+
+  @supports (overflow: clip) {
+    #programs {
+      overflow: clip;
+    }
   }
 
   #programs > .wrap {
@@ -503,7 +508,7 @@ const applyHref = links.familyApplication ?? getHelp.action.href;
 
   .checklist::details-content {
     block-size: 0;
-    overflow: clip;
+    overflow: hidden;
     opacity: 0;
     transition:
       block-size 260ms cubic-bezier(0.2, 0.8, 0.2, 1),
@@ -514,6 +519,15 @@ const applyHref = links.familyApplication ?? getHelp.action.href;
   .checklist[open]::details-content {
     block-size: auto;
     opacity: 1;
+  }
+
+  /* The global reduced-motion rule (global.css) cannot name this
+     pseudo-element: a browser that doesn't know it would drop the whole
+     selector list, so it is stilled here on its own. */
+  @media (prefers-reduced-motion: reduce) {
+    .checklist::details-content {
+      transition: none;
+    }
   }
 
   .checklist summary {
@@ -580,9 +594,9 @@ const applyHref = links.familyApplication ?? getHelp.action.href;
     }
   }
 
-  /* From tablets up the photo stands beside the words as a portrait, the
-     photos' own shape (they are phone pictures, 3 by 4), so no head is
-     cropped and the row reads as a spread; sides alternate. */
+  /* From tablets up the photo stands beside the words, a square crop of
+     these phone pictures (3 by 4), so the row reads as a spread; sides
+     alternate. */
   @media (min-width: 36rem) {
     .list {
       gap: var(--space-xl);
@@ -592,8 +606,8 @@ const applyHref = links.familyApplication ?? getHelp.action.href;
       gap: var(--space-l);
       align-items: center;
     }
-    /* The photo is square beside the words on tablets and a little wider
-       than tall on desktop: a crop about as tall as the words, so no column
+    /* The photo is square beside the words on tablets (and on desktop,
+       below): a crop about as tall as the words, so no column
        runs empty beside it, and one picture per class (a photo that took
        the row's height changed with the words' wrapping). */
     .media {

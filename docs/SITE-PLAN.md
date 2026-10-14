@@ -15,11 +15,11 @@ The site is delivered to Tamara as a finished gift. Contact with her is kept to 
 
 | Audience                | What they need                                          | Where they land                                        |
 | ----------------------- | ------------------------------------------------------- | ------------------------------------------------------ |
-| Families in need        | What programs exist, whether they qualify, how to apply | Hero "I need help" → Get help                          |
+| Families in need        | What programs exist, whether they qualify, how to apply | Banner "Help me" → /apply                              |
 | Holiday sponsors        | How to sponsor a family, right now                      | Get involved → Sponsor tab (the season strip, when on) |
-| Donors                  | A way to give, proof it's a real nonprofit              | Donate button → Donate tab, proof line                 |
+| Donors                  | A way to give, proof it's a real nonprofit              | Donate button → /donate, proof line                    |
 | Volunteers and stylists | How to sign up                                          | Get involved → Volunteer or Partner tab                |
-| Funders and press       | Who runs it, mission, EIN                               | About, trust strip                                     |
+| Funders and press       | Who runs it, mission, EIN                               | About, proof line                                      |
 
 ## Grouping logic
 
@@ -31,7 +31,7 @@ The site is delivered to Tamara as a finished gift. Contact with her is kept to 
 
 ## Page structure
 
-Three pages. The home page is the route map; the two doors lead to their own pages.
+Four pages. The home page is the route map, the two doors lead to their own pages, and a 404 answers any other address.
 
 ```
 ┌───────────────────────────────────────────────┐
@@ -117,12 +117,12 @@ All text pairings pass WCAG AA; most pass AAA.
 
 **Type:**
 
-- **Bricolage Grotesque** (headings, buttons, labels): sturdy, friendly, and distinct from the logo's script.
-- **Literata** (the banner headline, in bold with one line in bold italic; the phone menu and the footer): the serif of the owner's references.
+- **Bricolage Grotesque** (buttons, tabs, labels, eyebrows, the smallest headings): sturdy, friendly, and distinct from the logo's script.
+- **Literata** (the headings, the banner's in bold with its last line in bold italic; the program strip's titles, the phone menu and the footer): the serif of the owner's references. **Assistant** sets the footer's links and contact details.
 - **Atkinson Hyperlegible Next** (body): designed by the Braille Institute for low-vision readers, which suits an audience reading on older phones. Its slashed zero is intentional and keeps phone numbers and the EIN unambiguous.
 - 18px base size, major-third scale, with the lede step and the larger steps set per device class so a phone's title stands clear of its lede. Every font is self-hosted, with no third-party requests. Her lettering is the wordmark itself, so no script typeface is loaded.
 
-**Signature element:** the serif headline with its lavender line and the two equal doors over the crossfading photos, handed to the page by the wave. Everything else stays quiet: one button shape, three radii, list rows with dividers instead of a grid of identical cards, and no scroll animations.
+**Signature element:** the serif headline with its lavender line and the two equal doors over the crossfading photos, handed to the page by the wave. Everything else stays quiet: one button shape, three radii, rows parted by space instead of a grid of identical cards, and nothing that fades in on scroll.
 
 ## Open questions for Tamara
 

@@ -163,7 +163,7 @@ const sideBody = getHelp.talk.body;
                         autocomplete="tel"
                         inputmode="tel"
                         enterkeyhint="next"
-                        maxlength="14"
+                        maxlength="20"
                         required
                         data-kind="phone"
                       />
@@ -536,12 +536,13 @@ const sideBody = getHelp.talk.body;
       if (input.dataset.kind === "zip" && !/^\d{5}(-\d{4})?$/.test(value))
         return "Enter your 5-digit ZIP code.";
       if (input.required && !value) {
+        if (input.name === "childAge") return `Choose the age of child ${input.id.split("-")[1]}.`;
         if (input instanceof HTMLSelectElement)
           return input.id === "county" ? "Choose your county." : "Choose one.";
         if (input.id === "email") return "Enter an email address, or choose Call or Text.";
         return `Enter your ${labelOf(input)}.`;
       }
-      if (input.dataset.kind === "phone" && value.replace(/\D/g, "").length < 10)
+      if (input.dataset.kind === "phone" && phoneDigits(value).length < 10)
         return "Enter a 10-digit phone number with the area code.";
       if (
         input instanceof HTMLInputElement &&
@@ -607,12 +608,26 @@ const sideBody = getHelp.talk.body;
       });
     };
 
-    // The phone number, formatted as typed: (317) 555-1234.
-    const formatPhone = (raw: string) => {
-      const d = raw.replace(/\D/g, "").slice(0, 10);
+    // The phone number, formatted as typed: (317) 555-1234. A US number never
+    // starts with 1, so a leading 1 is the country code (people and autofill
+    // write "+1 317…" and "1-317-…"): it stays in front, as "1 (317) 555-1234",
+    // rather than becoming the first digit of the area code. What is sent is
+    // the 10-digit number.
+    const splitPhone = (raw: string) => {
+      const d = raw.replace(/\D/g, "");
+      return d.startsWith("1")
+        ? { country: "1 ", digits: d.slice(1, 11) }
+        : { country: "", digits: d.slice(0, 10) };
+    };
+    const phoneDigits = (raw: string) => splitPhone(raw).digits;
+    const groupPhone = (d: string) => {
       if (d.length > 6) return `(${d.slice(0, 3)}) ${d.slice(3, 6)}-${d.slice(6)}`;
       if (d.length > 3) return `(${d.slice(0, 3)}) ${d.slice(3)}`;
       return d;
+    };
+    const formatPhone = (raw: string) => {
+      const { country, digits } = splitPhone(raw);
+      return (country + groupPhone(digits)).trim();
     };
     const phone = form.querySelector<HTMLInputElement>("#phone")!;
     phone.addEventListener("input", () => {
@@ -666,15 +681,31 @@ const sideBody = getHelp.talk.body;
     count.addEventListener("change", renderChildren);
     renderChildren();
 
-    // Needs: a follow-up list opens under each kind of help that has one.
+    // Needs: a follow-up list opens under each kind of help that has one. A
+    // closed list is also disabled, so its answers are not sent with a kind
+    // of help the family unchecked (and come back if they check it again).
     form.querySelectorAll<HTMLInputElement>("[data-toggle]").forEach((box) => {
-      const sub = form.querySelector<HTMLElement>(`[data-sub="${box.dataset.toggle}"]`);
+      const sub = form.querySelector<HTMLFieldSetElement>(`[data-sub="${box.dataset.toggle}"]`);
       if (!sub) return;
       const sync = () => {
         sub.hidden = !box.checked;
+        sub.disabled = !box.checked;
       };
       box.addEventListener("change", sync);
       sync();
+    });
+
+    // A group's error goes as soon as it is answered, as a field's does.
+    const needsError = form.querySelector<HTMLElement>("[data-needs-error]")!;
+    form.querySelectorAll<HTMLInputElement>("input[name=need]").forEach((box) =>
+      box.addEventListener("change", () => {
+        if (form.querySelector("input[name=need]:checked")) needsError.hidden = true;
+      }),
+    );
+    const consentBox = form.querySelector<HTMLInputElement>("input[name=consent]")!;
+    const consentError = form.querySelector<HTMLElement>("[data-consent-error]")!;
+    consentBox.addEventListener("change", () => {
+      if (consentBox.checked) consentError.hidden = true;
     });
 
     // The answers, one group per step, for the review and the email.
@@ -686,7 +717,7 @@ const sideBody = getHelp.talk.body;
       const all = (name: string) => data.getAll(name).map((value) => String(value).trim());
       const you: Row[] = [
         ["Name", `${get("firstName")} ${get("lastName")}`.trim()],
-        ["Phone", formatPhone(get("phone"))],
+        ["Phone", groupPhone(phoneDigits(get("phone")))],
       ];
       if (get("email")) you.push(["Email", get("email")]);
       you.push(["Reach me by", get("contactMethod")]);
@@ -827,9 +858,10 @@ const sideBody = getHelp.talk.body;
           `${group.title}\n${group.rows.map(([label, value]) => `${label}: ${value}`).join("\n")}`,
       );
       const body = `${subject}\n\n${blocks.join("\n\n")}\n`;
-      // Built by hand: URLSearchParams writes spaces as "+", which mail apps show literally.
+      // Built by hand: URLSearchParams writes spaces as "+", which mail apps
+      // show literally. Line breaks in a mail link are CRLF (RFC 6068).
       const url = new URL(email);
-      url.search = `?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+      url.search = `?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body.replace(/\n/g, "\r\n"))}`;
       doneText.value = body;
       form.hidden = true;
       done.hidden = false;
@@ -1005,7 +1037,13 @@ const sideBody = getHelp.talk.body;
   /* One sheet, a surface (global.css), holds the four steps and the
      buttons that move between them. */
   .sheet {
-    overflow: clip;
+    overflow: hidden;
+  }
+
+  @supports (overflow: clip) {
+    .sheet {
+      overflow: clip;
+    }
   }
 
   .step {
@@ -1104,6 +1142,14 @@ const sideBody = getHelp.talk.body;
     color: #fff;
     font-size: 0.8em;
     line-height: 1;
+  }
+
+  /* The mark is decoration (the message says it all), so where generated
+     content takes alternative text it is given none and is not read aloud. */
+  @supports (content: "x" / "") {
+    .apply :global(.error::before) {
+      content: "!" / "";
+    }
   }
 
   .children {
@@ -1209,9 +1255,18 @@ const sideBody = getHelp.talk.body;
     cursor: pointer;
   }
 
-  /* The card carries the ring; the box inside does not need a second one. */
-  .need-card input:focus-visible {
-    outline: none;
+  /* The card carries the ring; the box inside does not need a second one.
+     Only where the card can draw it: without :has() the box keeps its own. */
+  @supports selector(:has(*)) {
+    .need-card input:focus-visible {
+      outline: none;
+    }
+  }
+
+  @media (forced-colors: active) {
+    .need:has(input[name="need"]:checked) {
+      outline: 3px solid Highlight;
+    }
   }
 
   .need-title {
@@ -1386,6 +1441,21 @@ const sideBody = getHelp.talk.body;
     box-shadow: inset 0 0 0 var(--hairline) var(--rule);
     font-size: var(--step--1);
     line-height: 1.5;
+  }
+
+  /* It is still a stop in the tab order (to select and copy), so it shows
+     focus like every control; the field rules' cues are overridden above. */
+  .done .textarea:focus-visible {
+    outline: max(2px, 0.1875rem) solid var(--focus);
+    outline-offset: 0.1875rem;
+  }
+
+  /* Its smaller text holds 16px under a finger, as every field's does
+     (global.css), so focusing it to copy doesn't zoom an iPhone. */
+  @media (pointer: coarse) {
+    .done .textarea {
+      font-size: max(16px, var(--step--1));
+    }
   }
 
   /* The night aside: a night surface, the home page's Get help card. */

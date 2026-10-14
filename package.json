@@ -5,7 +5,7 @@
   "description": "Website for Caring for a Cause Supportive Services Inc. (Central Indiana)",
   "type": "module",
   "engines": {
-    "node": ">=22.12.0"
+    "node": ">=22.18.0"
   },
   "scripts": {
     "dev": "astro dev",
@@ -15,7 +15,6 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "verify": "npm run format:check && npm run build && npm run test:gate && npm run test",
-    "deploy": "npm run build && wrangler deploy",
     "deploy:check": "npm run build && wrangler deploy --dry-run",
     "test": "playwright test",
     "test:gate": "node --test \"scripts/*.test.mjs\""

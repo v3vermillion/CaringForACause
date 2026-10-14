@@ -44,6 +44,7 @@ const current = (href: string) => (href.replace(/\/+$/, "") === here ? "page" : 
       data-menu-open
       aria-haspopup="dialog"
       aria-controls="menu"
+      aria-expanded="false"
     >
       <span class="band" aria-hidden="true"></span>
       <span class="corner" aria-hidden="true"></span>
@@ -281,6 +282,7 @@ const current = (href: string) => (href.replace(/\/+$/, "") === here ? "page" : 
       menu.showModal();
       menu.focus({ preventScroll: true });
       document.documentElement.classList.add("menu-open");
+      openButton.setAttribute("aria-expanded", "true");
     };
     // The page's scroll lock lifts here, before a chosen link's fragment
     // navigation starts its smooth scroll (the dialog's close event, which
@@ -298,6 +300,7 @@ const current = (href: string) => (href.replace(/\/+$/, "") === here ? "page" : 
     });
     menu.addEventListener("close", () => {
       document.documentElement.classList.remove("menu-open");
+      openButton.setAttribute("aria-expanded", "false");
       openButton.focus({ preventScroll: true });
     });
   } else if (header) {
@@ -307,44 +310,40 @@ const current = (href: string) => (href.replace(/\/+$/, "") === here ? "page" : 
   // The section links mark the section on screen: the links whose section
   // crosses the middle of the window carry aria-current, which draws the
   // desktop link's underline and marks the menu's row. Nothing is marked on
-  // the first screen. Without IntersectionObserver the links simply have no
-  // current state. (The door pages' "page" marks are set in the markup.)
+  // the first screen (the banner and the strips under it). Contact's column
+  // is in the footer, and the whole footer stands for it: the column alone
+  // can end a page below the middle of the window. Only the home page holds
+  // the sections; elsewhere the links lead away and nothing is marked.
+  // Without IntersectionObserver the links simply have no current state.
+  // (The door pages' "page" marks are set in the markup.)
   const sectionLinks = Array.from(
     document.querySelectorAll<HTMLAnchorElement>(
       '.inline-nav a[data-section], #menu a[href^="/#"]',
     ),
   );
   const sectionOf = (a: HTMLAnchorElement) => a.dataset.section ?? a.getAttribute("href")!.slice(2);
-  if (header && sectionLinks.length && "IntersectionObserver" in window) {
-    const ids = new Set(sectionLinks.map(sectionOf));
+  const firstScreen = document.querySelector(".first-screen");
+  if (header && firstScreen && sectionLinks.length && "IntersectionObserver" in window) {
     const mark = (id: string | null) => {
       sectionLinks.forEach((a) => {
         if (id !== null && sectionOf(a) === id) a.setAttribute("aria-current", "location");
         else a.removeAttribute("aria-current");
       });
     };
+    const watched = new Map<Element, string | null>([[firstScreen, null]]);
+    new Set(sectionLinks.map(sectionOf)).forEach((id) => {
+      const section = document.getElementById(id);
+      if (section) watched.set(section.closest("footer") ?? section, id);
+    });
     const watcher = new IntersectionObserver(
       (entries) => {
         for (const entry of entries) {
-          if (entry.isIntersecting && ids.has(entry.target.id)) mark(entry.target.id);
+          if (entry.isIntersecting) mark(watched.get(entry.target) ?? null);
         }
       },
       { rootMargin: "-45% 0px -50% 0px" },
     );
-    ids.forEach((id) => {
-      const section = document.getElementById(id);
-      if (section) watcher.observe(section);
-    });
-    // Back at the top, nothing is current.
-    const top = document.querySelector(".hero");
-    if (top) {
-      new IntersectionObserver(
-        ([entry]) => {
-          if (entry?.isIntersecting) mark(null);
-        },
-        { rootMargin: "-45% 0px -50% 0px" },
-      ).observe(top);
-    }
+    watched.forEach((_, el) => watcher.observe(el));
   }
 </script>
 
@@ -626,21 +625,24 @@ const current = (href: string) => (href.replace(/\/+$/, "") === here ? "page" : 
      links wrap under the brand row on phones. With it, phones and tablets
      hide them behind the wedge from the first paint; the page's script
      used to decide this, and on a slow load the bar painted two rows tall
-     and then snapped to one, moving the whole page (decision 55). */
-  html:not(.js) .bar,
-  .site-header.no-menu .bar {
-    flex-wrap: wrap;
-  }
+     and then snapped to one, moving the whole page (decision 55). Desktop
+     has room for them in the bar's one row either way. */
+  @media (max-width: 55.99rem) {
+    html:not(.js) .bar,
+    .site-header.no-menu .bar {
+      flex-wrap: wrap;
+    }
 
-  html:not(.js) .inline-nav,
-  .site-header.no-menu .inline-nav {
-    order: 3;
-    flex-basis: 100%;
-  }
+    html:not(.js) .inline-nav,
+    .site-header.no-menu .inline-nav {
+      order: 3;
+      flex-basis: 100%;
+    }
 
-  html:not(.js) .inline-nav > ul,
-  .site-header.no-menu .inline-nav > ul {
-    flex-wrap: wrap;
+    html:not(.js) .inline-nav > ul,
+    .site-header.no-menu .inline-nav > ul {
+      flex-wrap: wrap;
+    }
   }
 
   html.js .site-header:not(.no-menu) .inline-nav {
@@ -773,6 +775,19 @@ const current = (href: string) => (href.replace(/\/+$/, "") === here ? "page" : 
     width: 70%;
   }
 
+  /* High contrast replaces the wedge's fills and the lines' white with the
+     page's background, which left the menu button blank: the lines keep
+     the system's text colour, so the button can still be found. */
+  @media (forced-colors: active) {
+    .lines i {
+      forced-color-adjust: none;
+      background: CanvasText;
+    }
+    .menu-button {
+      border: 1px solid ButtonText;
+    }
+  }
+
   /* Tablets: the lockup at the 768px reference's size, and the pill's chevron. */
   @media (min-width: 36rem) {
     .brand :global(.brand-icon) {
@@ -800,9 +815,11 @@ const current = (href: string) => (href.replace(/\/+$/, "") === here ? "page" : 
       gap: var(--space-m);
       min-height: max(44px, calc(72 * var(--sp)));
     }
+    .inline-nav {
+      margin-left: auto;
+    }
     html.js .site-header:not(.no-menu) .inline-nav {
       display: block;
-      margin-left: auto;
     }
     .menu-button {
       display: none;
@@ -873,6 +890,12 @@ const current = (href: string) => (href.replace(/\/+$/, "") === here ? "page" : 
     display: block;
     opacity: 1;
     translate: 0 0;
+  }
+
+  /* A browser without <dialog> (Safari before 15.4) has no rule that hides
+     a closed one: it would sit in the page, unseen but in the way of taps. */
+  .menu:not([open]) {
+    display: none;
   }
 
   @starting-style {

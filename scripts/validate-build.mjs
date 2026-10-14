@@ -37,20 +37,45 @@ const PLACEHOLDERS = [
 ];
 
 /**
- * Every viewport-height unit in the CSS that is not a plain `vh` inside a
- * `@media (min-width: …)` block of at least 36rem (576px), the tablet and
- * desktop layouts, where the browser's bars don't change the height while
- * scrolling. Media blocks are found by matching braces.
+ * Every viewport-height unit in the CSS (vh and vb, and their s, d and l
+ * forms, in any case) that is not a plain `vh` or `vb` inside a media block
+ * whose every branch needs a window at least 36rem (576px) wide: the tablet
+ * and desktop layouts, where the browser's bars don't change the height
+ * while scrolling. Media blocks are found by matching braces.
  */
 export const DESKTOP_MIN_WIDTH_PX = 576;
 
+const px = (value, unit) => parseFloat(value) * (unit.toLowerCase() === "px" ? 1 : 16);
+
+/**
+ * Whether a media query can only match a window at least `min` pixels wide:
+ * each comma-separated branch needs a width floor (`min-width: 36rem`,
+ * `width >= 36rem`, `36rem <= width`) of at least `min`, joined with `and`. A
+ * branch with `not` or `or` could match a phone, so it never qualifies.
+ */
+export function mediaNeedsWidth(query, min) {
+  return query.split(",").every((branch) => {
+    const b = branch.toLowerCase();
+    if (/\bnot\b|\bor\b/.test(b)) return false;
+    const floors = [
+      ...[...b.matchAll(/\(\s*min-width\s*:\s*([0-9.]+)(rem|em|px)\s*\)/g)].map((m) =>
+        px(m[1], m[2]),
+      ),
+      ...[...b.matchAll(/\(\s*width\s*>=?\s*([0-9.]+)(rem|em|px)\s*\)/g)].map((m) =>
+        px(m[1], m[2]),
+      ),
+      ...[...b.matchAll(/\(\s*([0-9.]+)(rem|em|px)\s*<=?\s*width\b/g)].map((m) => px(m[1], m[2])),
+    ];
+    return floors.some((floor) => floor >= min);
+  });
+}
+
 export function viewportUnitsOutsideDesktop(html) {
   const desktopRanges = [];
-  const media = /@media[^{]*\bmin-width\s*:\s*([0-9.]+)(rem|em|px)[^{]*\{/g;
+  const media = /@media([^{]*)\{/gi;
   let m;
   while ((m = media.exec(html))) {
-    const px = parseFloat(m[1]) * (m[2] === "px" ? 1 : 16);
-    if (px < DESKTOP_MIN_WIDTH_PX) continue;
+    if (!mediaNeedsWidth(m[1], DESKTOP_MIN_WIDTH_PX)) continue;
     let depth = 1;
     let i = m.index + m[0].length;
     while (i < html.length && depth > 0) {
@@ -61,11 +86,41 @@ export function viewportUnitsOutsideDesktop(html) {
     desktopRanges.push([m.index, i]);
   }
   const found = [];
-  const unit = /[0-9.]+(?:[sdl]?vh)\b/g;
+  const unit = /[0-9.]+(?:[sdl]?v[hb])\b/gi;
   while ((m = unit.exec(html))) {
-    const plainVh = !/[sdl]vh$/.test(m[0]);
+    const plain = !/[sdl]v[hb]$/i.test(m[0]);
     const inDesktop = desktopRanges.some(([a, b]) => m.index > a && m.index < b);
-    if (!(plainVh && inDesktop)) found.push(m[0]);
+    if (!(plain && inDesktop)) found.push(m[0]);
+  }
+  return found;
+}
+
+/**
+ * Every `overflow: clip` in the CSS that is not inside an
+ * `@supports (overflow: clip)` block. Safari before 16 (every iPhone that
+ * stops at iOS 15) has no clip, and the minifier keeps only the last of two
+ * overflow declarations, so a `hidden` fallback written beside `clip` is
+ * dropped from the build; the fallback must be the plain rule and clip the
+ * @supports one.
+ */
+export function overflowClipWithoutFallback(html) {
+  const ranges = [];
+  const supports = /@supports\s*\(\s*overflow\s*:\s*clip\s*\)\s*\{/gi;
+  let m;
+  while ((m = supports.exec(html))) {
+    let depth = 1;
+    let i = m.index + m[0].length;
+    while (i < html.length && depth > 0) {
+      if (html[i] === "{") depth++;
+      else if (html[i] === "}") depth--;
+      i++;
+    }
+    ranges.push([m.index, i]);
+  }
+  const found = [];
+  const clip = /overflow(?:-[xy])?\s*:\s*clip\b/gi;
+  while ((m = clip.exec(html))) {
+    if (!ranges.some(([a, b]) => m.index > a && m.index < b)) found.push(m[0]);
   }
   return found;
 }
@@ -92,6 +147,15 @@ export function validateBuild(dist, { allowIndexing }) {
       .map((el) => el.getAttribute("id")),
   );
   const robotsTxt = existsSync(join(dist, "robots.txt")) ? read("robots.txt") : "";
+  // The site's host, as the home page names it.
+  let siteOrigin = "";
+  try {
+    siteOrigin = new URL(
+      parse(read("index.html")).querySelector('link[rel="canonical"]')?.getAttribute("href") ?? "",
+    ).origin;
+  } catch {
+    /* the home page's own check reports it */
+  }
 
   for (const page of PAGES) {
     if (!existsSync(join(dist, page))) continue;
@@ -110,13 +174,22 @@ export function validateBuild(dist, { allowIndexing }) {
     if (!/^([0-9a-f]{7}|local)$/.test(meta('meta[name="version"]')))
       fail(`${name}: missing build version meta tag`);
 
-    // Canonical URL and link preview
+    // Canonical URL and link preview. The not-found page has no address of
+    // its own (it answers any missing one), so it names none; its preview
+    // image is checked against the home page's host instead.
+    const notFound = page === "404.html";
     const canonical = doc.querySelector('link[rel="canonical"]')?.getAttribute("href") ?? "";
     let origin = "";
-    try {
-      origin = new URL(canonical).origin;
-    } catch {
-      fail(`${name}: canonical URL is not absolute: "${canonical}"`);
+    if (notFound) {
+      if (canonical) fail(`${name}: the not-found page must not name a canonical URL`);
+      if (meta('meta[property="og:url"]')) fail(`${name}: the not-found page must not name og:url`);
+      origin = siteOrigin;
+    } else {
+      try {
+        origin = new URL(canonical).origin;
+      } catch {
+        fail(`${name}: canonical URL is not absolute: "${canonical}"`);
+      }
     }
     const ogImage = meta('meta[property="og:image"]');
     try {
@@ -133,7 +206,10 @@ export function validateBuild(dist, { allowIndexing }) {
 
     // Search indexing must match the setting, and only production may be indexed
     const robotsMeta = meta('meta[name="robots"]');
-    if (allowIndexing) {
+    if (notFound) {
+      if (robotsMeta !== "noindex, nofollow")
+        fail(`${name}: the not-found page must never be indexed (robots meta is "${robotsMeta}")`);
+    } else if (allowIndexing) {
       if (robotsMeta !== "index, follow")
         fail(`Indexing is on but ${name} robots meta is "${robotsMeta}"`);
       if (origin && origin !== PRODUCTION_ORIGIN) {
@@ -147,6 +223,8 @@ export function validateBuild(dist, { allowIndexing }) {
 
     // Structured data
     const ld = doc.querySelector('script[type="application/ld+json"]');
+    // A "<" is written \u003c, so no text in it can close the script early.
+    if (ld?.text.includes("<")) fail(`${name}: structured data has an unescaped "<"`);
     try {
       const data = JSON.parse(ld?.text ?? "");
       if (data["@type"] !== "NGO")
@@ -173,6 +251,16 @@ export function validateBuild(dist, { allowIndexing }) {
         const id = decodeURIComponent(match[2]);
         const targets = match[1] ? homeIds : seen;
         if (!targets.has(id)) fail(`${name}: link ${href} has no matching element`);
+      }
+      // A page is linked by its own address, /donate/: Cloudflare answers
+      // /donate with a redirect to it (a round trip on every click), and the
+      // speculation rules prerender the address as written.
+      const path = href.split(/[?#]/)[0];
+      if (/^\/(?!\/)/.test(path) && path !== "/" && !/\.[a-z0-9]+$/i.test(path)) {
+        if (!path.endsWith("/"))
+          fail(`${name}: link ${path} is redirected by the host; write ${path}/`);
+        else if (!existsSync(join(dist, path, "index.html")))
+          fail(`${name}: link ${path} leads to no page in the build`);
       }
       if (a.getAttribute("target") === "_blank" && !/noopener/.test(a.getAttribute("rel") ?? "")) {
         fail(`${name}: link ${href} opens a new tab without rel="noopener"`);
@@ -203,6 +291,16 @@ export function validateBuild(dist, { allowIndexing }) {
         fail(`${name}: referenced file missing from build: ${url}`);
     }
 
+    // Fonts are served from the build's hashed assets, which the host caches
+    // for good (_headers); a file in public/ is revalidated on every page.
+    const fonts = [
+      ...doc.querySelectorAll('link[rel="preload"][as="font"]').map((l) => l.getAttribute("href")),
+      ...[...raw.matchAll(/url\(\s*["']?([^"')\s]+\.woff2?)/g)].map((m) => m[1]),
+    ];
+    for (const font of new Set(fonts)) {
+      if (!font.startsWith("/_astro/")) fail(`${name}: font ${font} is not in /_astro/`);
+    }
+
     // Leftover placeholder text
     const text = doc.querySelector("body")?.text ?? "";
     for (const pattern of PLACEHOLDERS) {
@@ -217,6 +315,12 @@ export function validateBuild(dist, { allowIndexing }) {
     if (cssUnits.length > 0)
       fail(
         `${name}: viewport-height units in CSS cause scroll zoom on phones: ${[...new Set(cssUnits)].join(", ")}`,
+      );
+
+    // overflow: clip without a hidden fallback scrolls an iOS 15 iPhone sideways.
+    if (overflowClipWithoutFallback(raw).length > 0)
+      fail(
+        `${name}: overflow: clip outside @supports (overflow: clip); Safari 15 has no clip. Write overflow: hidden, then clip under @supports.`,
       );
   }
 

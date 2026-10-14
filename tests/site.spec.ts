@@ -1,7 +1,17 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test } from "@playwright/test";
 import { claim } from "../src/data/facts";
-import { facts, hero, navigation, org, programStrip, seasonalBanner } from "../src/data/site";
+import {
+  about,
+  facts,
+  getInvolved,
+  hero,
+  links,
+  navigation,
+  org,
+  programStrip,
+  seasonalBanner,
+} from "../src/data/site";
 
 // The content the tests expect comes from the content file, so a content
 // edit (a confirmed year, a renamed section) never needs a test edit. The
@@ -11,10 +21,12 @@ const sectionLabels = navigation.items.map((item) => item.label);
 // A test that sets its own viewport measures the stylesheet, not the device,
 // so it runs once per engine, on that engine's desktop project. The device
 // projects keep every test that runs at the device's own screen size. This
-// holds while the only pointer-dependent rule is the footer's 44px rows
-// (vertical, not measured by these tests); a rule on (pointer) or (hover)
-// that changes the first screen or a width would need its test on a phone
-// project again.
+// holds while the only pointer-dependent rules are the footer's 44px rows
+// (vertical, not measured by these tests) and the form fields' 16px text
+// under a touch pointer (checked on the phone projects by "no field makes iOS
+// zoom"; these tests measure the page as a mouse sees it); a rule on
+// (pointer) or (hover) that changes the first screen or a width would need
+// its test on a phone project again.
 const oncePerEngine = (testInfo: import("@playwright/test").TestInfo) =>
   test.skip(!testInfo.project.name.startsWith("desktop-"), "runs once per engine");
 
@@ -25,6 +37,12 @@ const expectedSite = process.env.PLAYWRIGHT_BASE_URL
   : "https://caring4acausesupportiveservices.com/";
 
 const pages = ["/", "/donate", "/apply"];
+
+// The one host that may be indexed (scripts/validate-build.mjs).
+const PRODUCTION_ORIGIN = "https://caring4acausesupportiveservices.com";
+
+// The Get involved tab whose button leads to the giving page.
+const donateTab = getInvolved.tabs.find((tab) => tab.id === "donate")!;
 
 test.describe("accessibility", () => {
   for (const path of pages) {
@@ -41,6 +59,52 @@ test.describe("accessibility", () => {
     await page.goto("/404");
     const results = await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa"]).analyze();
     expect(results.violations.map((v) => v.id)).toEqual([]);
+  });
+
+  // A link's arrow and an error's "!" are decoration: not part of the name.
+  test("decorative arrows are not read aloud", async ({ page }) => {
+    await page.goto("/apply");
+    await expect(page.locator(".side .arrow-link")).toHaveAccessibleName("Email us");
+  });
+
+  test("headings and the proof line keep a space between their parts", async ({ page }) => {
+    await page.goto("/");
+    // What a screen reader or a copy reads: the text outside aria-hidden.
+    const read = (selector: string) =>
+      page.locator(selector).evaluate((el) => {
+        const walk = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
+        let text = "";
+        for (let node = walk.nextNode(); node; node = walk.nextNode()) {
+          if (!node.parentElement?.closest("[aria-hidden='true']")) text += node.textContent;
+        }
+        return text.replace(/\s+/g, " ").trim();
+      });
+    expect(await read("h1")).toBe(`${hero.headline} ${hero.headlineAccent}`);
+    expect(await read(".strip .facts")).toBe(
+      [
+        `Helping families since ${claim(facts.founded)}`,
+        `${claim(facts.taxExempt).section} nonprofit, EIN ${claim(facts.ein)}`,
+        `Partnered with ${claim(facts.toysForTotsPartner)}`,
+      ].join(" "),
+    );
+  });
+
+  test("a video's keyboard ring is drawn inside its rounded frame", async ({ page }) => {
+    await page.goto("/");
+    // The frame clips at its rounded edge: a ring outside the box is cut
+    // away, so its offset and width together must stay inside it.
+    const poster = page.locator("#haircuts .yt-link");
+    await poster.focus();
+    await page.keyboard.press("Shift");
+    expect(
+      await poster.evaluate((el) => {
+        const s = getComputedStyle(el);
+        return {
+          ring: el.matches(":focus-visible") && s.outlineStyle !== "none",
+          reach: parseFloat(s.outlineOffset) + parseFloat(s.outlineWidth),
+        };
+      }),
+    ).toEqual({ ring: true, reach: 0 });
   });
 
   test("skip link is the first thing keyboard users reach", async ({ page, browserName }) => {
@@ -70,6 +134,41 @@ test.describe("accessibility", () => {
       expect(repeated).toEqual([]);
     });
   }
+});
+
+// Windows high contrast (forced colours) drops backgrounds and shadows. The
+// phone menu's button, a chosen chip and the chosen tab must still show.
+// Chromium emulates forced colours; the stylesheet is the same everywhere.
+test.describe("high contrast", () => {
+  test.use({ forcedColors: "active" });
+
+  test("keeps the menu button, the chosen tab and chosen chips visible", async ({
+    page,
+    browserName,
+  }, testInfo) => {
+    oncePerEngine(testInfo);
+    test.skip(browserName !== "chromium", "forced colours are emulated in Chromium");
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto("/");
+    const [line, bar] = await page
+      .locator("[data-menu-open] .lines i")
+      .first()
+      .evaluate((el) => [
+        getComputedStyle(el).backgroundColor,
+        getComputedStyle(el.closest(".site-header")!).backgroundColor,
+      ]);
+    expect(line, "the menu button's lines").not.toBe(bar);
+    await expect(page.locator("[role=tab][aria-selected=true]")).toHaveCSS(
+      "outline-style",
+      "solid",
+    );
+    await page.goto("/donate");
+    await expect(page.locator(".choice:has(input[name=frequency]:checked)")).toHaveCSS(
+      "outline-style",
+      "solid",
+    );
+    await expect(page.locator(".card .go")).not.toHaveCSS("border-top-width", "0px");
+  });
 });
 
 test.describe("device compatibility", () => {
@@ -185,6 +284,72 @@ test.describe("device compatibility", () => {
     });
   }
 
+  // The banner's doors are links and hold the 44px floor wherever the scale
+  // would make their pills shorter (a 320px phone, a short laptop window);
+  // the composition and fold tests check that nothing moves for it.
+  test("the doors are never shorter than 44px", async ({ page }, testInfo) => {
+    oncePerEngine(testInfo);
+    for (const [width, height] of [
+      [320, 640],
+      [896, 600],
+      [1024, 600],
+      [1366, 657],
+    ] as const) {
+      await page.setViewportSize({ width, height });
+      await page.goto("/");
+      for (const door of [".door--help", ".door--give"]) {
+        const box = (await page.locator(door).boundingBox())!;
+        expect(box.height, `${door} at ${width} × ${height}`).toBeGreaterThanOrEqual(43.5);
+      }
+    }
+  });
+
+  // iOS zooms into a field whose text is under 16px when it is focused. Under
+  // a finger every field holds 16px, at the narrowest phone and on a phone
+  // on its side, including the application's copy box and the gift's amount.
+  test("no field makes iOS zoom when it is focused", async ({ page, isMobile }) => {
+    test.skip(!isMobile, "only a touch screen zooms into a field");
+    for (const [width, height] of [
+      [320, 640],
+      [640, 360],
+    ] as const) {
+      await page.setViewportSize({ width, height });
+      for (const path of ["/apply", "/donate"]) {
+        await page.goto(path);
+        const sizes = await page.evaluate(() => {
+          document.querySelector<HTMLElement>("[data-done]")?.removeAttribute("hidden");
+          return [
+            ...document.querySelectorAll(
+              "input:not([type=radio]):not([type=checkbox]), select, textarea",
+            ),
+          ].map(
+            (el) =>
+              `${el.id || el.getAttribute("name") || el.tagName} ${parseFloat(getComputedStyle(el).fontSize)}`,
+          );
+        });
+        for (const entry of sizes) {
+          expect(
+            Number(entry.split(" ").pop()),
+            `${path} ${entry} at ${width}`,
+          ).toBeGreaterThanOrEqual(16);
+        }
+      }
+    }
+  });
+
+  // The focus rule changes the field's colour, not its whole background: a
+  // dropdown's arrow is its background image.
+  test("a dropdown keeps its arrow when it is focused", async ({ page }) => {
+    await page.goto("/apply");
+    const arrow = await page.evaluate(() => {
+      document.querySelector<HTMLElement>("[data-step=household]")!.hidden = false;
+      const select = document.querySelector<HTMLSelectElement>("#county")!;
+      select.focus();
+      return getComputedStyle(select).backgroundImage;
+    });
+    expect(arrow).toContain("svg");
+  });
+
   test("the sticky header stays visible after scrolling", async ({ page }) => {
     await page.goto("/");
     // Scroll instantly: the page uses smooth scrolling, which would still be animating.
@@ -194,6 +359,34 @@ test.describe("device compatibility", () => {
     await expect
       .poll(() => page.locator(".site-header").evaluate((el) => el.getBoundingClientRect().top))
       .toBe(0);
+  });
+
+  test("the footer's record stays on the page with a longer place and wider text", async ({
+    page,
+  }) => {
+    await page.goto("/");
+    // A city the owner may confirm, and WCAG 1.4.12's text spacing as a
+    // reader's own stylesheet sets it.
+    await page.locator(".where .city").evaluate((el) => {
+      el.textContent = "Noblesville and Indianapolis, Indiana";
+    });
+    await page.addStyleTag({
+      content:
+        "* { line-height: 1.5 !important; letter-spacing: 0.12em !important; word-spacing: 0.16em !important; } p { margin-bottom: 2em !important; }",
+    });
+    const record = await page.evaluate(() => {
+      const width = document.documentElement.clientWidth;
+      const parts = [".legal .name", ".where .city", ".where .serving", ".copyright"].map((s) =>
+        document.querySelector(s)!.getBoundingClientRect(),
+      );
+      const meet = (a: DOMRect, b: DOMRect) =>
+        a.left < b.right && b.left < a.right && a.top < b.bottom && b.top < a.bottom;
+      return {
+        offPage: parts.some((box) => box.left < 0 || box.right > width),
+        overlap: parts.some((a, i) => parts.slice(i + 1).some((b) => meet(a, b))),
+      };
+    });
+    expect(record).toEqual({ offPage: false, overlap: false });
   });
 });
 
@@ -505,9 +698,9 @@ const fontsSettled = (page: import("@playwright/test").Page) =>
   });
 
 test.describe("the header by device", () => {
-  // The header is painted, not only laid out: a sweep of her logo's bands,
-  // a glow under the Donate pill, the wedge's hairlines. Its geometry is
-  // checked above; this checks the picture. On every page, the bar on each
+  // The header is painted, not only laid out: the glows behind the mark and
+  // under the Donate pill, the wedge's hairlines. Its geometry is checked
+  // above; this checks the picture. On the home page, the bar on each
   // device of a class, scaled to the class reference's size, must match the
   // reference bar pixel for pixel, within what text antialiasing at another
   // scale changes. A background placed in percent of the bar (a glow that
@@ -958,8 +1151,8 @@ test.describe("navigation", () => {
 
   test("the hero doors open the application and donation pages", async ({ page }) => {
     await page.goto("/");
-    await expect(page.locator(".door--help")).toHaveAttribute("href", "/apply");
-    await expect(page.locator(".door--give")).toHaveAttribute("href", "/donate");
+    await expect(page.locator(".door--help")).toHaveAttribute("href", hero.doors.getHelp.href);
+    await expect(page.locator(".door--give")).toHaveAttribute("href", hero.doors.donate.href);
   });
 
   test("subpages lead back to the home page through her lockup", async ({ page }) => {
@@ -1044,6 +1237,31 @@ test.describe("menu", () => {
     await expect(button).toBeFocused();
   });
 
+  test("the menu button says whether the menu is open", async ({ page, isMobile }) => {
+    test.skip(!isMobile, "the menu button only shows on phones");
+    await page.goto("/");
+    const button = page.locator("[data-menu-open]");
+    await expect(button).toHaveAttribute("aria-expanded", "false");
+    await button.click();
+    await expect(page.locator("#menu")).toBeVisible();
+    await expect(button).toHaveAttribute("aria-expanded", "true");
+    await page.keyboard.press("Escape");
+    await expect(button).toHaveAttribute("aria-expanded", "false");
+  });
+
+  test("a browser without dialogs never leaves the closed menu in the page", async ({ page }) => {
+    // Safari before 15.4 reads <dialog> as an unknown element, which no
+    // built-in rule hides when closed.
+    await page.route(/\/$/, async (route) => {
+      const response = await route.fetch();
+      const body = (await response.text()).replace(/<(\/?)dialog\b/g, "<$1x-dialog");
+      await route.fulfill({ response, body });
+    });
+    await page.goto("/");
+    await expect(page.locator(".site-header")).toHaveClass(/no-menu/);
+    await expect(page.locator("#menu")).toHaveCSS("display", "none");
+  });
+
   test("fills a portrait tablet and keeps the rules clear of the watermark", async ({
     page,
     isMobile,
@@ -1117,6 +1335,40 @@ test.describe("menu", () => {
       .withTags(["wcag2a", "wcag2aa"])
       .analyze();
     expect(results.violations.map((v) => v.id)).toEqual([]);
+  });
+});
+
+test.describe("the header's current section", () => {
+  const current = (page: import("@playwright/test").Page) =>
+    page.evaluate(() =>
+      Array.from(document.querySelectorAll(".inline-nav a[aria-current]"), (a) =>
+        a.getAttribute("data-section"),
+      ),
+    );
+
+  test("marks Contact at the end of the page", async ({ page }) => {
+    await page.goto("/");
+    await page.evaluate(() => scrollTo(0, document.documentElement.scrollHeight));
+    await expect.poll(() => current(page)).toEqual(["contact"]);
+  });
+
+  test("marks nothing over the program strip", async ({ page }) => {
+    await page.goto("/");
+    await page.locator("#programs").evaluate((el) => el.scrollIntoView());
+    await expect.poll(() => current(page)).toEqual(["programs"]);
+    // Back up until the strip crosses the middle of the window.
+    await page.locator(".strip").evaluate((el) => {
+      const box = el.getBoundingClientRect();
+      scrollBy(0, box.top + box.height / 2 - innerHeight * 0.475);
+    });
+    await expect.poll(() => current(page)).toEqual([]);
+  });
+
+  test("marks nothing on the door pages, whose links lead away", async ({ page }) => {
+    await page.goto("/donate");
+    await page.evaluate(() => scrollTo(0, document.documentElement.scrollHeight));
+    await page.waitForTimeout(300);
+    expect(await current(page)).toEqual([]);
   });
 });
 
@@ -1283,7 +1535,7 @@ test.describe("get involved tabs", () => {
 
   test("the Donate tab leads to the donation page", async ({ page }) => {
     await page.goto("/#donate");
-    await expect(page.locator("#donate .button")).toHaveAttribute("href", "/donate");
+    await expect(page.locator("#donate .button")).toHaveAttribute("href", donateTab.action.href!);
   });
 
   test("arrow keys, Home, and End move between tabs", async ({ page }) => {
@@ -1324,6 +1576,85 @@ test.describe("get involved tabs", () => {
     await page.keyboard.press("Tab");
     await expect(page.locator("#sponsor a.button")).toBeFocused();
   });
+
+  test("a tab address read on Back does not move the page", async ({ page, browserName }) => {
+    test.skip(
+      browserName === "webkit",
+      "WebKit itself scrolls to the address's element when it loads a page again from history, with or without the page's scripts",
+    );
+    // An unload listener keeps the page out of the back-forward cache, so
+    // Back loads it again, as Firefox often does.
+    await page.addInitScript(() => addEventListener("unload", () => {}));
+    await page.goto("/");
+    await page.locator("#tab-volunteer").evaluate((tab: HTMLElement) => tab.click());
+    expect(new URL(page.url()).hash).toBe("#volunteer");
+    await page.evaluate(() => scrollTo(0, 0));
+    await page.goto("/donate");
+    await page.goBack();
+    await expect(page.locator("#tab-volunteer")).toHaveAttribute("aria-selected", "true");
+    await page.waitForTimeout(800);
+    expect(await page.evaluate(() => window.scrollY)).toBe(0);
+  });
+
+  test("an address with a stray % opens the page as usual", async ({ page }) => {
+    const errors: string[] = [];
+    page.on("pageerror", (error) => errors.push(error.message));
+    await page.goto("/#%E0%A4%A");
+    await expect(page.locator("#tab-sponsor")).toHaveAttribute("aria-selected", "true");
+    await expect(page.locator("#volunteer")).toBeHidden();
+    await page.waitForLoadState("load");
+    expect(new URL(page.url()).hash).toBe("#%E0%A4%A");
+    expect(errors).toEqual([]);
+  });
+
+  test("Back after a page opened at a section is the browser's again", async ({ page }) => {
+    await page.goto("/#programs");
+    await page.waitForLoadState("load");
+    await page.waitForTimeout(1200); // the layout's hold on the place ends
+    const landed = await page.evaluate(() => Math.round(window.scrollY));
+    await page.evaluate(() => scrollTo(0, 600));
+    await page.waitForTimeout(300); // the browser records the place as a reader's scroll ends
+    await page.evaluate(() => (location.hash = "#about"));
+    await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(1500);
+    await page.goBack();
+    // What each browser does on its own: Safari and Firefox return to the
+    // place (Firefox a few dozen pixels off), Chrome to the section the
+    // address names. Held by the page, Back left the reader at About.
+    await expect
+      .poll(async () => {
+        const y = await page.evaluate(() => Math.round(window.scrollY));
+        return Math.abs(y - 600) < 100 || Math.abs(y - landed) < 2;
+      })
+      .toBe(true);
+  });
+
+  test("the panel that leaves fades out quicker than the new one arrives", async ({ page }) => {
+    await page.goto("/");
+    await expect(page.locator("[data-tabs]")).toHaveClass(/is-live/);
+    const leaving = await page.evaluate(() => {
+      document.querySelector<HTMLElement>("#tab-volunteer")!.click();
+      const panel = document.querySelector(".panel.is-leaving");
+      return panel && getComputedStyle(panel).transitionDuration;
+    });
+    expect(leaving).toBe("0.16s");
+  });
+
+  test("the thumb moves by transform, which every supported browser has", async ({ page }) => {
+    await page.goto("/");
+    await page.locator("#tab-partner").click();
+    const thumb = page.locator(".thumb");
+    // The translate property is Chrome 104 and later; transform is everywhere.
+    expect(await thumb.evaluate((el) => getComputedStyle(el).translate)).toBe("none");
+    await expect
+      .poll(async () => {
+        const [t, tab] = await Promise.all([
+          thumb.boundingBox(),
+          page.locator("#tab-partner").boundingBox(),
+        ]);
+        return Math.abs(t!.x - tab!.x);
+      })
+      .toBeLessThan(1);
+  });
 });
 
 test.describe("the waves", () => {
@@ -1336,6 +1667,10 @@ test.describe("the waves", () => {
   // nowhere, which Chromium never showed.
   test("every wave hands over without a seam", async ({ page }, testInfo) => {
     oncePerEngine(testInfo);
+    // Six page loads and a capture per wave: about 16s in WebKit alone and
+    // past 30s beside two other WebKit workers. The standard allowance for
+    // slow tests (three times the limit); a real hang still fails.
+    test.slow();
     const columns = [0.08, 0.25, 0.4];
     const seams: string[] = [];
     for (const [width, height] of [
@@ -1465,6 +1800,11 @@ test.describe("the waves", () => {
   // pixel, at widths whose edges fall on different fractions of a pixel.
   test("no wave's edge lets what lies behind show through", async ({ browser }, testInfo) => {
     oncePerEngine(testInfo);
+    // Fourteen page loads at three device pixels to a CSS pixel: about 16s
+    // in WebKit alone and 26 to 30s beside two other WebKit workers, against
+    // the 30s default. It gets the standard allowance for slow tests (three
+    // times the limit); a real hang still fails.
+    test.slow();
     const context = await browser.newContext({
       deviceScaleFactor: 3,
       baseURL: testInfo.project.use.baseURL,
@@ -1574,11 +1914,59 @@ test.describe("the program strip", () => {
   });
 });
 
+test.describe("the banner's photos", () => {
+  test("turning on Reduce Motion during the visit keeps the first photo", async ({ page }) => {
+    await page.goto("/");
+    await expect(page.locator(".montage")).toHaveClass(/play/, { timeout: 8000 });
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    const imgs = page.locator(".montage .slide img");
+    await expect(imgs.first()).toHaveCSS("opacity", "1");
+    await expect(imgs.nth(1)).toHaveCSS("opacity", "0");
+    expect(
+      await page
+        .evaluate(() =>
+          Array.from(document.querySelectorAll(".montage img")).flatMap((img) =>
+            img.getAnimations(),
+          ),
+        )
+        .then((a) => a.length),
+    ).toBe(0);
+  });
+
+  test("turning off Reduce Motion during the visit starts the crossfade", async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    await page.goto("/");
+    await page.waitForLoadState("load");
+    await page.waitForTimeout(2000);
+    await expect(page.locator(".montage")).not.toHaveClass(/play/);
+    await page.emulateMedia({ reducedMotion: "no-preference" });
+    await expect(page.locator(".montage")).toHaveClass(/play/, { timeout: 5000 });
+  });
+});
+
+test.describe("programs", () => {
+  test("under Reduce Motion the checklist opens at once", async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    await page.goto("/");
+    const list = page.locator("details.checklist").first();
+    await list.scrollIntoViewIfNeeded();
+    const heights = await list.evaluate(async (el: HTMLDetailsElement) => {
+      el.open = true;
+      await new Promise(requestAnimationFrame);
+      await new Promise(requestAnimationFrame);
+      const first = el.getBoundingClientRect().height;
+      await new Promise((done) => setTimeout(done, 600));
+      return [first, el.getBoundingClientRect().height];
+    });
+    expect(heights[0]).toBe(heights[1]);
+  });
+});
+
 test.describe("one home per fact", () => {
   // On the first screen each fact appears once: the tagline as the banner's
   // eyebrow, the service area in the headline's last line, the founding year
-  // in the trust strip. The subhead says what the organization is.
-  test("the banner and trust strip do not repeat each other", async ({ page }) => {
+  // in the proof line. The subhead says what the organization is.
+  test("the banner and the proof line do not repeat each other", async ({ page }) => {
     await page.goto("/");
     const area = claim(facts.serviceArea);
     const year = String(claim(facts.founded));
@@ -1587,8 +1975,8 @@ test.describe("one home per fact", () => {
     expect(times(banner, area), `${area} in the banner`).toBe(1);
     expect(times(banner, year), `${year} in the banner`).toBe(0);
     const strip = await page.locator(".facts").innerText();
-    expect(times(strip, year), `${year} in the trust strip`).toBe(1);
-    expect(times(strip, area), `${area} in the trust strip`).toBe(0);
+    expect(times(strip, year), `${year} in the proof line`).toBe(1);
+    expect(times(strip, area), `${area} in the proof line`).toBe(0);
     // The banner sets the tagline in capitals; innerText reports it that way.
     const body = (await page.locator("body").innerText()).toLowerCase();
     expect(times(body, hero.tagline.toLowerCase()), `${hero.tagline} on the page`).toBe(1);
@@ -1615,14 +2003,21 @@ test.describe("honest buttons", () => {
     });
   }
 
-  test("the sponsor and partner tabs ask for an email until their forms exist", async ({
+  test("each tab's button goes to its form, or asks for an email until the form exists", async ({
     page,
   }) => {
     await page.goto("/");
-    await expect(page.locator("#sponsor a.button")).toHaveText("Email us to sponsor");
-    await expect(page.locator("#partner a.button")).toHaveText("Email us to partner");
-    await expect(page.locator("#volunteer a.button")).toHaveAttribute("href", /^https:/);
-    await expect(page.locator("#donate a.button")).toHaveAttribute("href", "/donate");
+    for (const tab of getInvolved.tabs) {
+      const button = page.locator(`#${tab.id} a.button`);
+      if (tab.action.href) {
+        await expect(button).toHaveAttribute("href", tab.action.href);
+        // An outside form also says it opens in a new tab.
+        await expect(button).toContainText(tab.action.label);
+      } else {
+        await expect(button).toHaveAttribute("href", /^mailto:/);
+        await expect(button).toHaveText(tab.action.fallbackLabel);
+      }
+    }
   });
 
   test("sending the application says it goes by email", async ({ page }) => {
@@ -1632,6 +2027,22 @@ test.describe("honest buttons", () => {
 });
 
 test.describe("donation page", () => {
+  // Until a payment page is set (links.donate) the button opens an email
+  // that names the gift; once it is, the button goes there and the gift
+  // rides along in its address.
+  const byEmail = links.donate ? "" : " by email";
+  const carries = (href: string, amount: string, frequency: string) => {
+    if (links.donate) {
+      const url = new URL(href);
+      expect(url.searchParams.get("amount")).toBe(amount);
+      expect(url.searchParams.get("frequency")).toBe(frequency);
+    } else {
+      const text = decodeURIComponent(href);
+      expect(text).toContain(`$${amount}`);
+      expect(text).toContain(frequency === "monthly" ? "monthly" : "one-time");
+    }
+  };
+
   test("the chosen amount and frequency travel with the giving link", async ({ page }) => {
     await page.goto("/donate");
     await page.locator("input[name=amount][value='100']").check();
@@ -1639,10 +2050,8 @@ test.describe("donation page", () => {
     await expect(page.locator("[data-summary]")).toHaveText("Your gift: $100 a month.");
     const go = page.locator(".go");
     // The button carries the gift, so the last thing read before the click confirms it.
-    await expect(go).toHaveText("Donate $100 a month by email");
-    const href = decodeURIComponent((await go.getAttribute("href"))!);
-    expect(href).toMatch(/\$100/);
-    expect(href).toMatch(/monthly/);
+    await expect(go).toHaveText(`Donate $100 a month${byEmail}`);
+    carries((await go.getAttribute("href"))!, "100", "monthly");
   });
 
   test("the other amount is an always-visible field that acts as the fifth choice", async ({
@@ -1653,7 +2062,7 @@ test.describe("donation page", () => {
     await expect(other).toBeVisible();
     await other.fill("75");
     await expect(page.locator("[data-summary]")).toHaveText("Your gift: $75.");
-    await expect(page.locator(".go")).toHaveText("Donate $75 by email");
+    await expect(page.locator(".go")).toHaveText(`Donate $75${byEmail}`);
     await expect(page.locator("input[name=amount]:checked")).toHaveCount(0);
     // Choosing a chip again empties the field.
     await page.locator("input[name=amount][value='25']").check();
@@ -1665,6 +2074,29 @@ test.describe("donation page", () => {
     await page.goto("/donate");
     await expect(page.locator(".tax")).toContainText(claim(facts.ein));
     await expect(page.locator(".tax")).toContainText(claim(facts.taxExempt).section);
+  });
+
+  // A typed amount is taken as written: cents are kept, not dropped.
+  test("an amount with cents is shown and sent as typed", async ({ page }) => {
+    await page.goto("/donate");
+    await page.locator("#other-amount").fill("12.75");
+    await expect(page.locator("[data-summary]")).toHaveText("Your gift: $12.75.");
+    await expect(page.locator(".go")).toHaveText(`Donate $12.75${byEmail}`);
+    carries((await page.locator(".go").getAttribute("href"))!, "12.75", "once");
+  });
+
+  // Line breaks in an email link are CRLF (RFC 6068); some mail apps join
+  // lines that are separated by a bare LF.
+  test("the gift email's line breaks are CRLF", async ({ page }) => {
+    test.skip(!!links.donate, "gifts go to the payment page, not by email");
+    await page.goto("/donate");
+    const before = (await page.locator(".go").getAttribute("href"))!;
+    await page.locator("input[name=amount][value='100']").check();
+    const after = (await page.locator(".go").getAttribute("href"))!;
+    for (const href of [before, after]) {
+      expect(href).toContain("%0D%0A");
+      expect(href).not.toMatch(/(?<!%0D)%0A/);
+    }
   });
 });
 
@@ -1828,6 +2260,103 @@ test.describe("application page", () => {
     await page.goto("/apply");
     expect(await page.evaluate(() => document.activeElement === document.body)).toBe(true);
   });
+
+  // People and autofill write a US number with its country code. The form
+  // keeps the 1 in front instead of reading it as the first digit of the
+  // area code, and never cuts a pasted number short.
+  test("a phone number written with its country code is read correctly", async ({ page }) => {
+    await page.goto("/apply");
+    const phone = page.locator("#phone");
+    for (const written of ["+1 (317) 555-0100", "1-317-555-0100", "+13175550100"]) {
+      await phone.fill(written);
+      await expect(phone, written).toHaveValue("1 (317) 555-0100");
+      await phone.blur();
+      await expect(page.locator(".field:has(#phone) .error"), written).toHaveCount(0);
+    }
+    await phone.fill("");
+    await phone.pressSequentially("13175550100");
+    await expect(phone).toHaveValue("1 (317) 555-0100");
+  });
+
+  // What is sent is what the family chose at the end: a kind of help they
+  // unchecked takes its details with it, errors go away once corrected, and
+  // the email's lines break the way mail apps expect.
+  test("sends only the help still chosen, and clears errors once fixed", async ({ page }) => {
+    test.slow();
+    await page.goto("/apply");
+    await page.locator("#firstName").fill("Jane");
+    await page.locator("#lastName").fill("Doe");
+    await page.locator("#phone").fill("+1 317 555 0100");
+    await pressAndSettle(page, "[data-next]");
+    await page.locator("#street").fill("1 Main St");
+    await page.locator("#city").fill("Noblesville");
+    await page.locator("#zip").fill("46060");
+    await page.locator("#county").selectOption("Hamilton");
+    await page.locator("#childCount").selectOption("1");
+    await pressAndSettle(page, "[data-next]");
+    // An unchosen age names the child it belongs to.
+    await expect(page.locator(".field:has(#child-1-0) .error")).toHaveText(
+      "Choose the age of child 1.",
+    );
+    await page.locator("#child-1-0").selectOption("4");
+    await pressAndSettle(page, "[data-next]");
+    await pressAndSettle(page, "[data-next]");
+    await expect(page.locator("[data-needs-error]")).toBeVisible();
+    await page.locator("input[name=need][data-toggle=diapers]").check();
+    await expect(page.locator("[data-needs-error]")).toBeHidden();
+    await page.locator("input[name=diaperSizes][value='Size 4']").check();
+    await page.locator("input[name=need][data-toggle=diapers]").uncheck();
+    await page.locator("input[name=need][data-toggle=holiday]").check();
+    await pressAndSettle(page, "[data-next]");
+    const review = page.locator("[data-review]");
+    await expect(review).toContainText("(317) 555-0100");
+    await expect(review).not.toContainText("Size 4");
+    await expect(review).not.toContainText("Diaper");
+    await pressAndSettle(page, "[data-send]");
+    await expect(page.locator("[data-consent-error]")).toBeVisible();
+    await page.locator("input[name=consent]").check();
+    await expect(page.locator("[data-consent-error]")).toBeHidden();
+    await page.evaluate(() => {
+      document.querySelector("[data-apply]")!.addEventListener("application:send", (event) => {
+        event.preventDefault();
+        (window as unknown as { __mail: string }).__mail = (event as CustomEvent<string>).detail;
+      });
+    });
+    await pressAndSettle(page, "[data-send]");
+    const mail = await page.evaluate(() => (window as unknown as { __mail: string }).__mail);
+    expect(mail).toContain("%0D%0A");
+    expect(mail).not.toMatch(/(?<!%0D)%0A/);
+    expect(decodeURIComponent(mail)).toContain("Phone: (317) 555-0100");
+    expect(decodeURIComponent(mail)).not.toContain("Size 4");
+  });
+
+  // The copy box answers focus like every field, and the follow-up questions
+  // ("Which sizes?") are labels like "Best way to reach you".
+  test("the copy box shows focus, and follow-up questions read as labels", async ({ page }) => {
+    await page.goto("/apply");
+    const face = (sel: string) =>
+      page
+        .locator(sel)
+        .first()
+        .evaluate((el) => {
+          const s = getComputedStyle(el);
+          return `${s.fontFamily} ${s.fontWeight}`;
+        });
+    expect(await face(".sub > legend")).toBe(await face("fieldset.field > legend"));
+    const states = await page.evaluate(() => {
+      const done = document.querySelector<HTMLElement>("[data-done]")!;
+      done.hidden = false;
+      const box = done.querySelector("textarea")!;
+      const look = () => {
+        const s = getComputedStyle(box);
+        return `${s.outlineStyle} ${s.outlineWidth} ${s.boxShadow}`;
+      };
+      const rest = look();
+      box.focus();
+      return { rest, focused: look() };
+    });
+    expect(states.focused).not.toBe(states.rest);
+  });
 });
 
 test.describe("without JavaScript", () => {
@@ -1870,9 +2399,28 @@ test.describe("without JavaScript", () => {
     await expect(page.locator(".noscript")).toContainText("Call");
   });
 
-  test("the donation page still offers a way to give", async ({ page }) => {
+  // Without the script a choice of amount can't reach the link, so the page
+  // offers one way to give that names no amount, and no choices that do
+  // nothing.
+  test("the donation page offers a way to give that names no amount", async ({ page }) => {
     await page.goto("/donate");
-    await expect(page.locator(".go")).toBeVisible();
+    const give = page.locator(".card a.button:visible");
+    await expect(give).toHaveCount(1);
+    await expect(give).not.toHaveText(/\$/);
+    expect(decodeURIComponent((await give.getAttribute("href"))!)).not.toMatch(/\$\d/);
+    await expect(page.locator(".card fieldset").first()).toBeHidden();
+  });
+
+  test("the desktop bar keeps its one row", async ({ page, viewport }) => {
+    test.skip((viewport?.width ?? 0) < 896, "phones and tablets wrap the links under the brand");
+    await page.goto("/");
+    const centre = async (selector: string) => {
+      const box = await page.locator(selector).first().boundingBox();
+      return box!.y + box!.height / 2;
+    };
+    const bar = await centre(".site-header .brand");
+    expect(Math.abs((await centre(".site-header .inline-nav")) - bar)).toBeLessThan(2);
+    expect(Math.abs((await centre(".site-header .donate")) - bar)).toBeLessThan(2);
   });
 });
 
@@ -1919,16 +2467,33 @@ test.describe("videos", () => {
     await expect(iframe).toHaveAttribute("src", /^https:\/\/www\.youtube-nocookie\.com\/embed\//);
     await expect(iframe).toHaveAttribute("title", /.+/);
   });
+
+  test("her story's player is titled with the video's own title", async ({ page }) => {
+    await page.route("https://www.youtube-nocookie.com/**", (route) =>
+      route.fulfill({ status: 200, contentType: "text/html", body: "<p>player</p>" }),
+    );
+    await page.goto("/");
+    await page.locator("[data-watch]").click();
+    await expect(page.locator("#about iframe")).toHaveAttribute("title", about.video.title);
+  });
 });
 
 test.describe("search and sharing", () => {
-  test("search engines are blocked by default", async ({ page, request }) => {
+  // Blocked everywhere until launch; after launch (PUBLIC_ALLOW_INDEXING),
+  // the production domain alone is indexed. The page and robots.txt agree.
+  test("search engines are blocked, except on the launched production site", async ({
+    page,
+    request,
+  }) => {
     await page.goto("/");
-    await expect(page.locator('meta[name="robots"]')).toHaveAttribute(
-      "content",
-      "noindex, nofollow",
-    );
+    const robotsMeta = await page.locator('meta[name="robots"]').getAttribute("content");
     const robots = await (await request.get("/robots.txt")).text();
+    if (robotsMeta === "index, follow") {
+      expect(new URL(page.url()).origin).toBe(PRODUCTION_ORIGIN);
+      expect(robots).not.toMatch(/User-agent: \*\nDisallow: \//);
+      return;
+    }
+    expect(robotsMeta).toBe("noindex, nofollow");
     expect(robots).toMatch(/User-agent: \*\nDisallow: \//);
     // Link-preview bots stay allowed so shared links show the logo.
     expect(robots).toContain("User-agent: facebookexternalhit");
@@ -1991,5 +2556,18 @@ test.describe("search and sharing", () => {
     const response = await page.goto("/this-page-does-not-exist");
     expect(response?.status()).toBe(404);
     await expect(page.getByRole("heading", { level: 1 })).toHaveText("We can't find that page");
+    // It answers any missing address, so it names no address of its own,
+    // and it is never indexed, even after launch.
+    await expect(page.locator('link[rel="canonical"]')).toHaveCount(0);
+    await expect(page.locator('meta[property="og:url"]')).toHaveCount(0);
+    await expect(page.locator('meta[name="robots"]')).toHaveAttribute(
+      "content",
+      "noindex, nofollow",
+    );
+    // Its doors are the banner's.
+    await expect(page.locator(".button-row .button").first()).toHaveAttribute(
+      "href",
+      hero.doors.getHelp.href,
+    );
   });
 });

@@ -7,6 +7,12 @@ import BrandPaint from "../components/BrandPaint.astro";
 import displayFont from "@fontsource-variable/bricolage-grotesque/files/bricolage-grotesque-latin-wght-normal.woff2?url";
 import bodyFont from "@fontsource/atkinson-hyperlegible-next/files/atkinson-hyperlegible-next-latin-400-normal.woff2?url";
 import bodyBoldFont from "@fontsource/atkinson-hyperlegible-next/files/atkinson-hyperlegible-next-latin-700-normal.woff2?url";
+// Her faces' subsets go through the build like the others, so they are
+// served under hashed names and cached for good (public/ files are not).
+import serifFont from "../assets/fonts/serif.woff2?url";
+import serifItalicFont from "../assets/fonts/serif-italic.woff2?url";
+import footerFont from "../assets/fonts/footer-sans.woff2?url";
+import { scriptJson } from "../data/derive.ts";
 import { assertLaunchReady, claim, pendingFacts, show } from "../data/facts.ts";
 import { facts, org } from "../data/site";
 
@@ -17,11 +23,14 @@ type Props = {
   preloadImage?: { srcset: string; sizes: string; type: string };
   /** The home page paints the serif's italic on its first screen; nothing else does. */
   preloadItalic?: boolean;
+  /** The not-found page: never indexed, and no address of its own to name. */
+  notFound?: boolean;
 };
 
 const {
   preloadImage,
   preloadItalic = false,
+  notFound = false,
   title = `${org.name} | ${claim(facts.serviceArea)}`,
   description = `${org.shortName} helps families in ${claim(facts.serviceArea)} with holiday meals and gifts, monthly diapers, and school supplies.`,
 } = Astro.props;
@@ -84,7 +93,10 @@ const structuredData = {
     <meta name="color-scheme" content="light only" />
     <title>{title}</title>
     <meta name="description" content={description} />
-    <meta name="robots" content={allowIndexing ? "index, follow" : "noindex, nofollow"} />
+    <meta
+      name="robots"
+      content={allowIndexing && !notFound ? "index, follow" : "noindex, nofollow"}
+    />
     {preloadImage && (
       <link
         rel="preload"
@@ -101,18 +113,12 @@ const structuredData = {
     <link rel="preload" href={displayFont} as="font" type="font/woff2" crossorigin />
     <link rel="preload" href={bodyFont} as="font" type="font/woff2" crossorigin />
     <link rel="preload" href={bodyBoldFont} as="font" type="font/woff2" crossorigin />
-    <link rel="preload" href="/fonts/serif.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href={serifFont} as="font" type="font/woff2" crossorigin />
     {preloadItalic && (
-      <link
-        rel="preload"
-        href="/fonts/serif-italic.woff2"
-        as="font"
-        type="font/woff2"
-        crossorigin
-      />
+      <link rel="preload" href={serifItalicFont} as="font" type="font/woff2" crossorigin />
     )}
-    <link rel="preload" href="/fonts/footer-sans.woff2" as="font" type="font/woff2" crossorigin />
-    <link rel="canonical" href={canonical} />
+    <link rel="preload" href={footerFont} as="font" type="font/woff2" crossorigin />
+    {!notFound && <link rel="canonical" href={canonical} />}
     <meta name="theme-color" content="#1b0f2e" />
     <meta name="version" content={version} />
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
@@ -123,7 +129,7 @@ const structuredData = {
     <meta property="og:site_name" content={org.name} />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
-    <meta property="og:url" content={canonical} />
+    {!notFound && <meta property="og:url" content={canonical} />}
     <meta property="og:image" content={ogImage} />
     <meta property="og:image:type" content="image/jpeg" />
     <meta property="og:image:width" content="1200" />
@@ -134,14 +140,14 @@ const structuredData = {
     <meta name="twitter:image" content={ogImage} />
     <meta name="twitter:title" content={title} />
     <meta name="twitter:description" content={description} />
-    <script is:inline type="application/ld+json" set:html={JSON.stringify(structuredData)}></script>
+    <script is:inline type="application/ld+json" set:html={scriptJson(structuredData)}></script>
     <!-- The two doors' pages are fetched and rendered when a visitor shows
          intent (a hover or a touch on their link), so the change of page
          is immediate; browsers without speculation rules ignore this. -->
     <script is:inline type="speculationrules">
       {
         "prerender": [
-          { "where": { "href_matches": ["/donate", "/apply"] }, "eagerness": "moderate" }
+          { "where": { "href_matches": ["/donate/", "/apply/"] }, "eagerness": "moderate" }
         ]
       }
     </script>
@@ -202,7 +208,11 @@ const structuredData = {
             if (saved !== null) {
               scrollTo(0, Number(saved));
             } else {
-              var target = document.getElementById(decodeURIComponent(hash.slice(1)));
+              var id = hash.slice(1);
+              try {
+                id = decodeURIComponent(id);
+              } catch (e) {}
+              var target = document.getElementById(id);
               // A tab's panel sits in its section; land on the section.
               if (target && target.matches("[data-panel]"))
                 target = target.closest("section") || target;
@@ -221,6 +231,9 @@ const structuredData = {
             addEventListener("scroll", hold);
             setTimeout(function () {
               removeEventListener("scroll", hold);
+              // The hold is over: Back and Forward within the page are the
+              // browser's again (held, they had left the reader where they were).
+              history.scrollRestoration = "auto";
             }, 1000);
           });
         } catch (e) {}
