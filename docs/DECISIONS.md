@@ -654,3 +654,13 @@ Left as they are: an email address in the footer is not broken to fit a reader's
 - Building variants of the content (a hidden program, one gift amount, three photos) in CI: `scripts/content.test.mjs` covers those rules, and whole builds would cost minutes and break whenever `site.ts` is reworded.
 - Naming each part's devices with `--project` instead of `--shard`: `--shard` runs every test in exactly one part by construction (decision 65), and the parts' names are already checked.
 - More workers per part, a browser-feature linter, or broad screenshot comparison: flakier tests, false alarms, or more time.
+
+## 78. A refreshed page keeps the browser's own restoring off until a link leaves it
+
+**Decision:** When a page opens with a section in its address, `history.scrollRestoration` stays `manual` for as long as the reader is on that entry, as decision 50 had it. A click on a link to a section of the same page turns it to `auto` just before the browser makes the new entry, so Back and Forward between the two return the reader to their place. Decision 76 had instead turned it back to `auto` one second after load.
+
+**Why:** After decision 76 reached the live site, the owner found that a refresh on a phone dropped to the bottom of the page again, the bug decision 50 fixed (Contact from the menu, back up, refresh). Safari on a phone re-applies a stale position of its own after load; with the restoring back on after the one-second hold, nothing held the page against it. The test browsers never re-apply that position, so the refresh test passed throughout. It now also checks that the restoring is still `manual` after the hold: with the timed `auto` it failed on every engine, and it passes with this change.
+
+**What still holds from decision 76:** after a page opened at a section, Back from a section the reader went to returns them to their place. That test now follows a link the way a reader does (the timed change was tested with a script-written address, which no reader makes), and it fails without the link handler.
+
+**To confirm on a real iPhone:** open the menu, choose Contact, scroll back to the top, refresh; the page stays at the top. Automated WebKit cannot show Safari's stale position.
