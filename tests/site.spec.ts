@@ -21,10 +21,12 @@ const sectionLabels = navigation.items.map((item) => item.label);
 // A test that sets its own viewport measures the stylesheet, not the device,
 // so it runs once per engine, on that engine's desktop project. The device
 // projects keep every test that runs at the device's own screen size. This
-// holds while the only pointer-dependent rule is the footer's 44px rows
-// (vertical, not measured by these tests); a rule on (pointer) or (hover)
-// that changes the first screen or a width would need its test on a phone
-// project again.
+// holds while the only pointer-dependent rules are the footer's 44px rows
+// (vertical, not measured by these tests) and the form fields' 16px text
+// under a touch pointer (checked on the phone projects by "no field makes iOS
+// zoom"; these tests measure the page as a mouse sees it); a rule on
+// (pointer) or (hover) that changes the first screen or a width would need
+// its test on a phone project again.
 const oncePerEngine = (testInfo: import("@playwright/test").TestInfo) =>
   test.skip(!testInfo.project.name.startsWith("desktop-"), "runs once per engine");
 
@@ -696,9 +698,9 @@ const fontsSettled = (page: import("@playwright/test").Page) =>
   });
 
 test.describe("the header by device", () => {
-  // The header is painted, not only laid out: a sweep of her logo's bands,
-  // a glow under the Donate pill, the wedge's hairlines. Its geometry is
-  // checked above; this checks the picture. On every page, the bar on each
+  // The header is painted, not only laid out: the glows behind the mark and
+  // under the Donate pill, the wedge's hairlines. Its geometry is checked
+  // above; this checks the picture. On the home page, the bar on each
   // device of a class, scaled to the class reference's size, must match the
   // reference bar pixel for pixel, within what text antialiasing at another
   // scale changes. A background placed in percent of the bar (a glow that
@@ -1963,8 +1965,8 @@ test.describe("programs", () => {
 test.describe("one home per fact", () => {
   // On the first screen each fact appears once: the tagline as the banner's
   // eyebrow, the service area in the headline's last line, the founding year
-  // in the trust strip. The subhead says what the organization is.
-  test("the banner and trust strip do not repeat each other", async ({ page }) => {
+  // in the proof line. The subhead says what the organization is.
+  test("the banner and the proof line do not repeat each other", async ({ page }) => {
     await page.goto("/");
     const area = claim(facts.serviceArea);
     const year = String(claim(facts.founded));
@@ -1973,8 +1975,8 @@ test.describe("one home per fact", () => {
     expect(times(banner, area), `${area} in the banner`).toBe(1);
     expect(times(banner, year), `${year} in the banner`).toBe(0);
     const strip = await page.locator(".facts").innerText();
-    expect(times(strip, year), `${year} in the trust strip`).toBe(1);
-    expect(times(strip, area), `${area} in the trust strip`).toBe(0);
+    expect(times(strip, year), `${year} in the proof line`).toBe(1);
+    expect(times(strip, area), `${area} in the proof line`).toBe(0);
     // The banner sets the tagline in capitals; innerText reports it that way.
     const body = (await page.locator("body").innerText()).toLowerCase();
     expect(times(body, hero.tagline.toLowerCase()), `${hero.tagline} on the page`).toBe(1);

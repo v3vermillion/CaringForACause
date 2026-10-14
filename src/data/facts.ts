@@ -6,7 +6,7 @@
  * - "org-published": stated by the organization on its own current website.
  * - "needs-confirmation": conflicting or outdated sources; ask Tamara.
  *
- * Components that state something as fact (trust line, tax statement) accept
+ * Components that state something as fact (the proof line, tax statement) accept
  * only `Settled` values, so passing an unconfirmed fact is a type error.
  * Contact details may render while unconfirmed, because the preview needs a way
  * to reach her, but the launch check refuses to turn on search indexing until

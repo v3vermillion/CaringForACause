@@ -594,9 +594,9 @@ const applyHref = links.familyApplication ?? getHelp.action.href;
     }
   }
 
-  /* From tablets up the photo stands beside the words as a portrait, the
-     photos' own shape (they are phone pictures, 3 by 4), so no head is
-     cropped and the row reads as a spread; sides alternate. */
+  /* From tablets up the photo stands beside the words, a square crop of
+     these phone pictures (3 by 4), so the row reads as a spread; sides
+     alternate. */
   @media (min-width: 36rem) {
     .list {
       gap: var(--space-xl);
@@ -606,8 +606,8 @@ const applyHref = links.familyApplication ?? getHelp.action.href;
       gap: var(--space-l);
       align-items: center;
     }
-    /* The photo is square beside the words on tablets and a little wider
-       than tall on desktop: a crop about as tall as the words, so no column
+    /* The photo is square beside the words on tablets (and on desktop,
+       below): a crop about as tall as the words, so no column
        runs empty beside it, and one picture per class (a photo that took
        the row's height changed with the words' wrapping). */
     .media {

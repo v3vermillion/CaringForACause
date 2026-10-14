@@ -204,7 +204,7 @@ export const hero = {
   ] satisfies Photo[],
   /**
    * What the organization is, from her mission statement. The headline names
-   * the service area and the trust strip has the year, so neither is repeated.
+   * the service area and the proof line has the year, so neither is repeated.
    * The city is still unconfirmed (see facts.city), so it stays out of here.
    */
   subhead: "A nonprofit for households facing financial hardship.",
@@ -221,9 +221,10 @@ export const hero = {
 
 /**
  * The strip under the banner (decision 58): the four things the banner
- * promises, each with its icon from her reference, a title, one line, and
- * the program it opens. The lines are the programs' own words (see
- * `programs`), cut to fit a phone's column of four.
+ * promises, each with its icon from her reference, a title, and the program
+ * it opens. Each also has one line, the programs' own words (see
+ * `programs`), which the giving page shows beside the same icons; the strip
+ * shows the titles alone (decision 66).
  */
 export const programStrip = [
   {

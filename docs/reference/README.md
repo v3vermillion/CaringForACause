@@ -5,3 +5,7 @@ by page and width: `home-390.png`, `home-1280.png`, `menu-390.png`. Claude Code
 screenshots the preview at the same widths (see `CLAUDE.md`) and compares
 against these before running the suite. Add a reference when the owner approves
 a screen or sends a new one; replace it when a later approval supersedes it.
+
+None are here yet. Until the owner approves a screen, compare with the page
+before the change: screenshot the preview at the same widths on `main` and on
+the branch.

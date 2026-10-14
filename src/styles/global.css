@@ -7,7 +7,7 @@
   --purple-deep: #4a06ab; /* hover state for purple buttons */
   --crimson: #ba010c; /* logo heart; white text on it = 6.8:1 */
   --signal: #e2202c; /* the one crimson used on dark ground; stays red, never pink */
-  --night: #1b0f2e; /* hero, dark cards, and footer background */
+  --night: #1b0f2e; /* banner, night band, About, dark cards, page openers */
   --night-2: #150b26; /* deeper night, for the base of dark surfaces */
   --night-soft: #c9b6f2; /* secondary text on night = 9.9:1 */
   --paper: #faf7fd; /* page background */
@@ -59,8 +59,9 @@
   --hairline: max(1px, 0.0625rem);
 
   --measure: 62ch;
-  /* The wave between surfaces (src/components/Wave.astro): the banner's 84
-     reference px on phones and tablets, 92 on desktop. */
+  /* The wave between surfaces (src/components/Wave.astro): 84 reference px
+     on phones and tablets, 92 on desktop. The banner sets its own (64 of
+     --rp; 92 of --u). */
   --wave-h: 5.25rem;
   /* The program strip's bloom, centred on the seam between the banner and
      the strip (src/components/ProgramStrip.astro, Hero.astro): sized from the
@@ -82,13 +83,14 @@
 
   /* Reference pixels per device class (see docs/DESIGN.md, "The first screen
      by device"), both from the screen width, which does not change when a
-     phone's address bar collapses. --rp sizes the banner's words: on phones
-     one pixel of the 393px-wide reference layout; on tablets the same words
-     scaled so their column is 56% of the screen. --sp sizes the header and the
-     two strips, and through the root font size every rem on the site: the
-     phone reference on phones, the 768px-wide tablet reference on tablets, and
-     the 1280px-wide reference on desktop (the desktop banner alone scales by
-     height, --u, so it can end at the season strip). */
+     phone's address bar collapses. --rp sizes the banner's words and, on phones,
+     the program strip: on phones one pixel of the 393px-wide reference
+     layout; on tablets the same words scaled so their column is 56% of the
+     screen. --sp sizes the header, the season strip and the program strip on
+     tablets, and through the root font size every rem on the site: the phone
+     reference on phones, the 768px-wide tablet reference on tablets, and the
+     1280px-wide reference on desktop (on desktop the banner and the program
+     strip scale by height, --u, so the first screen ends at the fold). */
   /* A plain division, with its cap (1.15px, the largest phone at about
      450px) in the media query under this block rather than a min(): Firefox
      resolves a min() or max() of lengths to a whole number of sixtieths of a
@@ -100,9 +102,9 @@
   /* What sits above the first screen: the header. The desktop banner fills
      the rest. */
   /* The header bar scales with --sp; its Donate link is a 44px tap target,
-     so the bar can never be shorter than that (a desktop window narrower
-     than about 940px). Plus the 1px rule under it. Desktop sets its own,
-     taller bar below. */
+     so the bar can never be shorter than that (a guard: at the narrowest
+     phone and tablet the bar is 49 and 45px). Plus the 1px rule under it.
+     Desktop sets its own, taller bar below. */
   --header-h: calc(max(60 * var(--sp), 44px) + 1px);
   --top-chrome: var(--header-h);
   /* Where a link to a section lands: this far below the top of the window,
@@ -179,7 +181,7 @@
     --gutter: max(5vw, 50vw - 720px);
     --step-1: 1.406rem;
     /* The desktop bar is 72 reference px (her lockup and the links need the
-       room); the 44px floor still applies in a narrow window. */
+       room); the 44px floor is a guard (the bar is 50.4px at 896px). */
     --header-h: calc(max(72 * var(--sp), 44px) + 1px);
     --step-2: 1.9rem;
     --step-3: 2.75rem;

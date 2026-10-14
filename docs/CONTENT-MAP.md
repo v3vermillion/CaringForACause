@@ -71,7 +71,7 @@ The site is organized by what a visitor came to do, not by org chart. Two audien
 ```
 HEADER        mark + her lockup · About · Programs · Get involved · Contact · Donate
 BANNER        her photos + tagline + headline + one sentence + Help me / Donate, then the wave     choose your path
-TRUST         since 2015 · 501(c)(3) · Toys for Tots                      proof, in a glance (night band)
+STRIP         four programs as icons, then proof: since 2015 · 501(c)(3) · Toys for Tots     what the help is, and proof (night band)
 SEASON        one line: what's needed now + one link, then the wave       optional, off (decision 66); urgency, changes each season
 PROGRAMS      tiles, Get help card, then 4 programs as rows               what exists, who qualifies, how to apply
 GET INVOLVED  4 tabs: Sponsor · Donate · Volunteer · Partner              one action per supporter
@@ -88,7 +88,7 @@ Rules that keep it premium rather than busy:
 - One idea per section, one button per idea. No section asks two things.
 - Real photos carry the emotion; they are never stock and never decorative filler.
 - Every fact on the page is traceable (`facts.ts`). Unconfirmed details are kept off public builds by the launch check.
-- Motion is used once, in the banner, and stops for people who prefer reduced motion.
+- One orchestrated motion, in the banner; everything else moves only in response to a person, and all of it stops for people who prefer reduced motion.
 - Everything must work on a 375-pixel phone first. Desktop is a widening, not a redesign.
 
 ## 3. Banner specification
@@ -98,4 +98,4 @@ Goal: within the first screen on a phone, a visitor sees real people, her name i
 - **Background:** a slow, silent crossfade of four of her event photos (28-second cycle, 7 seconds each), each drifting slowly larger while it shows, under a night veil that keeps white text above 7:1. On phones it fills the banner, showing in a band above the words; on desktop it occupies the right side at close to its native width and the veil hides its edge. The wave at the foot of the banner cuts it. Under `prefers-reduced-motion`, the first photo stays still.
 - **Words:** "Together we can." as the eyebrow, the headline (its last line in lavender italic), the subhead. All from her materials.
 - **Doors:** two, the same size, side by side on every screen: "Help me" (signal) and "Donate" (a pale ring), each a pill. A test checks both fit an iPhone 12 mini and an iPhone 15 Safari screen.
-- **Facts:** the trust line sits directly below the banner on the same ground.
+- **Facts:** the program strip sits directly below the banner on the same ground, its proof line (since 2015, 501(c)(3) and EIN, Toys for Tots) under the four programs.
