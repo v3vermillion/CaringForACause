@@ -48,6 +48,7 @@ const nextGround = gallery.length >= 4 ? "lilac" : "footer";
             target="_blank"
             rel="noopener"
             data-watch
+            data-title={about.video.title}
           >
             <svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true">
               <path d="M6 4l10 6-10 6z" fill="currentColor" />
@@ -91,7 +92,7 @@ const nextGround = gallery.length >= 4 ? "lilac" : "footer";
       }
       const iframe = document.createElement("iframe");
       iframe.src = `https://www.youtube-nocookie.com/embed/${id}?autoplay=1&rel=0`;
-      iframe.title = button.textContent?.trim() || "Video";
+      iframe.title = button.dataset.title || "Video";
       iframe.allow = "autoplay; encrypted-media; picture-in-picture; fullscreen";
       iframe.allowFullscreen = true;
       frame.replaceChildren(iframe);

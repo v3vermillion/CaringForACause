@@ -51,9 +51,12 @@ const proof = [
       {proof.map((item, i) => (
         <>
           {i > 0 && (
-            <span class="sep" aria-hidden="true">
-              ·
-            </span>
+            <>
+              {" "}
+              <span class="sep" aria-hidden="true">
+                ·
+              </span>{" "}
+            </>
           )}
           <span>{item}</span>
         </>

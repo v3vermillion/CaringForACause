@@ -1,7 +1,15 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test } from "@playwright/test";
 import { claim } from "../src/data/facts";
-import { facts, hero, navigation, org, programStrip, seasonalBanner } from "../src/data/site";
+import {
+  about,
+  facts,
+  hero,
+  navigation,
+  org,
+  programStrip,
+  seasonalBanner,
+} from "../src/data/site";
 
 // The content the tests expect comes from the content file, so a content
 // edit (a confirmed year, a renamed section) never needs a test edit. The
@@ -47,6 +55,46 @@ test.describe("accessibility", () => {
   test("decorative arrows are not read aloud", async ({ page }) => {
     await page.goto("/apply");
     await expect(page.locator(".side .arrow-link")).toHaveAccessibleName("Email us");
+  });
+
+  test("headings and the proof line keep a space between their parts", async ({ page }) => {
+    await page.goto("/");
+    // What a screen reader or a copy reads: the text outside aria-hidden.
+    const read = (selector: string) =>
+      page.locator(selector).evaluate((el) => {
+        const walk = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
+        let text = "";
+        for (let node = walk.nextNode(); node; node = walk.nextNode()) {
+          if (!node.parentElement?.closest("[aria-hidden='true']")) text += node.textContent;
+        }
+        return text.replace(/\s+/g, " ").trim();
+      });
+    expect(await read("h1")).toBe(`${hero.headline} ${hero.headlineAccent}`);
+    expect(await read(".strip .facts")).toBe(
+      [
+        `Helping families since ${claim(facts.founded)}`,
+        `${claim(facts.taxExempt).section} nonprofit, EIN ${claim(facts.ein)}`,
+        `Partnered with ${claim(facts.toysForTotsPartner)}`,
+      ].join(" "),
+    );
+  });
+
+  test("a video's keyboard ring is drawn inside its rounded frame", async ({ page }) => {
+    await page.goto("/");
+    // The frame clips at its rounded edge: a ring outside the box is cut
+    // away, so its offset and width together must stay inside it.
+    const poster = page.locator("#haircuts .yt-link");
+    await poster.focus();
+    await page.keyboard.press("Shift");
+    expect(
+      await poster.evaluate((el) => {
+        const s = getComputedStyle(el);
+        return {
+          ring: el.matches(":focus-visible") && s.outlineStyle !== "none",
+          reach: parseFloat(s.outlineOffset) + parseFloat(s.outlineWidth),
+        };
+      }),
+    ).toEqual({ ring: true, reach: 0 });
   });
 
   test("skip link is the first thing keyboard users reach", async ({ page, browserName }) => {
@@ -301,6 +349,34 @@ test.describe("device compatibility", () => {
     await expect
       .poll(() => page.locator(".site-header").evaluate((el) => el.getBoundingClientRect().top))
       .toBe(0);
+  });
+
+  test("the footer's record stays on the page with a longer place and wider text", async ({
+    page,
+  }) => {
+    await page.goto("/");
+    // A city the owner may confirm, and WCAG 1.4.12's text spacing as a
+    // reader's own stylesheet sets it.
+    await page.locator(".where .city").evaluate((el) => {
+      el.textContent = "Noblesville and Indianapolis, Indiana";
+    });
+    await page.addStyleTag({
+      content:
+        "* { line-height: 1.5 !important; letter-spacing: 0.12em !important; word-spacing: 0.16em !important; } p { margin-bottom: 2em !important; }",
+    });
+    const record = await page.evaluate(() => {
+      const width = document.documentElement.clientWidth;
+      const parts = [".legal .name", ".where .city", ".where .serving", ".copyright"].map((s) =>
+        document.querySelector(s)!.getBoundingClientRect(),
+      );
+      const meet = (a: DOMRect, b: DOMRect) =>
+        a.left < b.right && b.left < a.right && a.top < b.bottom && b.top < a.bottom;
+      return {
+        offPage: parts.some((box) => box.left < 0 || box.right > width),
+        overlap: parts.some((a, i) => parts.slice(i + 1).some((b) => meet(a, b))),
+      };
+    });
+    expect(record).toEqual({ offPage: false, overlap: false });
   });
 });
 
@@ -1151,6 +1227,31 @@ test.describe("menu", () => {
     await expect(button).toBeFocused();
   });
 
+  test("the menu button says whether the menu is open", async ({ page, isMobile }) => {
+    test.skip(!isMobile, "the menu button only shows on phones");
+    await page.goto("/");
+    const button = page.locator("[data-menu-open]");
+    await expect(button).toHaveAttribute("aria-expanded", "false");
+    await button.click();
+    await expect(page.locator("#menu")).toBeVisible();
+    await expect(button).toHaveAttribute("aria-expanded", "true");
+    await page.keyboard.press("Escape");
+    await expect(button).toHaveAttribute("aria-expanded", "false");
+  });
+
+  test("a browser without dialogs never leaves the closed menu in the page", async ({ page }) => {
+    // Safari before 15.4 reads <dialog> as an unknown element, which no
+    // built-in rule hides when closed.
+    await page.route(/\/$/, async (route) => {
+      const response = await route.fetch();
+      const body = (await response.text()).replace(/<(\/?)dialog\b/g, "<$1x-dialog");
+      await route.fulfill({ response, body });
+    });
+    await page.goto("/");
+    await expect(page.locator(".site-header")).toHaveClass(/no-menu/);
+    await expect(page.locator("#menu")).toHaveCSS("display", "none");
+  });
+
   test("fills a portrait tablet and keeps the rules clear of the watermark", async ({
     page,
     isMobile,
@@ -1224,6 +1325,40 @@ test.describe("menu", () => {
       .withTags(["wcag2a", "wcag2aa"])
       .analyze();
     expect(results.violations.map((v) => v.id)).toEqual([]);
+  });
+});
+
+test.describe("the header's current section", () => {
+  const current = (page: import("@playwright/test").Page) =>
+    page.evaluate(() =>
+      Array.from(document.querySelectorAll(".inline-nav a[aria-current]"), (a) =>
+        a.getAttribute("data-section"),
+      ),
+    );
+
+  test("marks Contact at the end of the page", async ({ page }) => {
+    await page.goto("/");
+    await page.evaluate(() => scrollTo(0, document.documentElement.scrollHeight));
+    await expect.poll(() => current(page)).toEqual(["contact"]);
+  });
+
+  test("marks nothing over the program strip", async ({ page }) => {
+    await page.goto("/");
+    await page.locator("#programs").evaluate((el) => el.scrollIntoView());
+    await expect.poll(() => current(page)).toEqual(["programs"]);
+    // Back up until the strip crosses the middle of the window.
+    await page.locator(".strip").evaluate((el) => {
+      const box = el.getBoundingClientRect();
+      scrollBy(0, box.top + box.height / 2 - innerHeight * 0.475);
+    });
+    await expect.poll(() => current(page)).toEqual([]);
+  });
+
+  test("marks nothing on the door pages, whose links lead away", async ({ page }) => {
+    await page.goto("/donate");
+    await page.evaluate(() => scrollTo(0, document.documentElement.scrollHeight));
+    await page.waitForTimeout(300);
+    expect(await current(page)).toEqual([]);
   });
 });
 
@@ -1431,6 +1566,85 @@ test.describe("get involved tabs", () => {
     await page.keyboard.press("Tab");
     await expect(page.locator("#sponsor a.button")).toBeFocused();
   });
+
+  test("a tab address read on Back does not move the page", async ({ page, browserName }) => {
+    test.skip(
+      browserName === "webkit",
+      "WebKit itself scrolls to the address's element when it loads a page again from history, with or without the page's scripts",
+    );
+    // An unload listener keeps the page out of the back-forward cache, so
+    // Back loads it again, as Firefox often does.
+    await page.addInitScript(() => addEventListener("unload", () => {}));
+    await page.goto("/");
+    await page.locator("#tab-volunteer").evaluate((tab: HTMLElement) => tab.click());
+    expect(new URL(page.url()).hash).toBe("#volunteer");
+    await page.evaluate(() => scrollTo(0, 0));
+    await page.goto("/donate");
+    await page.goBack();
+    await expect(page.locator("#tab-volunteer")).toHaveAttribute("aria-selected", "true");
+    await page.waitForTimeout(800);
+    expect(await page.evaluate(() => window.scrollY)).toBe(0);
+  });
+
+  test("an address with a stray % opens the page as usual", async ({ page }) => {
+    const errors: string[] = [];
+    page.on("pageerror", (error) => errors.push(error.message));
+    await page.goto("/#%E0%A4%A");
+    await expect(page.locator("#tab-sponsor")).toHaveAttribute("aria-selected", "true");
+    await expect(page.locator("#volunteer")).toBeHidden();
+    await page.waitForLoadState("load");
+    expect(new URL(page.url()).hash).toBe("#%E0%A4%A");
+    expect(errors).toEqual([]);
+  });
+
+  test("Back after a page opened at a section is the browser's again", async ({ page }) => {
+    await page.goto("/#programs");
+    await page.waitForLoadState("load");
+    await page.waitForTimeout(1200); // the layout's hold on the place ends
+    const landed = await page.evaluate(() => Math.round(window.scrollY));
+    await page.evaluate(() => scrollTo(0, 600));
+    await page.waitForTimeout(300); // the browser records the place as a reader's scroll ends
+    await page.evaluate(() => (location.hash = "#about"));
+    await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(1500);
+    await page.goBack();
+    // What each browser does on its own: Safari and Firefox return to the
+    // place (Firefox a few dozen pixels off), Chrome to the section the
+    // address names. Held by the page, Back left the reader at About.
+    await expect
+      .poll(async () => {
+        const y = await page.evaluate(() => Math.round(window.scrollY));
+        return Math.abs(y - 600) < 100 || Math.abs(y - landed) < 2;
+      })
+      .toBe(true);
+  });
+
+  test("the panel that leaves fades out quicker than the new one arrives", async ({ page }) => {
+    await page.goto("/");
+    await expect(page.locator("[data-tabs]")).toHaveClass(/is-live/);
+    const leaving = await page.evaluate(() => {
+      document.querySelector<HTMLElement>("#tab-volunteer")!.click();
+      const panel = document.querySelector(".panel.is-leaving");
+      return panel && getComputedStyle(panel).transitionDuration;
+    });
+    expect(leaving).toBe("0.16s");
+  });
+
+  test("the thumb moves by transform, which every supported browser has", async ({ page }) => {
+    await page.goto("/");
+    await page.locator("#tab-partner").click();
+    const thumb = page.locator(".thumb");
+    // The translate property is Chrome 104 and later; transform is everywhere.
+    expect(await thumb.evaluate((el) => getComputedStyle(el).translate)).toBe("none");
+    await expect
+      .poll(async () => {
+        const [t, tab] = await Promise.all([
+          thumb.boundingBox(),
+          page.locator("#tab-partner").boundingBox(),
+        ]);
+        return Math.abs(t!.x - tab!.x);
+      })
+      .toBeLessThan(1);
+  });
 });
 
 test.describe("the waves", () => {
@@ -1443,6 +1657,10 @@ test.describe("the waves", () => {
   // nowhere, which Chromium never showed.
   test("every wave hands over without a seam", async ({ page }, testInfo) => {
     oncePerEngine(testInfo);
+    // Six page loads and a capture per wave: about 16s in WebKit alone and
+    // past 30s beside two other WebKit workers. The standard allowance for
+    // slow tests (three times the limit); a real hang still fails.
+    test.slow();
     const columns = [0.08, 0.25, 0.4];
     const seams: string[] = [];
     for (const [width, height] of [
@@ -1683,6 +1901,54 @@ test.describe("the program strip", () => {
     ]);
     expect(box).not.toBeNull();
     expect(box!.height - metrics.padding).toBeLessThan(metrics.lineHeight * 1.6);
+  });
+});
+
+test.describe("the banner's photos", () => {
+  test("turning on Reduce Motion during the visit keeps the first photo", async ({ page }) => {
+    await page.goto("/");
+    await expect(page.locator(".montage")).toHaveClass(/play/, { timeout: 8000 });
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    const imgs = page.locator(".montage .slide img");
+    await expect(imgs.first()).toHaveCSS("opacity", "1");
+    await expect(imgs.nth(1)).toHaveCSS("opacity", "0");
+    expect(
+      await page
+        .evaluate(() =>
+          Array.from(document.querySelectorAll(".montage img")).flatMap((img) =>
+            img.getAnimations(),
+          ),
+        )
+        .then((a) => a.length),
+    ).toBe(0);
+  });
+
+  test("turning off Reduce Motion during the visit starts the crossfade", async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    await page.goto("/");
+    await page.waitForLoadState("load");
+    await page.waitForTimeout(2000);
+    await expect(page.locator(".montage")).not.toHaveClass(/play/);
+    await page.emulateMedia({ reducedMotion: "no-preference" });
+    await expect(page.locator(".montage")).toHaveClass(/play/, { timeout: 5000 });
+  });
+});
+
+test.describe("programs", () => {
+  test("under Reduce Motion the checklist opens at once", async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    await page.goto("/");
+    const list = page.locator("details.checklist").first();
+    await list.scrollIntoViewIfNeeded();
+    const heights = await list.evaluate(async (el: HTMLDetailsElement) => {
+      el.open = true;
+      await new Promise(requestAnimationFrame);
+      await new Promise(requestAnimationFrame);
+      const first = el.getBoundingClientRect().height;
+      await new Promise((done) => setTimeout(done, 600));
+      return [first, el.getBoundingClientRect().height];
+    });
+    expect(heights[0]).toBe(heights[1]);
   });
 });
 
@@ -2114,6 +2380,18 @@ test.describe("without JavaScript", () => {
     expect(decodeURIComponent((await give.getAttribute("href"))!)).not.toMatch(/\$\d/);
     await expect(page.locator(".card fieldset").first()).toBeHidden();
   });
+
+  test("the desktop bar keeps its one row", async ({ page, viewport }) => {
+    test.skip((viewport?.width ?? 0) < 896, "phones and tablets wrap the links under the brand");
+    await page.goto("/");
+    const centre = async (selector: string) => {
+      const box = await page.locator(selector).first().boundingBox();
+      return box!.y + box!.height / 2;
+    };
+    const bar = await centre(".site-header .brand");
+    expect(Math.abs((await centre(".site-header .inline-nav")) - bar)).toBeLessThan(2);
+    expect(Math.abs((await centre(".site-header .donate")) - bar)).toBeLessThan(2);
+  });
 });
 
 test.describe("videos", () => {
@@ -2158,6 +2436,15 @@ test.describe("videos", () => {
     const iframe = page.locator("#about iframe");
     await expect(iframe).toHaveAttribute("src", /^https:\/\/www\.youtube-nocookie\.com\/embed\//);
     await expect(iframe).toHaveAttribute("title", /.+/);
+  });
+
+  test("her story's player is titled with the video's own title", async ({ page }) => {
+    await page.route("https://www.youtube-nocookie.com/**", (route) =>
+      route.fulfill({ status: 200, contentType: "text/html", body: "<p>player</p>" }),
+    );
+    await page.goto("/");
+    await page.locator("[data-watch]").click();
+    await expect(page.locator("#about iframe")).toHaveAttribute("title", about.video.title);
   });
 });
 

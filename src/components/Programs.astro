@@ -521,6 +521,15 @@ const applyHref = links.familyApplication ?? getHelp.action.href;
     opacity: 1;
   }
 
+  /* The global reduced-motion rule (global.css) cannot name this
+     pseudo-element: a browser that doesn't know it would drop the whole
+     selector list, so it is stilled here on its own. */
+  @media (prefers-reduced-motion: reduce) {
+    .checklist::details-content {
+      transition: none;
+    }
+  }
+
   .checklist summary {
     cursor: pointer;
     font-family: var(--font-display);

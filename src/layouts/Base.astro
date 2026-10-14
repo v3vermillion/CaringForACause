@@ -202,7 +202,11 @@ const structuredData = {
             if (saved !== null) {
               scrollTo(0, Number(saved));
             } else {
-              var target = document.getElementById(decodeURIComponent(hash.slice(1)));
+              var id = hash.slice(1);
+              try {
+                id = decodeURIComponent(id);
+              } catch (e) {}
+              var target = document.getElementById(id);
               // A tab's panel sits in its section; land on the section.
               if (target && target.matches("[data-panel]"))
                 target = target.closest("section") || target;
@@ -221,6 +225,9 @@ const structuredData = {
             addEventListener("scroll", hold);
             setTimeout(function () {
               removeEventListener("scroll", hold);
+              // The hold is over: Back and Forward within the page are the
+              // browser's again (held, they had left the reader where they were).
+              history.scrollRestoration = "auto";
             }, 1000);
           });
         } catch (e) {}

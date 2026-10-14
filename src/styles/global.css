@@ -244,6 +244,8 @@ html {
   }
 }
 
+/* Reduced motion: no smooth scrolling, transitions and animations end at
+   once, and a looping animation runs once rather than turning every 0.01ms. */
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
@@ -253,6 +255,7 @@ html {
   *::after {
     transition-duration: 0.01ms !important;
     animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
   }
 }
 
