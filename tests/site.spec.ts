@@ -1465,6 +1465,11 @@ test.describe("the waves", () => {
   // pixel, at widths whose edges fall on different fractions of a pixel.
   test("no wave's edge lets what lies behind show through", async ({ browser }, testInfo) => {
     oncePerEngine(testInfo);
+    // Fourteen page loads at three device pixels to a CSS pixel: about 16s
+    // in WebKit alone and 26 to 30s beside two other WebKit workers, against
+    // the 30s default. It gets the standard allowance for slow tests (three
+    // times the limit); a real hang still fails.
+    test.slow();
     const context = await browser.newContext({
       deviceScaleFactor: 3,
       baseURL: testInfo.project.use.baseURL,
@@ -1666,6 +1671,30 @@ test.describe("donation page", () => {
     await expect(page.locator(".tax")).toContainText(claim(facts.ein));
     await expect(page.locator(".tax")).toContainText(claim(facts.taxExempt).section);
   });
+
+  // A typed amount is taken as written: cents are kept, not dropped.
+  test("an amount with cents is shown and sent as typed", async ({ page }) => {
+    await page.goto("/donate");
+    await page.locator("#other-amount").fill("12.75");
+    await expect(page.locator("[data-summary]")).toHaveText("Your gift: $12.75.");
+    await expect(page.locator(".go")).toHaveText("Donate $12.75 by email");
+    expect(decodeURIComponent((await page.locator(".go").getAttribute("href"))!)).toContain(
+      "$12.75",
+    );
+  });
+
+  // Line breaks in an email link are CRLF (RFC 6068); some mail apps join
+  // lines that are separated by a bare LF.
+  test("the gift email's line breaks are CRLF", async ({ page }) => {
+    await page.goto("/donate");
+    const before = (await page.locator(".go").getAttribute("href"))!;
+    await page.locator("input[name=amount][value='100']").check();
+    const after = (await page.locator(".go").getAttribute("href"))!;
+    for (const href of [before, after]) {
+      expect(href).toContain("%0D%0A");
+      expect(href).not.toMatch(/(?<!%0D)%0A/);
+    }
+  });
 });
 
 // When Next or Send finds an error, the form focuses the first field and the
@@ -1828,6 +1857,103 @@ test.describe("application page", () => {
     await page.goto("/apply");
     expect(await page.evaluate(() => document.activeElement === document.body)).toBe(true);
   });
+
+  // People and autofill write a US number with its country code. The form
+  // keeps the 1 in front instead of reading it as the first digit of the
+  // area code, and never cuts a pasted number short.
+  test("a phone number written with its country code is read correctly", async ({ page }) => {
+    await page.goto("/apply");
+    const phone = page.locator("#phone");
+    for (const written of ["+1 (317) 555-0100", "1-317-555-0100", "+13175550100"]) {
+      await phone.fill(written);
+      await expect(phone, written).toHaveValue("1 (317) 555-0100");
+      await phone.blur();
+      await expect(page.locator(".field:has(#phone) .error"), written).toHaveCount(0);
+    }
+    await phone.fill("");
+    await phone.pressSequentially("13175550100");
+    await expect(phone).toHaveValue("1 (317) 555-0100");
+  });
+
+  // What is sent is what the family chose at the end: a kind of help they
+  // unchecked takes its details with it, errors go away once corrected, and
+  // the email's lines break the way mail apps expect.
+  test("sends only the help still chosen, and clears errors once fixed", async ({ page }) => {
+    test.slow();
+    await page.goto("/apply");
+    await page.locator("#firstName").fill("Jane");
+    await page.locator("#lastName").fill("Doe");
+    await page.locator("#phone").fill("+1 317 555 0100");
+    await pressAndSettle(page, "[data-next]");
+    await page.locator("#street").fill("1 Main St");
+    await page.locator("#city").fill("Noblesville");
+    await page.locator("#zip").fill("46060");
+    await page.locator("#county").selectOption("Hamilton");
+    await page.locator("#childCount").selectOption("1");
+    await pressAndSettle(page, "[data-next]");
+    // An unchosen age names the child it belongs to.
+    await expect(page.locator(".field:has(#child-1-0) .error")).toHaveText(
+      "Choose the age of child 1.",
+    );
+    await page.locator("#child-1-0").selectOption("4");
+    await pressAndSettle(page, "[data-next]");
+    await pressAndSettle(page, "[data-next]");
+    await expect(page.locator("[data-needs-error]")).toBeVisible();
+    await page.locator("input[name=need][data-toggle=diapers]").check();
+    await expect(page.locator("[data-needs-error]")).toBeHidden();
+    await page.locator("input[name=diaperSizes][value='Size 4']").check();
+    await page.locator("input[name=need][data-toggle=diapers]").uncheck();
+    await page.locator("input[name=need][data-toggle=holiday]").check();
+    await pressAndSettle(page, "[data-next]");
+    const review = page.locator("[data-review]");
+    await expect(review).toContainText("(317) 555-0100");
+    await expect(review).not.toContainText("Size 4");
+    await expect(review).not.toContainText("Diaper");
+    await pressAndSettle(page, "[data-send]");
+    await expect(page.locator("[data-consent-error]")).toBeVisible();
+    await page.locator("input[name=consent]").check();
+    await expect(page.locator("[data-consent-error]")).toBeHidden();
+    await page.evaluate(() => {
+      document.querySelector("[data-apply]")!.addEventListener("application:send", (event) => {
+        event.preventDefault();
+        (window as unknown as { __mail: string }).__mail = (event as CustomEvent<string>).detail;
+      });
+    });
+    await pressAndSettle(page, "[data-send]");
+    const mail = await page.evaluate(() => (window as unknown as { __mail: string }).__mail);
+    expect(mail).toContain("%0D%0A");
+    expect(mail).not.toMatch(/(?<!%0D)%0A/);
+    expect(decodeURIComponent(mail)).toContain("Phone: (317) 555-0100");
+    expect(decodeURIComponent(mail)).not.toContain("Size 4");
+  });
+
+  // The copy box answers focus like every field, and the follow-up questions
+  // ("Which sizes?") are labels like "Best way to reach you".
+  test("the copy box shows focus, and follow-up questions read as labels", async ({ page }) => {
+    await page.goto("/apply");
+    const face = (sel: string) =>
+      page
+        .locator(sel)
+        .first()
+        .evaluate((el) => {
+          const s = getComputedStyle(el);
+          return `${s.fontFamily} ${s.fontWeight}`;
+        });
+    expect(await face(".sub > legend")).toBe(await face("fieldset.field > legend"));
+    const states = await page.evaluate(() => {
+      const done = document.querySelector<HTMLElement>("[data-done]")!;
+      done.hidden = false;
+      const box = done.querySelector("textarea")!;
+      const look = () => {
+        const s = getComputedStyle(box);
+        return `${s.outlineStyle} ${s.outlineWidth} ${s.boxShadow}`;
+      };
+      const rest = look();
+      box.focus();
+      return { rest, focused: look() };
+    });
+    expect(states.focused).not.toBe(states.rest);
+  });
 });
 
 test.describe("without JavaScript", () => {
@@ -1870,9 +1996,16 @@ test.describe("without JavaScript", () => {
     await expect(page.locator(".noscript")).toContainText("Call");
   });
 
-  test("the donation page still offers a way to give", async ({ page }) => {
+  // Without the script a choice of amount can't reach the link, so the page
+  // offers one way to give that names no amount, and no choices that do
+  // nothing.
+  test("the donation page offers a way to give that names no amount", async ({ page }) => {
     await page.goto("/donate");
-    await expect(page.locator(".go")).toBeVisible();
+    const give = page.locator(".card a.button:visible");
+    await expect(give).toHaveCount(1);
+    await expect(give).not.toHaveText(/\$/);
+    expect(decodeURIComponent((await give.getAttribute("href"))!)).not.toMatch(/\$\d/);
+    await expect(page.locator(".card fieldset").first()).toBeHidden();
   });
 });
 

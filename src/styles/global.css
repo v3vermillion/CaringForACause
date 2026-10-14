@@ -594,7 +594,8 @@ a {
 }
 
 .field > label,
-.field > .label {
+.field > .label,
+legend.label {
   font-family: var(--font-display);
   font-weight: 700;
   font-size: var(--step-0);

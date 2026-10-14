@@ -75,7 +75,11 @@ export default defineConfig({
   webServer: liveUrl
     ? undefined
     : {
-        command: "npm run preview -- --host 127.0.0.1 --port 4321",
+        // --ignore-lock keeps the server in the foreground: when Astro
+        // detects an AI agent (Claude Code, which CLAUDE.md asks to run the
+        // suite) it otherwise moves `astro preview` to the background, the
+        // command exits at once, and Playwright stops with "exited early".
+        command: "npm run preview -- --host 127.0.0.1 --port 4321 --ignore-lock",
         url: "http://127.0.0.1:4321",
         reuseExistingServer: !process.env.CI,
         timeout: 60_000,

@@ -557,8 +557,9 @@ export const getInvolved = {
       id: "volunteer",
       label: "Volunteer",
       heading: "Volunteer your time",
+      /** Her website: "We have amazing part-time volunteers that are committed to helping others. We are always looking for more help." */
       body: [
-        "Our volunteers are part-time and help run every program. We're always looking for more.",
+        "Our part-time volunteers are committed to helping others, and we're always looking for more.",
       ],
       action: {
         label: "Fill out the volunteer form",
@@ -598,7 +599,9 @@ export const about = {
   heading: `Meet ${claim(facts.founder)}`,
   body: [
     `${claim(facts.founder).split(" ")[0]} founded ${org.shortName} in ${claim(facts.founded)} to support families in ${claim(facts.serviceArea)} who are facing financial hardship.`,
-    "Part-time volunteers help run every program, and the organization has grown thanks to the helping hands of this community.",
+    // Her website's "Our Team" and "Our History": part-time volunteers
+    // committed to helping others; grown thanks to the community's helping hands.
+    "Its part-time volunteers are committed to helping others, and the organization has grown thanks to the helping hands of this community.",
   ],
   /** A still from her "Do More" feature, cropped to leave out the program's caption. */
   portrait: {
