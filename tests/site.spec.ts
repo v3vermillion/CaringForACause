@@ -6,6 +6,7 @@ import {
   facts,
   getInvolved,
   hero,
+  links,
   navigation,
   org,
   programStrip,
@@ -34,6 +35,9 @@ const expectedSite = process.env.PLAYWRIGHT_BASE_URL
   : "https://caring4acausesupportiveservices.com/";
 
 const pages = ["/", "/donate", "/apply"];
+
+// The one host that may be indexed (scripts/validate-build.mjs).
+const PRODUCTION_ORIGIN = "https://caring4acausesupportiveservices.com";
 
 // The Get involved tab whose button leads to the giving page.
 const donateTab = getInvolved.tabs.find((tab) => tab.id === "donate")!;
@@ -1997,14 +2001,21 @@ test.describe("honest buttons", () => {
     });
   }
 
-  test("the sponsor and partner tabs ask for an email until their forms exist", async ({
+  test("each tab's button goes to its form, or asks for an email until the form exists", async ({
     page,
   }) => {
     await page.goto("/");
-    await expect(page.locator("#sponsor a.button")).toHaveText("Email us to sponsor");
-    await expect(page.locator("#partner a.button")).toHaveText("Email us to partner");
-    await expect(page.locator("#volunteer a.button")).toHaveAttribute("href", /^https:/);
-    await expect(page.locator("#donate a.button")).toHaveAttribute("href", donateTab.action.href!);
+    for (const tab of getInvolved.tabs) {
+      const button = page.locator(`#${tab.id} a.button`);
+      if (tab.action.href) {
+        await expect(button).toHaveAttribute("href", tab.action.href);
+        // An outside form also says it opens in a new tab.
+        await expect(button).toContainText(tab.action.label);
+      } else {
+        await expect(button).toHaveAttribute("href", /^mailto:/);
+        await expect(button).toHaveText(tab.action.fallbackLabel);
+      }
+    }
   });
 
   test("sending the application says it goes by email", async ({ page }) => {
@@ -2014,6 +2025,22 @@ test.describe("honest buttons", () => {
 });
 
 test.describe("donation page", () => {
+  // Until a payment page is set (links.donate) the button opens an email
+  // that names the gift; once it is, the button goes there and the gift
+  // rides along in its address.
+  const byEmail = links.donate ? "" : " by email";
+  const carries = (href: string, amount: string, frequency: string) => {
+    if (links.donate) {
+      const url = new URL(href);
+      expect(url.searchParams.get("amount")).toBe(amount);
+      expect(url.searchParams.get("frequency")).toBe(frequency);
+    } else {
+      const text = decodeURIComponent(href);
+      expect(text).toContain(`$${amount}`);
+      expect(text).toContain(frequency === "monthly" ? "monthly" : "one-time");
+    }
+  };
+
   test("the chosen amount and frequency travel with the giving link", async ({ page }) => {
     await page.goto("/donate");
     await page.locator("input[name=amount][value='100']").check();
@@ -2021,10 +2048,8 @@ test.describe("donation page", () => {
     await expect(page.locator("[data-summary]")).toHaveText("Your gift: $100 a month.");
     const go = page.locator(".go");
     // The button carries the gift, so the last thing read before the click confirms it.
-    await expect(go).toHaveText("Donate $100 a month by email");
-    const href = decodeURIComponent((await go.getAttribute("href"))!);
-    expect(href).toMatch(/\$100/);
-    expect(href).toMatch(/monthly/);
+    await expect(go).toHaveText(`Donate $100 a month${byEmail}`);
+    carries((await go.getAttribute("href"))!, "100", "monthly");
   });
 
   test("the other amount is an always-visible field that acts as the fifth choice", async ({
@@ -2035,7 +2060,7 @@ test.describe("donation page", () => {
     await expect(other).toBeVisible();
     await other.fill("75");
     await expect(page.locator("[data-summary]")).toHaveText("Your gift: $75.");
-    await expect(page.locator(".go")).toHaveText("Donate $75 by email");
+    await expect(page.locator(".go")).toHaveText(`Donate $75${byEmail}`);
     await expect(page.locator("input[name=amount]:checked")).toHaveCount(0);
     // Choosing a chip again empties the field.
     await page.locator("input[name=amount][value='25']").check();
@@ -2054,15 +2079,14 @@ test.describe("donation page", () => {
     await page.goto("/donate");
     await page.locator("#other-amount").fill("12.75");
     await expect(page.locator("[data-summary]")).toHaveText("Your gift: $12.75.");
-    await expect(page.locator(".go")).toHaveText("Donate $12.75 by email");
-    expect(decodeURIComponent((await page.locator(".go").getAttribute("href"))!)).toContain(
-      "$12.75",
-    );
+    await expect(page.locator(".go")).toHaveText(`Donate $12.75${byEmail}`);
+    carries((await page.locator(".go").getAttribute("href"))!, "12.75", "once");
   });
 
   // Line breaks in an email link are CRLF (RFC 6068); some mail apps join
   // lines that are separated by a bare LF.
   test("the gift email's line breaks are CRLF", async ({ page }) => {
+    test.skip(!!links.donate, "gifts go to the payment page, not by email");
     await page.goto("/donate");
     const before = (await page.locator(".go").getAttribute("href"))!;
     await page.locator("input[name=amount][value='100']").check();
@@ -2453,13 +2477,21 @@ test.describe("videos", () => {
 });
 
 test.describe("search and sharing", () => {
-  test("search engines are blocked by default", async ({ page, request }) => {
+  // Blocked everywhere until launch; after launch (PUBLIC_ALLOW_INDEXING),
+  // the production domain alone is indexed. The page and robots.txt agree.
+  test("search engines are blocked, except on the launched production site", async ({
+    page,
+    request,
+  }) => {
     await page.goto("/");
-    await expect(page.locator('meta[name="robots"]')).toHaveAttribute(
-      "content",
-      "noindex, nofollow",
-    );
+    const robotsMeta = await page.locator('meta[name="robots"]').getAttribute("content");
     const robots = await (await request.get("/robots.txt")).text();
+    if (robotsMeta === "index, follow") {
+      expect(new URL(page.url()).origin).toBe(PRODUCTION_ORIGIN);
+      expect(robots).not.toMatch(/User-agent: \*\nDisallow: \//);
+      return;
+    }
+    expect(robotsMeta).toBe("noindex, nofollow");
     expect(robots).toMatch(/User-agent: \*\nDisallow: \//);
     // Link-preview bots stay allowed so shared links show the logo.
     expect(robots).toContain("User-agent: facebookexternalhit");

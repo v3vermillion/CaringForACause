@@ -123,6 +123,44 @@ describe("publish gate", () => {
     expectError(dir, /viewport-height units/i);
   });
 
+  it("reads a media query's every branch before allowing vh in it", () => {
+    for (const query of [
+      "(max-width:30rem),(min-width:56rem)",
+      "not all and (min-width:56rem)",
+      "(min-width:56rem) or (max-width:30rem)",
+    ]) {
+      const dir = brokenBuild("index.html", (h) =>
+        h.replace("</style>", `@media ${query}{.x{height:100vh}}</style>`),
+      );
+      expectError(dir, /viewport-height units/i);
+    }
+  });
+
+  it("blocks viewport units however they are written", () => {
+    for (const css of [".x{height:100VH}", ".x{height:50dvb}", ".x{block-size:100svb}"]) {
+      const dir = brokenBuild("index.html", (h) => h.replace("</style>", `${css}</style>`));
+      expectError(dir, /viewport-height units/i);
+    }
+  });
+
+  it("allows vh in a desktop block written in range syntax or in capitals", () => {
+    for (const query of [
+      "(width >= 56rem)",
+      "(36rem <= width)",
+      "(MIN-WIDTH: 56REM)",
+      "screen and (min-width:600px)",
+    ]) {
+      const dir = brokenBuild("index.html", (h) =>
+        h.replace("</style>", `@media ${query}{.x{height:100vh;block-size:100vb}}</style>`),
+      );
+      assert.deepEqual(
+        validateBuild(dir, { allowIndexing: false }).filter((e) => /viewport/.test(e)),
+        [],
+        query,
+      );
+    }
+  });
+
   it("blocks overflow: clip that Safari 15 would ignore", () => {
     const dir = brokenBuild("index.html", (h) =>
       h.replace("</style>", ".x{overflow:clip}</style>"),

@@ -612,11 +612,6 @@ legend.label {
   font-size: var(--step-0);
 }
 
-.field .hint {
-  font-size: var(--step--1);
-  color: var(--muted);
-}
-
 .input,
 .select,
 .textarea {
@@ -1099,17 +1094,4 @@ legend.label {
   background-image:
     radial-gradient(44rem 26rem at 0 100%, rgb(160 108 255 / 0.26), transparent 70%),
     linear-gradient(rgb(255 255 255 / 0.25), rgb(255 255 255 / 0.25));
-}
-
-/* A rule of light, where a grey line would do less. */
-.rule-lit {
-  height: var(--hairline);
-  border: 0;
-  margin: 0;
-  background: linear-gradient(
-    90deg,
-    rgb(160 108 255 / 0.55),
-    rgb(255 90 134 / 0.45) 60%,
-    rgb(160 108 255 / 0)
-  );
 }

@@ -37,20 +37,45 @@ const PLACEHOLDERS = [
 ];
 
 /**
- * Every viewport-height unit in the CSS that is not a plain `vh` inside a
- * `@media (min-width: …)` block of at least 36rem (576px), the tablet and
- * desktop layouts, where the browser's bars don't change the height while
- * scrolling. Media blocks are found by matching braces.
+ * Every viewport-height unit in the CSS (vh and vb, and their s, d and l
+ * forms, in any case) that is not a plain `vh` or `vb` inside a media block
+ * whose every branch needs a window at least 36rem (576px) wide: the tablet
+ * and desktop layouts, where the browser's bars don't change the height
+ * while scrolling. Media blocks are found by matching braces.
  */
 export const DESKTOP_MIN_WIDTH_PX = 576;
 
+const px = (value, unit) => parseFloat(value) * (unit.toLowerCase() === "px" ? 1 : 16);
+
+/**
+ * Whether a media query can only match a window at least `min` pixels wide:
+ * each comma-separated branch needs a width floor (`min-width: 36rem`,
+ * `width >= 36rem`, `36rem <= width`) of at least `min`, joined with `and`. A
+ * branch with `not` or `or` could match a phone, so it never qualifies.
+ */
+export function mediaNeedsWidth(query, min) {
+  return query.split(",").every((branch) => {
+    const b = branch.toLowerCase();
+    if (/\bnot\b|\bor\b/.test(b)) return false;
+    const floors = [
+      ...[...b.matchAll(/\(\s*min-width\s*:\s*([0-9.]+)(rem|em|px)\s*\)/g)].map((m) =>
+        px(m[1], m[2]),
+      ),
+      ...[...b.matchAll(/\(\s*width\s*>=?\s*([0-9.]+)(rem|em|px)\s*\)/g)].map((m) =>
+        px(m[1], m[2]),
+      ),
+      ...[...b.matchAll(/\(\s*([0-9.]+)(rem|em|px)\s*<=?\s*width\b/g)].map((m) => px(m[1], m[2])),
+    ];
+    return floors.some((floor) => floor >= min);
+  });
+}
+
 export function viewportUnitsOutsideDesktop(html) {
   const desktopRanges = [];
-  const media = /@media[^{]*\bmin-width\s*:\s*([0-9.]+)(rem|em|px)[^{]*\{/g;
+  const media = /@media([^{]*)\{/gi;
   let m;
   while ((m = media.exec(html))) {
-    const px = parseFloat(m[1]) * (m[2] === "px" ? 1 : 16);
-    if (px < DESKTOP_MIN_WIDTH_PX) continue;
+    if (!mediaNeedsWidth(m[1], DESKTOP_MIN_WIDTH_PX)) continue;
     let depth = 1;
     let i = m.index + m[0].length;
     while (i < html.length && depth > 0) {
@@ -61,11 +86,11 @@ export function viewportUnitsOutsideDesktop(html) {
     desktopRanges.push([m.index, i]);
   }
   const found = [];
-  const unit = /[0-9.]+(?:[sdl]?vh)\b/g;
+  const unit = /[0-9.]+(?:[sdl]?v[hb])\b/gi;
   while ((m = unit.exec(html))) {
-    const plainVh = !/[sdl]vh$/.test(m[0]);
+    const plain = !/[sdl]v[hb]$/i.test(m[0]);
     const inDesktop = desktopRanges.some(([a, b]) => m.index > a && m.index < b);
-    if (!(plainVh && inDesktop)) found.push(m[0]);
+    if (!(plain && inDesktop)) found.push(m[0]);
   }
   return found;
 }

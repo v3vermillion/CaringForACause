@@ -31,9 +31,20 @@ code=$(status /_headers); [ "$code" != 200 ] && pass "/_headers is not served ($
 [ "$(status /site.webmanifest)" = 200 ] && pass "/site.webmanifest returns 200" || bad "/site.webmanifest missing"
 [ "$(status /og-image.jpg)" = 200 ] && pass "/og-image.jpg returns 200" || bad "/og-image.jpg missing"
 
-echo; echo "#### Search blocking (preview)"
-grep -q "Disallow: /" <<<"$robots" && pass "robots.txt disallows crawling" || bad "robots.txt allows crawling"
-grep -q 'content="noindex, nofollow"' <<<"$html" && pass "page has noindex meta tag" || bad "noindex meta tag missing"
+echo; echo "#### Search indexing"
+# Blocked everywhere until launch; after launch (PUBLIC_ALLOW_INDEXING) the
+# production domain alone is indexed. Either way the page and robots.txt agree.
+production="https://caring4acausesupportiveservices.com"
+blocked() { grep -qE "^Disallow: /[[:space:]]*$" <<<"$(awk '/^User-agent: \*/{f=1;next} /^User-agent:/{f=0} f' <<<"$robots")"; }
+if grep -q 'content="index, follow"' <<<"$html"; then
+  [ "$base" = "$production" ] && pass "indexed, on the production domain" || bad "indexed on \`$base\`; only $production may be"
+  blocked && bad "page is indexed but robots.txt disallows crawling" || pass "robots.txt allows crawling"
+elif grep -q 'content="noindex, nofollow"' <<<"$html"; then
+  pass "page has noindex meta tag"
+  blocked && pass "robots.txt disallows crawling" || bad "page is noindex but robots.txt allows crawling"
+else
+  bad "robots meta tag missing"
+fi
 
 echo; echo "#### Link preview"
 og=$(grep -oE '<meta property="og:image" content="[^"]+"' <<<"$html" | sed -E 's/.*content="([^"]+)"/\1/')
@@ -43,7 +54,12 @@ else
   ogtype=$(curl -sI "$og" | tr -d '\r' | grep -i '^content-type:' | cut -d' ' -f2-)
   [ "$(curl -s -o /dev/null -w '%{http_code}' "$og")" = 200 ] && pass "preview image loads (\`$ogtype\`)" || bad "preview image does not load"
 fi
-grep -q "User-agent: facebookexternalhit" <<<"$robots" && pass "link-preview bots allowed in robots.txt" || bad "link-preview bots blocked by robots.txt"
+# Allowed by name while search engines are blocked, and with everyone after launch.
+if grep -q "User-agent: facebookexternalhit" <<<"$robots" || ! blocked; then
+  pass "link-preview bots allowed in robots.txt"
+else
+  bad "link-preview bots blocked by robots.txt"
+fi
 
 echo; echo "#### Security headers on /"
 for h in content-security-policy x-content-type-options x-frame-options referrer-policy permissions-policy strict-transport-security; do
