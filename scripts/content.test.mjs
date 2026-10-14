@@ -2,7 +2,7 @@
 // content edits the README invites must build.
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { crossfade, defaultAmount, visibleStrip } from "../src/data/derive.ts";
+import { crossfade, defaultAmount, scriptJson, visibleStrip } from "../src/data/derive.ts";
 import { donatePage, programs, programStrip } from "../src/data/site.ts";
 
 describe("program strip", () => {
@@ -106,5 +106,13 @@ describe("banner crossfade", () => {
       /@keyframes crossfade\{0%\{opacity:0\}8%,25%\{opacity:1\}33%,100%/,
     );
     assert.equal(crossfade(1).keyframes, "");
+  });
+});
+
+describe("structured data", () => {
+  it("cannot end its script element early", () => {
+    const text = scriptJson({ name: "A </script><script>alert(1)</script> B" });
+    assert.ok(!text.includes("<"));
+    assert.deepEqual(JSON.parse(text), { name: "A </script><script>alert(1)</script> B" });
   });
 });

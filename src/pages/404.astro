@@ -3,12 +3,14 @@ import SiteFooter from "../components/SiteFooter.astro";
 import SiteHeader from "../components/SiteHeader.astro";
 import Base from "../layouts/Base.astro";
 import { show } from "../data/facts.ts";
-import { facts, notFoundPage, org } from "../data/site";
+import { facts, hero, notFoundPage, org } from "../data/site";
 
 const phone = show(facts.phone);
+// The banner's two doors, as the banner names them.
+const { getHelp, donate } = hero.doors;
 ---
 
-<Base title={`Page not found | ${org.shortName}`}>
+<Base title={`Page not found | ${org.shortName}`} notFound>
   <SiteHeader />
   <!-- The night opener of the two door pages, without the wave: the footer
        is night too, so the opener runs into it. -->
@@ -21,11 +23,11 @@ const phone = show(facts.phone);
           {notFoundPage.body} {notFoundPage.callUs} <a href={phone.href}>{phone.display}</a>.
         </p>
         <p class="button-row">
-          <a class="button button--signal" href="/apply">
-            Help me
+          <a class="button button--signal" href={getHelp.href}>
+            {getHelp.title}
           </a>
-          <a class="button button--glass" href="/donate">
-            Donate
+          <a class="button button--glass" href={donate.href}>
+            {donate.title}
           </a>
           <a class="arrow-link" href="/">
             Back to home

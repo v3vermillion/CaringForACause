@@ -214,8 +214,8 @@ export const hero = {
    * page says how giving works (decision 61).
    */
   doors: {
-    getHelp: { title: "Help me", href: "/apply" },
-    donate: { title: "Donate", href: "/donate" },
+    getHelp: { title: "Help me", href: "/apply/" },
+    donate: { title: "Donate", href: "/donate/" },
   },
 };
 
@@ -270,8 +270,8 @@ export const navigation = {
     { id: "involved", label: "Get involved", href: "/#get-involved" },
     { id: "contact", label: "Contact", href: "/#contact" },
   ] satisfies NavItem[],
-  donate: { label: "Donate", href: "/donate" },
-  help: { label: "Help me", href: "/apply" },
+  donate: { label: "Donate", href: "/donate/" },
+  help: { label: "Help me", href: "/apply/" },
 };
 
 export const getHelp = {
@@ -282,7 +282,7 @@ export const getHelp = {
     "Prefer to talk to someone first? Call or email us and we'll send you an application.",
   /** The aside beside the application form on desktop: the same offer under its own heading. */
   talk: { heading: "Prefer to talk?", body: "Call or email us and we'll send you an application." },
-  action: { label: "Start an application", href: "/apply" },
+  action: { label: "Start an application", href: "/apply/" },
 };
 
 /** The application page (/apply). Field choices live here so they can be edited without touching layout. */
@@ -546,7 +546,7 @@ export const getInvolved = {
       body: [
         "Give once or monthly. Your gift helps provide holiday meals, gifts, diapers, and school supplies for local families.",
       ],
-      action: { label: "Donate", href: "/donate", fallbackLabel: "Donate" },
+      action: { label: "Donate", href: "/donate/", fallbackLabel: "Donate" },
       photo: {
         file: "face-paint-closeup.jpg",
         alt: "A child with a colorful painted face at a community event",

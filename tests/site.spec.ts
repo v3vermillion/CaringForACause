@@ -4,6 +4,7 @@ import { claim } from "../src/data/facts";
 import {
   about,
   facts,
+  getInvolved,
   hero,
   navigation,
   org,
@@ -33,6 +34,9 @@ const expectedSite = process.env.PLAYWRIGHT_BASE_URL
   : "https://caring4acausesupportiveservices.com/";
 
 const pages = ["/", "/donate", "/apply"];
+
+// The Get involved tab whose button leads to the giving page.
+const donateTab = getInvolved.tabs.find((tab) => tab.id === "donate")!;
 
 test.describe("accessibility", () => {
   for (const path of pages) {
@@ -1141,8 +1145,8 @@ test.describe("navigation", () => {
 
   test("the hero doors open the application and donation pages", async ({ page }) => {
     await page.goto("/");
-    await expect(page.locator(".door--help")).toHaveAttribute("href", "/apply");
-    await expect(page.locator(".door--give")).toHaveAttribute("href", "/donate");
+    await expect(page.locator(".door--help")).toHaveAttribute("href", hero.doors.getHelp.href);
+    await expect(page.locator(".door--give")).toHaveAttribute("href", hero.doors.donate.href);
   });
 
   test("subpages lead back to the home page through her lockup", async ({ page }) => {
@@ -1525,7 +1529,7 @@ test.describe("get involved tabs", () => {
 
   test("the Donate tab leads to the donation page", async ({ page }) => {
     await page.goto("/#donate");
-    await expect(page.locator("#donate .button")).toHaveAttribute("href", "/donate");
+    await expect(page.locator("#donate .button")).toHaveAttribute("href", donateTab.action.href!);
   });
 
   test("arrow keys, Home, and End move between tabs", async ({ page }) => {
@@ -2000,7 +2004,7 @@ test.describe("honest buttons", () => {
     await expect(page.locator("#sponsor a.button")).toHaveText("Email us to sponsor");
     await expect(page.locator("#partner a.button")).toHaveText("Email us to partner");
     await expect(page.locator("#volunteer a.button")).toHaveAttribute("href", /^https:/);
-    await expect(page.locator("#donate a.button")).toHaveAttribute("href", "/donate");
+    await expect(page.locator("#donate a.button")).toHaveAttribute("href", donateTab.action.href!);
   });
 
   test("sending the application says it goes by email", async ({ page }) => {
@@ -2518,5 +2522,18 @@ test.describe("search and sharing", () => {
     const response = await page.goto("/this-page-does-not-exist");
     expect(response?.status()).toBe(404);
     await expect(page.getByRole("heading", { level: 1 })).toHaveText("We can't find that page");
+    // It answers any missing address, so it names no address of its own,
+    // and it is never indexed, even after launch.
+    await expect(page.locator('link[rel="canonical"]')).toHaveCount(0);
+    await expect(page.locator('meta[property="og:url"]')).toHaveCount(0);
+    await expect(page.locator('meta[name="robots"]')).toHaveAttribute(
+      "content",
+      "noindex, nofollow",
+    );
+    // Its doors are the banner's.
+    await expect(page.locator(".button-row .button").first()).toHaveAttribute(
+      "href",
+      hero.doors.getHelp.href,
+    );
   });
 });

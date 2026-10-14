@@ -42,3 +42,11 @@ export function crossfade(count: number, hold = 7, fade = 2.24) {
         `@keyframes drift{0%{transform:scale(1)}${stops.gone}%{transform:scale(1.085)}${+(stops.gone + 0.01).toFixed(2)}%,100%{transform:scale(1)}}`;
   return { cycle, hold, fade, stops, keyframes };
 }
+
+/**
+ * JSON for a script element (the page's structured data): a "<" in the
+ * content is written as <, so no text can close the script early.
+ */
+export function scriptJson(value: unknown): string {
+  return JSON.stringify(value).replace(/</g, "\\u003c");
+}

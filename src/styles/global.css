@@ -133,14 +133,14 @@
    banner headline's last line (public/fonts/serif-italic-LICENSE.txt). */
 @font-face {
   font-family: "Site Serif";
-  src: url("/fonts/serif.woff2") format("woff2");
+  src: url("../assets/fonts/serif.woff2") format("woff2");
   font-weight: 300 700;
   font-display: swap;
 }
 
 @font-face {
   font-family: "Site Serif";
-  src: url("/fonts/serif-italic.woff2") format("woff2");
+  src: url("../assets/fonts/serif-italic.woff2") format("woff2");
   font-weight: 700;
   font-style: italic;
   font-display: swap;
@@ -150,7 +150,7 @@
    (public/fonts/footer-sans-LICENSE.txt). */
 @font-face {
   font-family: "Footer Sans";
-  src: url("/fonts/footer-sans.woff2") format("woff2");
+  src: url("../assets/fonts/footer-sans.woff2") format("woff2");
   font-weight: 400;
   font-display: swap;
 }

@@ -142,6 +142,57 @@ describe("publish gate", () => {
     expectError(dir, /missing Content-Security-Policy/);
   });
 
+  it("blocks a link to a page that the host would redirect", () => {
+    // Cloudflare answers /donate with a redirect to /donate/, the page itself.
+    const dir = brokenBuild("index.html", (h) => h.replace('href="/donate/"', 'href="/donate"'));
+    expectError(dir, /link \/donate is redirected by the host; write \/donate\//);
+    const missing = brokenBuild("index.html", (h) =>
+      h.replace('href="/donate/"', 'href="/donations/"'),
+    );
+    expectError(missing, /link \/donations\/ leads to no page in the build/);
+  });
+
+  it("blocks fonts served outside the hashed, long-cached assets", () => {
+    const dir = brokenBuild("index.html", (h) =>
+      h.replace(
+        "</head>",
+        '<link rel="preload" href="/fonts/x.woff2" as="font" type="font/woff2" crossorigin></head>',
+      ),
+    );
+    expectError(dir, /font \/fonts\/x\.woff2 is not in \/_astro\//);
+    const css = brokenBuild("index.html", (h) =>
+      h.replace("</style>", '@font-face{font-family:X;src:url("/fonts/x.woff2")}</style>'),
+    );
+    expectError(css, /font \/fonts\/x\.woff2 is not in \/_astro\//);
+  });
+
+  it("keeps the not-found page out of search, with no address of its own", () => {
+    const canonical = brokenBuild("404.html", (h) =>
+      h.replace(
+        "</head>",
+        '<link rel="canonical" href="https://caring4acausesupportiveservices.com/404/"></head>',
+      ),
+    );
+    expectError(canonical, /404\.html: the not-found page must not name a canonical URL/);
+    const indexed = brokenBuild("404.html", (h) => h.replace("noindex, nofollow", "index, follow"));
+    expectError(indexed, /404\.html: the not-found page must never be indexed/, {
+      allowIndexing: true,
+    });
+  });
+
+  it("blocks structured data that could end its script early", () => {
+    // "</script>" ends it at once (and leaves broken JSON); "<!--" changes
+    // how the rest of the script is read. Either is written \u003c.
+    const closed = brokenBuild("index.html", (h) =>
+      h.replace('"@type":"NGO"', '"@type":"NGO","note":"</script>"'),
+    );
+    expectError(closed, /structured data is missing or is not valid JSON/);
+    const comment = brokenBuild("index.html", (h) =>
+      h.replace('"@type":"NGO"', '"@type":"NGO","note":"<!--"'),
+    );
+    expectError(comment, /structured data has an unescaped "<"/);
+  });
+
   it("blocks duplicate ids and a second h1", () => {
     const dir = brokenBuild("index.html", (h) =>
       h.replace("</main>", '<h1 id="about">Again</h1></main>'),

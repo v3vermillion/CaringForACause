@@ -122,6 +122,15 @@ export function validateBuild(dist, { allowIndexing }) {
       .map((el) => el.getAttribute("id")),
   );
   const robotsTxt = existsSync(join(dist, "robots.txt")) ? read("robots.txt") : "";
+  // The site's host, as the home page names it.
+  let siteOrigin = "";
+  try {
+    siteOrigin = new URL(
+      parse(read("index.html")).querySelector('link[rel="canonical"]')?.getAttribute("href") ?? "",
+    ).origin;
+  } catch {
+    /* the home page's own check reports it */
+  }
 
   for (const page of PAGES) {
     if (!existsSync(join(dist, page))) continue;
@@ -140,13 +149,22 @@ export function validateBuild(dist, { allowIndexing }) {
     if (!/^([0-9a-f]{7}|local)$/.test(meta('meta[name="version"]')))
       fail(`${name}: missing build version meta tag`);
 
-    // Canonical URL and link preview
+    // Canonical URL and link preview. The not-found page has no address of
+    // its own (it answers any missing one), so it names none; its preview
+    // image is checked against the home page's host instead.
+    const notFound = page === "404.html";
     const canonical = doc.querySelector('link[rel="canonical"]')?.getAttribute("href") ?? "";
     let origin = "";
-    try {
-      origin = new URL(canonical).origin;
-    } catch {
-      fail(`${name}: canonical URL is not absolute: "${canonical}"`);
+    if (notFound) {
+      if (canonical) fail(`${name}: the not-found page must not name a canonical URL`);
+      if (meta('meta[property="og:url"]')) fail(`${name}: the not-found page must not name og:url`);
+      origin = siteOrigin;
+    } else {
+      try {
+        origin = new URL(canonical).origin;
+      } catch {
+        fail(`${name}: canonical URL is not absolute: "${canonical}"`);
+      }
     }
     const ogImage = meta('meta[property="og:image"]');
     try {
@@ -163,7 +181,10 @@ export function validateBuild(dist, { allowIndexing }) {
 
     // Search indexing must match the setting, and only production may be indexed
     const robotsMeta = meta('meta[name="robots"]');
-    if (allowIndexing) {
+    if (notFound) {
+      if (robotsMeta !== "noindex, nofollow")
+        fail(`${name}: the not-found page must never be indexed (robots meta is "${robotsMeta}")`);
+    } else if (allowIndexing) {
       if (robotsMeta !== "index, follow")
         fail(`Indexing is on but ${name} robots meta is "${robotsMeta}"`);
       if (origin && origin !== PRODUCTION_ORIGIN) {
@@ -177,6 +198,8 @@ export function validateBuild(dist, { allowIndexing }) {
 
     // Structured data
     const ld = doc.querySelector('script[type="application/ld+json"]');
+    // A "<" is written \u003c, so no text in it can close the script early.
+    if (ld?.text.includes("<")) fail(`${name}: structured data has an unescaped "<"`);
     try {
       const data = JSON.parse(ld?.text ?? "");
       if (data["@type"] !== "NGO")
@@ -203,6 +226,16 @@ export function validateBuild(dist, { allowIndexing }) {
         const id = decodeURIComponent(match[2]);
         const targets = match[1] ? homeIds : seen;
         if (!targets.has(id)) fail(`${name}: link ${href} has no matching element`);
+      }
+      // A page is linked by its own address, /donate/: Cloudflare answers
+      // /donate with a redirect to it (a round trip on every click), and the
+      // speculation rules prerender the address as written.
+      const path = href.split(/[?#]/)[0];
+      if (/^\/(?!\/)/.test(path) && path !== "/" && !/\.[a-z0-9]+$/i.test(path)) {
+        if (!path.endsWith("/"))
+          fail(`${name}: link ${path} is redirected by the host; write ${path}/`);
+        else if (!existsSync(join(dist, path, "index.html")))
+          fail(`${name}: link ${path} leads to no page in the build`);
       }
       if (a.getAttribute("target") === "_blank" && !/noopener/.test(a.getAttribute("rel") ?? "")) {
         fail(`${name}: link ${href} opens a new tab without rel="noopener"`);
@@ -231,6 +264,16 @@ export function validateBuild(dist, { allowIndexing }) {
     for (const url of localRefs) {
       if (url !== "/" && !existsSync(join(dist, url)))
         fail(`${name}: referenced file missing from build: ${url}`);
+    }
+
+    // Fonts are served from the build's hashed assets, which the host caches
+    // for good (_headers); a file in public/ is revalidated on every page.
+    const fonts = [
+      ...doc.querySelectorAll('link[rel="preload"][as="font"]').map((l) => l.getAttribute("href")),
+      ...[...raw.matchAll(/url\(\s*["']?([^"')\s]+\.woff2?)/g)].map((m) => m[1]),
+    ];
+    for (const font of new Set(fonts)) {
+      if (!font.startsWith("/_astro/")) fail(`${name}: font ${font} is not in /_astro/`);
     }
 
     // Leftover placeholder text
