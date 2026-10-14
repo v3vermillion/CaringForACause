@@ -38,6 +38,16 @@ const expectedSite = process.env.PLAYWRIGHT_BASE_URL
 
 const pages = ["/", "/donate", "/apply"];
 
+// Fetches a page for a test to rewrite before the browser gets it.
+// Playwright's own fetch decodes gzip, deflate and br, not zstd. The deployed
+// site answers Firefox's accept-encoding (which lists zstd) with zstd, and the
+// page would be rewritten and fulfilled as undecoded bytes; so the fetch asks
+// for an encoding Playwright decodes.
+const fetchPage = (route: import("@playwright/test").Route) =>
+  route.fetch({
+    headers: { ...route.request().headers(), "accept-encoding": "gzip, deflate, br" },
+  });
+
 // The one host that may be indexed (scripts/validate-build.mjs).
 const PRODUCTION_ORIGIN = "https://caring4acausesupportiveservices.com";
 
@@ -444,13 +454,7 @@ test.describe("scrolling stability", () => {
         };
       });
     await page.route("**/", async (route) => {
-      // Playwright's own fetch decodes gzip, deflate and br, not zstd. The
-      // deployed site answers Firefox's accept-encoding (which lists zstd)
-      // with zstd, and the page would be fulfilled with undecoded bytes; so
-      // the fetch asks for an encoding Playwright decodes.
-      const response = await route.fetch({
-        headers: { ...route.request().headers(), "accept-encoding": "gzip, deflate, br" },
-      });
+      const response = await fetchPage(route);
       const html = (await response.text()).replace(
         /<script type="module"[^>]*>[\s\S]*?<\/script>/g,
         "",
@@ -1253,7 +1257,7 @@ test.describe("menu", () => {
     // Safari before 15.4 reads <dialog> as an unknown element, which no
     // built-in rule hides when closed.
     await page.route(/\/$/, async (route) => {
-      const response = await route.fetch();
+      const response = await fetchPage(route);
       const body = (await response.text()).replace(/<(\/?)dialog\b/g, "<$1x-dialog");
       await route.fulfill({ response, body });
     });
