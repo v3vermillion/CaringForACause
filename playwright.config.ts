@@ -1,7 +1,10 @@
 import { defineConfig, devices } from "@playwright/test";
 
 /**
- * Tests run against the production build served by `astro preview`.
+ * Tests run against the production build served by `npm run preview`, which
+ * is Wrangler's local copy of Cloudflare: the site's own headers (its
+ * Content-Security-Policy and caching), the /donate -> /donate/ redirect and
+ * the 404 page, as the live site serves them (decision 77).
  *
  * The matrix covers the three browser engines. Every iPhone and iPad
  * browser uses WebKit, so iOS coverage comes from the WebKit projects.
@@ -17,20 +20,24 @@ const chromiumPath = process.env.PW_CHROMIUM_PATH || undefined;
 const liveUrl = process.env.PLAYWRIGHT_BASE_URL;
 
 // [project name, Playwright device profile]
+// CI runs the suite as five parts, each two devices in this order (ci.yml), so
+// each pair puts a slow device with a quick one and the parts finish together.
 const matrix: [name: string, device: keyof typeof devices][] = [
-  // iPhone: smallest current screen, compact older model, standard, largest
+  // iPhone: smallest current screen, and a compact older model
   ["iphone-se", "iPhone SE (3rd gen)"],
   ["iphone-12-mini", "iPhone 12 Mini"],
+  // iPhone standard, with Android's narrowest common width
   ["iphone-17", "iPhone 17"],
-  ["iphone-17-pro-max", "iPhone 17 Pro Max"],
-  ["ipad-mini", "iPad Mini"],
-  // Android: narrowest common width, and a standard Pixel
   ["galaxy-s24", "Galaxy S24"],
-  ["pixel-7", "Pixel 7"],
-  // Desktop
-  ["desktop-safari", "Desktop Safari"],
-  ["desktop-firefox", "Desktop Firefox"],
+  // iPhone largest, with desktop Chrome
+  ["iphone-17-pro-max", "iPhone 17 Pro Max"],
   ["desktop-chrome", "Desktop Chrome"],
+  // iPad, with desktop Firefox
+  ["ipad-mini", "iPad Mini"],
+  ["desktop-firefox", "Desktop Firefox"],
+  // A standard Pixel, with desktop Safari
+  ["pixel-7", "Pixel 7"],
+  ["desktop-safari", "Desktop Safari"],
 ];
 
 const projects = matrix
@@ -75,11 +82,11 @@ export default defineConfig({
   webServer: liveUrl
     ? undefined
     : {
-        // --ignore-lock keeps the server in the foreground: when Astro
-        // detects an AI agent (Claude Code, which CLAUDE.md asks to run the
-        // suite) it otherwise moves `astro preview` to the background, the
-        // command exits at once, and Playwright stops with "exited early".
-        command: "npm run preview -- --host 127.0.0.1 --port 4321 --ignore-lock",
+        command: "npm run preview -- --ip 127.0.0.1",
+        // The site reads no Request.cf, so Wrangler need not fetch one from
+        // Cloudflare, and a test run sends no usage report: the server works
+        // offline.
+        env: { CLOUDFLARE_CF_FETCH_ENABLED: "false", WRANGLER_SEND_METRICS: "false" },
         url: "http://127.0.0.1:4321",
         reuseExistingServer: !process.env.CI,
         timeout: 60_000,

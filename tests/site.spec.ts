@@ -38,6 +38,16 @@ const expectedSite = process.env.PLAYWRIGHT_BASE_URL
 
 const pages = ["/", "/donate", "/apply"];
 
+// Fetches a page for a test to rewrite before the browser gets it.
+// Playwright's own fetch decodes gzip, deflate and br, not zstd. The deployed
+// site answers Firefox's accept-encoding (which lists zstd) with zstd, and the
+// page would be rewritten and fulfilled as undecoded bytes; so the fetch asks
+// for an encoding Playwright decodes.
+const fetchPage = (route: import("@playwright/test").Route) =>
+  route.fetch({
+    headers: { ...route.request().headers(), "accept-encoding": "gzip, deflate, br" },
+  });
+
 // The one host that may be indexed (scripts/validate-build.mjs).
 const PRODUCTION_ORIGIN = "https://caring4acausesupportiveservices.com";
 
@@ -444,13 +454,7 @@ test.describe("scrolling stability", () => {
         };
       });
     await page.route("**/", async (route) => {
-      // Playwright's own fetch decodes gzip, deflate and br, not zstd. The
-      // deployed site answers Firefox's accept-encoding (which lists zstd)
-      // with zstd, and the page would be fulfilled with undecoded bytes; so
-      // the fetch asks for an encoding Playwright decodes.
-      const response = await route.fetch({
-        headers: { ...route.request().headers(), "accept-encoding": "gzip, deflate, br" },
-      });
+      const response = await fetchPage(route);
       const html = (await response.text()).replace(
         /<script type="module"[^>]*>[\s\S]*?<\/script>/g,
         "",
@@ -1253,7 +1257,7 @@ test.describe("menu", () => {
     // Safari before 15.4 reads <dialog> as an unknown element, which no
     // built-in rule hides when closed.
     await page.route(/\/$/, async (route) => {
-      const response = await route.fetch();
+      const response = await fetchPage(route);
       const body = (await response.text()).replace(/<(\/?)dialog\b/g, "<$1x-dialog");
       await route.fulfill({ response, body });
     });
@@ -1348,25 +1352,31 @@ test.describe("the header's current section", () => {
 
   test("marks Contact at the end of the page", async ({ page }) => {
     await page.goto("/");
-    await page.evaluate(() => scrollTo(0, document.documentElement.scrollHeight));
+    await page.evaluate(() =>
+      scrollTo({ top: document.documentElement.scrollHeight, behavior: "instant" }),
+    );
     await expect.poll(() => current(page)).toEqual(["contact"]);
   });
 
   test("marks nothing over the program strip", async ({ page }) => {
     await page.goto("/");
-    await page.locator("#programs").evaluate((el) => el.scrollIntoView());
+    // Every scroll here is instant: the page scrolls smoothly, and a box
+    // measured while a scroll is still under way is measured in passing.
+    await page.locator("#programs").evaluate((el) => el.scrollIntoView({ behavior: "instant" }));
     await expect.poll(() => current(page)).toEqual(["programs"]);
     // Back up until the strip crosses the middle of the window.
     await page.locator(".strip").evaluate((el) => {
       const box = el.getBoundingClientRect();
-      scrollBy(0, box.top + box.height / 2 - innerHeight * 0.475);
+      scrollBy({ top: box.top + box.height / 2 - innerHeight * 0.475, behavior: "instant" });
     });
     await expect.poll(() => current(page)).toEqual([]);
   });
 
   test("marks nothing on the door pages, whose links lead away", async ({ page }) => {
     await page.goto("/donate");
-    await page.evaluate(() => scrollTo(0, document.documentElement.scrollHeight));
+    await page.evaluate(() =>
+      scrollTo({ top: document.documentElement.scrollHeight, behavior: "instant" }),
+    );
     await page.waitForTimeout(300);
     expect(await current(page)).toEqual([]);
   });
@@ -1588,7 +1598,7 @@ test.describe("get involved tabs", () => {
     await page.goto("/");
     await page.locator("#tab-volunteer").evaluate((tab: HTMLElement) => tab.click());
     expect(new URL(page.url()).hash).toBe("#volunteer");
-    await page.evaluate(() => scrollTo(0, 0));
+    await page.evaluate(() => scrollTo({ top: 0, behavior: "instant" }));
     await page.goto("/donate");
     await page.goBack();
     await expect(page.locator("#tab-volunteer")).toHaveAttribute("aria-selected", "true");
@@ -1612,7 +1622,7 @@ test.describe("get involved tabs", () => {
     await page.waitForLoadState("load");
     await page.waitForTimeout(1200); // the layout's hold on the place ends
     const landed = await page.evaluate(() => Math.round(window.scrollY));
-    await page.evaluate(() => scrollTo(0, 600));
+    await page.evaluate(() => scrollTo({ top: 600, behavior: "instant" }));
     await page.waitForTimeout(300); // the browser records the place as a reader's scroll ends
     await page.evaluate(() => (location.hash = "#about"));
     await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(1500);

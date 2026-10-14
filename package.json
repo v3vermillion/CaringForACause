@@ -10,7 +10,7 @@
   "scripts": {
     "dev": "astro dev",
     "build": "astro check && astro build && node scripts/validate-build.mjs",
-    "preview": "astro preview",
+    "preview": "wrangler dev --port 4321",
     "check": "astro check",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
