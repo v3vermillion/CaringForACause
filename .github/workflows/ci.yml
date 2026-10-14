@@ -37,7 +37,7 @@ jobs:
   browser-tests:
     name: Browser tests ${{ matrix.shard }}/5 (${{ matrix.devices }})
     runs-on: ubuntu-latest
-    # A part takes about 4 to 8 minutes; the limit is a hang stop, not a budget.
+    # A part takes about 5 to 7 minutes; the limit is a hang stop, not a budget.
     # It matches the single job's 40 minutes, because the OS-package install
     # depends on Ubuntu's mirrors: once it took 21 of a part's minutes, and a
     # run the single job would have passed must not fail here.
@@ -51,22 +51,24 @@ jobs:
         # spec file each part is two whole devices; the check below fails if a
         # part ever runs other devices than its name says (a device added or
         # removed means updating these names, and the count to 5 if needed).
+        # Each pair is a slow device with a quick one, in the order of the
+        # matrix in playwright.config.ts, so the parts finish close together.
         include:
           - shard: 1
             devices: iPhone SE, iPhone 12 mini
             projects: iphone-se iphone-12-mini
           - shard: 2
-            devices: iPhone 17, iPhone 17 Pro Max
-            projects: iphone-17 iphone-17-pro-max
+            devices: iPhone 17, Galaxy S24
+            projects: iphone-17 galaxy-s24
           - shard: 3
-            devices: iPad mini, Galaxy S24
-            projects: ipad-mini galaxy-s24
+            devices: iPhone 17 Pro Max, desktop Chrome
+            projects: iphone-17-pro-max desktop-chrome
           - shard: 4
+            devices: iPad mini, desktop Firefox
+            projects: ipad-mini desktop-firefox
+          - shard: 5
             devices: Pixel 7, desktop Safari
             projects: pixel-7 desktop-safari
-          - shard: 5
-            devices: desktop Firefox, desktop Chrome
-            projects: desktop-firefox desktop-chrome
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v7

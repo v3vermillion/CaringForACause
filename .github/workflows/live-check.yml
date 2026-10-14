@@ -1,6 +1,7 @@
 # Checks the deployed site: browser tests, headers, and Lighthouse.
 # Runs after every merge to main, weekly, and on demand, and posts results to
-# one issue labeled live-check.
+# one issue labeled live-check; while it fails, an issue labeled
+# live-check-failing is open too.
 name: Live site check
 
 on:
@@ -147,6 +148,30 @@ jobs:
             gh issue create --title "Live site check" --label live-check --body-file report-comment.md
           else
             gh issue comment "$number" --body-file report-comment.md
+          fi
+
+      # The issue above logs every run, so a failure there reads like any other
+      # comment. A failure also opens an issue of its own, assigned to the
+      # repository's owner, and the next passing run closes it.
+      - name: Open or close the failure issue
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+          FAILED: ${{ steps.deploy.outcome == 'failure' || steps.headers.outcome == 'failure' || steps.browser.outcome == 'failure' || steps.lighthouse.outcome == 'failure' }}
+          RUN: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          gh label create live-check-failing --color B60205 --description "The live site check is failing" --force
+          number=$(gh issue list --state open --label live-check-failing --json number --jq '.[0].number')
+          if [ "$FAILED" = true ]; then
+            if [ -n "$number" ]; then
+              gh issue comment "$number" --body-file report-comment.md
+            else
+              gh issue create --title "The live site check is failing" --label live-check-failing \
+                --assignee "$GITHUB_REPOSITORY_OWNER" --body-file report-comment.md \
+                || gh issue create --title "The live site check is failing" --label live-check-failing --body-file report-comment.md
+            fi
+          elif [ -n "$number" ]; then
+            gh issue close "$number" --comment "Passing again: $RUN (commit ${GITHUB_SHA:0:7})."
           fi
 
       - name: Fail if any check failed

@@ -628,3 +628,26 @@ The first continuation was a box clipped by a reference to an SVG clip path in t
 Left as they are: an email address in the footer is not broken to fit a reader's widest text spacing (the row runs past a tablet's window then, and stays readable by scrolling); WebKit itself scrolls to the address's element when it loads a page again from history; and the program tiles' photos, which render narrower than their 4.5rem squares, wait for the owner, since squaring them wraps two tile names.
 
 **Why:** Each of these was wrong in a way a visitor, a content edit, or a launch would meet, and none was caught by the suite. A test that failed first is what shows the fix is the cause and not a coincidence of one engine's rounding.
+
+## 77. The tests see the site as Cloudflare serves it, and a failing live check is its own issue
+
+**Decision:** Four changes to how a change is checked, from what the defect sweep (decision 76) and the live check after it showed.
+
+- **The browser tests run against Wrangler's local server.** `npm run preview` is now `wrangler dev`, which serves `dist/` the way Cloudflare does: the `_headers` file (the Content-Security-Policy, the caching), the redirect from `/donate` to `/donate/`, and the 404 page. `astro preview` served none of them, so a test could pass in CI and fail on the live site, and a page could break under the policy without any test seeing it. The tests' server sends Cloudflare nothing (no `Request.cf` fetch, no usage report).
+- **The five CI parts pair a slow device with a quick one.** The parts are two devices each, in the order of `playwright.config.ts`. The order had grouped devices by kind, so iPhone 17 and 17 Pro Max ran 8.1 minutes of tests while desktop Firefox and Chrome ran 3.8. The order now pairs each slow device with a quick one. The longest part is desktop Safari with the Pixel 7, as before: Safari alone is most of a part.
+- **A failing live check opens its own issue.** The `live-check` issue logs every run, and a failure there reads like the comments around it. A failure now also opens an issue labeled `live-check-failing`, assigned to the repository's owner; later failures are added to it, and the next passing run closes it.
+- **The documents' cross-references are tested** (`scripts/docs.test.mjs`, with the gate tests): each decision has one number, in order; every "decision N" in the docs, the code and the workflows names one that exists; and every repository path that README, CLAUDE.md and the docs other than this file name is in the repository. Decisions keep the paths of their day, so their paths are not checked.
+
+**Why:** After #59, #60 and #61 the live check failed in every engine on a test that ran `eval()` in the page, which the live site's policy refuses; CI had passed it each time, because the preview sent no policy. The failures sat among routine reports on the `live-check` issue until they were looked for. Run against Wrangler, that test as it was fails in Chromium and WebKit with the live site's error, and passes under `astro preview`. The sweep also found two `## 44.` headings and docs naming files that had moved; two pull requests open at once, each adding the next decision, would collide the same way.
+
+**Cost:** none measurable. Wrangler is already a dependency (Cloudflare deploys with it), and it starts in about 2.5 seconds against 1.5 for `astro preview`; desktop Chrome's 137 tests took 1.8 minutes against 1.9. The docs test takes a tenth of a second.
+
+**What stays with the live check:** what Cloudflare adds in front of the Worker on the real host (the custom domain, HSTS, its compression), and the deploy itself.
+
+**Considered and not done:**
+
+- A deployed copy of each pull request: preview URLs are off (`wrangler.jsonc`), and one would be a second deploy path.
+- `npm audit` in CI: Dependabot's security updates already open the fixes (#45, #51), and an audit step would fail unrelated pull requests whenever an advisory lands.
+- Building variants of the content (a hidden program, one gift amount, three photos) in CI: `scripts/content.test.mjs` covers those rules, and whole builds would cost minutes and break whenever `site.ts` is reworded.
+- Naming each part's devices with `--project` instead of `--shard`: `--shard` runs every test in exactly one part by construction (decision 65), and the parts' names are already checked.
+- More workers per part, a browser-feature linter, or broad screenshot comparison: flakier tests, false alarms, or more time.
