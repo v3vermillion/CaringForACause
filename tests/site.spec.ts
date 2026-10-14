@@ -1348,25 +1348,31 @@ test.describe("the header's current section", () => {
 
   test("marks Contact at the end of the page", async ({ page }) => {
     await page.goto("/");
-    await page.evaluate(() => scrollTo(0, document.documentElement.scrollHeight));
+    await page.evaluate(() =>
+      scrollTo({ top: document.documentElement.scrollHeight, behavior: "instant" }),
+    );
     await expect.poll(() => current(page)).toEqual(["contact"]);
   });
 
   test("marks nothing over the program strip", async ({ page }) => {
     await page.goto("/");
-    await page.locator("#programs").evaluate((el) => el.scrollIntoView());
+    // Every scroll here is instant: the page scrolls smoothly, and a box
+    // measured while a scroll is still under way is measured in passing.
+    await page.locator("#programs").evaluate((el) => el.scrollIntoView({ behavior: "instant" }));
     await expect.poll(() => current(page)).toEqual(["programs"]);
     // Back up until the strip crosses the middle of the window.
     await page.locator(".strip").evaluate((el) => {
       const box = el.getBoundingClientRect();
-      scrollBy(0, box.top + box.height / 2 - innerHeight * 0.475);
+      scrollBy({ top: box.top + box.height / 2 - innerHeight * 0.475, behavior: "instant" });
     });
     await expect.poll(() => current(page)).toEqual([]);
   });
 
   test("marks nothing on the door pages, whose links lead away", async ({ page }) => {
     await page.goto("/donate");
-    await page.evaluate(() => scrollTo(0, document.documentElement.scrollHeight));
+    await page.evaluate(() =>
+      scrollTo({ top: document.documentElement.scrollHeight, behavior: "instant" }),
+    );
     await page.waitForTimeout(300);
     expect(await current(page)).toEqual([]);
   });
@@ -1588,7 +1594,7 @@ test.describe("get involved tabs", () => {
     await page.goto("/");
     await page.locator("#tab-volunteer").evaluate((tab: HTMLElement) => tab.click());
     expect(new URL(page.url()).hash).toBe("#volunteer");
-    await page.evaluate(() => scrollTo(0, 0));
+    await page.evaluate(() => scrollTo({ top: 0, behavior: "instant" }));
     await page.goto("/donate");
     await page.goBack();
     await expect(page.locator("#tab-volunteer")).toHaveAttribute("aria-selected", "true");
@@ -1612,7 +1618,7 @@ test.describe("get involved tabs", () => {
     await page.waitForLoadState("load");
     await page.waitForTimeout(1200); // the layout's hold on the place ends
     const landed = await page.evaluate(() => Math.round(window.scrollY));
-    await page.evaluate(() => scrollTo(0, 600));
+    await page.evaluate(() => scrollTo({ top: 600, behavior: "instant" }));
     await page.waitForTimeout(300); // the browser records the place as a reader's scroll ends
     await page.evaluate(() => (location.hash = "#about"));
     await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(1500);

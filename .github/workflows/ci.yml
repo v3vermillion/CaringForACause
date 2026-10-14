@@ -37,7 +37,7 @@ jobs:
   browser-tests:
     name: Browser tests ${{ matrix.shard }}/5 (${{ matrix.devices }})
     runs-on: ubuntu-latest
-    # A part takes about 5 to 7 minutes; the limit is a hang stop, not a budget.
+    # A part's tests take about 4 to 7 minutes; the limit is a hang stop, not a budget.
     # It matches the single job's 40 minutes, because the OS-package install
     # depends on Ubuntu's mirrors: once it took 21 of a part's minutes, and a
     # run the single job would have passed must not fail here.
