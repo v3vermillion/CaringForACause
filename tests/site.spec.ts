@@ -1835,13 +1835,15 @@ test.describe("the waves", () => {
         await page.goto("/");
         await fontsSettled(page);
         await page.addStyleTag({ content: edge.css });
+        // Playwright passes edge.y to the page itself: the page's own eval
+        // is refused by the live site's Content-Security-Policy.
+        const before = await page.evaluate(edge.y);
         await page.evaluate(
-          `window.scrollTo({ top: scrollY + (${edge.y.toString()})() - 200, behavior: "instant" })`,
+          (top) => window.scrollTo({ top: scrollY + top - 200, behavior: "instant" }),
+          before,
         );
-        const y = await page.evaluate(async (fn) => {
-          await new Promise((done) => requestAnimationFrame(() => done(null)));
-          return (0, eval)(`(${fn})()`) as number;
-        }, edge.y.toString());
+        await page.evaluate(() => new Promise((done) => requestAnimationFrame(() => done(null))));
+        const y = await page.evaluate(edge.y);
         const png = await page.screenshot({
           clip: { x: 0, y: Math.floor(y) - 4, width, height: 8 },
           animations: "disabled",
