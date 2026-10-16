@@ -169,8 +169,13 @@ const structuredData = {
          arrival lands on the section at once. Then the section goes back into
          the address, so it can still be copied. For a moment after load the
          place is held against the browser moving the page on its own, until
-         the reader touches, scrolls or types. Back and forward are left to the
-         browser. The tabs read the held section (GetInvolved.astro). -->
+         the reader touches, scrolls or types. The browser's own restoring
+         stays off while the reader is on this entry: turned back on a second
+         after load, a refresh on a phone dropped to the bottom of the page
+         again (Safari's stale position). A link within the page turns it on
+         as the reader leaves, so Back and forward return to the reader's
+         place (decision 78). The tabs read the held section
+         (GetInvolved.astro). -->
     <script is:inline>
       (function () {
         var root = document.documentElement;
@@ -231,11 +236,26 @@ const structuredData = {
             addEventListener("scroll", hold);
             setTimeout(function () {
               removeEventListener("scroll", hold);
-              // The hold is over: Back and Forward within the page are the
-              // browser's again (held, they had left the reader where they were).
-              history.scrollRestoration = "auto";
             }, 1000);
           });
+          // A link to a section of this page makes a new history entry, which
+          // takes the restoring of the one it leaves; turned on just before,
+          // both entries are the browser's to restore on Back and Forward.
+          addEventListener(
+            "click",
+            function (event) {
+              var link = event.target.closest && event.target.closest("a[href]");
+              if (
+                link &&
+                link.hash &&
+                link.origin === location.origin &&
+                link.pathname === location.pathname &&
+                link.search === location.search
+              )
+                history.scrollRestoration = "auto";
+            },
+            true,
+          );
         } catch (e) {}
       })();
     </script>

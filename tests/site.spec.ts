@@ -1505,6 +1505,13 @@ test.describe("get involved tabs", () => {
     await settled(page);
     expect(await page.evaluate(() => window.scrollY)).toBe(0);
     expect(new URL(page.url()).hash).toBe("#contact");
+    // Safari on a phone re-applies a stale position of its own after load,
+    // here the bottom of the page, unless the page keeps the browser's own
+    // restoring off (decision 50). The test browsers never re-apply it, so
+    // the setting itself is checked, after the layout's one-second hold.
+    await page.waitForTimeout(1200);
+    expect(await page.evaluate(() => history.scrollRestoration)).toBe("manual");
+    expect(await page.evaluate(() => window.scrollY)).toBe(0);
   });
 
   test("a refresh on the section a link led to stays there", async ({ page }) => {
@@ -1624,7 +1631,11 @@ test.describe("get involved tabs", () => {
     const landed = await page.evaluate(() => Math.round(window.scrollY));
     await page.evaluate(() => scrollTo({ top: 600, behavior: "instant" }));
     await page.waitForTimeout(300); // the browser records the place as a reader's scroll ends
-    await page.evaluate(() => (location.hash = "#about"));
+    // A reader's link to another section, clicked in the page (Playwright's
+    // own click scrolls the menu's button into view first, moving the page).
+    await page.evaluate(() =>
+      document.querySelector<HTMLAnchorElement>('a[href="/#about"]')!.click(),
+    );
     await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(1500);
     await page.goBack();
     // What each browser does on its own: Safari and Firefox return to the
