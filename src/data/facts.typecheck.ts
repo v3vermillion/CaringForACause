@@ -3,7 +3,14 @@
  * If `claim()` ever accepted an unconfirmed fact, the @ts-expect-error lines
  * would become unused and the type check would fail.
  */
-import { claim, needsConfirmation, orgPublished, publicRecord, show } from "./facts.ts";
+import {
+  claim,
+  needsConfirmation,
+  orgPublished,
+  pressReported,
+  publicRecord,
+  show,
+} from "./facts.ts";
 
 const pending = needsConfirmation("x", "source", "question?");
 
@@ -15,4 +22,5 @@ claim("x");
 // Allowed:
 claim(publicRecord("x", "source"));
 claim(orgPublished("x", "source"));
+claim(pressReported("x", "source"));
 show(pending);

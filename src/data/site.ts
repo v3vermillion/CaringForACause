@@ -12,7 +12,14 @@
  * `orgPublished(...)` or `publicRecord(...)` and update its source.
  */
 
-import { claim, type Fact, needsConfirmation, orgPublished, publicRecord } from "./facts.ts";
+import {
+  claim,
+  type Fact,
+  needsConfirmation,
+  orgPublished,
+  pressReported,
+  publicRecord,
+} from "./facts.ts";
 
 export type YouTubeVideo = {
   /** The ID from the YouTube URL, e.g. youtube.com/watch?v=THIS_PART */
@@ -105,10 +112,9 @@ export const facts = {
     "Toys for Tots",
     "caring4acausesupportiveservices.com, Holiday Assistance section (2025 site)",
   ),
-  city: needsConfirmation(
-    "Noblesville, Indiana",
-    "GuideStar and directory listings; the 2021 site lists an Indianapolis office",
-    "Is the organization based in Noblesville, Indianapolis, or both?",
+  city: orgPublished(
+    "Indianapolis & Noblesville",
+    "Indianapolis: her Idealist listing (office on North Meridian Street, associated location Indianapolis), her Holiday Assistance Facebook page, and her 2025-2026 events at an Indianapolis church; Noblesville: the IRS exempt-organization record and GuideStar. Checked October 2026. Never publish the street addresses.",
   ),
   phone: needsConfirmation(
     { display: "(317) 886-0724", href: "tel:+13178860724" },
@@ -124,6 +130,10 @@ export const facts = {
     "https://www.facebook.com/caringforacausesupportiveservices",
     "Current website's Join Us link; directories also list facebook.com/427844620960035",
     "Which Facebook page is current?",
+  ),
+  familiesHelped: pressReported(
+    5000,
+    "Jiffy Lube of Indiana, 'Do More: Tamara Long-Ajimati Provides Supportive Services to Indianapolis Families' (June 13, 2023): 'Since 2015, Caring for a Cause has helped over 5,000 families.' A running total, so it stays true; no newer count was found in October 2026.",
   ),
   photoPermission: needsConfirmation(
     "Event photos from the organization's 2021 website, some showing children",
@@ -205,7 +215,6 @@ export const hero = {
   /**
    * What the organization is, from her mission statement. The headline names
    * the service area and the proof line has the year, so neither is repeated.
-   * The city is still unconfirmed (see facts.city), so it stays out of here.
    */
   subhead: "A nonprofit for households facing financial hardship.",
   /**
@@ -595,11 +604,22 @@ export const getInvolved = {
   ] satisfies InvolvementTab[],
 };
 
+/**
+ * "More than a decade on" (or "Eight years on" before then), from the
+ * founding year and the year the site is built, so it never goes stale.
+ */
+function yearsOn(founded: number): string {
+  const years = new Date().getFullYear() - founded;
+  if (years > 10) return "More than a decade on";
+  const words = ["", "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine", "Ten"];
+  return `${words[years] ?? years} year${years === 1 ? "" : "s"} on`;
+}
+
 export const about = {
   eyebrow: "About",
   heading: `Meet ${claim(facts.founder)}`,
   body: [
-    `${claim(facts.founder).split(" ")[0]} founded ${org.shortName} in ${claim(facts.founded)} to support families in ${claim(facts.serviceArea)} who are facing financial hardship.`,
+    `${claim(facts.founder).split(" ")[0]} founded ${org.shortName} in ${claim(facts.founded)} to support families in ${claim(facts.serviceArea)} who are facing financial hardship. ${yearsOn(claim(facts.founded))}, it has helped over ${claim(facts.familiesHelped).toLocaleString("en-US")} families.`,
     // Her website's "Our Team" and "Our History": part-time volunteers
     // committed to helping others; grown thanks to the community's helping hands.
     "Its part-time volunteers are committed to helping others, and the organization has grown thanks to the helping hands of this community.",
