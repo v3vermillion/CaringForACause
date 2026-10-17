@@ -145,8 +145,6 @@ const year = new Date().getFullYear();
             <path d="M12 32.4C12 32.4 1.4 21.2 1.4 12.6a10.6 10.6 0 0 1 21.2 0c0 8.6-10.6 19.8-10.6 19.8Z"></path>
             <circle cx="12" cy="12.4" r="4"></circle>
           </svg>
-          <span class="city">{claim(facts.city)}</span>
-          <span class="dot"></span>
           <span class="serving">Serving {claim(facts.serviceArea)}</span>
         </p>
         <p class="copyright">
@@ -586,7 +584,7 @@ const year = new Date().getFullYear();
   }
 
   /* Each part keeps to one line while it fits. A longer part (a longer
-     city, or text a reader has spaced wider) wraps instead of pushing the
+     service area, or text a reader has spaced wider) wraps instead of pushing the
      page sideways: the place's parts move to a second line first. */
   .legal p {
     max-width: 100%;
@@ -620,24 +618,6 @@ const year = new Date().getFullYear();
     color: #d7cdf3;
   }
 
-  .where .city {
-    color: #cfbded;
-  }
-
-  /* Phones: the two cities and the service area do not share a line at
-     phone widths, so the service area takes its own centred line and the
-     dot between them goes, rather than ending a line (decision 79). */
-  @media (max-width: 35.99rem) {
-    .where .dot {
-      display: none;
-    }
-
-    .where .serving {
-      flex-basis: 100%;
-      text-align: center;
-    }
-  }
-
   .pin {
     width: 1.2rem;
     height: 1.7rem;
@@ -647,14 +627,6 @@ const year = new Date().getFullYear();
     stroke-width: 1.9;
     stroke-linecap: round;
     stroke-linejoin: round;
-  }
-
-  .dot {
-    width: 0.25rem;
-    height: 0.25rem;
-    flex: none;
-    border-radius: 50%;
-    background: #8a72c4;
   }
 
   .copyright {
@@ -992,13 +964,11 @@ const year = new Date().getFullYear();
       width: 2.96rem;
     }
 
-    /* The name ends before the rule at 30.41rem (it takes about 20.7rem),
-       so text a reader has spaced wider wraps there instead of crossing it.
-       The rule sits a rem left of the reference's so the two cities and the
-       service area keep one line (decision 79). */
+    /* The name ends before the rule at 31.41rem (it takes about 20.7rem),
+       so text a reader has spaced wider wraps there instead of crossing it. */
     .legal .name {
       left: 6.9rem;
-      max-width: 23rem;
+      max-width: 24rem;
       text-align: left;
     }
 
@@ -1015,23 +985,15 @@ const year = new Date().getFullYear();
     /* The place ends before the rule ahead of the copyright (7rem from the
        right), so a longer one wraps there instead of running over it. */
     .where {
-      left: 33.9rem;
+      left: 34.9rem;
       right: 7rem;
-      justify-content: flex-start;
+      justify-content: center;
       gap: 0.35rem 0;
-      text-align: left;
-    }
-
-    .where .city {
-      margin-left: 1rem;
-    }
-
-    .where .dot {
-      margin-left: 1.17rem;
+      text-align: center;
     }
 
     .where .serving {
-      margin-left: 1.35rem;
+      margin-left: 1rem;
     }
 
     .copyright {
@@ -1061,11 +1023,11 @@ const year = new Date().getFullYear();
     }
 
     .legal::after {
-      left: 30.41rem;
+      left: 31.41rem;
     }
 
     .where::before {
-      left: 31.15rem;
+      left: 30.15rem;
       top: 50%;
     }
   }
