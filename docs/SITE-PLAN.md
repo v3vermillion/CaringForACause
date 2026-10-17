@@ -71,7 +71,7 @@ Four pages. The home page is the route map, the two doors lead to their own page
 ├───────────────────────────────────────────────┤
 │ Gallery strip (hidden until 4+ photos)        │
 ├───────────────────────────────────────────────┤
-│ FOOTER (near-black, from her reference):      │  #contact is its Connect column
+│ FOOTER (near-black, from owner's reference):  │  #contact is its Connect column
 │ lit mark · her lockup artwork · [Donate] ·    │
 │ Never give up.  │  Explore: Help me · About ·│
 │ Programs · Get involved │                     │

@@ -221,7 +221,7 @@ export const hero = {
 
 /**
  * The strip under the banner (decision 58): the four things the banner
- * promises, each with its icon from her reference, a title, and the program
+ * promises, each with its icon from the owner's reference, a title, and the program
  * it opens. Each also has one line, the programs' own words (see
  * `programs`), which the giving page shows beside the same icons; the strip
  * shows the titles alone (decision 66).

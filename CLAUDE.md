@@ -7,6 +7,23 @@ Read first, in order: `docs/APPROACH.md` (how to think), `README.md` (how to
 work), `docs/DECISIONS.md` (why things are the way they are),
 `docs/SITE-PLAN.md` (what the page shows).
 
+## Who's who
+
+- **The owner** (in every doc and comment) is the person building this site
+  and owning this repository. The owner supplies the reference images and
+  device screenshots, gives the design feedback, and makes the calls recorded
+  in `docs/DECISIONS.md`.
+- **Tamara Long-Ajimati** founded the organization. The site is a gift to her
+  and she has not been involved yet: no design choice, reference, or approval
+  in this repository is hers. "Her" in the docs means her organization's own
+  material (her logo, lettering, photos, published words), never a decision.
+- The gift is meant to arrive close to anonymous. Contact with her is one
+  message with the preview, then small corrections. Answer what her own two
+  sites already publish (caring4acausesupportiveservices.com and
+  caringforacauseindy.netlify.app) instead of adding questions for her, and
+  keep anything that identifies the owner (names, handles, accounts) out of
+  the published site.
+
 ## Rules
 
 - Content and claims live in `src/data/site.ts`. Factual claims use the

@@ -812,7 +812,7 @@ legend.label {
    surface with a lit rim. Sized in rem, so each is one picture per class. */
 :root {
   --grain: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='200'%20height='200'%3E%3Cfilter%20id='n'%3E%3CfeTurbulence%20type='fractalNoise'%20baseFrequency='0.85'%20numOctaves='2'%20stitchTiles='stitch'/%3E%3CfeColorMatrix%20values='0%200%200%200%200.12%200%200%200%200%200.06%200%200%200%200%200.24%200%200%200%200.5%200'/%3E%3C/filter%3E%3Crect%20width='100%25'%20height='100%25'%20filter='url(#n)'/%3E%3C/svg%3E");
-  /* A one-pixel rim that runs violet to rose, the rule language of her references. */
+  /* A one-pixel rim that runs violet to rose, the rule language of the owner's references. */
   --rim: linear-gradient(
     135deg,
     rgb(160 108 255 / 0.6),
