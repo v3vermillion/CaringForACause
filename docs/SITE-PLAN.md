@@ -136,7 +136,7 @@ Ask these in the follow-up after she sees the preview. Every one has a safe defa
 4. Which Facebook page is current? Two pages appear in public listings.
 5. Can she share event photos for the hero and gallery?
 6. Holiday dates and application windows for this season.
-7. Does she serve Hamilton County, Indianapolis (Marion County), or both? This affects wording and grant eligibility.
+7. ~~Does she serve Hamilton County, Indianapolis (Marion County), or both?~~ Answered from her own listings: the work happens in Indianapolis, the registered address is in Noblesville, and help reaches families across Central Indiana (decision 79).
 8. Does she want a donation page (Zeffy, free) and an online family application set up in her name?
 9. Is the organization volunteer-run? The banner no longer says so until she confirms it.
 

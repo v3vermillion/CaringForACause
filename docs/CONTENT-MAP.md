@@ -6,18 +6,19 @@ Everything the site needs to carry for Caring for a Cause, where each piece live
 
 ### Identity
 
-| Item                                                      | Status        | Source                     |
-| --------------------------------------------------------- | ------------- | -------------------------- |
-| Legal name: Caring for a Cause Supportive Services Inc.   | public record | IRS, GuideStar             |
-| Short name: Caring for a Cause                            | org           | her website                |
-| Logo (final redraw), heart mark, brand purple and crimson | org           | her logo                   |
-| Tagline: "Together we can." / "Never give up."            | org           | her website                |
-| Mission statement                                         | org           | her website                |
-| Founder: Tamara Long-Ajimati                              | org           | Jiffy Lube "Do More" video |
-| Founded 2015                                              | public record | IRS ruling Dec 2015        |
-| 501(c)(3), EIN 47-4917287, donations tax-deductible       | public record | IRS                        |
-| Service area: Central Indiana                             | org           | mission statement          |
-| City: Noblesville (office once listed in Indianapolis)    | **confirm**   | GuideStar vs 2021 site     |
+| Item                                                      | Status        | Source                      |
+| --------------------------------------------------------- | ------------- | --------------------------- |
+| Legal name: Caring for a Cause Supportive Services Inc.   | public record | IRS, GuideStar              |
+| Short name: Caring for a Cause                            | org           | her website                 |
+| Logo (final redraw), heart mark, brand purple and crimson | org           | her logo                    |
+| Tagline: "Together we can." / "Never give up."            | org           | her website                 |
+| Mission statement                                         | org           | her website                 |
+| Founder: Tamara Long-Ajimati                              | org           | Jiffy Lube "Do More" video  |
+| Founded 2015                                              | public record | IRS ruling Dec 2015         |
+| 501(c)(3), EIN 47-4917287, donations tax-deductible       | public record | IRS                         |
+| Service area: Central Indiana                             | org           | mission statement           |
+| City: Indianapolis and Noblesville                        | org / record  | Idealist, IRS (decision 79) |
+| Over 5,000 families helped since 2015                     | press         | Jiffy Lube feature, 2023    |
 
 ### Programs (what she does)
 

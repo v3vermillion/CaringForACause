@@ -70,12 +70,14 @@ const structuredData = {
   taxID: claim(facts.ein),
   nonprofitStatus: claim(facts.taxExempt).section === "501(c)(3)" ? "Nonprofit501c3" : undefined,
   areaServed: claim(facts.serviceArea),
-  address: {
-    "@type": "PostalAddress",
-    addressLocality: show(facts.city).split(",")[0],
-    addressRegion: "IN",
-    addressCountry: "US",
-  },
+  address: claim(facts.city)
+    .split(/\s+(?:&|and)\s+/)
+    .map((locality) => ({
+      "@type": "PostalAddress",
+      addressLocality: locality,
+      addressRegion: "IN",
+      addressCountry: "US",
+    })),
   telephone: phone.href.replace("tel:", ""),
   email: show(facts.email),
   sameAs: [show(facts.facebook)],

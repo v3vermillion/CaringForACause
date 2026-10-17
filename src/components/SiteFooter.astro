@@ -145,8 +145,6 @@ const year = new Date().getFullYear();
             <path d="M12 32.4C12 32.4 1.4 21.2 1.4 12.6a10.6 10.6 0 0 1 21.2 0c0 8.6-10.6 19.8-10.6 19.8Z"></path>
             <circle cx="12" cy="12.4" r="4"></circle>
           </svg>
-          <span class="city">{show(facts.city)}</span>
-          <span class="dot"></span>
           <span class="serving">Serving {claim(facts.serviceArea)}</span>
         </p>
         <p class="copyright">
@@ -586,7 +584,7 @@ const year = new Date().getFullYear();
   }
 
   /* Each part keeps to one line while it fits. A longer part (a longer
-     city, or text a reader has spaced wider) wraps instead of pushing the
+     service area, or text a reader has spaced wider) wraps instead of pushing the
      page sideways: the place's parts move to a second line first. */
   .legal p {
     max-width: 100%;
@@ -620,10 +618,6 @@ const year = new Date().getFullYear();
     color: #d7cdf3;
   }
 
-  .where .city {
-    color: #cfbded;
-  }
-
   .pin {
     width: 1.2rem;
     height: 1.7rem;
@@ -633,14 +627,6 @@ const year = new Date().getFullYear();
     stroke-width: 1.9;
     stroke-linecap: round;
     stroke-linejoin: round;
-  }
-
-  .dot {
-    width: 0.25rem;
-    height: 0.25rem;
-    flex: none;
-    border-radius: 50%;
-    background: #8a72c4;
   }
 
   .copyright {
@@ -1001,21 +987,13 @@ const year = new Date().getFullYear();
     .where {
       left: 34.9rem;
       right: 7rem;
-      justify-content: flex-start;
+      justify-content: center;
       gap: 0.35rem 0;
-      text-align: left;
-    }
-
-    .where .city {
-      margin-left: 1rem;
-    }
-
-    .where .dot {
-      margin-left: 1.17rem;
+      text-align: center;
     }
 
     .where .serving {
-      margin-left: 1.35rem;
+      margin-left: 1rem;
     }
 
     .copyright {

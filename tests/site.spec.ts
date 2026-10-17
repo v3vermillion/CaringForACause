@@ -375,10 +375,10 @@ test.describe("device compatibility", () => {
     page,
   }) => {
     await page.goto("/");
-    // A city the owner may confirm, and WCAG 1.4.12's text spacing as a
-    // reader's own stylesheet sets it.
-    await page.locator(".where .city").evaluate((el) => {
-      el.textContent = "Noblesville and Indianapolis, Indiana";
+    // A longer service area than today's, and WCAG 1.4.12's text spacing as
+    // a reader's own stylesheet sets it.
+    await page.locator(".where .serving").evaluate((el) => {
+      el.textContent = "Serving Indianapolis, Noblesville and Central Indiana";
     });
     await page.addStyleTag({
       content:
@@ -386,7 +386,7 @@ test.describe("device compatibility", () => {
     });
     const record = await page.evaluate(() => {
       const width = document.documentElement.clientWidth;
-      const parts = [".legal .name", ".where .city", ".where .serving", ".copyright"].map((s) =>
+      const parts = [".legal .name", ".where .serving", ".copyright"].map((s) =>
         document.querySelector(s)!.getBoundingClientRect(),
       );
       const meet = (a: DOMRect, b: DOMRect) =>

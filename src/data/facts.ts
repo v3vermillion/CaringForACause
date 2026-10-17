@@ -3,7 +3,10 @@
  * settled. This keeps unconfirmed details from quietly shipping as fact.
  *
  * - "public-record": verified in an official third-party source (for example the IRS).
- * - "org-published": stated by the organization on its own current website.
+ * - "org-published": stated by the organization on its own current website or
+ *   the listings it maintains (its Idealist page, its Facebook pages).
+ * - "press-reported": published by a named outside outlet about the organization
+ *   (for example a sponsor's feature), with its date in the source.
  * - "needs-confirmation": conflicting or outdated sources; ask Tamara.
  *
  * Components that state something as fact (the proof line, tax statement) accept
@@ -13,7 +16,8 @@
  * every fact is settled.
  */
 
-export type FactStatus = "public-record" | "org-published" | "needs-confirmation";
+export type FactStatus =
+  "public-record" | "org-published" | "press-reported" | "needs-confirmation";
 
 type FactBase<T> = {
   readonly value: T;
@@ -22,7 +26,7 @@ type FactBase<T> = {
 };
 
 export type Settled<T> = FactBase<T> & {
-  readonly status: "public-record" | "org-published";
+  readonly status: "public-record" | "org-published" | "press-reported";
 };
 
 export type Pending<T> = FactBase<T> & {
@@ -43,6 +47,12 @@ export const orgPublished = <T>(value: T, source: string): Settled<T> => ({
   value,
   source,
   status: "org-published",
+});
+
+export const pressReported = <T>(value: T, source: string): Settled<T> => ({
+  value,
+  source,
+  status: "press-reported",
 });
 
 export const needsConfirmation = <T>(value: T, source: string, question: string): Pending<T> => ({
