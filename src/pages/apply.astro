@@ -100,7 +100,7 @@ const sideBody = getHelp.talk.body;
               <ol class="progress" aria-label="Steps">
                 {steps.map((step, i) => (
                   <li data-progress={step.id} aria-current={i === 0 ? "step" : undefined}>
-                    <button type="button" class="progress-go" data-goto={i} disabled>
+                    <button type="button" class="progress-go" data-goto={i} aria-disabled="true">
                       <span class="num" aria-hidden="true">
                         {i + 1}
                       </span>
@@ -801,8 +801,13 @@ const sideBody = getHelp.talk.body;
         if (i === index) item.setAttribute("aria-current", "step");
         else item.removeAttribute("aria-current");
         item.classList.toggle("passed", i < index);
-        // A passed step can be reopened; the ones ahead wait for Next.
-        item.querySelector<HTMLButtonElement>("[data-goto]")!.disabled = i >= index;
+        // A passed step can be reopened. The current one and the ones ahead
+        // announce as not yet available, but stay tappable: a tap ahead runs
+        // the same check as Next (goTo below), so it answers instead of
+        // ignoring the press.
+        item
+          .querySelector<HTMLButtonElement>("[data-goto]")!
+          .setAttribute("aria-disabled", String(i >= index));
       });
       back.hidden = index === 0;
       next.hidden = index === last;
@@ -827,10 +832,28 @@ const sideBody = getHelp.talk.body;
     };
     // Going back never loses answers and is never gated. A step reopened from
     // the review returns there on Next; any other way back walks forward again.
+    // A tap on a later step walks forward with the same check as Next, one
+    // step at a time, and stops on the first step that isn't ready, with its
+    // errors shown and the first one focused (validate does both).
     const goTo = (index: number) => {
-      if (index >= current) return;
-      returnToReview = current === last;
-      show(index);
+      if (index === current) return;
+      if (index < current) {
+        returnToReview = current === last;
+        show(index);
+        return;
+      }
+      const from = current;
+      while (current < index) {
+        if (!validate(steps[current]!)) {
+          // The walk moved before stopping: say where it stopped (the focus
+          // is already on that step's first error).
+          if (current !== from)
+            live.textContent = `Step ${current + 1} of ${steps.length}, ${titles[current]}`;
+          return;
+        }
+        returnToReview = false;
+        show(current + 1, current + 1 === index);
+      }
     };
     next.addEventListener("click", advance);
     back.addEventListener("click", () => {
@@ -997,11 +1020,11 @@ const sideBody = getHelp.talk.body;
     cursor: pointer;
   }
 
-  .progress-go:disabled {
+  .progress-go[aria-disabled="true"] {
     cursor: default;
   }
 
-  .progress-go:not(:disabled):hover .step-title {
+  .progress-go:not([aria-disabled="true"]):hover .step-title {
     text-decoration: underline;
   }
 

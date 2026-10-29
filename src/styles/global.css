@@ -578,17 +578,23 @@ a {
   text-decoration: none;
 }
 
+/* The arrow is drawn, not typed: U+2192 is outside the display face's
+   subset, so a "→" glyph came from whatever font the platform fell back
+   to. Drawn at the checklist chevron's stroke (2.5 reference pixels,
+   round caps, like the door pills' chevrons), it is one glyph family on
+   every device; an empty content box is silent for screen readers, so
+   "Email us" stays "Email us". currentColor keeps each surface's color. */
 .arrow-link::after {
-  content: "→";
+  content: "";
+  flex: none;
+  width: 0.875rem;
+  height: 0.625rem;
+  background: currentColor;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 14 10'%3E%3Cpath d='M1.5 5h10M8 1.5 11.5 5 8 8.5' fill='none' stroke='black' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")
+    center / contain no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 14 10'%3E%3Cpath d='M1.5 5h10M8 1.5 11.5 5 8 8.5' fill='none' stroke='black' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")
+    center / contain no-repeat;
   transition: transform 150ms ease;
-}
-
-/* The arrow is decoration: where the browser takes alternative text for
-   generated content, it is given none, so "Email us →" is read "Email us". */
-@supports (content: "x" / "") {
-  .arrow-link::after {
-    content: "→" / "";
-  }
 }
 
 .arrow-link:hover {

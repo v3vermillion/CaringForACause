@@ -46,9 +46,10 @@ const mailto = (subject: string) =>
         </div>
       </div>
 
-      <!-- The stage holds the panels: with JavaScript one shows at a time,
-           and a change crossfades in place while the stage's height eases,
-           so nothing below the card jumps. -->
+      <!-- The stage holds the panels: with JavaScript they stack in one
+           grid cell and one shows at a time, so the stage is always the
+           tallest panel's height and a change crossfades in place while
+           nothing below the card moves. -->
       <div class="stage" data-stage>
         {tabs.map((tab) => {
           const href = tab.action.href ?? mailto(tab.heading);
@@ -118,18 +119,23 @@ const mailto = (subject: string) =>
 
     const selected = () => tabs.find((tab) => tab.getAttribute("aria-selected") === "true");
 
-    // The thumb sits under the chosen tab: its place and width are the tab's.
+    // The thumb sits under the chosen tab: its place and size are the tab's
+    // (two coordinates, because on phones the track is two rows).
     const place = () => {
       const tab = selected();
       if (!tab) return;
       track.style.setProperty("--x", `${tab.offsetLeft}px`);
+      track.style.setProperty("--y", `${tab.offsetTop}px`);
       track.style.setProperty("--w", `${tab.offsetWidth}px`);
+      track.style.setProperty("--h", `${tab.offsetHeight}px`);
     };
     document.fonts?.ready.then(place);
     if ("ResizeObserver" in window) new ResizeObserver(place).observe(track);
 
-    // The chosen tab is brought to the middle of the strip (the strip
-    // scrolls on phones), never moving the page itself.
+    // The chosen tab is brought to the middle of the strip, never moving
+    // the page itself. On phones the rail is two rows and nothing scrolls,
+    // so this is a no-op there; from 36rem up it covers a strip that
+    // overflows (none does today, but a longer label would).
     const reveal = (tab: HTMLElement) => {
       const left = tab.getBoundingClientRect().left - tablist.getBoundingClientRect().left;
       tablist.scrollTo({
@@ -138,9 +144,11 @@ const mailto = (subject: string) =>
       });
     };
 
-    // A leaving panel fades out in place (absolutely positioned, out of the
-    // accessibility tree at once) and is hidden after the fade; the timer is
-    // the safety net if the transition never ends.
+    // A leaving panel fades out in place (out of the accessibility tree at
+    // once) and turns invisible after the fade; the timer is the safety net
+    // if the transition never ends. Panels keep their boxes (visibility, not
+    // display), stacked in one grid cell, so the stage is always the tallest
+    // panel's height and switching never moves the page below.
     const leaving = new Map<HTMLElement, number>();
     const settle = (panel: HTMLElement) => {
       clearTimeout(leaving.get(panel));
@@ -148,18 +156,23 @@ const mailto = (subject: string) =>
       panel.classList.remove("is-leaving");
       panel.removeAttribute("aria-hidden");
       panel.inert = false;
-      panel.hidden = true;
-    };
-    let stageTimer = 0;
-    const settleStage = () => {
-      clearTimeout(stageTimer);
-      stage.style.height = "";
+      panel.classList.add("is-off");
     };
     stage.addEventListener("transitionend", (event) => {
       const target = event.target as HTMLElement;
-      if (target === stage && event.propertyName === "height") settleStage();
-      else if (event.propertyName === "opacity" && leaving.has(target)) settle(target);
+      if (event.propertyName === "opacity" && leaving.has(target)) settle(target);
     });
+    // The arriving panel starts a step toward its side and eases to rest: a
+    // start frame committed by a forced layout, then the transition. (The
+    // old @starting-style route only fires when display changes, which the
+    // grid stack no longer does, and Safari 15 never had it.)
+    const arrive = (panel: HTMLElement) => {
+      if (!panel.classList.contains("is-off")) return;
+      panel.classList.add("is-in");
+      panel.classList.remove("is-off");
+      void panel.offsetHeight;
+      panel.classList.remove("is-in");
+    };
 
     const select = (id: string, focus = false, user = false) => {
       const tab = tabs.find((t) => t.getAttribute("aria-controls") === id);
@@ -189,23 +202,19 @@ const mailto = (subject: string) =>
         }
       }
 
-      const showing = panels.filter((p) => !p.hidden && !leaving.has(p));
+      const showing = panels.filter((p) => !p.classList.contains("is-off") && !leaving.has(p));
       if (showing.length === 1 && showing[0] === panel) return;
 
       // Before the page has painted (or under reduced motion) the change is
       // a plain swap: nothing on screen moves.
       if (!live() || reduce.matches) {
         leaving.forEach((_, p) => settle(p));
-        settleStage();
         panels.forEach((p) => {
-          p.hidden = p !== panel;
+          p.classList.toggle("is-off", p !== panel);
         });
         return;
       }
 
-      // The stage keeps the old height while the panels cross, then eases
-      // to the new one (measure, set the start, force a layout, set the end).
-      const before = stage.offsetHeight;
       stage.dataset.dir = to > from ? "next" : "prev";
       panels.forEach((p) => {
         if (p === panel) {
@@ -215,8 +224,8 @@ const mailto = (subject: string) =>
           p.classList.remove("is-leaving");
           p.removeAttribute("aria-hidden");
           p.inert = false;
-          p.hidden = false;
-        } else if (!p.hidden && !leaving.has(p)) {
+          arrive(p);
+        } else if (!p.classList.contains("is-off") && !leaving.has(p)) {
           p.classList.add("is-leaving");
           p.setAttribute("aria-hidden", "true");
           p.inert = true;
@@ -226,15 +235,6 @@ const mailto = (subject: string) =>
           );
         }
       });
-      stage.style.height = "";
-      const after = stage.offsetHeight;
-      if (before !== after) {
-        stage.style.height = `${before}px`;
-        void stage.offsetHeight;
-        stage.style.height = `${after}px`;
-        clearTimeout(stageTimer);
-        stageTimer = window.setTimeout(settleStage, 400);
-      }
     };
 
     tabs.forEach((tab, i) => {
@@ -344,33 +344,16 @@ const mailto = (subject: string) =>
     margin-top: var(--space-s);
   }
 
-  /* Tabs: one row that scrolls on phones and tablets, sitting on the
-     panel's own axis. Its edges fade where it bleeds past the column, so a
-     tab cut by the screen dissolves rather than chops; at rest the tabs
-     start where the fade ends (the bleed and the fade are both the gutter),
-     so nothing at rest is dimmed. */
+  /* Tabs. On a phone the rail is two rows of two, so all four choices are
+     on screen at once (one row cannot fit them: the labels alone are wider
+     than the column at every phone size, the classes scale). From 36rem up
+     the rail is one row that scrolls if it must, its edges fading where it
+     bleeds past the column, so a tab cut by the screen dissolves rather
+     than chops; at rest the tabs start where the fade ends (the bleed and
+     the fade are both the gutter), so nothing at rest is dimmed. */
   .tablist {
     display: flex;
-    padding: 0.25rem var(--gutter) var(--r-card); /* clear of the card by its own radius */
-    margin: 0 calc(-1 * var(--gutter));
-    overflow-x: auto;
-    scroll-snap-type: x proximity;
-    scroll-padding-inline: var(--gutter);
-    scrollbar-width: none;
-    -webkit-mask-image: linear-gradient(
-      90deg,
-      transparent,
-      #000 var(--gutter),
-      #000 calc(100% - var(--gutter)),
-      transparent
-    );
-    mask-image: linear-gradient(
-      90deg,
-      transparent,
-      #000 var(--gutter),
-      #000 calc(100% - var(--gutter)),
-      transparent
-    );
+    padding: 0.25rem 0 var(--r-card); /* clear of the card by its own radius */
   }
 
   .tablist::-webkit-scrollbar {
@@ -385,11 +368,12 @@ const mailto = (subject: string) =>
      never snaps to a whole pixel), holding the tabs and the thumb. */
   .track {
     position: relative;
-    display: inline-flex;
-    flex: none;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    width: 100%;
     gap: 0;
     padding: 0.25rem;
-    border-radius: var(--r-pill);
+    border-radius: var(--r-card);
     background: rgb(255 255 255 / 0.72);
     -webkit-backdrop-filter: blur(0.75rem);
     backdrop-filter: blur(0.75rem);
@@ -399,19 +383,55 @@ const mailto = (subject: string) =>
       inset 0 1px 0 #fff;
   }
 
+  @media (min-width: 36rem) {
+    .tablist {
+      padding-inline: var(--gutter);
+      margin: 0 calc(-1 * var(--gutter));
+      overflow-x: auto;
+      scroll-snap-type: x proximity;
+      scroll-padding-inline: var(--gutter);
+      scrollbar-width: none;
+      -webkit-mask-image: linear-gradient(
+        90deg,
+        transparent,
+        #000 var(--gutter),
+        #000 calc(100% - var(--gutter)),
+        transparent
+      );
+      mask-image: linear-gradient(
+        90deg,
+        transparent,
+        #000 var(--gutter),
+        #000 calc(100% - var(--gutter)),
+        transparent
+      );
+    }
+
+    .track {
+      display: inline-flex;
+      flex: none;
+      width: auto;
+      border-radius: var(--r-pill);
+    }
+
+    [role="tab"] {
+      padding-inline: 1.225rem;
+    }
+  }
+
   /* The thumb: the purple pill under the chosen tab, placed by the script
-     (--x and --w are the tab's offset and width) and slid there once the
-     page has painted. */
+     (--x, --y, --w and --h are the tab's offsets and size: two rows on a
+     phone, one from 36rem up) and slid there once the page has painted. */
   .thumb {
     position: absolute;
-    top: 0.25rem;
+    top: 0;
     left: 0;
-    height: calc(100% - 0.5rem);
+    height: var(--h, 0px);
     width: var(--w, 0px);
     /* transform, not the translate property, which Chrome only has from
        104: without it the thumb stayed under the first tab and the chosen
        tab's white label sat on the white rail. */
-    transform: translateX(var(--x, 0px));
+    transform: translate(var(--x, 0px), var(--y, 0px));
     border-radius: var(--r-pill);
     background: var(--purple);
   }
@@ -427,7 +447,9 @@ const mailto = (subject: string) =>
     z-index: 1;
     flex: none;
     min-height: max(44px, 3rem);
-    padding: 0.625rem 1.225rem; /* no border: it would snap to whole pixels and shift the row */
+    /* Narrow sides on the phone rail, where the widest label fills its half
+       row; no border: it would snap to whole pixels and shift the row. */
+    padding: 0.625rem 0.5rem;
     border: 0;
     border-radius: var(--r-pill);
     background: transparent;
@@ -468,13 +490,28 @@ const mailto = (subject: string) =>
     }
   }
 
-  /* The stage: the panels' room. Its height eases between panels (set by
-     the script), and a sideways swipe on it turns the panel while vertical
-     scrolling stays the browser's. */
+  /* The stage: the panels' room. With JavaScript the panels stack in one
+     grid cell, so the stage is always the tallest panel's height and
+     switching never moves the page below; a sideways swipe on it turns the
+     panel while vertical scrolling stays the browser's. */
   .stage {
     position: relative;
     touch-action: pan-y;
-    transition: height 260ms cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+
+  .is-enhanced .stage {
+    display: grid;
+  }
+
+  .is-enhanced .panel {
+    grid-area: 1 / 1;
+  }
+
+  /* A panel at rest that isn't the chosen one: invisible but keeping its
+     box (so the stage holds the tallest panel's height), unfocusable, and
+     out of the accessibility tree, all of which visibility gives. */
+  .is-enhanced .panel.is-off {
+    visibility: hidden;
   }
 
   /* A surface (global.css): white, lifted, with a rim of light. */
@@ -488,33 +525,32 @@ const mailto = (subject: string) =>
 
   /* A chosen panel arrives with a short ease from the side it was called
      from (only after the page has painted, so nothing on screen at load
-     moves); in browsers without @starting-style it simply appears. The one
-     it replaces fades out on top of it, lifted out of the flow so the stage
-     is already the new panel's height. */
+     moves). The script commits the start frame (.is-in, a forced layout)
+     and then releases it, which works in every supported browser; the one
+     it replaces fades out on top of it, sharing the same grid cell. */
   .is-live .panel {
     transition:
       opacity 220ms ease,
       translate 220ms ease;
   }
 
-  @starting-style {
-    .is-live .panel {
-      opacity: 0;
-      translate: 0 0.5rem;
-    }
-    .is-live .stage[data-dir="next"] .panel {
-      translate: 1rem 0;
-    }
-    .is-live .stage[data-dir="prev"] .panel {
-      translate: -1rem 0;
-    }
+  .is-live .panel.is-in {
+    opacity: 0;
+    translate: 0 0.5rem;
+    transition: none;
+  }
+
+  .is-live .stage[data-dir="next"] .panel.is-in {
+    translate: 1rem 0;
+  }
+
+  .is-live .stage[data-dir="prev"] .panel.is-in {
+    translate: -1rem 0;
   }
 
   /* .is-live in the selector so the quicker fade outranks the arriving
      panel's transition above. */
   .is-live .panel.is-leaving {
-    position: absolute;
-    inset: 0 0 auto 0;
     z-index: 1;
     opacity: 0;
     pointer-events: none;
@@ -548,10 +584,6 @@ const mailto = (subject: string) =>
 
   .is-enhanced .panel + .panel {
     margin-top: 0;
-  }
-
-  .panel[hidden] {
-    display: none;
   }
 
   .panel h3 {
