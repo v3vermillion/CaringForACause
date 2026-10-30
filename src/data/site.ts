@@ -585,8 +585,8 @@ export const getInvolved = {
       label: "Sponsor a family",
       heading: "Sponsor a family for the holidays",
       body: [
-        "As a sponsor, you give a family gifts from their wish list, a holiday meal, or both.",
-        "Sponsor one family or several, for one holiday or all three.",
+        "Sponsors provide a family with gifts from their wish list, a holiday meal, or both.",
+        "You may sponsor one family or several, for a single holiday or for all three.",
       ],
       action: {
         label: "Sign up to sponsor",
