@@ -338,9 +338,19 @@ svg {
   height: auto;
 }
 
+/* Links keep their underline (the one signal every reader knows), drawn
+   as a quiet hairline in the link's own colour until the pointer asks;
+   heavy full-strength underlines read as clutter inside a lede. */
 a {
   color: var(--purple);
   text-underline-offset: 0.18em;
+  text-decoration-thickness: 0.06em;
+  text-decoration-color: rgb(96 8 215 / 0.4);
+  transition: text-decoration-color 150ms ease;
+}
+
+a:hover {
+  text-decoration-color: currentColor;
 }
 
 /* A phone number never breaks across lines ("(317)" ending one and
@@ -364,6 +374,11 @@ a[href^="tel:"] {
 
 .on-dark a {
   color: #fff;
+  text-decoration-color: rgb(255 255 255 / 0.45);
+}
+
+.on-dark a:hover {
+  text-decoration-color: currentColor;
 }
 
 /* The states the composition tests cannot measure (focus, hover, blur) are
