@@ -22,7 +22,7 @@ Requires Node.js 22.18 or later (the gate tests import TypeScript files, which N
 
 ## Welcome
 
-The home page opens once per browser on a short thank-you sequence (decision 87). To see it again, clear the `cfac-welcome-seen` key in the browser's local storage. Its words and timings are `intro` in `src/data/site.ts`.
+The home page opens once per browser on a short thank-you sequence for Tamara (decision 87). It is built only while the site is a private preview: a public build (`PUBLIC_ALLOW_INDEXING=true`) leaves it out (decision 88). To see it again, clear the `cfac-welcome-seen` key in the browser's local storage. Its words and timings are `intro` in `src/data/site.ts`.
 
 ## Quick start
 
