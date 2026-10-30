@@ -20,6 +20,10 @@ Website for [Caring for a Cause Supportive Services Inc.](https://caring4acauses
 
 Requires Node.js 22.18 or later (the gate tests import TypeScript files, which Node runs as-is from 22.18); `.nvmrc` selects the version CI and Cloudflare use.
 
+## Welcome
+
+The home page opens once per browser on a short thank-you sequence (decision 87). To see it again, clear the `cfac-welcome-seen` key in the browser's local storage. Its words and timings are `intro` in `src/data/site.ts`.
+
 ## Quick start
 
 ```sh
