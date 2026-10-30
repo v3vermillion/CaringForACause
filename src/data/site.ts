@@ -304,7 +304,9 @@ export const applyPage = {
     focus: "center 27%",
   } satisfies Photo,
   eyebrow: "Help me",
-  heading: "Apply for help",
+  heading: "Apply",
+  /** The heading's second line, set like the banner's italic accent line. */
+  headingAccent: "for help",
   intro:
     "Four short steps. Your answers go straight to us by email, and we'll follow up with next steps.",
   privacy:
@@ -370,7 +372,9 @@ export const applyPage = {
 /** The donation page (/donate). */
 export const donatePage = {
   eyebrow: "Donate",
-  heading: `Give to families in ${claim(facts.serviceArea)}`,
+  heading: "Give to families",
+  /** The heading's second line, set like the banner's italic accent line. */
+  headingAccent: `in ${claim(facts.serviceArea)}`,
   intro: "Your gift helps put holiday meals, gifts, diapers, and school supplies into local homes.",
   /** The chooser's heading, over the frequency and amount choices. */
   giftHeading: "Give once or every month",
