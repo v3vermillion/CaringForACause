@@ -3,6 +3,7 @@ import { expect, test } from "@playwright/test";
 import { claim } from "../src/data/facts";
 import {
   about,
+  intro,
   facts,
   getInvolved,
   hero,
@@ -2656,5 +2657,28 @@ test.describe("search and sharing", () => {
       "href",
       hero.doors.getHelp.href,
     );
+  });
+});
+
+test.describe("welcome", () => {
+  // These start as a first-time visitor; every other test starts as a returning one.
+  test.use({ storageState: { cookies: [], origins: [] } });
+
+  test("plays on the first visit, ends on Skip, and never returns", async ({ page }) => {
+    await page.goto("/");
+    const welcome = page.locator("#intro");
+    await expect(welcome).toBeVisible();
+    await expect(welcome.locator(".slide")).toHaveCount(intro.slides.length);
+    await expect(welcome.locator(".slide").first()).toHaveClass(/vis/, { timeout: 5000 });
+    await page.getByRole("button", { name: intro.skip }).click();
+    await expect(welcome).toHaveCount(0, { timeout: 3000 });
+    expect(await page.evaluate((k) => localStorage.getItem(k), intro.storageKey)).toBe("1");
+    await page.reload();
+    await expect(page.locator("#intro")).toHaveCount(0);
+  });
+
+  test("other pages never show it", async ({ page }) => {
+    await page.goto("/donate");
+    await expect(page.locator("#intro")).toHaveCount(0);
   });
 });

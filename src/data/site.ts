@@ -173,6 +173,42 @@ export const seasonalBanner = {
   action: { label: "Sponsor a family", href: "/#sponsor" },
 };
 
+/**
+ * The welcome shown once, on the first visit to the home page (decision 87).
+ * The words are the owner's gift message, not claims about the organization;
+ * "thousands" agrees with the press-reported 5,000 families (decision 79).
+ * Each slide holds its lines on screen for `hold` milliseconds, counted after
+ * the slide has faded in: a short slide holds less than a long one. Lines
+ * within a slide arrive one after another. `accent` sets a line in the
+ * banner's lavender italic; `large` sets a one-line slide in the biggest size.
+ */
+export const intro = {
+  /** localStorage key; once set, the welcome never plays again in that browser. */
+  storageKey: "cfac-welcome-seen",
+  label: "A thank-you message",
+  skip: "Skip",
+  slides: [
+    { hold: 1400, large: true, lines: [{ text: "Tamara" }] },
+    {
+      hold: 3400,
+      lines: [
+        { text: "year after year," },
+        { text: "you\u2019ve shown up for thousands of people in need" },
+      ],
+    },
+    {
+      hold: 2800,
+      lines: [{ text: "So this time," }, { text: "we wanted to show up for you", accent: true }],
+    },
+    {
+      hold: 3200,
+      lines: [{ text: "On behalf of every family whose holiday you made brighter..." }],
+    },
+    { hold: 2000, large: true, lines: [{ text: "thank you!", accent: true }] },
+    { hold: 2400, lines: [{ text: "Enjoy your new site :)" }] },
+  ],
+};
+
 export const hero = {
   /** Her own tagline, from her website. Its one home is the banner's eyebrow, above the headline. */
   tagline: "Together we can.",

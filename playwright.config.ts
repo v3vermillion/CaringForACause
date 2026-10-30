@@ -73,6 +73,17 @@ export default defineConfig({
     : "list",
   use: {
     baseURL: liveUrl ?? "http://127.0.0.1:4321",
+    // Every test starts as a returning visitor: the welcome plays once per
+    // browser (decision 87) and would cover the page. Its own tests clear this.
+    storageState: {
+      cookies: [],
+      origins: [
+        {
+          origin: new URL(liveUrl ?? "http://127.0.0.1:4321").origin,
+          localStorage: [{ name: "cfac-welcome-seen", value: "1" }],
+        },
+      ],
+    },
     trace: "retain-on-failure",
     // A failed layout test attaches the page as it looked, readable from the
     // report or by an agent without opening the trace viewer.
