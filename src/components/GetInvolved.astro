@@ -344,13 +344,15 @@ const mailto = (subject: string) =>
     margin-top: var(--space-s);
   }
 
-  /* Tabs. On a phone the rail is two rows of two, so all four choices are
-     on screen at once (one row cannot fit them: the labels alone are wider
-     than the column at every phone size, the classes scale). From 36rem up
-     the rail is one row that scrolls if it must, its edges fading where it
-     bleeds past the column, so a tab cut by the screen dissolves rather
-     than chops; at rest the tabs start where the fade ends (the bleed and
-     the fade are both the gutter), so nothing at rest is dimmed. */
+  /* Tabs. On a phone the four choices are glass chips in two rows of two,
+     so all are on screen at once (one row cannot fit them: the labels
+     alone are wider than the column at every phone size, the classes
+     scale); the chosen chip fills purple, the way the forms' choice chips
+     answer. From 36rem up they sit on the one-row rail with the sliding
+     pill, which scrolls if it must, its edges fading where it bleeds past
+     the column, so a tab cut by the screen dissolves rather than chops; at
+     rest the tabs start where the fade ends (the bleed and the fade are
+     both the gutter), so nothing at rest is dimmed. */
   .tablist {
     display: flex;
     padding: 0.25rem 0 var(--r-card); /* clear of the card by its own radius */
@@ -364,23 +366,19 @@ const mailto = (subject: string) =>
     display: none;
   }
 
-  /* The rail: white, ringed by a hairline (a shadow, not a border, so it
-     never snaps to a whole pixel), holding the tabs and the thumb. */
+  /* On phones the track is only the chips' grid: no rail chrome, and the
+     thumb stays placed but invisible (the chips answer with their own
+     fill; a pill has no rail to slide along in two rows). */
   .track {
     position: relative;
     display: grid;
     grid-template-columns: 1fr 1fr;
     width: 100%;
-    gap: 0;
-    padding: 0.25rem;
-    border-radius: var(--r-card);
-    background: rgb(255 255 255 / 0.72);
-    -webkit-backdrop-filter: blur(0.75rem);
-    backdrop-filter: blur(0.75rem);
-    box-shadow:
-      0 0 0 var(--hairline) rgb(96 8 215 / 0.14),
-      0 0.5rem 1.5rem rgb(27 15 46 / 0.08),
-      inset 0 1px 0 #fff;
+    gap: 0.5rem;
+  }
+
+  .thumb {
+    opacity: 0; /* not visibility: it keeps its box for the thumb test */
   }
 
   @media (min-width: 36rem) {
@@ -407,15 +405,26 @@ const mailto = (subject: string) =>
       );
     }
 
+    /* The rail: white, ringed by a hairline (a shadow, not a border, so it
+       never snaps to a whole pixel), holding the tabs and the thumb. */
     .track {
       display: inline-flex;
       flex: none;
       width: auto;
+      gap: 0;
+      padding: 0.25rem;
       border-radius: var(--r-pill);
+      background: rgb(255 255 255 / 0.72);
+      -webkit-backdrop-filter: blur(0.75rem);
+      backdrop-filter: blur(0.75rem);
+      box-shadow:
+        0 0 0 var(--hairline) rgb(96 8 215 / 0.14),
+        0 0.5rem 1.5rem rgb(27 15 46 / 0.08),
+        inset 0 1px 0 #fff;
     }
 
-    [role="tab"] {
-      padding-inline: 1.225rem;
+    .thumb {
+      opacity: 1;
     }
   }
 
@@ -447,12 +456,17 @@ const mailto = (subject: string) =>
     z-index: 1;
     flex: none;
     min-height: max(44px, 3rem);
-    /* Narrow sides on the phone rail, where the widest label fills its half
-       row; no border: it would snap to whole pixels and shift the row. */
+    /* Narrow sides on a phone, where the widest label fills its half row;
+       no border: it would snap to whole pixels and shift the row. */
     padding: 0.625rem 0.5rem;
     border: 0;
     border-radius: var(--r-pill);
-    background: transparent;
+    /* A glass chip on the lilac, ringed by a hairline, as the forms'
+       choice chips are; the rail strips this from 36rem up. */
+    background: rgb(255 255 255 / 0.72);
+    -webkit-backdrop-filter: blur(0.75rem);
+    backdrop-filter: blur(0.75rem);
+    box-shadow: inset 0 0 0 var(--hairline) rgb(96 8 215 / 0.18);
     color: var(--ink);
     font: inherit;
     font-family: var(--font-display);
@@ -461,7 +475,24 @@ const mailto = (subject: string) =>
     scroll-snap-align: center;
     cursor: pointer;
     -webkit-tap-highlight-color: transparent; /* the tab answers a press itself */
-    transition: color 200ms ease;
+    transition:
+      color 200ms ease,
+      background-color 200ms ease;
+  }
+
+  [role="tab"][aria-selected="true"] {
+    background: var(--purple);
+  }
+
+  @media (min-width: 36rem) {
+    [role="tab"],
+    [role="tab"][aria-selected="true"] {
+      padding-inline: 1.225rem;
+      background: transparent;
+      -webkit-backdrop-filter: none;
+      backdrop-filter: none;
+      box-shadow: none;
+    }
   }
 
   [role="tab"]:hover {
