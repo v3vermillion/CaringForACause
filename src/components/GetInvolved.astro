@@ -505,6 +505,11 @@ const mailto = (subject: string) =>
 
   .is-enhanced .panel {
     grid-area: 1 / 1;
+    /* The cell is the tallest panel's height; a shorter panel keeps its own
+       (start, not the default stretch, whose extra height seeped between
+       the card's rows and pushed the photo off the card's top edge), and
+       the ground shows below its card. */
+    align-self: start;
   }
 
   /* A panel at rest that isn't the chosen one: invisible but keeping its

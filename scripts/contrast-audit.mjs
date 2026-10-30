@@ -5,15 +5,16 @@
 //
 // Two passes per page. The quick pass screenshots each unjudged spot with
 // its text made transparent and takes the worst contrast between the text
-// colour and ANY pixel in the spot's box — decoration included, so it
-// over-flags. The precise pass re-measures each flag at the glyph pixels
-// only: a shot with the text and one without, diffed; a pixel the text
-// meaningfully covers is a glyph pixel, and the contrast is taken against
-// the background image's pixel there, so antialiasing never blends in. A
-// spot over the banner montage is measured once per photo. Exits non-zero
-// if any spot measures under its WCAG threshold (4.5:1, or 3:1 for large
-// text).
-import { chromium } from "playwright-core";
+// colour and EVERY pixel in the spot's box (the worst is wherever a pixel's
+// luminance comes nearest the text's, never only at the box's extremes) —
+// decoration included, so it can only over-flag. The precise pass
+// re-measures each flag at the glyph pixels only: a shot with the text and
+// one without, diffed; a pixel the text meaningfully covers is a glyph
+// pixel, and the contrast is taken against the background image's pixel
+// there, so antialiasing never blends in. A spot over the banner montage is
+// measured once per photo. Exits non-zero if any spot measures under its
+// WCAG threshold (4.5:1, or 3:1 for large text).
+import { chromium } from "@playwright/test";
 import { AxeBuilder } from "@axe-core/playwright";
 
 const mode = process.argv[2] ?? "phone";
@@ -27,14 +28,6 @@ function parseColor(s) {
   const m = s.match(/rgba?\(([\d.]+),\s*([\d.]+),\s*([\d.]+)(?:,\s*([\d.]+))?\)/);
   return m ? { rgb: [+m[1], +m[2], +m[3]], a: m[4] === undefined ? 1 : +m[4] } : null;
 }
-const lin = (v) => ((v /= 255), v <= 0.04045 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4);
-const luminance = ([r, g, b]) => 0.2126 * lin(r) + 0.7152 * lin(g) + 0.0722 * lin(b);
-function contrast(fg, bg) {
-  const a = luminance(fg);
-  const b = luminance(bg);
-  return (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05);
-}
-
 /** Hide (or restore) the element's own text so only its background shows. */
 async function setTextTransparent(handle, on) {
   await handle.evaluate((el, on) => {
@@ -71,17 +64,19 @@ async function readPixels(page, args) {
     const lum = (r, g, b) => 0.2126 * lin(r) + 0.7152 * lin(g) + 0.0722 * lin(b);
     const a = await load(shotA);
     if (!shotB) {
-      // Quick pass: the lightest and darkest pixel of the background shot.
-      let minL = 2,
-        maxL = -1,
-        minC = null,
-        maxC = null;
+      // Quick pass: the worst contrast between the text colour and any
+      // pixel of the background shot. The worst sits wherever a pixel's
+      // luminance comes nearest the text's — which can be anywhere between
+      // the box's darkest and lightest pixel, so every pixel is checked.
+      const Lt = lum(...fg);
+      let worst = Infinity,
+        worstBg = null;
       for (let i = 0; i < a.length; i += 4) {
         const L = lum(a[i], a[i + 1], a[i + 2]);
-        if (L < minL) ((minL = L), (minC = [a[i], a[i + 1], a[i + 2]]));
-        if (L > maxL) ((maxL = L), (maxC = [a[i], a[i + 1], a[i + 2]]));
+        const c = (Math.max(Lt, L) + 0.05) / (Math.min(Lt, L) + 0.05);
+        if (c < worst) ((worst = c), (worstBg = [a[i], a[i + 1], a[i + 2]]));
       }
-      return { minC, maxC };
+      return { worst, worstBg };
     }
     // Precise pass: pixels where the two shots differ enough are glyph
     // pixels; measure the text colour against the BACKGROUND shot there.
@@ -207,10 +202,8 @@ for (const path of pages) {
         await page.waitForTimeout(40);
         const bare = (await page.screenshot({ clip })).toString("base64");
         await setTextTransparent(handle, false);
-        const quick = await readPixels(page, { shotA: bare, shotB: null, fg: null });
-        const quickWorst = Math.min(
-          ...[quick.minC, quick.maxC].filter(Boolean).map((bg) => contrast(color.rgb, bg)),
-        );
+        const quick = await readPixels(page, { shotA: bare, shotB: null, fg: color.rgb });
+        const quickWorst = quick.worst;
         if (quickWorst >= needed) {
           if (quickWorst < worst) ((worst = quickWorst), (worstBg = null));
           continue;
