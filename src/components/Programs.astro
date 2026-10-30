@@ -130,12 +130,15 @@ const applyHref = links.familyApplication ?? getHelp.action.href;
             )}
           </div>
           {program.video ? (
-            <div class="media">
+            <div class:list={["media", "plate", { "plate--left": i % 2 === 1 }]}>
               <YouTubeLite video={program.video} />
             </div>
           ) : (
             program.photo && (
               <div class:list={["media", "plate", { "plate--left": i % 2 === 1 }]}>
+                {/* Row 01's phone crop is 4:3 on purpose: the taller frame
+                    keeps all three children's faces, where 3:2 trimmed
+                    them. Tablets up recrop square anyway. */}
                 <Photo
                   photo={program.photo}
                   ratio={`var(--photo-ratio, ${i === 0 ? "4 / 3" : "3 / 2"})`}
@@ -213,7 +216,9 @@ const applyHref = links.familyApplication ?? getHelp.action.href;
   }
 
   .intro {
-    margin-bottom: var(--space-m);
+    /* One head-to-content distance across the sections (--space-l), less
+       the tile scroller's own 0.25rem of slack. */
+    margin-bottom: calc(var(--space-l) - 0.25rem);
   }
 
   .intro .lede {
@@ -286,8 +291,10 @@ const applyHref = links.familyApplication ?? getHelp.action.href;
       transform 150ms ease;
   }
 
+  /* The hover rim stays in the rule language at full strength — the same
+     violet-rose gesture as the eyebrow rules, not a flat field border. */
   .tile:hover::before {
-    background: var(--purple);
+    background: linear-gradient(135deg, var(--purple), #d43a92);
   }
 
   .tile:hover {
@@ -297,9 +304,13 @@ const applyHref = links.familyApplication ?? getHelp.action.href;
     transform: translateY(-2px);
   }
 
+  /* Pressed, the tile settles to a tight contact shadow and keeps its
+     surface light, instead of its whole finish vanishing for the press. */
   .tile:active {
     transform: translateY(0);
-    box-shadow: none;
+    box-shadow:
+      0 0.25rem 0.75rem rgb(27 15 46 / 0.05),
+      inset 0 1px 0 rgb(255 255 255 / 0.9);
     transition-duration: 60ms;
   }
 
@@ -309,6 +320,8 @@ const applyHref = links.familyApplication ?? getHelp.action.href;
     width: 4.5rem;
     height: 4.5rem;
     border-radius: var(--r-img);
+    /* The section's photo ring at thumb scale: no raw crop edge on white. */
+    box-shadow: 0 0 0 var(--hairline) rgb(160 108 255 / 0.4);
   }
 
   .tile-text {
@@ -541,6 +554,20 @@ const applyHref = links.familyApplication ?? getHelp.action.href;
     gap: 0.5rem;
     list-style: none;
     scroll-margin-top: calc(var(--header-h) + var(--space-s));
+    transition: color 150ms ease;
+  }
+
+  /* The row's two kinds of next step answer the pointer the same way:
+     the summary underlines like the arrow links beside it, and a press
+     deepens it. */
+  .checklist summary:hover {
+    text-decoration: underline;
+    text-underline-offset: 0.18em;
+  }
+
+  .checklist summary:active {
+    color: var(--purple-deep);
+    transition-duration: 60ms;
   }
 
   .checklist summary::-webkit-details-marker {
@@ -561,23 +588,32 @@ const applyHref = links.familyApplication ?? getHelp.action.href;
     transform: rotate(45deg);
   }
 
-  /* The two groups stack on every class, under a rule that parts the open
-     list from the summary; each list runs in two columns wide enough that
-     an item never wraps mid-phrase. */
+  /* The two groups stack on every class; space parts the open list from
+     its summary, the way the section's words open and close elsewhere —
+     the flat full-width rule read as a stray line. Each list runs in one
+     column on phones (two columns wrapped items mid-phrase) and two from
+     the tablet up. */
   .groups {
     display: grid;
     gap: var(--space-m);
     padding-top: var(--space-s);
     margin-top: var(--space-xs);
-    border-top: var(--hairline) solid var(--rule);
   }
 
-  h4 {
+  /* The group names carry the section's own label language, like the
+     "Who it's for" lines above them. */
+  .groups h4 {
     margin: 0 0 0.4rem;
+    font-family: var(--font-display);
+    font-size: 0.6875rem;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--muted);
   }
 
   .groups ul {
-    columns: 2;
+    columns: 1;
     column-gap: var(--space-m);
     padding-left: 1.2rem;
   }
@@ -588,9 +624,24 @@ const applyHref = links.familyApplication ?? getHelp.action.href;
     line-height: 1.5;
   }
 
+  .groups li::marker {
+    color: var(--purple);
+  }
+
   @media (min-width: 36rem) {
     .tiles li {
       flex-basis: min(46%, 17rem);
+    }
+
+    .groups ul {
+      columns: 2;
+    }
+
+    /* An opened checklist makes the copy far taller than the photo: the
+       photo holds to the row's head instead of floating between voids.
+       Safari 15 has no :has() and keeps the centred photo. */
+    .row.has-media:has(.checklist[open]) .media {
+      align-self: start;
     }
   }
 
@@ -639,6 +690,15 @@ const applyHref = links.familyApplication ?? getHelp.action.href;
     }
     .row.has-media:has(:global(.yt)) .media {
       order: -1;
+    }
+  }
+
+  /* In the tablet window the video row shares the width evenly: the 7fr
+     frame left the words a ragged ~25-character column ("low-/income"
+     breaking mid-word); desktop has the room for the wide frame. */
+  @media (min-width: 36rem) and (max-width: 55.99rem) {
+    .row.has-media:has(:global(.yt)) {
+      grid-template-columns: 1fr 1fr;
     }
   }
 

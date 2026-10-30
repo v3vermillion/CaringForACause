@@ -751,8 +751,19 @@ const current = (href: string) => (href.replace(/\/+$/, "") === here ? "page" : 
     border-radius: calc(4 * var(--sp));
   }
 
+  .menu-button {
+    transition: filter 150ms ease;
+  }
+
   .menu-button:hover {
     filter: brightness(1.12);
+  }
+
+  /* The thumb press visibly dims the wedge; the default tap flash is
+     invisible over its saturated violet. */
+  .menu-button:active {
+    filter: brightness(0.92);
+    transition-duration: 60ms;
   }
 
   .lines {
@@ -1083,6 +1094,12 @@ const current = (href: string) => (href.replace(/\/+$/, "") === here ? "page" : 
     box-shadow:
       0 0 0.5038rem rgb(150 80 255 / 0.45),
       inset 0 0 0.3779rem rgb(150 80 255 / 0.25);
+    transition: background-color 150ms ease;
+  }
+
+  .menu-close:active::before {
+    background: rgb(150 80 255 / 0.25);
+    transition-duration: 60ms;
   }
 
   .menu-close svg {
@@ -1180,6 +1197,10 @@ const current = (href: string) => (href.replace(/\/+$/, "") === here ? "page" : 
     min-height: var(--menu-row);
     padding: 0 0.6613rem 0 1.7194rem;
     color: #fff;
+    /* A press fills the row itself: the default tap flash is imperceptible
+       on the menu's near-black ground. */
+    -webkit-tap-highlight-color: transparent;
+    transition: background-color 150ms ease;
     text-decoration: none;
   }
 
@@ -1226,6 +1247,17 @@ const current = (href: string) => (href.replace(/\/+$/, "") === here ? "page" : 
   }
 
   .menu-help .menu-chevron {
+    color: #ec3658;
+  }
+
+  .menu-list > li > a:active {
+    background: rgb(160 108 255 / 0.08);
+    transition-duration: 60ms;
+  }
+
+  /* The menu's last row is the site's one action: its chevron answers in
+     the signal crimson, a register under Help me's full treatment. */
+  .menu-list > li:last-child .menu-chevron {
     color: #ec3658;
   }
 

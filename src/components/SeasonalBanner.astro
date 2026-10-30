@@ -23,11 +23,37 @@ import { seasonalBanner } from "../data/site";
      (src/styles/global.css): the bottom border counts, so it stays even
      though it is invisible where the wave's night meets it. */
   .banner {
+    position: relative;
+    isolation: isolate;
     background: var(--night-2);
     border-bottom: 1px solid transparent;
     /* A hairline of the band's violet marks the strip's top edge, so it reads
        as its own bar under the proof line, at no cost in height. */
     box-shadow: inset 0 1px 0 rgb(160 108 255 / 0.22);
+  }
+
+  /* The band is a ground like every surface between banner and footer
+     (decision 63): a thin corner wash and the night grain, at no cost in
+     height. */
+  .banner::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: radial-gradient(30rem 4rem at 100% 0, rgb(96 8 215 / 0.35), transparent 70%);
+    pointer-events: none;
+  }
+
+  .banner::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background-image: var(--grain);
+    background-size: 12.5rem;
+    opacity: 0.09;
+    mix-blend-mode: screen;
+    pointer-events: none;
   }
 
   /* Sized in the class's reference pixel (--sp) so every phone and every

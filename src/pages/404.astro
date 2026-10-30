@@ -1,4 +1,5 @@
 ---
+import Brand from "../components/Brand.astro";
 import SiteFooter from "../components/SiteFooter.astro";
 import SiteHeader from "../components/SiteHeader.astro";
 import Base from "../layouts/Base.astro";
@@ -16,6 +17,7 @@ const { getHelp, donate } = hero.doors;
        is night too, so the opener runs into it. -->
   <main id="main">
     <section class="page-hero on-dark hero--404">
+      <Brand kind="mark" class="hero-watermark" label="" preserveAspectRatio="xMaxYMid meet" />
       <div class="wrap">
         <span class="eyebrow">{notFoundPage.eyebrow}</span>
         <h1>{notFoundPage.heading}</h1>
@@ -25,9 +27,15 @@ const { getHelp, donate } = hero.doors;
         <p class="button-row">
           <a class="button button--signal" href={getHelp.href}>
             {getHelp.title}
+            <svg class="chev" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <path d="m9 5 7 7-7 7"></path>
+            </svg>
           </a>
           <a class="button button--glass" href={donate.href}>
             {donate.title}
+            <svg class="chev" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <path d="m9 5 7 7-7 7"></path>
+            </svg>
           </a>
           <a class="arrow-link" href="/">
             Back to home
@@ -51,7 +59,73 @@ const { getHelp, donate } = hero.doors;
     padding-block: var(--space-xl);
   }
 
+  /* The opener meets the footer on a lit rule in the footer's own
+     language, not a bare unmarked seam — the one place two surfaces touch
+     without a wave. */
+  .hero--404::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: max(1px, 0.12rem);
+    background: linear-gradient(
+      90deg,
+      rgb(83 50 181 / 0) 0%,
+      #5332b5 22%,
+      #8f4caf 55%,
+      #cf6fae 80%,
+      rgb(207 111 174 / 0) 100%
+    );
+    box-shadow: 0 0 0.375rem rgb(190 110 240 / 0.45);
+  }
+
   .hero--404 .button-row {
     margin-top: var(--space-m);
+  }
+
+  /* The doors carry their chevrons here as everywhere else. */
+  .hero--404 .button .chev {
+    flex: none;
+    width: 1.15em;
+    height: 1.15em;
+    margin-right: -0.2em;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2.2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  /* A tall window's empty night takes the mark in the ground's own tones,
+     as the phone menu fills its corner. The svg's box runs the full bleed
+     (it follows the screen, as the grounds and waves do — the composition
+     is measured inside the column) and the drawing pins to its right end,
+     a rem past the screen's edge, at the height that draws it 12rem wide. */
+  .hero--404 :global(.hero-watermark) {
+    position: absolute;
+    left: 0;
+    bottom: 1.25rem;
+    width: calc(100% + 1rem);
+    max-width: none; /* the global svg clamp would take back the bleed */
+    height: calc(12rem * 1576 / 1718);
+    pointer-events: none;
+  }
+
+  .hero--404 :global(.hero-watermark path[fill="#6008d7"]) {
+    fill: #2c1356;
+  }
+
+  .hero--404 :global(.hero-watermark path[fill="#8a5bff"]) {
+    fill: #241047;
+  }
+
+  .hero--404 :global(.hero-watermark path[fill="#ba010c"]),
+  .hero--404 :global(.hero-watermark path[fill="#f4eeff"]) {
+    fill: #1f0c3c;
+  }
+
+  .hero--404 .wrap {
+    position: relative;
   }
 </style>

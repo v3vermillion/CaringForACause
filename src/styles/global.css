@@ -219,6 +219,9 @@ html {
      viewport unit: the publish gate rejects those outside a min-width block,
      because a phone's address bar resizes them mid-scroll. */
   height: 100%;
+  /* The scrollbar in the site's own colors where the platform draws it in
+     the page (Windows, Linux); Safari ignores it harmlessly. */
+  scrollbar-color: var(--rule-strong) var(--paper);
   /* The canvas behind the page, seen only where a phone's browser pulls the
      page past its end and shows what lies beyond: the footer's navy, so the
      page ends on the footer rather than on a flash of paper (decision 69).
@@ -335,9 +338,32 @@ svg {
   height: auto;
 }
 
+/* Links keep their underline (the one signal every reader knows), drawn
+   as a quiet hairline in the link's own colour until the pointer asks;
+   heavy full-strength underlines read as clutter inside a lede. */
 a {
   color: var(--purple);
   text-underline-offset: 0.18em;
+  text-decoration-thickness: 0.06em;
+  text-decoration-color: rgb(96 8 215 / 0.4);
+  transition: text-decoration-color 150ms ease;
+}
+
+a:hover {
+  text-decoration-color: currentColor;
+}
+
+/* A phone number never breaks across lines ("(317)" ending one and
+   "886-0724" opening the next); the whole number drops as a unit. */
+a[href^="tel:"] {
+  white-space: nowrap;
+}
+
+/* Selected text in the site's own colors: the browser's royal blue was the
+   one unthemed color in the system. White on the purple is 8.4:1. */
+::selection {
+  background: var(--purple);
+  color: #fff;
 }
 
 /* Dark surfaces: white focus ring and white links. */
@@ -348,6 +374,11 @@ a {
 
 .on-dark a {
   color: #fff;
+  text-decoration-color: rgb(255 255 255 / 0.45);
+}
+
+.on-dark a:hover {
+  text-decoration-color: currentColor;
 }
 
 /* The states the composition tests cannot measure (focus, hover, blur) are
@@ -439,16 +470,27 @@ a {
   white-space: nowrap;
 }
 
+/* The first control a keyboard shows lands on the lit header, so it wears
+   the site's own pill, not a browser-default slab. */
 .skip-link {
   position: absolute;
   left: 1rem;
-  top: -4rem;
+  top: -5rem;
   z-index: 100;
-  padding: 0.75rem 1rem;
-  background: var(--purple);
+  display: inline-flex;
+  align-items: center;
+  min-height: max(44px, 3rem);
+  padding: 0.825rem 1.625rem;
+  background-color: var(--purple);
+  background-image: linear-gradient(180deg, rgb(255 255 255 / 0.1), rgb(255 255 255 / 0) 30%);
   color: #fff;
+  font-family: var(--font-display);
   font-weight: 700;
-  border-radius: 0.5rem;
+  text-decoration: none;
+  border-radius: var(--r-pill);
+  box-shadow:
+    inset 0 0 0 var(--hairline) rgb(255 255 255 / 0.18),
+    0 0.5rem 1.25rem rgb(27 15 46 / 0.35);
 }
 
 .skip-link:focus {
@@ -494,13 +536,27 @@ a {
   -webkit-tap-highlight-color: transparent;
 }
 
+/* The purple pills are lit like the signal, a register lower: a thinner
+   sheen, a quieter rim, a violet lift instead of the crimson blaze. The
+   sheen is a fixed background-image over a background-color, so the hover
+   still interpolates (a gradient swap would snap). White on the lit top
+   still reads at 7.5:1. */
 .button--purple {
-  background: var(--purple);
+  background-color: var(--purple);
+  background-image: linear-gradient(180deg, rgb(255 255 255 / 0.1), rgb(255 255 255 / 0) 30%);
   color: #fff;
+  box-shadow:
+    inset 0 0 0 var(--hairline) rgb(255 255 255 / 0.18),
+    0 0.5rem 1.25rem rgb(96 8 215 / 0.25),
+    0 0.125rem 0.375rem rgb(27 15 46 / 0.12);
 }
 
 .button--purple:hover {
-  background: var(--purple-deep);
+  background-color: var(--purple-deep);
+  box-shadow:
+    inset 0 0 0 var(--hairline) rgb(255 255 255 / 0.24),
+    0 0.625rem 1.5rem rgb(96 8 215 / 0.32),
+    0 0.125rem 0.375rem rgb(27 15 46 / 0.12);
 }
 
 .button--crimson {
@@ -578,17 +634,23 @@ a {
   text-decoration: none;
 }
 
+/* The arrow is drawn, not typed: U+2192 is outside the display face's
+   subset, so a "→" glyph came from whatever font the platform fell back
+   to. Drawn at the checklist chevron's stroke (2.5 reference pixels,
+   round caps, like the door pills' chevrons), it is one glyph family on
+   every device; an empty content box is silent for screen readers, so
+   "Email us" stays "Email us". currentColor keeps each surface's color. */
 .arrow-link::after {
-  content: "→";
+  content: "";
+  flex: none;
+  width: 0.875rem;
+  height: 0.625rem;
+  background: currentColor;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 14 10'%3E%3Cpath d='M1.5 5h10M8 1.5 11.5 5 8 8.5' fill='none' stroke='black' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")
+    center / contain no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 14 10'%3E%3Cpath d='M1.5 5h10M8 1.5 11.5 5 8 8.5' fill='none' stroke='black' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")
+    center / contain no-repeat;
   transition: transform 150ms ease;
-}
-
-/* The arrow is decoration: where the browser takes alternative text for
-   generated content, it is given none, so "Email us →" is read "Email us". */
-@supports (content: "x" / "") {
-  .arrow-link::after {
-    content: "→" / "";
-  }
 }
 
 .arrow-link:hover {
@@ -621,11 +683,40 @@ legend.label {
   min-height: max(44px, 3.25rem);
   padding: 0.7rem 0.9rem;
   border: var(--hairline) solid var(--rule-strong);
-  border-radius: 0.75rem;
+  border-radius: var(
+    --r-img
+  ); /* the images' radius: fields are the third rounded box, not a fourth */
   background: var(--paper);
   color: var(--ink);
   font: inherit;
   line-height: 1.4;
+  /* The hover border and the focus halo ease like every other control. */
+  transition:
+    border-color 150ms ease,
+    box-shadow 150ms ease,
+    background-color 150ms ease;
+}
+
+::placeholder {
+  color: var(--muted);
+  opacity: 1; /* Firefox dims placeholders by default */
+}
+
+/* Chrome and Safari paint autofilled fields their own pale blue; keep the
+   paper (and the focus white) with the inset-shadow device they honor. */
+.input:-webkit-autofill,
+.select:-webkit-autofill,
+.textarea:-webkit-autofill {
+  -webkit-box-shadow: inset 0 0 0 2rem var(--paper);
+  -webkit-text-fill-color: var(--ink);
+}
+
+.input:-webkit-autofill:focus,
+.select:-webkit-autofill:focus,
+.textarea:-webkit-autofill:focus {
+  -webkit-box-shadow:
+    inset 0 0 0 2rem #fff,
+    0 0 0 0.1875rem rgb(96 8 215 / 0.2);
 }
 
 .textarea {
@@ -635,10 +726,13 @@ legend.label {
 
 .select {
   appearance: none;
-  padding-right: 2.6rem;
+  padding-right: 2.25rem;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16'%3E%3Cpath d='M3 6l5 5 5-5' fill='none' stroke='%236008d7' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
-  background-position: right 0.9rem center;
+  background-position: right 0.75rem center;
+  /* In rem, like every drawn glyph: a fixed 16px arrow stayed its own size
+     while the control scaled with the class (decision 40). */
+  background-size: 1rem 1rem;
 }
 
 .input:hover,
@@ -677,6 +771,14 @@ legend.label {
   border-color: var(--crimson);
 }
 
+/* A focused invalid field keeps one voice: the halo agrees with the crimson
+   border instead of fighting it in lavender. */
+.input[aria-invalid="true"]:focus,
+.select[aria-invalid="true"]:focus,
+.textarea[aria-invalid="true"]:focus {
+  box-shadow: 0 0 0 0.1875rem rgb(186 1 12 / 0.16);
+}
+
 .error {
   color: var(--crimson);
   font-size: var(--step--1);
@@ -702,6 +804,7 @@ legend.label {
   box-shadow: inset 0 0 0 var(--hairline) var(--rule-strong); /* a ring, not a border: see .button */
   font-family: var(--font-display);
   font-weight: 700;
+  line-height: 1.2; /* like .button: the chip lands exactly on its 3rem floor */
   cursor: pointer;
   transition:
     box-shadow 150ms ease,
@@ -728,9 +831,14 @@ legend.label {
   cursor: pointer;
 }
 
+/* Chosen: the lit purple of .button--purple, so a chosen chip and the
+   action it leads to speak one language. */
 .choice:has(input:checked) {
-  box-shadow: inset 0 0 0 0.125rem var(--purple);
-  background: var(--purple);
+  background-color: var(--purple);
+  background-image: linear-gradient(180deg, rgb(255 255 255 / 0.1), rgb(255 255 255 / 0) 30%);
+  box-shadow:
+    inset 0 0 0 var(--hairline) rgb(255 255 255 / 0.2),
+    0 0.25rem 0.75rem rgb(96 8 215 / 0.25);
   color: #fff;
 }
 
@@ -771,6 +879,7 @@ legend.label {
    About section, ending in the wave onto the paper below (decision 52). */
 .page-hero {
   position: relative;
+  isolation: isolate;
   /* The wave's ground continuation overhangs the opener by a pixel (see
      .wave-ground); the clip keeps that row from showing through the
      transparent section below, where it would carry the wash twice.
@@ -780,6 +889,20 @@ legend.label {
   background:
     radial-gradient(50rem 24rem at 100% 0, rgb(96 8 215 / 0.4), transparent 70%),
     radial-gradient(30rem 16rem at 0 100%, rgb(200 40 120 / 0.2), transparent 70%), var(--night);
+}
+
+/* The openers are grounds like every band between banner and footer
+   (decision 63): the night grain they were missing. */
+.page-hero::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 -1px;
+  z-index: -1;
+  background-image: var(--grain);
+  background-size: 12.5rem;
+  opacity: 0.09;
+  mix-blend-mode: screen;
+  pointer-events: none;
 }
 
 @supports (overflow: clip) {
@@ -799,6 +922,14 @@ legend.label {
 .page-hero h1 {
   font-size: var(--step-3);
   max-width: 24ch;
+}
+
+/* The heading's second line in the banner's own voice: the italic serif in
+   lavender (9.9:1 on the night, documented in docs/SITE-PLAN.md). */
+.page-hero h1 .accent {
+  display: block;
+  font-style: italic;
+  color: var(--night-soft);
 }
 
 .page-hero .lede {
@@ -1037,12 +1168,16 @@ legend.label {
 }
 
 /* Lilac above the ribbons: the lilac ground's rose wash sits at its bottom
-   right (this box's top right), and its vertical gradient has reached its
-   lavender foot. */
+   right (this box's top right), its vertical gradient has reached its
+   lavender foot, and the Get involved section's own rose breath — centred
+   on its bottom-left corner, under the lavender like the section paints it
+   (src/components/GetInvolved.astro) — straddles the edge, so its lower
+   half continues here. */
 .wave-ground--above.wave-ground--lilac::before {
   background-image:
     radial-gradient(36rem 24rem at 100% 0, rgb(255 90 134 / 0.16), transparent 70%),
-    linear-gradient(rgb(200 170 250 / 0.22), rgb(200 170 250 / 0.22));
+    linear-gradient(rgb(200 170 250 / 0.22), rgb(200 170 250 / 0.22)),
+    radial-gradient(30rem 18rem at 0 0, rgb(255 90 134 / 0.1), transparent 70%);
 }
 
 /* The footer below the ribbons (decision 70): its darkest navy, lit along
@@ -1096,4 +1231,43 @@ legend.label {
   background-image:
     radial-gradient(44rem 26rem at 0 100%, rgb(160 108 255 / 0.26), transparent 70%),
     linear-gradient(rgb(255 255 255 / 0.25), rgb(255 255 255 / 0.25));
+}
+
+/* Print: browsers skip backgrounds, so without this the night sections
+   printed white-on-white — including the Get help card that holds the
+   phone number. Everything prints as ink on paper; pills keep their shape
+   as outlines; the montage and the painted seams stay on screen. */
+@media print {
+  *,
+  *::before,
+  *::after {
+    box-shadow: none !important;
+    text-shadow: none !important;
+  }
+  .on-dark,
+  .on-dark *,
+  .section--night,
+  .section--night *,
+  .page-hero,
+  .page-hero *,
+  .surface--night,
+  .surface--night *,
+  .site-footer,
+  .site-footer * {
+    color: var(--ink) !important;
+  }
+  .button,
+  .door-pill,
+  .choice,
+  [role="tab"] {
+    background: none !important;
+    color: var(--ink) !important;
+    box-shadow: inset 0 0 0 var(--hairline) var(--rule-strong) !important;
+  }
+  .montage,
+  .wave-ground,
+  .page-wave,
+  .skip-link {
+    display: none !important;
+  }
 }
