@@ -95,7 +95,7 @@ const sideBody = getHelp.talk.body;
             <noscript>
               <p class="noscript">
                 {applyPage.noScript} Call <a href={phone.href}>{phone.display}</a> or email{" "}
-                <a href={mailto}>{email}</a>.
+                <a href={mailto}>{email}</a>, and we'll send you an application.
               </p>
             </noscript>
 
@@ -435,7 +435,7 @@ const sideBody = getHelp.talk.body;
                   <label class="consent">
                     <input type="checkbox" name="consent" required />
                     <span>
-                      My answers are accurate, and {org.shortName} may contact me about help.
+                      My answers are accurate, and {org.shortName} may contact me to arrange help.
                     </span>
                   </label>
                   <p class="error" data-consent-error role="alert" hidden>
@@ -723,7 +723,7 @@ const sideBody = getHelp.talk.body;
         ["Phone", groupPhone(phoneDigits(get("phone")))],
       ];
       if (get("email")) you.push(["Email", get("email")]);
-      you.push(["Reach me by", get("contactMethod")]);
+      you.push(["Best way to reach you", get("contactMethod")]);
       const household: Row[] = [
         [
           "Address",

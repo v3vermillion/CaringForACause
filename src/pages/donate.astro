@@ -31,7 +31,7 @@ const mailto = mailLink(
 );
 const mailtoAny = mailLink(
   donatePage.emailSubject,
-  `Hello,\n\nI'd like to give to ${org.shortName}. What's the best way to send it?\n\nThank you,\n`,
+  `Hello,\n\nI'd like to give to ${org.shortName}. What's the best way to send a gift?\n\nThank you,\n`,
 );
 ---
 
@@ -201,7 +201,7 @@ const mailtoAny = mailLink(
         const subject = gift ? `${subjectPrefix}: ${gift}` : subjectPrefix;
         const body = dollars
           ? `Hello,\n\nI'd like to make a ${monthly ? "monthly" : "one-time"} gift of ${dollars} to ${orgName}. What's the best way to send it?\n\nThank you,\n`
-          : `Hello,\n\nI'd like to give to ${orgName}. What's the best way to send it?\n\nThank you,\n`;
+          : `Hello,\n\nI'd like to give to ${orgName}. What's the best way to send a gift?\n\nThank you,\n`;
         // Encoded by hand: URLSearchParams writes spaces as "+", which mail apps
         // show literally. Line breaks in a mail link are CRLF (RFC 6068).
         const address = emailLink.href.split("?")[0];
