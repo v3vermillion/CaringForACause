@@ -713,14 +713,19 @@ const mailto = (subject: string) =>
       min-height: 22rem;
     }
     /* A hairline inside the card on its open sides, so the surface's rim
-       rings the photo instead of painting over its pixels. */
+       rings the photo instead of painting over its pixels. The size is
+       stated, not left to the insets: an absolutely positioned image takes
+       its intrinsic size, so until the lazy file arrives it had no box at
+       all (a 0×0 img the composition test caught), and once it arrived it
+       took its own ratio instead of the row's. Percentages fill the
+       picture either way, and object-fit crops to the stated focus. */
     .panel :global(.photo) {
       --photo-ratio: auto;
       position: absolute;
       inset: var(--hairline) var(--hairline) var(--hairline) 0;
-      width: auto;
+      width: calc(100% - var(--hairline));
       margin: 0;
-      height: auto;
+      height: calc(100% - 2 * var(--hairline));
       border-radius: 0 calc(var(--r-card) - var(--hairline)) calc(var(--r-card) - var(--hairline)) 0;
     }
   }

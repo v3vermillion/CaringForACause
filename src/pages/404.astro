@@ -17,7 +17,7 @@ const { getHelp, donate } = hero.doors;
        is night too, so the opener runs into it. -->
   <main id="main">
     <section class="page-hero on-dark hero--404">
-      <Brand kind="mark" class="hero-watermark" label="" />
+      <Brand kind="mark" class="hero-watermark" label="" preserveAspectRatio="xMaxYMid meet" />
       <div class="wrap">
         <span class="eyebrow">{notFoundPage.eyebrow}</span>
         <h1>{notFoundPage.heading}</h1>
@@ -98,12 +98,17 @@ const { getHelp, donate } = hero.doors;
   }
 
   /* A tall window's empty night takes the mark in the ground's own tones,
-     as the phone menu fills its corner. */
+     as the phone menu fills its corner. The svg's box runs the full bleed
+     (it follows the screen, as the grounds and waves do — the composition
+     is measured inside the column) and the drawing pins to its right end,
+     a rem past the screen's edge, at the height that draws it 12rem wide. */
   .hero--404 :global(.hero-watermark) {
     position: absolute;
-    right: -1rem;
+    left: 0;
     bottom: 1.25rem;
-    width: 12rem;
+    width: calc(100% + 1rem);
+    max-width: none; /* the global svg clamp would take back the bleed */
+    height: calc(12rem * 1576 / 1718);
     pointer-events: none;
   }
 

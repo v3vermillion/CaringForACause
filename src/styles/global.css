@@ -1168,12 +1168,16 @@ legend.label {
 }
 
 /* Lilac above the ribbons: the lilac ground's rose wash sits at its bottom
-   right (this box's top right), and its vertical gradient has reached its
-   lavender foot. */
+   right (this box's top right), its vertical gradient has reached its
+   lavender foot, and the Get involved section's own rose breath — centred
+   on its bottom-left corner, under the lavender like the section paints it
+   (src/components/GetInvolved.astro) — straddles the edge, so its lower
+   half continues here. */
 .wave-ground--above.wave-ground--lilac::before {
   background-image:
     radial-gradient(36rem 24rem at 100% 0, rgb(255 90 134 / 0.16), transparent 70%),
-    linear-gradient(rgb(200 170 250 / 0.22), rgb(200 170 250 / 0.22));
+    linear-gradient(rgb(200 170 250 / 0.22), rgb(200 170 250 / 0.22)),
+    radial-gradient(30rem 18rem at 0 0, rgb(255 90 134 / 0.1), transparent 70%);
 }
 
 /* The footer below the ribbons (decision 70): its darkest navy, lit along
