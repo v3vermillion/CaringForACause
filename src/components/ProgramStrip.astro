@@ -68,7 +68,7 @@ const proof = [
 <style>
   /* The band is lit from the wave and falls off to the deeper night, as the
      reference's does: a gradient down to --night-2 (the wave out of the band
-     continues it) and a violet bloom centred on the seam with the wave,
+       continues it) and a violet bloom centred on the seam with the wave,
      straddling it. Each section paints its own half: the banner the half
      above the seam (Hero.astro), the strip the half below, from the same
      ellipse, so they meet without a step. A strip box that reached up over
@@ -207,14 +207,26 @@ const proof = [
     transition: color 0.25s ease;
   }
 
-  .item:hover .name,
+  .item:active .name,
   .item:focus-visible .name {
     color: #e2d3ff;
   }
 
-  .item:hover .icon,
+  @media (hover: hover) {
+    .item:hover .name {
+      color: #e2d3ff;
+    }
+  }
+
+  .item:active .icon,
   .item:focus-visible .icon {
     filter: brightness(1.12) saturate(1.05);
+  }
+
+  @media (hover: hover) {
+    .item:hover .icon {
+      filter: brightness(1.12) saturate(1.05);
+    }
   }
 
   .item:focus-visible {
@@ -317,7 +329,7 @@ const proof = [
   }
 
   /* Desktop: part of the first screen, sized in --u like the banner (see
-     src/pages/index.astro): 22 above, a 64 row of icon beside its title, 14,
+       src/pages/index.astro): 22 above, a 64 row of icon beside its title, 14,
      an 18 line of proof, 18 below: 136 reference pixels, the number the
      first screen's arithmetic uses. Every height here is fixed so the sum
      holds whatever the words do. */
