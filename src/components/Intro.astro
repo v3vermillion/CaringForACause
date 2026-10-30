@@ -8,7 +8,7 @@ import { intro } from "../data/site";
      scripts is never covered. The script below runs right after this markup,
      before the page behind it paints, so a returning visitor never sees it. -->
 <div
-  class="intro"
+  class="welcome"
   id="intro"
   role="dialog"
   aria-modal="true"
@@ -172,11 +172,11 @@ import { intro } from "../data/site";
 
 <style is:global>
   /* Hidden unless scripts run: the layout adds "js" before the first paint. */
-  .intro {
+  .welcome {
     display: none;
   }
 
-  .js .intro {
+  .js .welcome {
     position: fixed;
     inset: 0;
     z-index: 1000;
@@ -203,7 +203,7 @@ import { intro } from "../data/site";
     animation: intro-backstop 1s linear 50s forwards;
   }
 
-  .intro.leaving {
+  .welcome.leaving {
     opacity: 0;
     pointer-events: none;
   }
@@ -218,7 +218,7 @@ import { intro } from "../data/site";
 
   /* The light behind the words: gradients only (a blur filter or a shadow on
      clipped text paints boxes on some engines), breathing slowly. */
-  .intro .glow {
+  .welcome .glow {
     position: absolute;
     left: 50%;
     top: 46%;
@@ -248,7 +248,7 @@ import { intro } from "../data/site";
     }
   }
 
-  .intro .stage {
+  .welcome .stage {
     position: relative;
     display: grid;
     width: 100%;
@@ -258,7 +258,7 @@ import { intro } from "../data/site";
   }
 
   /* Every slide sits in the same cell, so a change never moves the layout. */
-  .intro .slide {
+  .welcome .slide {
     grid-area: 1 / 1;
     align-self: center;
     text-align: center;
@@ -266,13 +266,13 @@ import { intro } from "../data/site";
     visibility: hidden;
   }
 
-  .intro .slide.vis {
+  .welcome .slide.vis {
     opacity: 1;
     visibility: visible;
     transition: opacity 0.8s ease;
   }
 
-  .intro .slide.out {
+  .welcome .slide.out {
     opacity: 0;
     visibility: visible;
     transition:
@@ -282,7 +282,7 @@ import { intro } from "../data/site";
 
   /* The words: the banner's serif, bold, white, with a soft violet light.
      Plain colour, never clipped to the text, so the glow stays crisp. */
-  .intro .line {
+  .welcome .line {
     margin: 0;
     font-family: var(--font-serif);
     font-weight: 700;
@@ -301,34 +301,34 @@ import { intro } from "../data/site";
       transform 1.1s cubic-bezier(0.2, 0.7, 0.2, 1);
   }
 
-  .intro .line + .line {
+  .welcome .line + .line {
     margin-top: 0.5em;
   }
 
-  .intro .slide.vis .line {
+  .welcome .slide.vis .line {
     opacity: 1;
     transform: none;
     transition-delay: calc(var(--i) * 0.75s + 0.1s);
   }
 
-  .intro .slide.out .line {
+  .welcome .slide.out .line {
     opacity: 1;
     transform: none;
     transition: none;
   }
 
-  .intro .line.accent {
+  .welcome .line.accent {
     font-style: italic;
     color: #d9c6ff;
   }
 
   /* The single-word screens are the largest. */
-  .intro .slide.large .line {
+  .welcome .slide.large .line {
     font-size: calc(var(--step-4) * 1.35);
     line-height: 1.1;
   }
 
-  .intro .skip {
+  .welcome .skip {
     position: absolute;
     left: 50%;
     bottom: max(1.5rem, env(safe-area-inset-bottom));
@@ -352,22 +352,22 @@ import { intro } from "../data/site";
       box-shadow 0.2s ease;
   }
 
-  .intro .skip:hover {
+  .welcome .skip:hover {
     background: rgb(255 255 255 / 0.14);
     box-shadow: 0 0 0 max(1px, 0.09rem) rgb(226 214 255 / 0.85) inset;
   }
 
-  .intro .skip:focus-visible {
+  .welcome .skip:focus-visible {
     outline: 0.15rem solid #fff;
     outline-offset: 0.2rem;
   }
 
   @media (min-width: 56rem) {
-    .intro .line {
+    .welcome .line {
       font-size: calc(var(--step-4) * 1.1);
     }
 
-    .intro .stage {
+    .welcome .stage {
       margin-bottom: 2vw;
     }
   }
@@ -375,12 +375,12 @@ import { intro } from "../data/site";
   /* Reduced motion: the same words and timing, with no movement and no
      breathing light; each line simply fades. */
   @media (prefers-reduced-motion: reduce) {
-    .intro .glow {
+    .welcome .glow {
       animation: none;
     }
 
-    .intro .line,
-    .intro .slide.vis .line {
+    .welcome .line,
+    .welcome .slide.vis .line {
       transform: none;
       transition-duration: 0.4s;
     }
