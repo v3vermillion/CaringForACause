@@ -157,7 +157,7 @@ const year = new Date().getFullYear();
 
 <style>
   /*
-   * Colours are the reference's, sampled: near-black navy under the columns,
+     * Colours are the reference's, sampled: near-black navy under the columns,
    * a step bluer under the record, lavender light on the lettering and the
    * lines, and the one crimson on the Donate button. Every size is rem, so
    * the footer is one picture per device class (decision 40). The desktop
@@ -318,8 +318,10 @@ const year = new Date().getFullYear();
       transform 150ms ease;
   }
 
-  .donate:hover {
-    filter: brightness(1.08);
+  @media (hover: hover) {
+    .donate:hover {
+      filter: brightness(1.08);
+    }
   }
 
   .donate:active {
@@ -455,15 +457,30 @@ const year = new Date().getFullYear();
     letter-spacing: 0.055em;
   }
 
-  .links a:hover span,
-  .contact a:hover .value {
+  .links a:active span,
+  .contact a:active .value {
     text-decoration: underline;
     text-underline-offset: 0.15em;
   }
 
-  .links a:hover .chev,
-  .contact a:hover .icon {
+  @media (hover: hover) {
+    .links a:hover span,
+    .contact a:hover .value {
+      text-decoration: underline;
+      text-underline-offset: 0.15em;
+    }
+  }
+
+  .links a:active .chev,
+  .contact a:active .icon {
     stroke: #fff;
+  }
+
+  @media (hover: hover) {
+    .links a:hover .chev,
+    .contact a:hover .icon {
+      stroke: #fff;
+    }
   }
 
   /* The rule: a hairline lit violet to magenta across the whole width, with
@@ -830,8 +847,14 @@ const year = new Date().getFullYear();
       padding-top: 0;
     }
 
+    /* The reference's columns are 29.13, 19.04 and 23.82rem. Connect takes
+         2rem of Explore's width: the email address, at the rows' size, is
+         wider than the reference's column allowed, and ran past the content
+         edge the header and sections share (by 25 to 28px at 1280 to 1440
+         wide; decision 88). Explore's widest row, "Get involved" and its
+         chevron, has room to spare. */
     .columns {
-      grid-template-columns: 29.13rem 19.04rem 23.82rem;
+      grid-template-columns: 29.13rem 17.04rem 25.82rem;
       align-items: start;
       min-height: 24.51rem;
     }
