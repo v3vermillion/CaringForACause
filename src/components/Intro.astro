@@ -203,6 +203,17 @@ import { intro } from "../data/site";
     animation: intro-backstop 1s linear 50s forwards;
   }
 
+  /* The night grain (decision 63) over the gradients: it dithers them, so the
+     light has no visible rings or steps on 8-bit screens. */
+  .welcome::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image: var(--grain);
+    opacity: 0.7;
+    pointer-events: none;
+  }
+
   .welcome.leaving {
     opacity: 0;
     pointer-events: none;
@@ -227,10 +238,14 @@ import { intro } from "../data/site";
     transform: translate(-50%, -50%);
     border-radius: 50%;
     background: radial-gradient(
-      circle,
-      rgb(130 70 240 / 0.34) 0%,
-      rgb(96 8 215 / 0.14) 38%,
-      rgb(96 8 215 / 0) 68%
+      closest-side,
+      rgb(140 80 245 / 0.36) 0%,
+      rgb(132 72 240 / 0.28) 16%,
+      rgb(118 56 232 / 0.19) 34%,
+      rgb(104 36 222 / 0.11) 52%,
+      rgb(96 8 215 / 0.05) 70%,
+      rgb(96 8 215 / 0.015) 86%,
+      rgb(96 8 215 / 0) 100%
     );
     pointer-events: none;
     animation: intro-breathe 7s ease-in-out infinite;
@@ -255,6 +270,42 @@ import { intro } from "../data/site";
     max-width: 44rem;
     /* A little above centre, where the eye rests. */
     margin-bottom: 4vw;
+  }
+
+  /* Each slide carries its own broad bloom: a gradient that reaches nothing
+     at its edge, breathing while the slide is up. */
+  .welcome .slide {
+    position: relative;
+  }
+
+  .welcome .slide::before {
+    content: "";
+    position: absolute;
+    inset: -90% -25%;
+    z-index: -1;
+    background: radial-gradient(
+      closest-side,
+      rgb(176 120 255 / 0.3) 0%,
+      rgb(150 90 250 / 0.2) 30%,
+      rgb(124 60 235 / 0.1) 58%,
+      rgb(110 40 225 / 0.03) 82%,
+      rgb(110 40 225 / 0) 100%
+    );
+    pointer-events: none;
+  }
+
+  .welcome .slide.vis::before {
+    animation: welcome-halo 4.5s ease-in-out infinite;
+  }
+
+  @keyframes welcome-halo {
+    0%,
+    100% {
+      opacity: 0.8;
+    }
+    50% {
+      opacity: 1;
+    }
   }
 
   /* Every slide sits in the same cell, so a change never moves the layout. */
@@ -292,8 +343,9 @@ import { intro } from "../data/site";
     text-wrap: balance;
     color: #fff;
     text-shadow:
-      0 0 0.18em rgb(190 150 255 / 0.55),
-      0 0 0.7em rgb(130 70 240 / 0.55);
+      0 0 0.1em rgb(225 205 255 / 0.8),
+      0 0 0.28em rgb(180 125 255 / 0.7),
+      0 0 0.65em rgb(135 75 245 / 0.55);
     opacity: 0;
     transform: translateY(0.4em);
     transition:
@@ -319,7 +371,7 @@ import { intro } from "../data/site";
 
   .welcome .line.accent {
     font-style: italic;
-    color: #d9c6ff;
+    color: #e6d8ff;
   }
 
   /* The single-word screens are the largest. */
@@ -375,7 +427,8 @@ import { intro } from "../data/site";
   /* Reduced motion: the same words and timing, with no movement and no
      breathing light; each line simply fades. */
   @media (prefers-reduced-motion: reduce) {
-    .welcome .glow {
+    .welcome .glow,
+    .welcome .slide.vis::before {
       animation: none;
     }
 
