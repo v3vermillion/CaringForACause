@@ -91,7 +91,7 @@ Four pages. The home page is the route map, the two doors lead to their own page
 /404      Page not found: the night opener with the banner's two doors
 ```
 
-On phones every two-column block stacks, the two doors stay side by side under the headline, and the tabs and program tiles scroll sideways inside the page gutter.
+On phones every two-column block stacks, the two doors stay side by side under the headline, the four Get involved tabs sit in two rows of two so every choice is on screen, and the program tiles scroll sideways inside the page gutter.
 
 **Deep links:** `/#get-help`, `/#programs`, `/#get-involved`, `/#about`, `/#contact`, each program slug (for example `/#holiday-assistance`), and each tab (`/#sponsor`, `/#donate`, `/#volunteer`, `/#partner`) opens that tab directly.
 

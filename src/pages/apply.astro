@@ -45,7 +45,10 @@ const sideBody = getHelp.talk.body;
       <div class="wrap">
         <div class="opener-words">
           <span class="eyebrow">{applyPage.eyebrow}</span>
-          <h1>{applyPage.heading}</h1>
+          <h1>
+            {applyPage.heading}
+            <span class="accent">{applyPage.headingAccent}</span>
+          </h1>
           <p class="lede">{getHelp.whoCanApply}</p>
           <p class="talk">
             {applyPage.intro}{" "}
@@ -59,7 +62,7 @@ const sideBody = getHelp.talk.body;
           <Photo
             photo={applyPage.photo}
             ratio="5 / 4"
-            sizes="(min-width: 56rem) 352px, 1px"
+            sizes="(min-width: 56rem) 352px, 100vw"
             widths={[352, 704]}
           />
         </div>
@@ -92,7 +95,7 @@ const sideBody = getHelp.talk.body;
             <noscript>
               <p class="noscript">
                 {applyPage.noScript} Call <a href={phone.href}>{phone.display}</a> or email{" "}
-                <a href={mailto}>{email}</a>.
+                <a href={mailto}>{email}</a>, and we'll send you an application.
               </p>
             </noscript>
 
@@ -100,7 +103,7 @@ const sideBody = getHelp.talk.body;
               <ol class="progress" aria-label="Steps">
                 {steps.map((step, i) => (
                   <li data-progress={step.id} aria-current={i === 0 ? "step" : undefined}>
-                    <button type="button" class="progress-go" data-goto={i} disabled>
+                    <button type="button" class="progress-go" data-goto={i} aria-disabled="true">
                       <span class="num" aria-hidden="true">
                         {i + 1}
                       </span>
@@ -432,7 +435,7 @@ const sideBody = getHelp.talk.body;
                   <label class="consent">
                     <input type="checkbox" name="consent" required />
                     <span>
-                      My answers are accurate, and {org.shortName} may contact me about help.
+                      My answers are accurate, and {org.shortName} may contact me to arrange help.
                     </span>
                   </label>
                   <p class="error" data-consent-error role="alert" hidden>
@@ -720,7 +723,7 @@ const sideBody = getHelp.talk.body;
         ["Phone", groupPhone(phoneDigits(get("phone")))],
       ];
       if (get("email")) you.push(["Email", get("email")]);
-      you.push(["Reach me by", get("contactMethod")]);
+      you.push(["Best way to reach you", get("contactMethod")]);
       const household: Row[] = [
         [
           "Address",
@@ -801,8 +804,13 @@ const sideBody = getHelp.talk.body;
         if (i === index) item.setAttribute("aria-current", "step");
         else item.removeAttribute("aria-current");
         item.classList.toggle("passed", i < index);
-        // A passed step can be reopened; the ones ahead wait for Next.
-        item.querySelector<HTMLButtonElement>("[data-goto]")!.disabled = i >= index;
+        // A passed step can be reopened. The current one and the ones ahead
+        // announce as not yet available, but stay tappable: a tap ahead runs
+        // the same check as Next (goTo below), so it answers instead of
+        // ignoring the press.
+        item
+          .querySelector<HTMLButtonElement>("[data-goto]")!
+          .setAttribute("aria-disabled", String(i >= index));
       });
       back.hidden = index === 0;
       next.hidden = index === last;
@@ -827,10 +835,28 @@ const sideBody = getHelp.talk.body;
     };
     // Going back never loses answers and is never gated. A step reopened from
     // the review returns there on Next; any other way back walks forward again.
+    // A tap on a later step walks forward with the same check as Next, one
+    // step at a time, and stops on the first step that isn't ready, with its
+    // errors shown and the first one focused (validate does both).
     const goTo = (index: number) => {
-      if (index >= current) return;
-      returnToReview = current === last;
-      show(index);
+      if (index === current) return;
+      if (index < current) {
+        returnToReview = current === last;
+        show(index);
+        return;
+      }
+      const from = current;
+      while (current < index) {
+        if (!validate(steps[current]!)) {
+          // The walk moved before stopping: say where it stopped (the focus
+          // is already on that step's first error).
+          if (current !== from)
+            live.textContent = `Step ${current + 1} of ${steps.length}, ${titles[current]}`;
+          return;
+        }
+        returnToReview = false;
+        show(current + 1, current + 1 === index);
+      }
     };
     next.addEventListener("click", advance);
     back.addEventListener("click", () => {
@@ -900,17 +926,42 @@ const sideBody = getHelp.talk.body;
     color: #fff;
   }
 
-  /* The opener's photo is a desktop composition: below that, the words
-     alone open the page. */
+  /* Below desktop the photo is the opener's backdrop, the banner's own
+     pattern: the family under a night veil behind the words, so the page
+     a family opens first leads with people on every device. The words sit
+     above it; the veil keeps the measured contrast (the audit script
+     checks text over photos). Desktop lifts it out to its plate. */
   .opener-photo {
-    display: none;
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    overflow: hidden;
   }
 
+  .opener-photo::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(50rem 24rem at 100% 0, rgb(96 8 215 / 0.45), transparent 70%),
+      linear-gradient(180deg, rgb(27 15 46 / 0.92), rgb(27 15 46 / 0.8));
+  }
+
+  .opener-photo.plate::before {
+    content: none;
+  }
+
+  .opener-words {
+    position: relative;
+    z-index: 1;
+  }
+
+  /* Width and height together put the inline aspect-ratio out of play, so
+     the photo covers the opener; its focus point rides in from the data. */
+  .opener-photo :global(picture),
   .opener-photo :global(.photo) {
-    border-radius: var(--r-card);
-    box-shadow:
-      0 0 0 var(--hairline) rgb(255 255 255 / 0.28),
-      0 1.875rem 5rem rgb(0 0 0 / 0.45);
+    width: 100%;
+    height: 100%;
   }
 
   /* The form, then the night aside; side by side on desktop. */
@@ -963,18 +1014,29 @@ const sideBody = getHelp.talk.body;
     list-style: none;
   }
 
+  /* Each step's bar is the eyebrow rule's own spec (0.1875rem, rounded):
+     done is solid purple, the current one carries the lit violet-rose
+     gradient, the ones ahead stay on the quiet rule — so bar and dot agree
+     about every step's state. */
   .progress li {
-    border-top: max(3px, 0.1875rem) solid var(--rule);
     font-size: var(--step--1);
     color: var(--muted);
   }
 
-  .progress li.passed {
-    border-top-color: rgb(96 8 215 / 0.45);
+  .progress li::before {
+    content: "";
+    display: block;
+    height: 0.1875rem;
+    border-radius: 0.125rem;
+    background: var(--rule);
   }
 
-  .progress li[aria-current] {
-    border-top-color: var(--purple);
+  .progress li.passed::before {
+    background: var(--purple);
+  }
+
+  .progress li[aria-current]::before {
+    background: linear-gradient(90deg, var(--purple), #d43a92);
   }
 
   .progress li[aria-current] {
@@ -997,31 +1059,61 @@ const sideBody = getHelp.talk.body;
     cursor: pointer;
   }
 
-  .progress-go:disabled {
+  .progress-go[aria-disabled="true"] {
     cursor: default;
   }
 
-  .progress-go:not(:disabled):hover .step-title {
+  .progress-go:not([aria-disabled="true"]):hover .step-title {
     text-decoration: underline;
   }
 
+  /* The dots speak the chip language: ahead is paper with the boundary
+     ring, done is flat purple, and only the current one is lit — the
+     "where am I" answer at a glance. */
   .num {
     display: inline-grid;
     place-items: center;
     width: 1.6rem;
     height: 1.6rem;
     border-radius: 50%;
-    background: var(--rule);
+    background: #fff;
+    box-shadow: inset 0 0 0 var(--hairline) var(--rule-strong);
     font-family: var(--font-display);
     font-weight: 700;
     font-size: 0.8rem;
     color: var(--ink);
+    transition:
+      background-color 150ms ease,
+      box-shadow 150ms ease,
+      transform 150ms ease;
   }
 
-  .progress li[aria-current] .num,
   .progress li.passed .num {
     background: var(--purple);
+    box-shadow: none;
     color: #fff;
+  }
+
+  .progress li[aria-current] .num {
+    background-color: var(--purple);
+    background-image: linear-gradient(180deg, rgb(255 255 255 / 0.14), rgb(255 255 255 / 0) 40%);
+    box-shadow:
+      inset 0 0 0 var(--hairline) rgb(255 255 255 / 0.25),
+      0 0.25rem 0.625rem rgb(96 8 215 / 0.3);
+    color: #fff;
+  }
+
+  /* A tappable step answers the pointer and the press at its dot. */
+  .progress-go:not([aria-disabled="true"]):hover .num {
+    background-color: var(--purple-deep);
+    color: #fff;
+  }
+
+  .progress-go:not([aria-disabled="true"]):active .num {
+    background-color: var(--purple-deep);
+    color: #fff;
+    transform: translateY(0.0625rem);
+    transition-duration: 60ms;
   }
 
   /* "Step 2 of 4: " is read aloud with every title. */
@@ -1194,11 +1286,22 @@ const sideBody = getHelp.talk.body;
     letter-spacing: -0.02em;
   }
 
-  /* Controls sit on one line whatever their label's height. */
+  /* Controls sit on one shared line whatever their label's height, and the
+     labels share the top line too (a one-line "Age" no longer floats a line
+     below its two-line neighbours with a hole above it). */
   .child-fields {
     display: grid;
     gap: 0.75rem;
-    align-items: end;
+    align-items: stretch;
+  }
+
+  .child-fields .field {
+    grid-template-rows: auto 1fr;
+  }
+
+  .child-fields .field > .input,
+  .child-fields .field > .select {
+    align-self: end;
   }
 
   /* Kinds of help: selectable cards. The follow-up list opens as the lower
@@ -1509,8 +1612,11 @@ const sideBody = getHelp.talk.body;
       grid-template-columns: 2fr 1fr 1.4fr;
     }
 
+    /* Shoe size's "e.g. 12C" needs the least room; Age needs "Choose one"
+       whole, never "Choose" with the word cut at the padding edge — the
+       9rem floor is that phrase plus the select's padding and arrow. */
     .child-fields {
-      grid-template-columns: 1fr 1.4fr 1.4fr 1fr;
+      grid-template-columns: minmax(9.5rem, 1.2fr) 1.4fr 1.3fr 0.9fr;
     }
 
     .review :global(.review-list > div) {
@@ -1532,7 +1638,31 @@ const sideBody = getHelp.talk.body;
     .opener-photo {
       display: block;
       position: relative;
+      inset: auto;
       z-index: 1;
+      overflow: visible;
+    }
+
+    /* Out of the backdrop role: no veil, the plate back, the photo in its
+       frame with the pale ring it had. */
+    .opener-photo::after {
+      content: none;
+    }
+
+    .opener-photo.plate::before {
+      content: "";
+    }
+
+    .opener-photo :global(picture),
+    .opener-photo :global(.photo) {
+      height: auto;
+    }
+
+    .opener-photo :global(.photo) {
+      border-radius: var(--r-card);
+      box-shadow:
+        0 0 0 var(--hairline) rgb(255 255 255 / 0.28),
+        0 1.875rem 5rem rgb(0 0 0 / 0.45);
     }
 
     .layout {

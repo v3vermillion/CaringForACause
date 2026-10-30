@@ -345,6 +345,9 @@ const { cycle, hold, fade, keyframes } = crossfade(slides.length);
     min-width: 0;
     min-height: max(44px, var(--pill-h));
     margin-block: calc((var(--pill-h) - max(44px, var(--pill-h))) / 2);
+    /* The keyboard ring follows the pill's capsule, as the header's does,
+       instead of boxing it with square corners. */
+    border-radius: var(--r-pill);
     color: #fff;
     text-decoration: none;
   }

@@ -95,6 +95,16 @@ const nextGround = gallery.length >= 4 ? "lilac" : "footer";
       iframe.title = button.dataset.title || "Video";
       iframe.allow = "autoplay; encrypted-media; picture-in-picture; fullscreen";
       iframe.allowFullscreen = true;
+      // A turning ring on the night frame until the player paints, as the
+      // other player draws one (the frame's own empty first document is
+      // skipped; YouTube's is cross-origin and reads as null).
+      player.classList.add("is-loading");
+      const loaded = () => {
+        if (iframe.contentDocument?.URL === "about:blank") return;
+        iframe.removeEventListener("load", loaded);
+        player.classList.remove("is-loading");
+      };
+      iframe.addEventListener("load", loaded);
       frame.replaceChildren(iframe);
       player.hidden = false;
       player.scrollIntoView({ behavior: behavior(), block: "center" });
@@ -204,13 +214,40 @@ const nextGround = gallery.length >= 4 ? "lilac" : "footer";
     display: none;
   }
 
+  /* The frame opens on the section's own night with the pale rim the other
+     media boxes wear, never a raw #000 void. */
   .frame {
     position: relative;
+    isolation: isolate;
     aspect-ratio: 16 / 9;
     overflow: hidden;
     border-radius: var(--r-card);
-    background: #000;
-    box-shadow: 0 1.875rem 5rem rgb(0 0 0 / 0.45);
+    background: var(--night-2);
+    box-shadow:
+      0 0 0 var(--hairline) rgb(255 255 255 / 0.2),
+      0 1.875rem 5rem rgb(0 0 0 / 0.45);
+  }
+
+  /* The loading ring, as the haircut video's player turns one; the global
+     reduced-motion rule holds it still. */
+  .player.is-loading .frame::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    margin: auto;
+    width: 2.5rem;
+    height: 2.5rem;
+    border: 0.25rem solid rgb(255 255 255 / 0.35);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: spin 900ms linear infinite;
+    pointer-events: none;
+  }
+
+  @keyframes spin {
+    to {
+      transform: rotate(1turn);
+    }
   }
 
   .frame :global(iframe) {

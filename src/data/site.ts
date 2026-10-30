@@ -289,9 +289,12 @@ export const getHelp = {
   whoCanApply:
     "Households with children and seniors are our focus, but anyone who is struggling right now can apply.",
   howToApply:
-    "Prefer to talk to someone first? Call or email us and we'll send you an application.",
+    "Prefer to talk to someone first? Call or email us, and we'll send you an application.",
   /** The aside beside the application form on desktop: the same offer under its own heading. */
-  talk: { heading: "Prefer to talk?", body: "Call or email us and we'll send you an application." },
+  talk: {
+    heading: "Prefer to talk?",
+    body: "Call or email us, and we'll send you an application.",
+  },
   action: { label: "Start an application", href: "/apply/" },
 };
 
@@ -304,18 +307,19 @@ export const applyPage = {
     focus: "center 27%",
   } satisfies Photo,
   eyebrow: "Help me",
-  heading: "Apply for help",
+  heading: "Apply",
+  /** The heading's second line, set like the banner's italic accent line. */
+  headingAccent: "for help",
   intro:
-    "Four short steps. Your answers go straight to us by email, and we'll follow up with next steps.",
+    "Four short steps. Your answers go straight to us by email, and we'll follow up from there.",
   privacy:
     "This website stores nothing. Your application goes to us by email, and we use it only to arrange help for you.",
   /** Shown when JavaScript is off, since the form can't send without it. */
-  noScript:
-    "This form needs JavaScript to send. Call or email us instead and we'll send you an application.",
+  noScript: "This form needs JavaScript to send.",
   steps: [
     { id: "you", title: "About you", hint: "How we can reach you" },
     { id: "household", title: "Your household", hint: "Where you live and who lives with you" },
-    { id: "needs", title: "What you need", hint: "Choose everything that applies" },
+    { id: "needs", title: "What you need", hint: "Choose all that apply" },
     { id: "review", title: "Review and send", hint: "Check your answers" },
   ],
   /** Counties in Central Indiana, for the county picker. */
@@ -370,10 +374,13 @@ export const applyPage = {
 /** The donation page (/donate). */
 export const donatePage = {
   eyebrow: "Donate",
-  heading: `Give to families in ${claim(facts.serviceArea)}`,
-  intro: "Your gift helps put holiday meals, gifts, diapers, and school supplies into local homes.",
+  heading: "Give to families",
+  /** The heading's second line, set like the banner's italic accent line. */
+  headingAccent: `in ${claim(facts.serviceArea)}`,
+  intro:
+    "Your donation helps put holiday meals, gifts, diapers, and school supplies into local homes.",
   /** The chooser's heading, over the frequency and amount choices. */
-  giftHeading: "Give once or every month",
+  giftHeading: "Give once or monthly",
   /** The heading over the four programs a gift goes to (programStrip). */
   providesHeading: "What your gift provides",
   amounts: [25, 50, 100, 250],
@@ -387,7 +394,7 @@ export const donatePage = {
   continueLabel: "Donate",
   emailLabel: "Donate by email",
   emailNote:
-    "We don't take card payments on this site yet. This button opens an email to us with your gift written in, and we'll reply with the easiest way to send it.",
+    "We don't accept card payments on this site yet. This button opens an email to us with your gift filled in, and we'll reply with the easiest way to send it.",
 };
 
 /** The page shown for an address that doesn't exist. */
@@ -408,7 +415,7 @@ export const programs: Program[] = [
     forWhom: "Low-income families in Central Indiana, especially households with children.",
     details: [
       "Families can receive toys, clothes, gift cards, meals, or gifts from their wish list.",
-      "Sponsors choose a family and help fill its holiday needs.",
+      "Sponsors choose a family and help fill their holiday needs.",
       "We partner with Toys for Tots.",
     ],
     photo: {
@@ -508,7 +515,7 @@ export const programs: Program[] = [
     },
     video: {
       id: "Z5USx1xFF58",
-      title: "Free haircut and styles outreach program",
+      title: "Free haircuts and styles outreach program",
       poster: "stylist-haircut.jpg",
       posterFocus: "center 27%",
     },
@@ -554,7 +561,7 @@ export const getInvolved = {
       heading: "Donate money or items",
       /** The short version: /donate is the destination, so this says one thing and hands off. */
       body: [
-        "Give once or monthly. Your gift helps provide holiday meals, gifts, diapers, and school supplies for local families.",
+        "Give once or monthly. Your donation helps provide holiday meals, gifts, diapers, and school supplies for local families.",
       ],
       action: { label: "Donate", href: "/donate/", fallbackLabel: "Donate" },
       photo: {
@@ -633,7 +640,8 @@ export const about = {
   watchLabel: "Watch her story",
   video: {
     id: "7smWzJwY9kA",
-    title: "Do More: Tamara Long-Ajimati provides supportive services to families in need",
+    // The video's published title, quoted exactly (YouTube oEmbed, October 2026).
+    title: "Tamara Long-Ajimati Provides Supportive Services to Indianapolis Families",
     poster: "tamara-portrait.jpg",
     posterFocus: "center 25%",
   } satisfies YouTubeVideo,

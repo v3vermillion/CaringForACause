@@ -31,7 +31,7 @@ const mailto = mailLink(
 );
 const mailtoAny = mailLink(
   donatePage.emailSubject,
-  `Hello,\n\nI'd like to give to ${org.shortName}. What's the best way to send it?\n\nThank you,\n`,
+  `Hello,\n\nI'd like to give to ${org.shortName}. What's the best way to send a gift?\n\nThank you,\n`,
 );
 ---
 
@@ -41,7 +41,10 @@ const mailtoAny = mailLink(
     <section class="page-hero on-dark">
       <div class="wrap">
         <span class="eyebrow">{donatePage.eyebrow}</span>
-        <h1>{donatePage.heading}</h1>
+        <h1>
+          {donatePage.heading}
+          <span class="accent">{donatePage.headingAccent}</span>
+        </h1>
         <p class="lede">{donatePage.intro}</p>
       </div>
       <Wave kind="into-paper" id="wp" above="none" belowGround="paper" class="page-wave" />
@@ -198,7 +201,7 @@ const mailtoAny = mailLink(
         const subject = gift ? `${subjectPrefix}: ${gift}` : subjectPrefix;
         const body = dollars
           ? `Hello,\n\nI'd like to make a ${monthly ? "monthly" : "one-time"} gift of ${dollars} to ${orgName}. What's the best way to send it?\n\nThank you,\n`
-          : `Hello,\n\nI'd like to give to ${orgName}. What's the best way to send it?\n\nThank you,\n`;
+          : `Hello,\n\nI'd like to give to ${orgName}. What's the best way to send a gift?\n\nThank you,\n`;
         // Encoded by hand: URLSearchParams writes spaces as "+", which mail apps
         // show literally. Line breaks in a mail link are CRLF (RFC 6068).
         const address = emailLink.href.split("?")[0];
@@ -270,6 +273,20 @@ const mailtoAny = mailLink(
     border-top: var(--hairline) solid rgb(255 255 255 / 0.1);
   }
 
+  /* From the tablet up the four rows sit two by two, so the panel uses the
+     width instead of leaving its right half empty; each row keeps exactly
+     one hairline above it. */
+  @media (min-width: 36rem) and (max-width: 55.99rem) {
+    .programs {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      column-gap: var(--space-l);
+    }
+
+    .programs li:nth-child(2) {
+      border-top: 0;
+    }
+  }
+
   .program {
     display: grid;
     grid-template-columns: 4.5rem 1fr;
@@ -281,6 +298,13 @@ const mailtoAny = mailLink(
     color: #fff;
     text-decoration: none;
     -webkit-tap-highlight-color: transparent;
+    transition: background-color 150ms ease;
+  }
+
+  /* A press answers on the row itself; the tap flash is off above. */
+  .program:active {
+    background: rgb(255 255 255 / 0.07);
+    transition-duration: 60ms;
   }
 
   .program:hover .name {
@@ -390,6 +414,19 @@ const mailtoAny = mailLink(
     }
   }
 
+  /* While nothing is typed, the prefix and the placeholder sit centred
+     like the other pills' labels; typing returns the natural field.
+     Browsers without :has() keep the plain field. */
+  .amounts .choice--other:has(input:placeholder-shown) {
+    justify-content: center;
+  }
+
+  .amounts .choice--other:has(input:placeholder-shown) input {
+    flex: 0 1 auto;
+    width: auto;
+    max-width: 5.5ch;
+  }
+
   /* Under a finger the typed amount holds 16px, so focusing the field
      doesn't zoom an iPhone (global.css explains). */
   @media (pointer: coarse) {
@@ -453,14 +490,20 @@ const mailtoAny = mailLink(
     display: none;
   }
 
-  .note {
-    max-width: 40ch;
-  }
-
+  /* The two notes share one measure and read as one column; the legal
+     record opens under its own quiet rule, so the words that make a
+     stranger comfortable giving are marked as the card's record, not an
+     echo of the mechanical note above them. */
   .note,
   .tax {
+    max-width: 46ch;
     font-size: var(--step--1);
     color: var(--muted);
+  }
+
+  .tax {
+    border-top: var(--hairline) solid var(--rule);
+    padding-top: var(--space-s);
   }
 
   @media (min-width: 36rem) {
@@ -527,13 +570,20 @@ const mailtoAny = mailLink(
       grid-row: 1;
       align-self: start;
       max-width: 34rem;
-      margin-top: calc(var(--overlap) + var(--space-l));
+      margin-top: calc(var(--overlap) + var(--space-s));
       padding: var(--space-l);
+      gap: var(--space-s);
     }
 
     /* Tighter rows, so the panel ends near the card's foot. */
     .program {
-      padding-block: 0.5rem;
+      padding-block: 0.375rem;
+    }
+
+    /* The section's foot hugs the panel instead of running a band of bare
+       ground below both columns. */
+    .section.give {
+      padding-bottom: var(--space-l);
     }
   }
 </style>

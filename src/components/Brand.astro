@@ -19,9 +19,11 @@ type Props = {
   class?: string;
   /** Accessible name. Empty means decorative (hidden from screen readers). */
   label?: string;
+  /** Pins the drawing inside a box wider than the art, e.g. "xMaxYMid meet". */
+  preserveAspectRatio?: string;
 };
 
-const { kind, class: className, label = "Caring for a Cause" } = Astro.props;
+const { kind, class: className, label = "Caring for a Cause", preserveAspectRatio } = Astro.props;
 const classes = [`brand-${kind}`, className];
 const a11y = label
   ? ({ role: "img", "aria-label": label } as const)
@@ -42,7 +44,7 @@ const Svg = kind === "mark" ? Mark : Wordmark;
 {kind === "lockup" ? (
   <svg viewBox={lockupViewBox} class:list={classes} {...a11y} set:html={lockupPaths} />
 ) : (
-  <Svg class:list={classes} {...a11y} />
+  <Svg class:list={classes} {...a11y} preserveAspectRatio={preserveAspectRatio} />
 )}
 
 <style is:global>

@@ -309,19 +309,23 @@ const year = new Date().getFullYear();
       0 0 1.4rem rgb(220 30 70 / 0.5);
   }
 
+  /* The hover brightens the resting paint instead of swapping gradients —
+     a gradient image cannot interpolate, so the swap snapped where the
+     header's twin eases. */
+  .donate {
+    transition:
+      filter 150ms ease,
+      transform 150ms ease;
+  }
+
   .donate:hover {
-    background: linear-gradient(
-      180deg,
-      #e85a76 0%,
-      #ea4668 6%,
-      #d43a50 17%,
-      #bd2c41 30%,
-      #9e222c 45%,
-      #841a22 62%,
-      #72161c 78%,
-      #76141d 92%,
-      #8a1a27 100%
-    );
+    filter: brightness(1.08);
+  }
+
+  .donate:active {
+    filter: brightness(0.94);
+    transform: translateY(1px);
+    transition-duration: 60ms;
   }
 
   /* The chevron's ink is 7 by 14 of its 24 box, so the box is drawn larger
@@ -741,8 +745,12 @@ const year = new Date().getFullYear();
       font-size: 1.3rem;
     }
 
+    /* In column-width rows the chevron trails the label like the page's
+       other arrows, instead of stranding right-aligned on an empty rail. */
     .links a {
-      padding-right: 2.8rem;
+      justify-content: flex-start;
+      gap: 0.5rem;
+      padding-right: 0;
     }
 
     .contact a {

@@ -274,7 +274,9 @@ test.describe("device compatibility", () => {
     expect(await outside.count()).toBeGreaterThanOrEqual(5);
     for (const img of await outside.all()) await loaded(img);
 
-    // Photos inside tabs only load once their tab is open
+    // Photos inside tabs are loaded by the time their tab is open (their
+    // boxes stay in the stage, decision 80, so they may fetch earlier, as
+    // the section comes near)
     for (const id of ["sponsor", "volunteer", "partner"]) {
       await page.locator(`#tab-${id}`).click();
       await loaded(page.locator(`#${id} img.photo`));
@@ -1399,6 +1401,31 @@ test.describe("get involved tabs", () => {
     expect(await page.evaluate(() => window.scrollY)).toBe(0);
   });
 
+  // Every choice is on screen at once — on phones the rail is two rows of
+  // two, since one row cannot hold the four labels — and the stage keeps
+  // the tallest panel's height, so a switch moves nothing below the card
+  // (decision 80).
+  test("all four choices are on screen, and switching keeps the page's height", async ({
+    page,
+  }) => {
+    await page.goto("/");
+    const tabs = page.getByRole("tab");
+    await expect(tabs).toHaveCount(getInvolved.tabs.length);
+    const width = page.viewportSize()!.width;
+    for (const tab of await tabs.all()) {
+      const box = (await tab.boundingBox())!;
+      expect(box.x).toBeGreaterThanOrEqual(0);
+      expect(box.x + box.width).toBeLessThanOrEqual(width + 0.5);
+    }
+    const height = () => page.evaluate(() => document.documentElement.scrollHeight);
+    const before = await height();
+    for (const tab of await tabs.all()) {
+      await tab.click();
+      await expect(tab).toHaveAttribute("aria-selected", "true");
+      expect(await height()).toBe(before);
+    }
+  });
+
   // Section links scroll smoothly; wait until the page has stopped moving:
   // the same position three samples in a row, 120ms apart. (A waitForFunction
   // whose function returns a promise counts the promise itself as true and
@@ -1666,13 +1693,15 @@ test.describe("get involved tabs", () => {
     const thumb = page.locator(".thumb");
     // The translate property is Chrome 104 and later; transform is everywhere.
     expect(await thumb.evaluate((el) => getComputedStyle(el).translate)).toBe("none");
+    // Both coordinates: on a phone Partner sits on the rail's second row,
+    // and the thumb must follow it down, not only across.
     await expect
       .poll(async () => {
         const [t, tab] = await Promise.all([
           thumb.boundingBox(),
           page.locator("#tab-partner").boundingBox(),
         ]);
-        return Math.abs(t!.x - tab!.x);
+        return Math.max(Math.abs(t!.x - tab!.x), Math.abs(t!.y - tab!.y));
       })
       .toBeLessThan(1);
   });
@@ -2131,9 +2160,8 @@ test.describe("donation page", () => {
 // come to rest (six frames without scrolling) before the next tap. Smooth
 // scrolling stays on, as visitors have it; turning it off with reduced motion
 // was measured to slow these tests on WebKit by a third.
-const pressAndSettle = async (page: import("@playwright/test").Page, selector: string) => {
-  await page.locator(selector).click();
-  await page.evaluate(
+const atRest = (page: import("@playwright/test").Page) =>
+  page.evaluate(
     () =>
       new Promise<void>((resolve) => {
         let last = scrollY;
@@ -2147,6 +2175,9 @@ const pressAndSettle = async (page: import("@playwright/test").Page, selector: s
         requestAnimationFrame(tick);
       }),
   );
+const pressAndSettle = async (page: import("@playwright/test").Page, selector: string) => {
+  await page.locator(selector).click();
+  await atRest(page);
 };
 
 test.describe("application page", () => {
@@ -2282,6 +2313,39 @@ test.describe("application page", () => {
   test("does not steal focus when the page opens", async ({ page }) => {
     await page.goto("/apply");
     expect(await page.evaluate(() => document.activeElement === document.body)).toBe(true);
+  });
+
+  // A tap on a later step's number answers like Next instead of ignoring the
+  // press: the current step's check runs, its errors show and the first is
+  // focused, and the walk stops on the first step that is not ready. The
+  // steps ahead are aria-disabled, not disabled, so they announce as not yet
+  // available while still answering; Playwright counts aria-disabled as not
+  // enabled, so the test taps them with force, as a finger is not stopped.
+  test("a later step's number runs the same check as Next", async ({ page }) => {
+    await page.goto("/apply");
+    const go = page.locator(".progress-go");
+    await expect(go.nth(2)).toHaveAttribute("aria-disabled", "true");
+    await go.nth(2).click({ force: true });
+    await atRest(page);
+    await expect(page.locator("[data-step=you]")).toBeVisible();
+    await expect(page.locator(".field:has(#firstName) .error")).toHaveText(
+      "Enter your first name.",
+    );
+    await expect(page.locator("#firstName")).toBeFocused();
+    // With the first step ready, the same tap walks forward and stops where
+    // the form does: the household step, whose own check now speaks.
+    await page.locator("#firstName").fill("Jane");
+    await page.locator("#lastName").fill("Doe");
+    await page.locator("#phone").fill("3175550100");
+    await go.nth(3).click({ force: true });
+    await atRest(page);
+    await expect(page.locator("[data-step=household]")).toBeVisible();
+    await expect(page.locator(".field:has(#street) .error")).toBeVisible();
+    await expect(page.locator("#street")).toBeFocused();
+    // The step that passed opens again as before, no check in the way.
+    await expect(go.nth(0)).toHaveAttribute("aria-disabled", "false");
+    await go.nth(0).click();
+    await expect(page.locator("[data-step=you]")).toBeVisible();
   });
 
   // People and autofill write a US number with its country code. The form
