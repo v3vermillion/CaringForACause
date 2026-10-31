@@ -2235,6 +2235,45 @@ test.describe("application page", () => {
     await expect(page.locator("[data-step=you]")).toBeVisible();
   });
 
+  test("a county outside the list is named in a box that opens under the picker", async ({
+    page,
+  }) => {
+    await page.goto("/apply");
+    await page.locator("#firstName").fill("Jane");
+    await page.locator("#lastName").fill("Doe");
+    await page.locator("#phone").fill("3175550100");
+    await pressAndSettle(page, "[data-next]");
+    await expect(page.locator("[data-step=household]")).toBeVisible();
+    const box = page.locator("#countyOther");
+    await expect(box).toBeHidden();
+    await page.locator("#street").fill("1 Main St");
+    await page.locator("#city").fill("Tipton");
+    await page.locator("#zip").fill("46072");
+    await page.locator("#county").selectOption("Other");
+    await expect(box).toBeVisible();
+    await expect(box).toBeFocused();
+    // The name is required while the box is open.
+    await pressAndSettle(page, "[data-next]");
+    await expect(box).toHaveAttribute("aria-invalid", "true");
+    await expect(page.locator("[data-step=household]")).toBeVisible();
+    // Up to ten children can be counted.
+    await expect(page.locator("#childCount option")).toHaveCount(11);
+    await expect(page.locator("#childCount option").last()).toHaveText("10 or more");
+    await box.fill("Tipton County");
+    await pressAndSettle(page, "[data-next]");
+    await page.locator("input[name=need][data-toggle=haircut]").check();
+    await pressAndSettle(page, "[data-next]");
+    await expect(page.locator("[data-review]")).toContainText("Tipton County)");
+    await expect(page.locator("[data-review]")).not.toContainText("County County");
+    // Picking a listed county again closes the box, and what was typed is not sent.
+    await page.locator("[data-review] [data-goto='1']").click();
+    await page.locator("#county").selectOption("Hamilton");
+    await expect(box).toBeHidden();
+    await pressAndSettle(page, "[data-next]");
+    await expect(page.locator("[data-review]")).toContainText("Hamilton County");
+    await expect(page.locator("[data-review]")).not.toContainText("Tipton County");
+  });
+
   test("walks through four steps, validates each, and sends by email", async ({ page }) => {
     // The longest test in the suite: four steps, every field, the review and
     // the send. Since the form redesign (decision 62) it takes 20 to 28 s on

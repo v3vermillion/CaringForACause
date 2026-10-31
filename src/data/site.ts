@@ -668,25 +668,16 @@ export const getInvolved = {
   ] satisfies InvolvementTab[],
 };
 
-/**
- * "More than a decade on" (or "Eight years on" before then), from the
- * founding year and the year the site is built, so it never goes stale.
- */
-function yearsOn(founded: number): string {
-  const years = new Date().getFullYear() - founded;
-  if (years > 10) return "More than a decade on";
-  const words = ["", "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine", "Ten"];
-  return `${words[years] ?? years} year${years === 1 ? "" : "s"} on`;
-}
-
 export const about = {
   eyebrow: "About",
   heading: `Meet ${claim(facts.founder)}`,
   body: [
-    `${claim(facts.founder).split(" ")[0]} founded ${org.shortName} in ${claim(facts.founded)} to support families in ${claim(facts.serviceArea)} who are facing financial hardship. ${yearsOn(claim(facts.founded))}, it has helped over ${claim(facts.familiesHelped).toLocaleString("en-US")} families.`,
+    `${claim(facts.founder).split(" ")[0]} founded ${org.shortName} in ${claim(facts.founded)} to support families in ${claim(facts.serviceArea)} who are facing financial hardship. Year after year since then, she and her volunteers have helped more than ${claim(facts.familiesHelped).toLocaleString("en-US")} families.`,
+    // The count is the press-reported running total (decision 79); "she and
+    // her volunteers" is the organization, which is volunteer-run (decision 92).
     // Her website's "Our Team" and "Our History": part-time volunteers
     // committed to helping others; grown thanks to the community's helping hands.
-    "Its part-time volunteers are committed to helping others, and the organization has grown thanks to the helping hands of this community.",
+    "Her part-time volunteers are committed to helping others, and the organization has grown thanks to the helping hands of this community.",
   ],
   /** A still from her "Do More" feature, cropped to leave out the program's caption. */
   portrait: {

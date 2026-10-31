@@ -15,7 +15,7 @@ const description = `Apply for holiday meals and gifts, monthly diapers, school 
 const steps = applyPage.steps;
 const stepCount = steps.length;
 const adults = ["1", "2", "3", "4", "5", "6 or more"];
-const children = ["0", "1", "2", "3", "4", "5", "6", "7", "8 or more"];
+const children = [...Array.from({ length: 10 }, (_, i) => String(i)), "10 or more"];
 const ages = ["Under 1", ...Array.from({ length: 17 }, (_, i) => String(i + 1))];
 const heard = [
   "Facebook",
@@ -265,6 +265,21 @@ const followUps = {
                           <option value={c}>{c}</option>
                         ))}
                       </select>
+                    </div>
+                  </div>
+                  <div class="fields" data-county-other hidden>
+                    <div class="field">
+                      <label for="countyOther">Which county?</label>
+                      <input
+                        class="input"
+                        id="countyOther"
+                        name="countyOther"
+                        autocomplete="off"
+                        autocapitalize="words"
+                        enterkeyhint="next"
+                        required
+                        disabled
+                      />
                     </div>
                   </div>
                   <div class="fields two">
@@ -533,6 +548,8 @@ const followUps = {
         .toLowerCase();
     };
     const messageFor = (input: HTMLInputElement | HTMLSelectElement) => {
+      // A disabled field is a closed follow-up: not shown, not sent, not checked.
+      if (input.disabled) return "";
       const value = input.value.trim();
       if (input.dataset.kind === "zip" && !/^\d{5}(-\d{4})?$/.test(value))
         return "Enter your 5-digit ZIP code.";
@@ -541,6 +558,7 @@ const followUps = {
         if (input instanceof HTMLSelectElement)
           return input.id === "county" ? "Choose your county." : "Choose one.";
         if (input.id === "email") return "Enter an email address, or choose Call or Text.";
+        if (input.id === "countyOther") return "Enter the name of your county.";
         return `Enter your ${labelOf(input)}.`;
       }
       if (input.dataset.kind === "phone" && phoneDigits(value).length < 10)
@@ -655,6 +673,24 @@ const followUps = {
       .forEach((radio) => radio.addEventListener("change", syncEmail));
     syncEmail();
 
+    // County: "Other" opens a box for the county's name, required while open.
+    // Closed, the box is also disabled, so a name typed and then withdrawn is
+    // not sent and not checked.
+    const county = form.querySelector<HTMLSelectElement>("#county")!;
+    const countyOther = form.querySelector<HTMLElement>("[data-county-other]")!;
+    const countyName = countyOther.querySelector<HTMLInputElement>("input")!;
+    const syncCounty = () => {
+      const other = county.value === "Other";
+      countyOther.hidden = !other;
+      countyName.disabled = !other;
+      if (!other) setError(countyName, "");
+    };
+    county.addEventListener("change", () => {
+      syncCounty();
+      if (county.value === "Other") countyName.focus();
+    });
+    syncCounty();
+
     // Children: one row of fields per child.
     const count = form.querySelector<HTMLSelectElement>("[data-child-count]")!;
     const children = form.querySelector<HTMLElement>("[data-children]")!;
@@ -722,10 +758,14 @@ const followUps = {
       ];
       if (get("email")) you.push(["Email", get("email")]);
       you.push(["Best way to reach you", get("contactMethod")]);
+      // The county named under "Other" stands where a picked one would; a
+      // typed "Tipton County" is not doubled.
+      const countyOf =
+        get("county") === "Other" ? get("countyOther").replace(/\s+county$/i, "") : get("county");
       const household: Row[] = [
         [
           "Address",
-          `${get("street")}, ${get("city")} ${get("zip")}${get("county") === "Other" ? "" : ` (${get("county")} County)`}`,
+          `${get("street")}, ${get("city")} ${get("zip")}${countyOf ? ` (${countyOf} County)` : ""}`,
         ],
         ["Adults", get("adults")],
         ["Children", get("childCount")],
@@ -1195,6 +1235,11 @@ const followUps = {
   .fields {
     display: grid;
     gap: var(--space-s);
+  }
+
+  /* The grid rule would otherwise beat the hidden attribute. */
+  .fields[hidden] {
+    display: none;
   }
 
   fieldset.field {
