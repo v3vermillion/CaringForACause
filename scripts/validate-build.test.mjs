@@ -41,15 +41,42 @@ describe("publish gate", () => {
   });
 
   it("blocks indexing on any host other than production", () => {
+    // A public build names its address; this one names another host.
     const dir = brokenBuild("index.html", (h) =>
       h
         .replace("noindex, nofollow", "index, follow")
-        .replaceAll("https://caring4acausesupportiveservices.com", "https://example.workers.dev"),
+        .replace("<head>", '<head><link rel="canonical" href="https://example.org/">')
+        .replaceAll('content="/og-image.jpg"', 'content="https://example.org/og-image.jpg"'),
     );
     writeFileSync(join(dir, "robots.txt"), "User-agent: *\nAllow: /\n");
     expectError(dir, /only https:\/\/caring4acausesupportiveservices\.com may be indexed/, {
       allowIndexing: true,
     });
+  });
+
+  // A preview names no address of its own (decision 99).
+  it("blocks a preview that names a canonical URL", () => {
+    const dir = brokenBuild("index.html", (h) =>
+      h.replace("<head>", '<head><link rel="canonical" href="https://example.org/">'),
+    );
+    expectError(dir, /a preview must not name a canonical URL/);
+  });
+
+  it("blocks a preview whose link-preview image is an address", () => {
+    const dir = brokenBuild("apply/index.html", (h) =>
+      h.replaceAll('content="/og-image.jpg"', 'content="https://example.org/og-image.jpg"'),
+    );
+    expectError(dir, /apply\/index\.html: a preview's og:image must be a path/);
+  });
+
+  it("blocks a page that names a workers.dev address", () => {
+    const dir = brokenBuild("donate/index.html", (h) =>
+      h.replace(
+        "</main>",
+        '<a href="https://caring-for-a-cause.example.workers.dev/">x</a></main>',
+      ),
+    );
+    expectError(dir, /donate\/index\.html: names a workers\.dev address/);
   });
 
   it("blocks a missing link-preview image", () => {
@@ -222,7 +249,10 @@ describe("publish gate", () => {
         '<link rel="canonical" href="https://caring4acausesupportiveservices.com/404/"></head>',
       ),
     );
-    expectError(canonical, /404\.html: the not-found page must not name a canonical URL/);
+    expectError(canonical, /404\.html: the not-found page must not name a canonical URL/, {
+      allowIndexing: true,
+    });
+    expectError(canonical, /404\.html: a preview must not name a canonical URL/);
     const indexed = brokenBuild("404.html", (h) => h.replace("noindex, nofollow", "index, follow"));
     expectError(indexed, /404\.html: the not-found page must never be indexed/, {
       allowIndexing: true,
