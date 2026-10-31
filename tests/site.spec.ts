@@ -2692,6 +2692,89 @@ test.describe("gallery", () => {
   });
 });
 
+test.describe("program tiles", () => {
+  // Below desktop the tiles strip is a loop: two copies of the four tiles,
+  // one either side, panning one way at the gallery's pace, and a swipe
+  // that settles past the real four is moved back among them (decision 101).
+  const tiles = "[data-tiles]";
+  const strip = (page: import("@playwright/test").Page) => page.locator(tiles);
+
+  test("below desktop, the copies are for the eye only and the four links are read once", async ({
+    page,
+  }) => {
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto("/");
+    await expect(strip(page).locator("> li")).toHaveCount(12);
+    const copies = strip(page).locator("> li[data-copy]");
+    await expect(copies).toHaveCount(8);
+    for (const copy of await copies.all()) {
+      await expect(copy).toHaveAttribute("aria-hidden", "true");
+      expect(await copy.evaluate((li) => (li as HTMLElement).inert)).toBe(true);
+      await expect(copy.locator("a")).toHaveAttribute("tabindex", "-1");
+    }
+    const nav = page.getByRole("navigation", { name: "Jump to a program" });
+    await expect(nav.getByRole("link")).toHaveCount(4);
+    // At rest the real tiles come first, where the strip always began: on
+    // the section's left edge.
+    const firstReal = strip(page).locator("> li:not([data-copy])").first();
+    const edge = (await page.locator("#programs-title").boundingBox())!.x;
+    expect(Math.abs((await firstReal.boundingBox())!.x - edge)).toBeLessThan(2);
+  });
+
+  test("a swipe that settles past either end comes back among the real tiles", async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto("/");
+    const period = await strip(page).evaluate((ul) => {
+      const lis = [...ul.children] as HTMLElement[];
+      const real = lis.find((li) => !li.hasAttribute("data-copy"))!;
+      return real.getBoundingClientRect().left - lis[0]!.getBoundingClientRect().left;
+    });
+    for (const to of ["end", "start"] as const) {
+      await strip(page).evaluate((ul, to) => {
+        ul.scrollLeft = to === "end" ? ul.scrollWidth : 0;
+      }, to);
+      // Among the real tiles: within the middle copy, a pixel of give.
+      await expect
+        .poll(
+          () =>
+            strip(page).evaluate(
+              (ul, period) => ul.scrollLeft >= period - 1 && ul.scrollLeft < 2 * period,
+              period,
+            ),
+          { message: `settled after a swipe to the ${to}`, timeout: 3000 },
+        )
+        .toBe(true);
+    }
+  });
+
+  test("below desktop, the strip pans on its own", async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: "no-preference" });
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto("/");
+    await strip(page).evaluate((ul) => ul.scrollIntoView({ block: "center", behavior: "instant" }));
+    const x = () =>
+      strip(page)
+        .locator("> li")
+        .first()
+        .evaluate((li) => li.getBoundingClientRect().left);
+    const before = await x();
+    await expect.poll(async () => before - (await x()), { timeout: 8000 }).toBeGreaterThan(40);
+    await expect(strip(page)).toHaveClass(/is-gliding/);
+  });
+
+  test("on desktop the four tiles stand still and are not copied", async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: "no-preference" });
+    await page.setViewportSize({ width: 1280, height: 900 });
+    await page.goto("/");
+    await strip(page).evaluate((ul) => ul.scrollIntoView({ block: "center", behavior: "instant" }));
+    await page.waitForTimeout(1500);
+    await expect(strip(page).locator("> li")).toHaveCount(4);
+    await expect(strip(page)).not.toHaveClass(/is-gliding/);
+  });
+});
+
 test.describe("videos", () => {
   test("no image on the site is fetched from YouTube", async ({ page }) => {
     const external: string[] = [];

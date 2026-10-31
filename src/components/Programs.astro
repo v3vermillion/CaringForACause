@@ -30,7 +30,7 @@ const applyHref = links.familyApplication ?? getHelp.action.href;
 
     <!-- Jump tiles: one per program, so the whole offering fits one glance. -->
     <nav class="tiles" aria-label="Jump to a program">
-      <ul>
+      <ul data-tiles>
         {active.map((program) => (
           <li>
             <a class="tile surface" href={`#${program.slug}`}>
@@ -176,6 +176,66 @@ const applyHref = links.familyApplication ?? getHelp.action.href;
   </div>
 </section>
 
+<script>
+  import { glide, type Glide } from "../data/glide.ts";
+
+  // Below desktop the tiles are a sideways strip, and it runs as a loop
+  // (decision 101): two copies of the four tiles, one either side, so the
+  // strip pans one way for ever at the gallery's pace and a reader's swipe
+  // never reaches an end. The copies are for the eye only: hidden from
+  // assistive technology, out of the tab order and inert, so the four real
+  // links are read and reached once. On desktop the four sit in a grid that
+  // fits, and nothing is copied or moved.
+  const list = document.querySelector<HTMLElement>("[data-tiles]");
+  if (list) {
+    const strip = list;
+    const originals = Array.from(strip.children) as HTMLElement[];
+    const scrolls = matchMedia("(max-width: 55.99rem)");
+    let pan: Glide | null = null;
+    let copies: HTMLElement[] = [];
+
+    const copy = () =>
+      originals.map((li) => {
+        const clone = li.cloneNode(true) as HTMLElement;
+        clone.dataset.copy = "";
+        clone.setAttribute("aria-hidden", "true");
+        clone.inert = true;
+        clone.querySelectorAll("a").forEach((a) => a.setAttribute("tabindex", "-1"));
+        // The same files as the real tiles', so already fetched: loaded at
+        // once, a copy never slides into view still blank.
+        clone.querySelectorAll("img").forEach((img) => (img.loading = "eager"));
+        return clone;
+      });
+    // One copy's width: from the first tile of the copy before to the first
+    // real tile.
+    const period = () =>
+      originals[0]!.getBoundingClientRect().left - copies[0]!.getBoundingClientRect().left;
+
+    const setup = () => {
+      const before = copy();
+      const after = copy();
+      copies = [...before, ...after];
+      strip.prepend(...before);
+      strip.append(...after);
+      // The view the strip had at rest: the real tiles first.
+      strip.scrollLeft = period();
+      pan = glide(strip, { speed: 107.5, period });
+    };
+    const teardown = () => {
+      pan?.destroy();
+      pan = null;
+      copies.forEach((clone) => clone.remove());
+      copies = [];
+      strip.scrollLeft = 0;
+    };
+    if (scrolls.matches) setup();
+    scrolls.addEventListener("change", () => {
+      teardown();
+      if (scrolls.matches) setup();
+    });
+  }
+</script>
+
 <style>
   /* The section starts under the wave from the night band (--wave-h), so its
      top padding is the wave plus the usual section space. */
@@ -279,6 +339,9 @@ const applyHref = links.familyApplication ?? getHelp.action.href;
     scroll-snap-type: x mandatory;
     scroll-padding-inline: var(--gutter);
     scrollbar-width: none;
+    /* The loop sets its own scroll position when it adds the copies; the
+       browser must not shift it again to keep a tile in place. */
+    overflow-anchor: none;
     -webkit-overflow-scrolling: touch;
     -webkit-mask-image: linear-gradient(
       90deg,
@@ -298,6 +361,18 @@ const applyHref = links.familyApplication ?? getHelp.action.href;
 
   .tiles ul::-webkit-scrollbar {
     display: none;
+  }
+
+  /* The loop's glide (decision 101): while it drives the strip no snap pulls
+     at it, and every tile moves by the same transform, in fractions of a
+     pixel. */
+  .tiles ul.is-panning {
+    scroll-snap-type: none;
+  }
+
+  .tiles ul.is-gliding > li {
+    transform: translate3d(calc(var(--pan, 0) * -1px), 0, 0);
+    will-change: transform;
   }
 
   .tiles li {
