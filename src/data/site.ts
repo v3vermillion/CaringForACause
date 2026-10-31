@@ -185,7 +185,8 @@ export const seasonalBanner = {
  * preview: a public build (PUBLIC_ALLOW_INDEXING=true) leaves it out
  * (decision 88).
  * The words are the owner's gift message, not claims about the organization;
- * "thousands" agrees with the press-reported 5,000 families (decision 79).
+ * "thousands" agrees with the press-reported count of over 5,000 families
+ * (decision 79), which About also says as "thousands" (decision 92).
  * Each slide holds its lines on screen for `hold` milliseconds, counted after
  * the slide has faded in: a short slide holds less than a long one. Lines
  * within a slide arrive one after another. `accent` sets a line in the
@@ -672,9 +673,11 @@ export const about = {
   eyebrow: "About",
   heading: `Meet ${claim(facts.founder)}`,
   body: [
-    `${claim(facts.founder).split(" ")[0]} founded ${org.shortName} in ${claim(facts.founded)} to support families in ${claim(facts.serviceArea)} who are facing financial hardship. Year after year since then, she and her volunteers have helped more than ${claim(facts.familiesHelped).toLocaleString("en-US")} families.`,
-    // The count is the press-reported running total (decision 79); "she and
-    // her volunteers" is the organization, which is volunteer-run (decision 92).
+    `${claim(facts.founder).split(" ")[0]} founded ${org.shortName} in ${claim(facts.founded)} to support families in ${claim(facts.serviceArea)} who are facing financial hardship. Year after year since then, she and her volunteers have helped thousands of families.`,
+    // "Thousands", not the press-reported 5,000 (decision 79): that count is
+    // from 2023 and the owner believes the true one is well above it, so the
+    // page claims only what the record supports (decision 92). "She and her
+    // volunteers" is the organization, which is volunteer-run.
     // Her website's "Our Team" and "Our History": part-time volunteers
     // committed to helping others; grown thanks to the community's helping hands.
     "Her part-time volunteers are committed to helping others, and the organization has grown thanks to the helping hands of this community.",
