@@ -2599,7 +2599,9 @@ test.describe("gallery", () => {
     await page.goto("/");
     const section = page.locator("#gallery");
     await expect(section.locator(".eyebrow")).toHaveText("Gallery");
-    await expect(section.locator(".lede")).toBeVisible();
+    await expect(section.locator("h2")).toHaveText("Moments from our programs");
+    // No lede: the photos say it themselves (decision 97).
+    await expect(section.locator(".lede")).toHaveCount(0);
     const gap = await page.evaluate(() => {
       const wave = document.querySelector("#about .wave-bottom")!.getBoundingClientRect();
       const eyebrow = document.querySelector("#gallery .eyebrow")!.getBoundingClientRect();

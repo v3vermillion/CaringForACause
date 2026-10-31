@@ -696,13 +696,12 @@ export const about = {
 };
 
 /**
- * The gallery's opener, set like every other section's: label, heading, one
- * lede line (decision 94). The lede names what the photos show, nothing more.
+ * The gallery's opener: label and heading (decision 94). No lede: the photos
+ * are directly below and say it themselves (decision 97).
  */
 export const gallerySection = {
   eyebrow: "Gallery",
   heading: "Moments from our programs",
-  lede: "Easter baskets, toy tables, the diaper pantry, and a holiday dinner, in our own photos.",
 };
 
 /** Photos from src/assets/photos/ shown in the gallery strip. Fewer than four hides the section. */
