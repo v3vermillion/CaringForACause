@@ -495,15 +495,15 @@ export const programs: Program[] = [
     label: "Hygiene and school supplies",
     summary: "Hygiene items and school supplies for girls and boys in our community.",
     forWhom: "Students from families who need help getting ready for school.",
-    /* No photo of this program exists in any album (decision 90). The
-       basket is an Easter food basket, but a real basket being carried to a
-       family is nearer the row's subject than an icon, which read as a hole
-       beside three photos (the owner's call). A care-package photo from
-       Tamara replaces it. */
+    /* No photo of this program exists in her albums (decision 90). This
+       one is the site's single stock photo, a one-time exception the owner
+       made (decision 104): real supplies in a real room, no people, under
+       the free Unsplash License (Laura Rivera, unsplash.com/photos/
+       ArH3dtoDQc0). A care-package photo from Tamara replaces it. */
     photo: {
-      file: "care-basket.jpg",
-      alt: "A woman carries a wrapped basket of food and care items to a family",
-      focus: "center 28%",
+      file: "school-supplies.jpg",
+      alt: "Buckets of colored pencils, school scissors, pencils and highlighters on a shelf",
+      focus: "center 45%",
     },
     checklist: {
       title: "See what we're collecting",
