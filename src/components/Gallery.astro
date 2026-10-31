@@ -1,5 +1,5 @@
 ---
-import { gallery } from "../data/site";
+import { gallery, gallerySection } from "../data/site";
 import Photo from "./Photo.astro";
 
 // A strip needs enough photos to read as one; fewer than four looks unfinished.
@@ -7,13 +7,21 @@ const show = gallery.length >= 4;
 ---
 
 {show && (
-  <section class="section section--lilac ground ground--lilac" aria-labelledby="gallery-title">
+  <section
+    class="section section--lilac ground ground--lilac"
+    id="gallery"
+    aria-labelledby="gallery-title"
+  >
     <div class="wrap">
-      <h2 id="gallery-title">Moments from our programs</h2>
+      <header class="head">
+        <span class="eyebrow">{gallerySection.eyebrow}</span>
+        <h2 id="gallery-title">{gallerySection.heading}</h2>
+        <p class="lede">{gallerySection.lede}</p>
+      </header>
       {/* The row scrolls sideways and holds no links, so it takes focus
           itself: keyboard readers reach it with Tab and move it with the
           arrow keys (axe's scrollable-region rule). Its name is the heading. */}
-      <ul class="moments" tabindex="0" aria-labelledby="gallery-title">
+      <ul class="moments" tabindex="0" aria-labelledby="gallery-title" data-moments>
         {gallery.map((photo) => (
           <li>
             <Photo photo={photo} ratio="4 / 5" sizes="(min-width: 40rem) 320px, 80vw" />
@@ -24,9 +32,162 @@ const show = gallery.length >= 4;
   </section>
 )}
 
+<script>
+  // The strip pans on its own while it is on screen: end to end and back,
+  // at a walking pace, easing into each turn, so every photo crosses the
+  // screen without a hand on it (decision 94). A hand wins at once: a
+  // pointer resting on it or focus in it holds the pan; a wheel, a touch, a
+  // press or a key hands the strip over, and the pan picks up again from
+  // wherever it was left eight seconds after the last touch. The strip's
+  // snap is off only while the pan drives it, so a swipe still settles on a
+  // photo. Readers who ask for less motion get the still strip.
+  const strip = document.querySelector<HTMLElement>("[data-moments]");
+  if (strip && matchMedia("(prefers-reduced-motion: no-preference)").matches) {
+    const SPEED = 40; // px/s on the open run
+    const RAMP = 260; // px over which a run eases in and out
+    const TURN = 1600; // ms held at each end
+    const HAND = 8000; // ms a hand on the strip holds it after letting go
+    let dir = 1;
+    let origin = 0; // where the current run began: the ramp is measured from it
+    // The pan's own position, carried between frames: at a walking pace a
+    // frame moves a fraction of a pixel, and scrollLeft gives back whole ones.
+    let pos = 0;
+    let placed = 0; // where the last frame left the strip, as the strip reports it
+    let running = false;
+    let frame = 0;
+    let last = 0;
+    let turnUntil = 0;
+    let inView = false;
+    let hovered = false;
+    let focused = false;
+    let handUntil = 0;
+    let handTimer = 0;
+    let handed = false; // a gesture has the strip: its snap returns once it settles
+    let settleTimer = 0;
+
+    const smooth = (t: number) => {
+      const c = Math.min(1, Math.max(0, t));
+      return c * c * (3 - 2 * c);
+    };
+    const span = () => strip.scrollWidth - strip.clientWidth;
+
+    const tick = (now: number) => {
+      if (!running) return;
+      const dt = Math.min((now - last) / 1000, 0.1);
+      last = now;
+      // Moved since the last frame by something other than the pan (a
+      // scrollbar, a script, find in page): that is a hand too.
+      if (Math.abs(strip.scrollLeft - placed) > 1) {
+        hand();
+        return;
+      }
+      if (now >= turnUntil) {
+        const x = pos;
+        const end = span();
+        const toEnd = dir > 0 ? end - x : x;
+        const fromStart = Math.abs(x - origin);
+        const v = SPEED * Math.max(0.1, smooth(Math.min(toEnd, fromStart + RAMP * 0.25) / RAMP));
+        const next = x + dir * v * dt;
+        if ((dir > 0 && next >= end - 0.5) || (dir < 0 && next <= 0.5)) {
+          pos = dir > 0 ? end : 0;
+          strip.scrollLeft = pos;
+          placed = strip.scrollLeft;
+          origin = pos;
+          dir = -dir;
+          turnUntil = now + TURN;
+        } else {
+          pos = next;
+          strip.scrollLeft = pos;
+          placed = strip.scrollLeft;
+        }
+      }
+      frame = requestAnimationFrame(tick);
+    };
+    const start = () => {
+      if (running || !inView || hovered || focused || document.hidden) return;
+      if (performance.now() < handUntil) return;
+      if (span() <= 0) return;
+      running = true;
+      pos = strip.scrollLeft;
+      placed = pos;
+      origin = pos;
+      strip.classList.add("is-panning");
+      last = performance.now();
+      frame = requestAnimationFrame(tick);
+    };
+    const stop = () => {
+      running = false;
+      cancelAnimationFrame(frame);
+    };
+    // The strip is handed over: the pan stops, its snap comes back once the
+    // gesture has settled (the snap would otherwise pull the strip to the
+    // nearest photo the moment it returned), and the pan returns after the
+    // hand's hold. A pointer or focus merely resting on the strip holds it
+    // where it is, snap still off, so nothing moves under a still hand.
+    const settle = () => {
+      if (!handed) return;
+      clearTimeout(settleTimer);
+      settleTimer = window.setTimeout(() => {
+        handed = false;
+        strip.classList.remove("is-panning");
+      }, 160);
+    };
+    const hand = () => {
+      stop();
+      handed = true;
+      handUntil = performance.now() + HAND;
+      clearTimeout(handTimer);
+      handTimer = window.setTimeout(start, HAND);
+      settle();
+    };
+
+    strip.addEventListener("pointerenter", (event) => {
+      if (event.pointerType !== "mouse") return;
+      hovered = true;
+      stop();
+    });
+    strip.addEventListener("pointerleave", (event) => {
+      if (event.pointerType !== "mouse") return;
+      hovered = false;
+      start();
+    });
+    strip.addEventListener("focusin", () => {
+      focused = true;
+      stop();
+    });
+    strip.addEventListener("focusout", () => {
+      focused = false;
+      start();
+    });
+    for (const type of ["wheel", "touchstart", "pointerdown", "keydown"] as const)
+      strip.addEventListener(type, hand, { passive: true });
+    strip.addEventListener("scroll", settle, { passive: true });
+
+    new IntersectionObserver(
+      ([entry]) => {
+        inView = entry?.isIntersecting ?? false;
+        if (inView) start();
+        else stop();
+      },
+      { threshold: 0.35 },
+    ).observe(strip);
+    document.addEventListener("visibilitychange", () => (document.hidden ? stop() : start()));
+  }
+</script>
+
 <style>
-  h2 {
-    margin-bottom: var(--space-m);
+  /* The About wave opens the section, so the head sits a --space-l under
+     it, as the Programs head sits under its own wave (decision 93). */
+  .section {
+    padding-top: var(--space-l);
+  }
+
+  .head {
+    margin-bottom: var(--space-l);
+  }
+
+  .head .lede {
+    margin-top: var(--space-s);
   }
 
   /* The strip bleeds to the screen's edges and dissolves there, as the
@@ -56,6 +217,15 @@ const show = gallery.length >= 4;
       #000 calc(100% - var(--gutter)),
       transparent
     );
+  }
+
+  /* While the pan drives the strip, no snap pulls at it. */
+  .moments.is-panning {
+    scroll-snap-type: none;
+  }
+
+  .moments::-webkit-scrollbar {
+    display: none;
   }
 
   /* The ring sits inside the row's own padding, so the fading edges keep

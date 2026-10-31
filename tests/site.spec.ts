@@ -2570,6 +2570,59 @@ test.describe("without JavaScript", () => {
   });
 });
 
+test.describe("gallery", () => {
+  // The strip pans on its own while it is on screen; a hand on it wins; a
+  // reader who asks for less motion gets the still strip (decision 94).
+  const bring = async (page: import("@playwright/test").Page) => {
+    await page.goto("/");
+    await page
+      .locator("[data-moments]")
+      .evaluate((el) => el.scrollIntoView({ block: "center", behavior: "instant" }));
+  };
+  const left = (page: import("@playwright/test").Page) =>
+    page.locator("[data-moments]").evaluate((el) => el.scrollLeft);
+
+  test("opens like every other section, a --space-l under the wave", async ({ page }) => {
+    await page.goto("/");
+    const section = page.locator("#gallery");
+    await expect(section.locator(".eyebrow")).toHaveText("Gallery");
+    await expect(section.locator(".lede")).toBeVisible();
+    const gap = await page.evaluate(() => {
+      const wave = document.querySelector("#about .wave-bottom")!.getBoundingClientRect();
+      const eyebrow = document.querySelector("#gallery .eyebrow")!.getBoundingClientRect();
+      const programs = document.querySelector("#programs .eyebrow")!.getBoundingClientRect();
+      const programsWave = document.querySelector("#programs .wave-in")!.getBoundingClientRect();
+      return [eyebrow.top - wave.bottom, programs.top - programsWave.bottom];
+    });
+    expect(Math.abs(gap[0]! - gap[1]!)).toBeLessThan(2);
+  });
+
+  test("pans on its own once on screen, and stops under a pointer", async ({ page, hasTouch }) => {
+    await page.emulateMedia({ reducedMotion: "no-preference" });
+    await bring(page);
+    const strip = page.locator("[data-moments]");
+    await expect.poll(() => left(page), { timeout: 8000 }).toBeGreaterThan(8);
+    await expect(strip).toHaveClass(/is-panning/);
+    test.skip(hasTouch, "a pointer resting on the strip is a mouse gesture");
+    await strip.hover();
+    const held = await left(page);
+    await page.waitForTimeout(700);
+    expect(Math.abs((await left(page)) - held)).toBeLessThan(1);
+    // Taking the wheel hands the strip over, and its snap comes back.
+    await page.mouse.wheel(0, 0);
+    await strip.dispatchEvent("wheel");
+    await expect(strip).not.toHaveClass(/is-panning/);
+  });
+
+  test("stays still for a reader who asks for less motion", async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    await bring(page);
+    await page.waitForTimeout(2500);
+    expect(await left(page)).toBe(0);
+    await expect(page.locator("[data-moments]")).not.toHaveClass(/is-panning/);
+  });
+});
+
 test.describe("videos", () => {
   test("no image on the site is fetched from YouTube", async ({ page }) => {
     const external: string[] = [];
