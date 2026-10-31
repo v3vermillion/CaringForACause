@@ -2235,7 +2235,7 @@ test.describe("application page", () => {
     await expect(page.locator("[data-step=you]")).toBeVisible();
   });
 
-  test("a county outside the list is named in a box that opens under the picker", async ({
+  test("a county outside the list is named in a Please-specify box that opens under the picker", async ({
     page,
   }) => {
     await page.goto("/apply");
@@ -2249,9 +2249,15 @@ test.describe("application page", () => {
     await page.locator("#street").fill("1 Main St");
     await page.locator("#city").fill("Tipton");
     await page.locator("#zip").fill("46072");
+    // The step, not the card: the card's button row changes with the way in.
+    const sheet = page.locator("[data-step=household]");
+    const closedHeight = (await sheet.boundingBox())!.height;
     await page.locator("#county").selectOption("Other");
     await expect(box).toBeVisible();
     await expect(box).toBeFocused();
+    await expect(page.locator("label[for=countyOther]")).toHaveText("Please specify");
+    // The card grows for the box and no other field moves sideways.
+    expect((await sheet.boundingBox())!.height).toBeGreaterThan(closedHeight + 40);
     // The name is required while the box is open.
     await pressAndSettle(page, "[data-next]");
     await expect(box).toHaveAttribute("aria-invalid", "true");
@@ -2269,6 +2275,8 @@ test.describe("application page", () => {
     await page.locator("[data-review] [data-goto='1']").click();
     await page.locator("#county").selectOption("Hamilton");
     await expect(box).toBeHidden();
+    // The card returns to the height it had before the box opened.
+    expect(Math.abs((await sheet.boundingBox())!.height - closedHeight)).toBeLessThan(1);
     await pressAndSettle(page, "[data-next]");
     await expect(page.locator("[data-review]")).toContainText("Hamilton County");
     await expect(page.locator("[data-review]")).not.toContainText("Tipton County");
