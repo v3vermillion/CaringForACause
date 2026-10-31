@@ -135,8 +135,17 @@ export function ring(list: HTMLElement, options: RingOptions): Ring {
     last = performance.now();
     frame = requestAnimationFrame(tick);
   };
-  const tick = (now: number) => {
-    const dt = Math.min((now - last) / 1000, 0.1);
+  const tick = () => {
+    // One clock for every frame: a frame's own timestamp can be older than
+    // the moment the motion began (WebKit stamps a late frame with its
+    // display time), which made a negative step that ran the motion
+    // backwards and grew a throw instead of slowing it.
+    // A step may run up to a quarter second, so a throw ends in about the
+    // same real time when frames come slowly (a busy phone, a headless
+    // browser drew 13 a second): at a tenth of a second the motion's own
+    // clock stopped between slow frames and a throw took five seconds.
+    const now = performance.now();
+    const dt = Math.min(Math.max((now - last) / 1000, 0), 0.25);
     last = now;
     if (mode === "pan") {
       const v = speed * Math.max(0.1, smooth((x - panFrom + ramp * 0.25) / ramp));

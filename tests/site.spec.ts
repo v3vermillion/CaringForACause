@@ -2759,7 +2759,9 @@ test.describe("program tiles", () => {
       await expect
         .poll(async () => (await shown(page)).some((t) => Math.abs(t.left - edge) < 2), {
           message: `settled on a tile after a drag of ${by}px`,
-          timeout: 6000,
+          // A throw runs about a second and a half; a headless browser
+          // draws far fewer frames than a phone.
+          timeout: 12000,
         })
         .toBe(true);
       const ids = (await shown(page)).map((t) => t.id);
@@ -2780,7 +2782,7 @@ test.describe("program tiles", () => {
     const where = async () =>
       `${(await shown(page)).map((t) => `${t.id}@${Math.round(t.left)}`).join(" ")} (edge ${Math.round(edge)}, hash "${new URL(page.url()).hash}", ${await strip(page).getAttribute("class")})`;
     try {
-      await expect.poll(atEdge, { timeout: 6000 }).toBeTruthy();
+      await expect.poll(atEdge, { timeout: 12000 }).toBeTruthy();
     } catch {
       throw new Error(`the ring did not settle on a tile: ${await where()}`);
     }

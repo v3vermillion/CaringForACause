@@ -66,9 +66,14 @@ export function glide(strip: HTMLElement, options: GlideOptions): Glide {
 
   const span = () => strip.scrollWidth - strip.clientWidth;
 
-  const tick = (now: number) => {
+  const tick = () => {
     if (!running) return;
-    const dt = Math.min((now - last) / 1000, 0.1);
+    // One clock for every frame: a frame's own timestamp can be older than
+    // the moment the motion began (WebKit stamps a late frame with its
+    // display time), which made a negative step that ran the motion
+    // backwards and grew a throw instead of slowing it.
+    const now = performance.now();
+    const dt = Math.min(Math.max((now - last) / 1000, 0), 0.1);
     last = now;
     // Scrolled by something other than the pan: that is a hand too.
     if (Math.abs(strip.scrollLeft - base) > 1) {
