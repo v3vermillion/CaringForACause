@@ -837,3 +837,9 @@ The publish gate's viewport-unit scan read a hashed asset name (`…Zwy0VB.webp`
 **Decision:** The gallery opens with its label and heading only. The lede ("Easter baskets, toy tables, the diaper pantry, and a holiday dinner, in our own photos") is gone, and the arrows for a mouse sit beside the heading instead of on the lede's baseline. The photos stand about 70px higher on a phone.
 
 **Why:** The owner asked whether it should stay. The heading already says what the section is, and the line only narrated photos directly under it; it named four of fourteen, so it would drift as photos change, and "in our own photos" read as defensive. What had made the heading look unfinished was the missing label and lit rule (decision 94), and those stay.
+
+## 98. Node 22.23.4 is the floor, from Astro 7.4
+
+**Decision:** The `engines` floor in `package.json` and the README's requirement go from Node 22.18 to 22.23.4, the floor Astro 7.4 declares (7.4.0 asked for 22.22). CI and Cloudflare Workers Builds are unaffected: `.nvmrc` selects Node 24 for both. The Playwright MCP server in `.mcp.json` moves from 0.0.80 to 0.0.83, the last release built on Playwright 1.64, to stay on the release the tests use (decision 76).
+
+**Why:** Dependabot's minor-and-patch group moved Astro from 7.3.5 to 7.4, and Astro refuses to run below its floor, so a checkout on an older Node 22 fails at the first build with "Node.js is not supported by Astro". The stated floor should be the real one.

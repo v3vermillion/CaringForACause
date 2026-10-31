@@ -18,7 +18,7 @@ Website for [Caring for a Cause Supportive Services Inc.](https://caring4acauses
 - Hosted on Cloudflare Workers static assets (`wrangler.jsonc`, `public/_headers`)
 - GitHub Actions runs formatting, type checks, the gated build, browser tests on 10 devices, and Lighthouse budgets on every pull request
 
-Requires Node.js 22.18 or later (the gate tests import TypeScript files, which Node runs as-is from 22.18); `.nvmrc` selects the version CI and Cloudflare use.
+Requires Node.js 22.23.4 or later (Astro 7.4's floor; the gate tests also import TypeScript files, which Node runs as-is from 22.18); `.nvmrc` selects the version CI and Cloudflare use (24).
 
 ## Welcome
 
