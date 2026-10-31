@@ -177,32 +177,46 @@ export function validateBuild(dist, { allowIndexing }) {
     if (!/^([0-9a-f]{7}|local)$/.test(meta('meta[name="version"]')))
       fail(`${name}: missing build version meta tag`);
 
-    // Canonical URL and link preview. The not-found page has no address of
-    // its own (it answers any missing one), so it names none; its preview
+    // Canonical URL and link preview. Only a public build names the site's
+    // address (decision 99): a preview names none, and its preview image is a
+    // path. The not-found page has no address of its own (it answers any
+    // missing one), so it never names one; in a public build its preview
     // image is checked against the home page's host instead.
     const notFound = page === "404.html";
     const canonical = doc.querySelector('link[rel="canonical"]')?.getAttribute("href") ?? "";
-    let origin = "";
-    if (notFound) {
-      if (canonical) fail(`${name}: the not-found page must not name a canonical URL`);
-      if (meta('meta[property="og:url"]')) fail(`${name}: the not-found page must not name og:url`);
-      origin = siteOrigin;
-    } else {
-      try {
-        origin = new URL(canonical).origin;
-      } catch {
-        fail(`${name}: canonical URL is not absolute: "${canonical}"`);
-      }
-    }
     const ogImage = meta('meta[property="og:image"]');
-    try {
-      const og = new URL(ogImage);
-      if (og.origin !== origin)
-        fail(`${name}: og:image (${ogImage}) is not on the canonical host (${origin})`);
-      if (!existsSync(join(dist, og.pathname)))
-        fail(`${name}: og:image file not in build: ${og.pathname}`);
-    } catch {
-      fail(`${name}: og:image is missing or not absolute: "${ogImage}"`);
+    let origin = "";
+    if (/\.workers\.dev\b/.test(raw))
+      fail(`${name}: names a workers.dev address, which is the preview host, not the site's`);
+    if (!allowIndexing) {
+      if (canonical) fail(`${name}: a preview must not name a canonical URL ("${canonical}")`);
+      if (meta('meta[property="og:url"]')) fail(`${name}: a preview must not name og:url`);
+      if (!ogImage.startsWith("/") || ogImage.startsWith("//"))
+        fail(`${name}: a preview's og:image must be a path, not an address: "${ogImage}"`);
+      else if (!existsSync(join(dist, ogImage)))
+        fail(`${name}: og:image file not in build: ${ogImage}`);
+    } else {
+      if (notFound) {
+        if (canonical) fail(`${name}: the not-found page must not name a canonical URL`);
+        if (meta('meta[property="og:url"]'))
+          fail(`${name}: the not-found page must not name og:url`);
+        origin = siteOrigin;
+      } else {
+        try {
+          origin = new URL(canonical).origin;
+        } catch {
+          fail(`${name}: canonical URL is not absolute: "${canonical}"`);
+        }
+      }
+      try {
+        const og = new URL(ogImage);
+        if (og.origin !== origin)
+          fail(`${name}: og:image (${ogImage}) is not on the canonical host (${origin})`);
+        if (!existsSync(join(dist, og.pathname)))
+          fail(`${name}: og:image file not in build: ${og.pathname}`);
+      } catch {
+        fail(`${name}: og:image is missing or not absolute: "${ogImage}"`);
+      }
     }
     if (meta('meta[name="twitter:image"]') !== ogImage)
       fail(`${name}: twitter:image does not match og:image`);
@@ -234,8 +248,9 @@ export function validateBuild(dist, { allowIndexing }) {
         fail(`${name}: structured data @type is "${data["@type"]}", expected "NGO"`);
       if (!/^\d{2}-\d{7}$/.test(data.taxID ?? ""))
         fail(`${name}: structured data taxID (EIN) is missing or malformed`);
-      if (page === "index.html" && data.url !== canonical)
+      if (page === "index.html" && allowIndexing && data.url !== canonical)
         fail("Structured data url does not match the canonical URL");
+      if (!allowIndexing && data.url) fail(`${name}: a preview's structured data names a url`);
     } catch {
       fail(`${name}: structured data is missing or is not valid JSON`);
     }

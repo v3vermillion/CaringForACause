@@ -136,7 +136,7 @@ Cloudflare Workers Builds deploys every commit on `main`, running `npm run build
 1. **Before `main`:** the ruleset only lets a pull request merge after the full browser-test check passes.
 2. **During the build:** `npm run build` type-checks and validates the site; if it fails, nothing is published and the last good version stays live.
 
-Other branches are not built. Cloudflare builds automatically use the workers.dev preview address for the canonical URL and link-preview image (see `astro.config.mjs`).
+Other branches are not built. A preview build (indexing off) names no address of its own: no canonical URL or `og:url`, and the link-preview image by its path. Only a public build names the site's address (decision 99).
 
 Every page includes `<meta name="version">` with the commit it was built from. After each merge, the live site check waits for that tag to match, which confirms the deploy happened.
 

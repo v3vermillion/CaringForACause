@@ -2829,6 +2829,41 @@ test.describe("videos", () => {
   });
 });
 
+test.describe("analytics", () => {
+  // Cloudflare Web Analytics adds its beacon to pages served on her domain.
+  // The policy lets that one script load and report, and nothing else from
+  // outside (decision 100). The beacon is stood in for here: the test's
+  // server never adds it, and the test must not reach Cloudflare.
+  test("the policy lets Cloudflare's analytics beacon load and report", async ({ page }) => {
+    let reported = false;
+    await page.route("https://static.cloudflareinsights.com/**", (route) =>
+      route.fulfill({
+        contentType: "application/javascript",
+        body: 'fetch("https://cloudflareinsights.com/cdn-cgi/rum", { method: "POST", body: "{}" }).catch(() => {});',
+      }),
+    );
+    await page.route("https://cloudflareinsights.com/**", (route) => {
+      reported = true;
+      return route.fulfill({ status: 204, headers: { "access-control-allow-origin": "*" } });
+    });
+    await page.route("/", async (route) => {
+      const response = await fetchPage(route);
+      const body = (await response.text()).replace(
+        "</body>",
+        `<script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token":"test"}'></script></body>`,
+      );
+      await route.fulfill({ response, body });
+    });
+    const blocked: string[] = [];
+    page.on("console", (message) => {
+      if (/Content Security Policy/i.test(message.text())) blocked.push(message.text());
+    });
+    await page.goto("/");
+    await expect.poll(() => reported, { timeout: 5000 }).toBe(true);
+    expect(blocked).toEqual([]);
+  });
+});
+
 test.describe("search and sharing", () => {
   // Blocked everywhere until launch; after launch (PUBLIC_ALLOW_INDEXING),
   // the production domain alone is indexed. The page and robots.txt agree.
@@ -2851,17 +2886,29 @@ test.describe("search and sharing", () => {
     expect(robots).toContain("User-agent: Twitterbot");
   });
 
-  test("page has a title, description, canonical URL, and sharing image", async ({
+  test("page has a title, description, sharing image, and an address only when public", async ({
     page,
     request,
   }) => {
-    await page.goto("/");
+    const response = await page.goto("/");
     await expect(page).toHaveTitle(/Caring for a Cause/);
     await expect(page.locator('meta[name="description"]')).toHaveAttribute("content", /.{50,}/);
-    await expect(page.locator('link[rel="canonical"]')).toHaveAttribute("href", expectedSite);
     const og = await page.locator('meta[property="og:image"]').getAttribute("content");
-    expect(new URL(og!).origin).toBe(new URL(expectedSite).origin);
-    const image = await request.get(new URL(og!).pathname);
+    // Only a public build names the site's address; a preview names none and
+    // gives its preview image by path (decision 99). No page names the
+    // preview host, which carries the account it runs under.
+    expect(await response!.text()).not.toMatch(/\.workers\.dev\b/);
+    const indexed =
+      (await page.locator('meta[name="robots"]').getAttribute("content")) === "index, follow";
+    if (indexed) {
+      await expect(page.locator('link[rel="canonical"]')).toHaveAttribute("href", expectedSite);
+      expect(new URL(og!).origin).toBe(new URL(expectedSite).origin);
+    } else {
+      await expect(page.locator('link[rel="canonical"]')).toHaveCount(0);
+      await expect(page.locator('meta[property="og:url"]')).toHaveCount(0);
+      expect(og).toBe("/og-image.jpg");
+    }
+    const image = await request.get(new URL(og!, expectedSite).pathname);
     expect(image.status()).toBe(200);
     expect(image.headers()["content-type"]).toContain("image/jpeg");
     await expect(page.locator('meta[name="twitter:image"]')).toHaveAttribute("content", og!);
@@ -2882,7 +2929,9 @@ test.describe("search and sharing", () => {
     expect(data["@type"]).toBe("NGO");
     expect(data.taxID).toBe(claim(facts.ein));
     expect(data.nonprofitStatus).toBe("Nonprofit501c3");
-    expect(data.url).toBe(expectedSite);
+    const indexed =
+      (await page.locator('meta[name="robots"]').getAttribute("content")) === "index, follow";
+    expect(data.url).toBe(indexed ? expectedSite : undefined);
   });
 
   test("web manifest and icons load", async ({ request }) => {
