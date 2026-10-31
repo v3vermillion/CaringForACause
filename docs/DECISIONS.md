@@ -838,6 +838,12 @@ The publish gate's viewport-unit scan read a hashed asset name (`…Zwy0VB.webp`
 
 **Why:** The owner asked whether it should stay. The heading already says what the section is, and the line only narrated photos directly under it; it named four of fourteen, so it would drift as photos change, and "in our own photos" read as defensive. What had made the heading look unfinished was the missing label and lit rule (decision 94), and those stay.
 
+## 98. Node 22.23.4 is the floor, from Astro 7.4
+
+**Decision:** The `engines` floor in `package.json` and the README's requirement go from Node 22.18 to 22.23.4, the floor Astro 7.4 declares (7.4.0 asked for 22.22). CI and Cloudflare Workers Builds are unaffected: `.nvmrc` selects Node 24 for both. The Playwright MCP server in `.mcp.json` moves from 0.0.80 to 0.0.83, the last release built on Playwright 1.64, to stay on the release the tests use (decision 76).
+
+**Why:** Dependabot's minor-and-patch group moved Astro from 7.3.5 to 7.4, and Astro refuses to run below its floor, so a checkout on an older Node 22 fails at the first build with "Node.js is not supported by Astro". The stated floor should be the real one.
+
 ## 101. The gallery pans at 2.5 times its pace, and the program tiles loop
 
 **Decision:** The gallery's pan runs at 107.5px a second, 2.5 times decision 96's 43. Below desktop the program tiles strip under "What we do, all year" runs the same pan as a loop: the script adds a copy of the four tiles on either side, the strip glides one way at the gallery's pace without end, and a swipe that settles past the real four is moved, invisibly, back among them, so a reader can keep swiping either way. The copies are for the eye only: hidden from assistive technology, inert and out of the tab order, so the four real links are read and reached once. On desktop the four stand in their grid, uncopied and still. Both strips share one module, `src/data/glide.ts`, with decision 94's hand rules (a resting mouse or focus holds the pan; any gesture hands the strip over for eight seconds) and decision 96's transform glide. Reduced motion stops both pans; the tiles still loop under a swipe. Without JavaScript the tiles are the plain strip. Tests: the copies' hiding and the four links, the swipe loop from both ends, the pan, and the still desktop grid.
