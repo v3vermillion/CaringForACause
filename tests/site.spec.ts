@@ -2693,85 +2693,134 @@ test.describe("gallery", () => {
 });
 
 test.describe("program tiles", () => {
-  // Below desktop the tiles strip is a loop: two copies of the four tiles,
-  // one either side, panning one way at the gallery's pace, and a swipe
-  // that settles past the real four is moved back among them (decision 101).
+  // Below desktop the four tiles are a ring (decision 102): after the last
+  // comes the first again, either way, with no end; the strip does not
+  // scroll, a drag turns it with momentum and settles on a tile, and it pans
+  // on its own while nothing holds it.
   const tiles = "[data-tiles]";
   const strip = (page: import("@playwright/test").Page) => page.locator(tiles);
-
-  test("below desktop, the copies are for the eye only and the four links are read once", async ({
-    page,
-  }) => {
-    await page.emulateMedia({ reducedMotion: "reduce" });
-    await page.setViewportSize({ width: 390, height: 844 });
-    await page.goto("/");
-    await expect(strip(page).locator("> li")).toHaveCount(12);
-    const copies = strip(page).locator("> li[data-copy]");
-    await expect(copies).toHaveCount(8);
-    for (const copy of await copies.all()) {
-      await expect(copy).toHaveAttribute("aria-hidden", "true");
-      expect(await copy.evaluate((li) => (li as HTMLElement).inert)).toBe(true);
-      await expect(copy.locator("a")).toHaveAttribute("tabindex", "-1");
-    }
-    const nav = page.getByRole("navigation", { name: "Jump to a program" });
-    await expect(nav.getByRole("link")).toHaveCount(4);
-    // At rest the real tiles come first, where the strip always began: on
-    // the section's left edge.
-    const firstReal = strip(page).locator("> li:not([data-copy])").first();
-    const edge = (await page.locator("#programs-title").boundingBox())!.x;
-    expect(Math.abs((await firstReal.boundingBox())!.x - edge)).toBeLessThan(2);
-  });
-
-  test("a swipe that settles past either end comes back among the real tiles", async ({ page }) => {
-    await page.emulateMedia({ reducedMotion: "reduce" });
-    await page.setViewportSize({ width: 390, height: 844 });
-    await page.goto("/");
-    const period = await strip(page).evaluate((ul) => {
-      const lis = [...ul.children] as HTMLElement[];
-      const real = lis.find((li) => !li.hasAttribute("data-copy"))!;
-      return real.getBoundingClientRect().left - lis[0]!.getBoundingClientRect().left;
+  const order = ["holiday-assistance", "diaper-drive", "back-to-school", "haircuts"];
+  // The tiles the strip shows, left to right, by the program they open.
+  const shown = (page: import("@playwright/test").Page) =>
+    strip(page).evaluate((ul) => {
+      const r = ul.getBoundingClientRect();
+      return [...ul.children]
+        .map((li) => ({
+          id: li.querySelector("a")!.getAttribute("href")!.slice(1),
+          left: li.getBoundingClientRect().left,
+          right: li.getBoundingClientRect().right,
+        }))
+        .filter((t) => t.right > r.left + 1 && t.left < r.right - 1)
+        .sort((x, y) => x.left - y.left);
     });
-    for (const to of ["end", "start"] as const) {
-      await strip(page).evaluate((ul, to) => {
-        ul.scrollLeft = to === "end" ? ul.scrollWidth : 0;
-      }, to);
-      // Among the real tiles: within the middle copy, a pixel of give.
-      await expect
-        .poll(
-          () =>
-            strip(page).evaluate(
-              (ul, period) => ul.scrollLeft >= period - 1 && ul.scrollLeft < 2 * period,
-              period,
-            ),
-          { message: `settled after a swipe to the ${to}`, timeout: 3000 },
-        )
-        .toBe(true);
+  // Swipes across the strip, each in small moves within it, as a finger
+  // makes them: `by` pixels in all, one stroke after another.
+  const drag = async (page: import("@playwright/test").Page, by: number) => {
+    const box = (await strip(page).boundingBox())!;
+    const y = box.y + box.height / 2;
+    const stroke = Math.sign(by) * Math.min(Math.abs(by), box.width * 0.7);
+    for (let done = 0; Math.abs(done) < Math.abs(by); done += stroke) {
+      const from = box.x + box.width / 2 - stroke / 2;
+      await page.mouse.move(from, y);
+      await page.mouse.down();
+      for (let i = 1; i <= 12; i++) await page.mouse.move(from + (stroke * i) / 12, y);
+      await page.mouse.up();
     }
-  });
-
-  test("below desktop, the strip pans on its own", async ({ page }) => {
-    await page.emulateMedia({ reducedMotion: "no-preference" });
+  };
+  const phone = async (
+    page: import("@playwright/test").Page,
+    motion: "reduce" | "no-preference",
+  ) => {
+    await page.emulateMedia({ reducedMotion: motion });
     await page.setViewportSize({ width: 390, height: 844 });
     await page.goto("/");
     await strip(page).evaluate((ul) => ul.scrollIntoView({ block: "center", behavior: "instant" }));
-    const x = () =>
-      strip(page)
-        .locator("> li")
-        .first()
-        .evaluate((li) => li.getBoundingClientRect().left);
-    const before = await x();
-    await expect.poll(async () => before - (await x()), { timeout: 8000 }).toBeGreaterThan(40);
-    await expect(strip(page)).toHaveClass(/is-gliding/);
+  };
+
+  test("below desktop, the ring is the four tiles and their four links", async ({ page }) => {
+    await phone(page, "reduce");
+    await expect(strip(page)).toHaveClass(/is-ring/);
+    await expect(strip(page).locator("> li")).toHaveCount(4);
+    const nav = page.getByRole("navigation", { name: "Jump to a program" });
+    await expect(nav.getByRole("link")).toHaveCount(4);
+    // At rest the first tile stands where the strip always began: on the
+    // section's left edge.
+    const edge = (await page.locator("#programs-title").boundingBox())!.x;
+    const first = (await shown(page)).find((t) => t.id === order[0])!;
+    expect(Math.abs(first.left - edge)).toBeLessThan(2);
   });
 
-  test("on desktop the four tiles stand still and are not copied", async ({ page }) => {
+  test("a drag either way never reaches an end, and the four stay in order", async ({ page }) => {
+    await phone(page, "reduce");
+    const edge = (await page.locator("#programs-title").boundingBox())!.x;
+    for (const by of [-2600, 5200, -1300]) {
+      await drag(page, by);
+      // The throw runs on and settles on a tile at the strip's start.
+      await expect
+        .poll(async () => (await shown(page)).some((t) => Math.abs(t.left - edge) < 2), {
+          message: `settled on a tile after a drag of ${by}px`,
+          // A throw runs about a second and a half; a headless browser
+          // draws far fewer frames than a phone.
+          timeout: 12000,
+        })
+        .toBe(true);
+      const ids = (await shown(page)).map((t) => t.id);
+      // Never an empty strip, and every neighbour is the next on the ring.
+      expect(ids.length).toBeGreaterThanOrEqual(2);
+      ids.slice(1).forEach((id, i) => {
+        expect(order.indexOf(id), ids.join(" ")).toBe((order.indexOf(ids[i]!) + 1) % 4);
+      });
+    }
+  });
+
+  test("a drag that ends on a tile does not open it, and a tap does", async ({ page }) => {
+    await phone(page, "reduce");
+    await drag(page, -120);
+    const edge = (await page.locator("#programs-title").boundingBox())!.x;
+    const atEdge = async () => (await shown(page)).find((t) => Math.abs(t.left - edge) < 2)?.id;
+    // On failure, say where the ring stopped and where the page went.
+    const where = async () =>
+      `${(await shown(page)).map((t) => `${t.id}@${Math.round(t.left)}`).join(" ")} (edge ${Math.round(edge)}, hash "${new URL(page.url()).hash}", ${await strip(page).getAttribute("class")})`;
+    try {
+      await expect.poll(atEdge, { timeout: 12000 }).toBeTruthy();
+    } catch {
+      throw new Error(`the ring did not settle on a tile: ${await where()}`);
+    }
+    expect(new URL(page.url()).hash).toBe("");
+    const target = (await atEdge())!;
+    await strip(page).locator(`a[href="#${target}"]`).click();
+    await expect.poll(() => new URL(page.url()).hash).toBe(`#${target}`);
+  });
+
+  test("focus on a tile turns it into view", async ({ page }) => {
+    await phone(page, "reduce");
+    const link = strip(page).locator(`a[href="#${order[3]}"]`);
+    await link.focus();
+    const box = await strip(page).boundingBox();
+    await expect
+      .poll(async () => {
+        const t = (await shown(page)).find((x) => x.id === order[3]);
+        return Boolean(t && t.left >= box!.x - 1 && t.right <= box!.x + box!.width + 1);
+      })
+      .toBe(true);
+  });
+
+  test("below desktop, the ring pans on its own", async ({ page }) => {
+    await phone(page, "no-preference");
+    const at = async () =>
+      (await shown(page)).map((t) => `${t.id}@${Math.round(t.left)}`).join(" ");
+    const before = await at();
+    await expect.poll(at, { timeout: 8000 }).not.toBe(before);
+  });
+
+  test("on desktop the four tiles stand still in their grid", async ({ page }) => {
     await page.emulateMedia({ reducedMotion: "no-preference" });
     await page.setViewportSize({ width: 1280, height: 900 });
     await page.goto("/");
     await strip(page).evaluate((ul) => ul.scrollIntoView({ block: "center", behavior: "instant" }));
     await page.waitForTimeout(1500);
     await expect(strip(page).locator("> li")).toHaveCount(4);
-    await expect(strip(page)).not.toHaveClass(/is-gliding/);
+    await expect(strip(page)).not.toHaveClass(/is-ring/);
   });
 });
 

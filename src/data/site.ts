@@ -497,7 +497,7 @@ export const programs: Program[] = [
     forWhom: "Students from families who need help getting ready for school.",
     /* No photo of this program exists in her albums (decision 90). This
        one is the site's single stock photo, a one-time exception the owner
-       made (decision 102): real supplies in a real room, no people, under
+       made (decision 104): real supplies in a real room, no people, under
        the free Unsplash License (Laura Rivera, unsplash.com/photos/
        ArH3dtoDQc0). A care-package photo from Tamara replaces it. */
     photo: {

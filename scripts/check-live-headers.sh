@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Checks the deployed site's status codes, security headers, caching, and compression.
-# Usage: scripts/check-live-headers.sh https://example.workers.dev
+# Usage: scripts/check-live-headers.sh https://caringforacauseindy.org
 set -uo pipefail
 base="${1%/}"
 fail=0

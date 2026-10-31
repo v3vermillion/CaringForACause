@@ -19,7 +19,7 @@ working after handoff without a developer, and is it true?
    sounds right or appeared once online.
 2. **Real over polished.** Use the organization's own photos and words. No
    stock photos presented as her work (one supplies photo is the owner's
-   one-time exception, decision 102), no invented programs, numbers, quotes,
+   one-time exception, decision 104), no invented programs, numbers, quotes,
    or history. When copy needs a detail you don't have, leave it out.
 3. **Evidence, not assumption.** Check the current state before acting: the
    live site, the docs, the build output. "It probably works" is not done.

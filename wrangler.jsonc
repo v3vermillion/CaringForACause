@@ -10,7 +10,8 @@
     "not_found_handling": "404-page",
     "html_handling": "auto-trailing-slash",
   },
-  // The workers.dev address is the private preview link until her domain is connected.
-  "workers_dev": true,
+  // The site is served only on its custom domain (caringforacauseindy.org);
+  // the workers.dev address, which named the account, is off (decision 103).
+  "workers_dev": false,
   "preview_urls": false,
 }

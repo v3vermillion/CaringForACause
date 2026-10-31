@@ -33,7 +33,7 @@ work), `docs/DECISIONS.md` (why things are the way they are),
   the organization hasn't confirmed.
 - Don't invent copy, numbers, history, or quotes. Don't use stock photos. The
   one exception is the Back-to-School row's `school-supplies.jpg`, made once
-  by the owner (decision 102); it is not a precedent.
+  by the owner (decision 104); it is not a precedent.
 - Work on a branch and open a pull request; `main` rejects direct pushes.
   Always create the branch from a freshly updated `main`, and before merging
   check that the pull request's changed files match the intended change.
