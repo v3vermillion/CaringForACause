@@ -59,6 +59,12 @@ export type Program = {
   checklist?: { title: string; groups: { heading: string; items: string[] }[] };
   /** Shown in the program's tile, and beside its text unless a video is set. */
   photo?: Photo;
+  /**
+   * Until a real photo of the program exists, its strip icon stands in its
+   * tile and beside its text, drawn large on the night (decision 90). Never
+   * a stock photo, never another program's moment.
+   */
+  icon?: "meals" | "gifts" | "diapers" | "school";
   /** A click-to-play player takes the photo's place beside the text. */
   video?: YouTubeVideo;
   /** The one next step at the foot of the row, pointing at a place on the site. */
@@ -461,9 +467,10 @@ export const programs: Program[] = [
       "We partner with Toys for Tots.",
     ],
     photo: {
-      file: "holiday-gift-bags.jpg",
-      alt: "Children holding holiday gift bags beside a volunteer in a Santa hat",
-      focus: "center 27%",
+      file: "holiday-mother-child.jpg",
+      alt: "A mother with her arm around her young daughter, choosing a toy at a holiday giveaway",
+      /* The pair stands in the upper half; the square and 3:2 crops keep both faces. */
+      focus: "center 30%",
     },
     link: { label: "Sponsor a family", href: "/#sponsor" },
     active: true,
@@ -475,11 +482,9 @@ export const programs: Program[] = [
     summary: "A reliable supply, plus referrals to partner resources.",
     forWhom: "Families with babies and toddlers who need help with diapers.",
     photo: {
-      file: "diaper-drive.jpg",
-      alt: "A volunteer hands a large pack of diapers to a family with a young child",
-      /* High enough that the phone's wide crop (3 by 2) keeps the volunteer's
-         whole face; the square desktop crop loses floor, not people. */
-      focus: "center 20%",
+      file: "diaper-shelves.jpg",
+      alt: "The pantry's shelves stacked with packs of diapers, each labelled with the organization's heart",
+      focus: "center 50%",
     },
     link: { label: "Partner on the Diaper Drive", href: "/#partner" },
     active: true,
@@ -490,9 +495,14 @@ export const programs: Program[] = [
     label: "Hygiene and school supplies",
     summary: "Hygiene items and school supplies for girls and boys in our community.",
     forWhom: "Students from families who need help getting ready for school.",
+    /* No photo of this program exists in any album (decision 90). The
+       basket is an Easter food basket, but a real basket being carried to a
+       family is nearer the row's subject than an icon, which read as a hole
+       beside three photos (the owner's call). A care-package photo from
+       Tamara replaces it. */
     photo: {
       file: "care-basket.jpg",
-      alt: "A woman carries a basket filled with care package items",
+      alt: "A woman carries a wrapped basket of food and care items to a family",
       focus: "center 28%",
     },
     checklist: {
@@ -594,9 +604,10 @@ export const getInvolved = {
         fallbackLabel: "Email us to sponsor",
       },
       photo: {
-        file: "holiday-shopping.jpg",
-        alt: "Children holding shopping bags during a holiday shopping trip",
-        focus: "center 50%",
+        file: "gift-boy.jpg",
+        alt: "A young boy grins as he holds up the superhero toy he chose at a holiday giveaway",
+        /* His face sits a third of the way down; the 3:2 panel crop keeps head and toy. */
+        focus: "center 32%",
       },
     },
     {
@@ -608,10 +619,12 @@ export const getInvolved = {
         "Give once or monthly. Your donation helps provide holiday meals, gifts, diapers, and school supplies for local families.",
       ],
       action: { label: "Donate", href: "/donate/", fallbackLabel: "Donate" },
+      /* What a gift turns into: a Thanksgiving basket in the cart, turkey and
+         sides, no faces. The panel's copy names holiday meals first. */
       photo: {
-        file: "face-paint-closeup.jpg",
-        alt: "A child with a colorful painted face at a community event",
-        focus: "center 35%",
+        file: "holiday-basket-cart.jpg",
+        alt: "A shopping cart filled with a Thanksgiving meal for one family: a turkey, vegetables, potatoes and sides",
+        focus: "center 50%",
       },
     },
     {
@@ -694,8 +707,68 @@ export const about = {
 /** Photos from src/assets/photos/ shown in the gallery strip. Fewer than four hides the section. */
 export const gallery: Photo[] = [
   {
-    file: "face-paint-closeup.jpg",
-    alt: "A child with a colorful painted face at a community event",
+    file: "easter-volunteer.jpg",
+    alt: "A volunteer in scrubs smiles in the street with two wrapped Easter baskets",
+    focus: "center 30%",
+  },
+  {
+    file: "toy-tables.jpg",
+    alt: "Tables of new toys sorted by age for the holiday giveaway, with a Toys for Tots sign",
+    focus: "center 45%",
+  },
+  {
+    file: "diaper-pantry.jpg",
+    alt: "The founder in a Diaper Drive shirt beside the pantry's shelves of diapers",
+    focus: "center 40%",
+  },
+  {
+    file: "diaper-drive.jpg",
+    alt: "A volunteer hands a large pack of diapers to a family with a young child",
+    focus: "center 20%",
+  },
+  {
+    file: "easter-trunk.jpg",
+    alt: "A car's open trunk filled with wrapped Easter baskets ready to deliver",
+    focus: "center 50%",
+  },
+  {
+    file: "face-paint-tiger.jpg",
+    alt: "A child with half his face painted as a tiger at a community event",
+    focus: "center 30%",
+  },
+  {
+    file: "toy-tables-little-ones.jpg",
+    alt: "A table of toys for babies and toddlers at the holiday giveaway",
+    focus: "center 45%",
+  },
+  {
+    file: "easter-doorway.jpg",
+    alt: "A volunteer in a doorway holding wrapped Easter baskets",
+    focus: "center 35%",
+  },
+  {
+    file: "holiday-dinner.jpg",
+    alt: "Families eat a holiday dinner at long tables while others browse the toy tables behind them",
+    focus: "center 55%",
+  },
+  {
+    file: "holiday-cooks.jpg",
+    alt: "Four volunteer cooks behind trays of hot food at the holiday dinner, the organization's banner beside them",
+    focus: "center 40%",
+  },
+  {
+    file: "family-embrace.jpg",
+    alt: "A father hugs his five children, all holding bags of gifts, outside the winter distribution",
+    focus: "center 45%",
+  },
+  {
+    file: "serving-line.jpg",
+    alt: "A volunteer serves hot food while a child carries her plate to the table",
+    focus: "center 45%",
+  },
+  {
+    file: "volunteers-winter.jpg",
+    alt: "Three volunteers in winter coats and Santa headbands smile outside the distribution",
     focus: "center 35%",
   },
 ];

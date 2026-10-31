@@ -86,7 +86,10 @@ export function viewportUnitsOutsideDesktop(html) {
     desktopRanges.push([m.index, i]);
   }
   const found = [];
-  const unit = /[0-9.]+(?:[sdl]?v[hb])\b/gi;
+  // A unit follows a bare number: no letter or digit before it. Without that
+  // guard a hashed asset name (holiday-mother-child.lDMX0q6x_Zwy0VB.webp) reads
+  // as "0VB" and fails the build.
+  const unit = /(?<![\w.])[0-9.]+(?:[sdl]?v[hb])\b/gi;
   while ((m = unit.exec(html))) {
     const plain = !/[sdl]v[hb]$/i.test(m[0]);
     const inDesktop = desktopRanges.some(([a, b]) => m.index > a && m.index < b);
