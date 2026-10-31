@@ -482,11 +482,9 @@ export const programs: Program[] = [
     summary: "A reliable supply, plus referrals to partner resources.",
     forWhom: "Families with babies and toddlers who need help with diapers.",
     photo: {
-      file: "diaper-drive.jpg",
-      alt: "A volunteer hands a large pack of diapers to a family with a young child",
-      /* High enough that the phone's wide crop (3 by 2) keeps the volunteer's
-         whole face; the square desktop crop loses floor, not people. */
-      focus: "center 20%",
+      file: "diaper-shelves.jpg",
+      alt: "The pantry's shelves stacked with packs of diapers, each labelled with the organization's heart",
+      focus: "center 50%",
     },
     link: { label: "Partner on the Diaper Drive", href: "/#partner" },
     active: true,
@@ -714,6 +712,11 @@ export const gallery: Photo[] = [
     file: "diaper-pantry.jpg",
     alt: "The founder in a Diaper Drive shirt beside the pantry's shelves of diapers",
     focus: "center 40%",
+  },
+  {
+    file: "diaper-drive.jpg",
+    alt: "A volunteer hands a large pack of diapers to a family with a young child",
+    focus: "center 20%",
   },
   {
     file: "easter-trunk.jpg",
