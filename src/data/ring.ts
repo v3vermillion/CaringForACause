@@ -193,13 +193,18 @@ export function ring(list: HTMLElement, options: RingOptions): Ring {
   const stopPan = () => {
     if (mode === "pan") stopMotion();
   };
-  // The ring is handed to a reader: the pan stops and waits out the hold.
-  const hand = () => {
+  // The pan stops and picks up again after `ms`. A reader who turns the
+  // ring holds it the full `hold`; a touch that turns out to be no turn at
+  // all (a tap, a brush on the way down the page) only pauses it, so the
+  // ring is moving again by the time the page has stopped.
+  const BRIEF = 1200;
+  const pause = (ms: number) => {
     stopPan();
-    handUntil = performance.now() + hold;
+    handUntil = performance.now() + ms;
     clearTimeout(handTimer);
-    handTimer = window.setTimeout(startPan, hold);
+    handTimer = window.setTimeout(startPan, ms);
   };
+  const hand = () => pause(hold);
 
   // A drag: horizontal movement past a few pixels takes the ring; vertical
   // movement first is the page's scroll and is left alone (touch-action:
@@ -219,7 +224,7 @@ export function ring(list: HTMLElement, options: RingOptions): Ring {
     startRing = x;
     samples = [];
     if (mode !== "idle") stopMotion();
-    hand();
+    pause(BRIEF);
   };
   const onMove = (event: PointerEvent) => {
     if (event.pointerId !== pointer) return;
@@ -228,10 +233,12 @@ export function ring(list: HTMLElement, options: RingOptions): Ring {
     if (!dragging) {
       if (Math.abs(dy) > 8 && Math.abs(dy) > Math.abs(dx)) {
         pointer = -1; // the page is scrolling
+        pause(BRIEF);
         return;
       }
       if (Math.abs(dx) < 6) return;
       dragging = true;
+      hand();
       list.classList.add("is-dragging");
       list.setPointerCapture(event.pointerId);
     }
@@ -246,7 +253,10 @@ export function ring(list: HTMLElement, options: RingOptions): Ring {
   const onUp = (event: PointerEvent) => {
     if (event.pointerId !== pointer) return;
     pointer = -1;
-    if (!dragging) return;
+    if (!dragging) {
+      pause(BRIEF);
+      return;
+    }
     dragging = false;
     list.classList.remove("is-dragging");
     // A drag that ends on a tile does not follow its link. The click comes
@@ -264,6 +274,13 @@ export function ring(list: HTMLElement, options: RingOptions): Ring {
       run();
     } else settle();
     hand();
+  };
+  // Only the strip's own capture counts. A touch starts captured by the tile
+  // the finger lands on; when the strip takes it over to turn the ring, that
+  // tile reports losing it, and the report bubbles up here. Read as a
+  // release, it ended every swipe on a phone the moment it began.
+  const onLost = (event: PointerEvent) => {
+    if (event.target === list) onUp(event);
   };
   const onClick = (event: MouseEvent) => {
     if (!suppressClick) return;
@@ -328,7 +345,7 @@ export function ring(list: HTMLElement, options: RingOptions): Ring {
   list.addEventListener("pointermove", onMove);
   list.addEventListener("pointerup", onUp);
   list.addEventListener("pointercancel", onUp);
-  list.addEventListener("lostpointercapture", onUp);
+  list.addEventListener("lostpointercapture", onLost);
   list.addEventListener("click", onClick, true);
   list.addEventListener("dragstart", onDragStart);
   list.addEventListener("wheel", onWheel, { passive: false });
@@ -374,7 +391,7 @@ export function ring(list: HTMLElement, options: RingOptions): Ring {
       list.removeEventListener("pointermove", onMove);
       list.removeEventListener("pointerup", onUp);
       list.removeEventListener("pointercancel", onUp);
-      list.removeEventListener("lostpointercapture", onUp);
+      list.removeEventListener("lostpointercapture", onLost);
       list.removeEventListener("click", onClick, true);
       list.removeEventListener("dragstart", onDragStart);
       list.removeEventListener("wheel", onWheel);

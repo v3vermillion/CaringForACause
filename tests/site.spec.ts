@@ -2792,6 +2792,72 @@ test.describe("program tiles", () => {
     await expect.poll(() => new URL(page.url()).hash).toBe(`#${target}`);
   });
 
+  // A finger, not a mouse: a phone hands a touch to the tile it lands on,
+  // and a page scroll can start on the strip. Touches are sent through
+  // Chromium's own input pipeline, so the page scrolls as a phone's does.
+  test("a finger's sideways swipe turns the ring", async ({ page, browserName, hasTouch }) => {
+    test.skip(browserName !== "chromium" || !hasTouch, "real touches go through Chromium's input");
+    await phone(page, "reduce");
+    const cdp = await page.context().newCDPSession(page);
+    const box = (await strip(page).boundingBox())!;
+    const y = box.y + box.height / 2;
+    await cdp.send("Input.dispatchTouchEvent", {
+      type: "touchStart",
+      touchPoints: [{ x: box.x + box.width * 0.8, y }],
+    });
+    for (let i = 1; i <= 10; i++) {
+      await cdp.send("Input.dispatchTouchEvent", {
+        type: "touchMove",
+        touchPoints: [{ x: box.x + box.width * 0.8 - (box.width * 0.6 * i) / 10, y: y + 2 }],
+      });
+      await page.waitForTimeout(16);
+    }
+    await cdp.send("Input.dispatchTouchEvent", { type: "touchEnd", touchPoints: [] });
+    const edge = (await page.locator("#programs-title").boundingBox())!.x;
+    // It turned and settled on a tile other than the first.
+    await expect
+      .poll(async () => (await shown(page)).find((t) => Math.abs(t.left - edge) < 2)?.id, {
+        timeout: 12000,
+      })
+      .not.toBe(order[0]);
+    await expect
+      .poll(async () => Boolean((await shown(page)).find((t) => Math.abs(t.left - edge) < 2)))
+      .toBe(true);
+  });
+
+  test("an upright swipe that starts on the strip scrolls the page and only pauses the ring", async ({
+    page,
+    browserName,
+    hasTouch,
+  }) => {
+    test.skip(browserName !== "chromium" || !hasTouch, "real touches go through Chromium's input");
+    await phone(page, "no-preference");
+    const cdp = await page.context().newCDPSession(page);
+    const box = (await strip(page).boundingBox())!;
+    const y = box.y + box.height / 2;
+    const before = await page.evaluate(() => scrollY);
+    await cdp.send("Input.dispatchTouchEvent", {
+      type: "touchStart",
+      touchPoints: [{ x: box.x + box.width / 2, y }],
+    });
+    for (let i = 1; i <= 8; i++) {
+      await cdp.send("Input.dispatchTouchEvent", {
+        type: "touchMove",
+        touchPoints: [{ x: box.x + box.width / 2 + 2, y: y - 8 * i }],
+      });
+      await page.waitForTimeout(16);
+    }
+    await cdp.send("Input.dispatchTouchEvent", { type: "touchEnd", touchPoints: [] });
+    await expect.poll(() => page.evaluate(() => scrollY)).toBeGreaterThan(before + 20);
+    // The ring is moving again within a few seconds, not after the long
+    // hold a real turn earns.
+    const at = async () =>
+      (await shown(page)).map((t) => `${t.id}@${Math.round(t.left)}`).join(" ");
+    await page.waitForTimeout(2500);
+    const a = await at();
+    await expect.poll(at, { timeout: 2000 }).not.toBe(a);
+  });
+
   test("focus on a tile turns it into view", async ({ page }) => {
     await phone(page, "reduce");
     const link = strip(page).locator(`a[href="#${order[3]}"]`);
