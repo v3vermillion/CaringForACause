@@ -838,6 +838,12 @@ The publish gate's viewport-unit scan read a hashed asset name (`…Zwy0VB.webp`
 
 **Why:** The owner asked whether it should stay. The heading already says what the section is, and the line only narrated photos directly under it; it named four of fourteen, so it would drift as photos change, and "in our own photos" read as defensive. What had made the heading look unfinished was the missing label and lit rule (decision 94), and those stay.
 
+## 98. Node 22.23.4 is the floor, from Astro 7.4
+
+**Decision:** The `engines` floor in `package.json` and the README's requirement go from Node 22.18 to 22.23.4, the floor Astro 7.4 declares (7.4.0 asked for 22.22). CI and Cloudflare Workers Builds are unaffected: `.nvmrc` selects Node 24 for both. The Playwright MCP server in `.mcp.json` moves from 0.0.80 to 0.0.83, the last release built on Playwright 1.64, to stay on the release the tests use (decision 76).
+
+**Why:** Dependabot's minor-and-patch group moved Astro from 7.3.5 to 7.4, and Astro refuses to run below its floor, so a checkout on an older Node 22 fails at the first build with "Node.js is not supported by Astro". The stated floor should be the real one.
+
 ## 99. A preview names no address of its own
 
 **Decision:** Only a public build (indexing on) names the site's address. A preview build writes no canonical URL and no `og:url`, gives the link-preview image and the structured data's logo by path (`/og-image.jpg`, `/icon-512.png`), and leaves the structured data's `url` out. `astro.config.mjs` no longer knows the preview host: the site address is `PUBLIC_SITE_URL` or the production domain. The publish gate enforces it: in a preview a canonical URL, an `og:url`, an absolute preview image or a structured-data `url` fails the build, and any page that names a `workers.dev` address fails in every build. The browser tests check the same on the page as served. A public build is unchanged: absolute addresses on the production domain, checked as before.
