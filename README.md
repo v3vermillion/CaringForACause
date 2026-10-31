@@ -59,7 +59,7 @@ Everything visitors read lives in **`src/data/site.ts`**. Common updates:
 | Get involved tabs                                  | `getInvolved.tabs`                                                                                     |
 | About                                              | `about`                                                                                                |
 | The page for a missing address                     | `notFoundPage`                                                                                         |
-| Gallery photos                                     | Add files to `src/assets/photos/`, then list them in `gallery` (shows at 4+; eight today, decision 90) |
+| Gallery photos                                     | Add files to `src/assets/photos/`, then list them in `gallery` (shows at 4+; fourteen today, decision 90) |
 
 Run `npm run verify` after editing. It catches missing fields and typos in field names.
 

@@ -619,10 +619,12 @@ export const getInvolved = {
         "Give once or monthly. Your donation helps provide holiday meals, gifts, diapers, and school supplies for local families.",
       ],
       action: { label: "Donate", href: "/donate/", fallbackLabel: "Donate" },
+      /* What a gift turns into: a Thanksgiving basket in the cart, turkey and
+         sides, no faces. The panel's copy names holiday meals first. */
       photo: {
-        file: "face-paint-closeup.jpg",
-        alt: "A child with a colorful painted face at a community event",
-        focus: "center 35%",
+        file: "holiday-basket-cart.jpg",
+        alt: "A shopping cart filled with a Thanksgiving meal for one family: a turkey, vegetables, potatoes and sides",
+        focus: "center 50%",
       },
     },
     {
@@ -742,6 +744,31 @@ export const gallery: Photo[] = [
   {
     file: "easter-doorway.jpg",
     alt: "A volunteer in a doorway holding wrapped Easter baskets",
+    focus: "center 35%",
+  },
+  {
+    file: "holiday-dinner.jpg",
+    alt: "Families eat a holiday dinner at long tables while others browse the toy tables behind them",
+    focus: "center 55%",
+  },
+  {
+    file: "holiday-cooks.jpg",
+    alt: "Four volunteer cooks behind trays of hot food at the holiday dinner, the organization's banner beside them",
+    focus: "center 40%",
+  },
+  {
+    file: "family-embrace.jpg",
+    alt: "A father hugs his five children, all holding bags of gifts, outside the winter distribution",
+    focus: "center 45%",
+  },
+  {
+    file: "serving-line.jpg",
+    alt: "A volunteer serves hot food while a child carries her plate to the table",
+    focus: "center 45%",
+  },
+  {
+    file: "volunteers-winter.jpg",
+    alt: "Three volunteers in winter coats and Santa headbands smile outside the distribution",
     focus: "center 35%",
   },
 ];
