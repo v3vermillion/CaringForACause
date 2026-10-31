@@ -59,6 +59,12 @@ export type Program = {
   checklist?: { title: string; groups: { heading: string; items: string[] }[] };
   /** Shown in the program's tile, and beside its text unless a video is set. */
   photo?: Photo;
+  /**
+   * Until a real photo of the program exists, its strip icon stands in its
+   * tile and beside its text, drawn large on the night (decision 90). Never
+   * a stock photo, never another program's moment.
+   */
+  icon?: "meals" | "gifts" | "diapers" | "school";
   /** A click-to-play player takes the photo's place beside the text. */
   video?: YouTubeVideo;
   /** The one next step at the foot of the row, pointing at a place on the site. */
@@ -461,9 +467,10 @@ export const programs: Program[] = [
       "We partner with Toys for Tots.",
     ],
     photo: {
-      file: "holiday-gift-bags.jpg",
-      alt: "Children holding holiday gift bags beside a volunteer in a Santa hat",
-      focus: "center 27%",
+      file: "holiday-mother-child.jpg",
+      alt: "A mother with her arm around her young daughter, choosing a toy at a holiday giveaway",
+      /* The pair stands in the upper half; the square and 3:2 crops keep both faces. */
+      focus: "center 30%",
     },
     link: { label: "Sponsor a family", href: "/#sponsor" },
     active: true,
@@ -490,11 +497,10 @@ export const programs: Program[] = [
     label: "Hygiene and school supplies",
     summary: "Hygiene items and school supplies for girls and boys in our community.",
     forWhom: "Students from families who need help getting ready for school.",
-    photo: {
-      file: "care-basket.jpg",
-      alt: "A woman carries a basket filled with care package items",
-      focus: "center 28%",
-    },
+    /* No photo of this program exists yet (decision 90): the basket that
+       stood here was an Easter food basket, now in the gallery. The strip's
+       backpack stands in until Tamara sends a care-package photo. */
+    icon: "school",
     checklist: {
       title: "See what we're collecting",
       groups: [
@@ -594,9 +600,10 @@ export const getInvolved = {
         fallbackLabel: "Email us to sponsor",
       },
       photo: {
-        file: "holiday-shopping.jpg",
-        alt: "Children holding shopping bags during a holiday shopping trip",
-        focus: "center 50%",
+        file: "gift-boy.jpg",
+        alt: "A young boy grins as he holds up the superhero toy he chose at a holiday giveaway",
+        /* His face sits a third of the way down; the 3:2 panel crop keeps head and toy. */
+        focus: "center 32%",
       },
     },
     {
@@ -694,8 +701,43 @@ export const about = {
 /** Photos from src/assets/photos/ shown in the gallery strip. Fewer than four hides the section. */
 export const gallery: Photo[] = [
   {
-    file: "face-paint-closeup.jpg",
-    alt: "A child with a colorful painted face at a community event",
+    file: "easter-volunteer.jpg",
+    alt: "A volunteer in scrubs smiles in the street with two wrapped Easter baskets",
+    focus: "center 30%",
+  },
+  {
+    file: "toy-tables.jpg",
+    alt: "Tables of new toys sorted by age for the holiday giveaway, with a Toys for Tots sign",
+    focus: "center 45%",
+  },
+  {
+    file: "diaper-pantry.jpg",
+    alt: "The founder in a Diaper Drive shirt beside the pantry's shelves of diapers",
+    focus: "center 40%",
+  },
+  {
+    file: "easter-trunk.jpg",
+    alt: "A car's open trunk filled with wrapped Easter baskets ready to deliver",
+    focus: "center 50%",
+  },
+  {
+    file: "face-paint-tiger.jpg",
+    alt: "A child with half his face painted as a tiger at a community event",
+    focus: "center 30%",
+  },
+  {
+    file: "care-basket.jpg",
+    alt: "A woman carries a wrapped Easter food basket",
+    focus: "center 28%",
+  },
+  {
+    file: "toy-tables-little-ones.jpg",
+    alt: "A table of toys for babies and toddlers at the holiday giveaway",
+    focus: "center 45%",
+  },
+  {
+    file: "easter-doorway.jpg",
+    alt: "A volunteer in a doorway holding wrapped Easter baskets",
     focus: "center 35%",
   },
 ];

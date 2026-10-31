@@ -104,6 +104,17 @@ describe("publish gate", () => {
     expectError(dir, /viewport-height units/i);
   });
 
+  it("ignores a hashed asset name that happens to end in a unit's letters", () => {
+    // A comment carries the name, so the build's own file check is not involved.
+    const dir = brokenBuild("index.html", (h) =>
+      h.replace(
+        "</head>",
+        "<!-- /_astro/photo.lDMX0q6x_Zwy0VB.webp /_astro/a.Qx80vh.png --></head>",
+      ),
+    );
+    assert.deepEqual(validateBuild(dir, { allowIndexing: false }), []);
+  });
+
   it("blocks plain vh outside a desktop media block", () => {
     const dir = brokenBuild("index.html", (h) => h.replace("</style>", ".x{height:100vh}</style>"));
     expectError(dir, /viewport-height units/i);

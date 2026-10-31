@@ -3,6 +3,7 @@ import { show } from "../data/facts.ts";
 import { facts, getHelp, links, org, programs } from "../data/site";
 import Brand from "./Brand.astro";
 import Photo from "./Photo.astro";
+import ProgramIcon from "./ProgramIcon.astro";
 import Wave from "./Wave.astro";
 import YouTubeLite from "./YouTubeLite.astro";
 
@@ -33,7 +34,7 @@ const applyHref = links.familyApplication ?? getHelp.action.href;
         {active.map((program) => (
           <li>
             <a class="tile surface" href={`#${program.slug}`}>
-              {program.photo && (
+              {program.photo ? (
                 <Photo
                   photo={program.photo}
                   ratio="1 / 1"
@@ -41,6 +42,12 @@ const applyHref = links.familyApplication ?? getHelp.action.href;
                   widths={[144, 216]}
                   class="tile-photo"
                 />
+              ) : (
+                program.icon && (
+                  <span class="tile-photo tile-icon" aria-hidden="true">
+                    <ProgramIcon kind={program.icon} />
+                  </span>
+                )
               )}
               <span class="tile-text">
                 <span class="tile-name">{program.name}</span>
@@ -76,7 +83,7 @@ const applyHref = links.familyApplication ?? getHelp.action.href;
       {active.map((program, i) => (
         <article
           id={program.slug}
-          class:list={["row", { "has-media": program.photo || program.video }]}
+          class:list={["row", { "has-media": program.photo || program.video || program.icon }]}
         >
           <div class="stack copy">
             <span class="index" aria-hidden="true">
@@ -133,17 +140,26 @@ const applyHref = links.familyApplication ?? getHelp.action.href;
             <div class:list={["media", "plate", { "plate--left": i % 2 === 1 }]}>
               <YouTubeLite video={program.video} />
             </div>
-          ) : (
-            program.photo && (
-              <div class:list={["media", "plate", { "plate--left": i % 2 === 1 }]}>
-                {/* Row 01's phone crop is 4:3 on purpose: the taller frame
+          ) : program.photo ? (
+            <div class:list={["media", "plate", { "plate--left": i % 2 === 1 }]}>
+              {/* Row 01's phone crop is 4:3 on purpose: the taller frame
                     keeps all three children's faces, where 3:2 trimmed
                     them. Tablets up recrop square anyway. */}
-                <Photo
-                  photo={program.photo}
-                  ratio={`var(--photo-ratio, ${i === 0 ? "4 / 3" : "3 / 2"})`}
-                  sizes="(min-width: 56rem) 480px, (min-width: 36rem) 40vw, calc(100vw - 2.5rem)"
-                />
+              <Photo
+                photo={program.photo}
+                ratio={`var(--photo-ratio, ${i === 0 ? "4 / 3" : "3 / 2"})`}
+                sizes="(min-width: 56rem) 480px, (min-width: 36rem) 40vw, calc(100vw - 2.5rem)"
+              />
+            </div>
+          ) : (
+            program.icon && (
+              <div class:list={["media", "plate", { "plate--left": i % 2 === 1 }]}>
+                {/* No photo of this program yet: its strip icon, large, on the
+                      night, in the same frame and plate as the photos, so the
+                      zigzag holds (decision 90). */}
+                <div class="icon-panel" aria-hidden="true">
+                  <ProgramIcon kind={program.icon} />
+                </div>
               </div>
             )
           )}
@@ -316,6 +332,44 @@ const applyHref = links.familyApplication ?? getHelp.action.href;
       0 0.25rem 0.75rem rgb(27 15 46 / 0.05),
       inset 0 1px 0 rgb(255 255 255 / 0.9);
     transition-duration: 60ms;
+  }
+
+  /* An icon in a tile stands on a small night square the size of the photo,
+     the strip's own ground, so the four tiles read as one row. */
+  .tile-icon {
+    display: grid;
+    place-items: center;
+    background: var(--night);
+    border-radius: var(--r-img);
+  }
+
+  .tile-icon :global(.pi) {
+    width: 58%;
+    height: auto;
+  }
+
+  /* The icon panel beside a row: the photo's frame (ratio, radius, ring and
+     shadow come from .media's rules on .photo, repeated here) around the
+     strip's night, grained, with the icon at about half the frame's width. */
+  .icon-panel {
+    display: grid;
+    place-items: center;
+    aspect-ratio: var(--photo-ratio, 3 / 2);
+    border-radius: var(--r-img);
+    /* The strip's night with its violet well, as the banner's dark cards. */
+    background:
+      radial-gradient(ellipse 70% 60% at 50% 45%, rgb(96 8 215 / 0.35), transparent 70%),
+      linear-gradient(160deg, #2a1550, var(--night) 55%, var(--night-2));
+    box-shadow:
+      0 0 0 var(--hairline) rgb(160 108 255 / 0.4),
+      0 0 0 calc(var(--hairline) * 2) rgb(255 255 255 / 0.6),
+      0 1.5rem 3rem rgb(27 15 46 / 0.14);
+  }
+
+  .icon-panel :global(.pi) {
+    width: 46%;
+    height: auto;
+    filter: drop-shadow(0 0 1.25rem rgb(160 108 255 / 0.55));
   }
 
   .tile :global(.tile-photo) {

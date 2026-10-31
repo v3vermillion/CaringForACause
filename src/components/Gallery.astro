@@ -10,7 +10,10 @@ const show = gallery.length >= 4;
   <section class="section section--lilac ground ground--lilac" aria-labelledby="gallery-title">
     <div class="wrap">
       <h2 id="gallery-title">Moments from our programs</h2>
-      <ul class="strip">
+      {/* The row scrolls sideways and holds no links, so it takes focus
+          itself: keyboard readers reach it with Tab and move it with the
+          arrow keys (axe's scrollable-region rule). Its name is the heading. */}
+      <ul class="moments" tabindex="0" aria-labelledby="gallery-title">
         {gallery.map((photo) => (
           <li>
             <Photo photo={photo} ratio="4 / 5" sizes="(min-width: 40rem) 320px, 80vw" />
@@ -29,7 +32,7 @@ const show = gallery.length >= 4;
   /* The strip bleeds to the screen's edges and dissolves there, as the
      program jump strip does, so a photo cut by the screen fades rather
      than chops. */
-  .strip {
+  .moments {
     display: flex;
     gap: var(--space-s);
     padding: 0 var(--gutter) var(--space-xs);
@@ -53,6 +56,14 @@ const show = gallery.length >= 4;
       #000 calc(100% - var(--gutter)),
       transparent
     );
+  }
+
+  /* The ring sits inside the row's own padding, so the fading edges keep
+     their room; the mask would clip a ring drawn outside. */
+  .moments:focus-visible {
+    outline: max(2px, 0.1875rem) solid var(--focus);
+    outline-offset: calc(-1 * max(2px, 0.1875rem));
+    border-radius: var(--r-img);
   }
 
   li {
