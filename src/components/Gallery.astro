@@ -13,11 +13,42 @@ const show = gallery.length >= 4;
     aria-labelledby="gallery-title"
   >
     <div class="wrap">
-      <header class="head">
-        <span class="eyebrow">{gallerySection.eyebrow}</span>
-        <h2 id="gallery-title">{gallerySection.heading}</h2>
-        <p class="lede">{gallerySection.lede}</p>
-      </header>
+      <div class="head-row">
+        <header class="head">
+          <span class="eyebrow">{gallerySection.eyebrow}</span>
+          <h2 id="gallery-title">{gallerySection.heading}</h2>
+          <p class="lede">{gallerySection.lede}</p>
+        </header>
+        {/* For a mouse, which has no sideways scroll of its own: a photo back
+            or forward. Shown where a pointer hovers; hidden without JavaScript,
+            which is what moves the strip. */}
+        <div class="arrows" data-arrows hidden>
+          <button type="button" class="arrow" data-arrow="-1" aria-label="Previous photos">
+            <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" focusable="false">
+              <path
+                d="M15 5l-7 7 7 7"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2.4"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+          </button>
+          <button type="button" class="arrow" data-arrow="1" aria-label="Next photos">
+            <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" focusable="false">
+              <path
+                d="M9 5l7 7-7 7"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2.4"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+          </button>
+        </div>
+      </div>
       {/* The row scrolls sideways and holds no links, so it takes focus
           itself: keyboard readers reach it with Tab and move it with the
           arrow keys (axe's scrollable-region rule). Its name is the heading. */}
@@ -42,6 +73,8 @@ const show = gallery.length >= 4;
   // snap is off only while the pan drives it, so a swipe still settles on a
   // photo. Readers who ask for less motion get the still strip.
   const strip = document.querySelector<HTMLElement>("[data-moments]");
+  /** Set by the pan below: the strip has been handed to a reader. */
+  let handOver = () => {};
   if (strip && matchMedia("(prefers-reduced-motion: no-preference)").matches) {
     const SPEED = 40; // px/s on the open run
     const RAMP = 260; // px over which a run eases in and out
@@ -172,6 +205,39 @@ const show = gallery.length >= 4;
       { threshold: 0.35 },
     ).observe(strip);
     document.addEventListener("visibilitychange", () => (document.hidden ? stop() : start()));
+    handOver = hand;
+  }
+
+  // The arrows: one photo (a card and its gap) back or forward, smoothly,
+  // and the pan steps aside as for any hand. Each arrow goes quiet at its
+  // end of the strip.
+  const arrows = document.querySelector<HTMLElement>("[data-arrows]");
+  if (strip && arrows) {
+    arrows.hidden = false;
+    const buttons = Array.from(arrows.querySelectorAll<HTMLButtonElement>("[data-arrow]"));
+    const step = () => {
+      const first = strip.querySelector<HTMLElement>("li");
+      return first
+        ? first.getBoundingClientRect().width + parseFloat(getComputedStyle(strip).gap)
+        : 320;
+    };
+    const ends = () => {
+      const end = strip.scrollWidth - strip.clientWidth;
+      for (const button of buttons) {
+        const dir = Number(button.dataset.arrow);
+        const at = dir < 0 ? strip.scrollLeft <= 1 : strip.scrollLeft >= end - 1;
+        button.setAttribute("aria-disabled", String(at));
+      }
+    };
+    for (const button of buttons)
+      button.addEventListener("click", () => {
+        if (button.getAttribute("aria-disabled") === "true") return;
+        handOver();
+        strip.scrollBy({ left: Number(button.dataset.arrow) * step(), behavior: "smooth" });
+      });
+    strip.addEventListener("scroll", ends, { passive: true });
+    window.addEventListener("resize", ends);
+    ends();
   }
 </script>
 
@@ -182,8 +248,77 @@ const show = gallery.length >= 4;
     padding-top: var(--space-l);
   }
 
-  .head {
+  .head-row {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: var(--space-m);
     margin-bottom: var(--space-l);
+  }
+
+  /* The arrows are for a pointer that hovers (a mouse has no sideways
+     scroll of its own); a finger swipes the strip and gets none. */
+  .arrows {
+    display: none;
+    flex: none;
+    gap: 0.5rem;
+    padding-bottom: 0.2rem; /* on the lede's baseline */
+  }
+
+  @media (hover: hover) and (min-width: 36rem) {
+    .arrows:not([hidden]) {
+      display: flex;
+    }
+  }
+
+  /* A glass chip, as the tabs and the checklist pill: the ring token on
+     the lilac, the purple chevron. */
+  .arrow {
+    display: grid;
+    place-items: center;
+    width: max(44px, 2.75rem);
+    height: max(44px, 2.75rem);
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: rgb(255 255 255 / 0.72);
+    -webkit-backdrop-filter: blur(0.75rem);
+    backdrop-filter: blur(0.75rem);
+    box-shadow: inset 0 0 0 var(--hairline) var(--rule-strong);
+    color: var(--purple);
+    cursor: pointer;
+    transition:
+      background-color 150ms ease,
+      color 150ms ease,
+      opacity 150ms ease;
+  }
+
+  @media (hover: hover) {
+    .arrow:hover {
+      background: var(--purple);
+      color: #fff;
+    }
+  }
+
+  .arrow:active {
+    transform: translateY(1px);
+  }
+
+  .arrow[aria-disabled="true"] {
+    opacity: 0.35;
+    cursor: default;
+  }
+
+  @media (hover: hover) {
+    .arrow[aria-disabled="true"]:hover {
+      background: rgb(255 255 255 / 0.72);
+      color: var(--purple);
+    }
+  }
+
+  .arrow:focus-visible {
+    outline: max(2px, 0.1875rem) solid var(--focus);
+    outline-offset: 0.125rem;
   }
 
   .head .lede {

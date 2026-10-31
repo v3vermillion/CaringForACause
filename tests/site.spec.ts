@@ -2622,6 +2622,33 @@ test.describe("gallery", () => {
     await expect(strip).not.toHaveClass(/is-panning/);
   });
 
+  test("a mouse gets arrows that step the strip a photo at a time", async ({ page, hasTouch }) => {
+    test.skip(hasTouch, "a finger swipes the strip; the arrows are for a pointer that hovers");
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    await bring(page);
+    const arrows = page.locator("[data-arrows]");
+    await expect(arrows).toBeVisible();
+    const prev = page.locator("[data-arrow='-1']");
+    const next = page.locator("[data-arrow='1']");
+    await expect(prev).toHaveAttribute("aria-disabled", "true");
+    await expect(next).toHaveAttribute("aria-disabled", "false");
+    const step = await page
+      .locator("[data-moments] li")
+      .first()
+      .evaluate((el) => el.getBoundingClientRect().width + 16);
+    await next.click();
+    await expect.poll(() => left(page)).toBeGreaterThan(step - 2);
+    await expect(prev).toHaveAttribute("aria-disabled", "false");
+    await prev.click();
+    await expect.poll(() => left(page)).toBeLessThan(1);
+  });
+
+  test("a finger gets no arrows", async ({ page, hasTouch }) => {
+    test.skip(!hasTouch, "the arrows show for a pointer that hovers");
+    await bring(page);
+    await expect(page.locator("[data-arrows]")).toBeHidden();
+  });
+
   test("stays still for a reader who asks for less motion", async ({ page }) => {
     await page.emulateMedia({ reducedMotion: "reduce" });
     await bring(page);
