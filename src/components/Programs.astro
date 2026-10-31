@@ -415,7 +415,8 @@ const applyHref = links.familyApplication ?? getHelp.action.href;
     display: grid;
     gap: var(--space-m);
     margin-block: var(--space-m) var(--space-xl);
-    padding: var(--space-m);
+    /* A step more at the top than the sides, like every card header. */
+    padding: calc(var(--space-m) + var(--space-s)) var(--space-m) var(--space-m);
   }
 
   /* A step under the section's title, like a program's name. */
@@ -878,7 +879,7 @@ const applyHref = links.familyApplication ?? getHelp.action.href;
     .get-help {
       grid-template-columns: 1fr auto;
       align-items: center;
-      padding: var(--space-l);
+      padding: calc(var(--space-l) + var(--space-xs)) var(--space-l) var(--space-l);
     }
     .actions {
       flex-direction: column;

@@ -242,7 +242,10 @@ const mailtoAny = mailLink(
     max-width: 44rem;
     display: grid;
     gap: var(--space-m);
-    padding: var(--space-m);
+    /* The heading stands a step further in at the top than the sides, as
+       the application's step header does: a card's first line hard against
+       its edge read as crammed on the owner's phone. */
+    padding: calc(var(--space-m) + var(--space-s)) var(--space-m) var(--space-m);
   }
 
   /* What the gift provides: the banner's four programs, their neon icons
@@ -560,7 +563,7 @@ const mailtoAny = mailLink(
       align-self: start;
       max-width: none;
       z-index: 1;
-      padding: var(--space-l);
+      padding: calc(var(--space-l) + var(--space-xs)) var(--space-l) var(--space-l);
       box-shadow:
         0 1.5rem 3rem rgb(27 15 46 / 0.24),
         0 0.125rem 0.375rem rgb(27 15 46 / 0.12),
