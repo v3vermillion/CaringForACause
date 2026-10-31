@@ -59,6 +59,15 @@ const { getHelp, donate } = hero.doors;
     padding-block: var(--space-xl);
   }
 
+  /* Below desktop the words span the screen, so the mark gets a band of its
+     own under them (its 12rem-wide drawing, its 1.25rem inset and a section
+     space) rather than sitting behind the doors (decision 88). */
+  @media (max-width: 55.99rem) {
+    .page-hero.hero--404 {
+      padding-bottom: calc(12rem * 1576 / 1718 + 1.25rem + var(--space-l));
+    }
+  }
+
   /* The opener meets the footer on a lit rule in the footer's own
      language, not a bare unmarked seam — the one place two surfaces touch
      without a wave. */

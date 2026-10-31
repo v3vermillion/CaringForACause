@@ -11,10 +11,14 @@ import SiteFooter from "../components/SiteFooter.astro";
 import SiteHeader from "../components/SiteHeader.astro";
 import { seasonalBanner } from "../data/site";
 import Base from "../layouts/Base.astro";
+
+// The welcome is for Tamara's private preview: a public build leaves it out,
+// so the launch (turning indexing on) retires it by itself (decision 88).
+const preview = import.meta.env.PUBLIC_ALLOW_INDEXING !== "true";
 ---
 
 <Base preloadItalic>
-  <Intro />
+  {preview && <Intro />}
   <SiteHeader />
   <main id="main">
     <!-- On desktop these fill the first screen: the banner takes the slack

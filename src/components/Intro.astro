@@ -68,7 +68,9 @@ import { intro } from "../data/site";
     }
 
     var slides = Array.prototype.slice.call(root.querySelectorAll(".slide"));
-    var FADE = 800; // a slide's fade in; the next begins as the last fades out
+    var FADE = 800; // a slide's fade in
+    var OUT = 600; // its fade out (the stylesheet's .out transition)
+    var GAP = 300; // empty night between one slide's last trace and the next
     var held = [];
     var done = false;
     var current = -1;
@@ -76,7 +78,7 @@ import { intro } from "../data/site";
     var ceiling = 0;
     var total = 0;
     slides.forEach(function (s) {
-      total += FADE + Number(s.getAttribute("data-hold"));
+      total += FADE + Number(s.getAttribute("data-hold")) + OUT + GAP;
     });
 
     // The page behind is inert while the welcome is up, so nothing in it
@@ -98,6 +100,15 @@ import { intro } from "../data/site";
       held.forEach(function (el) {
         el.inert = false;
       });
+      // The reader's place is the page itself, not the Skip button that is
+      // leaving: focus goes to the content, where a Tab reaches the header.
+      var main = document.getElementById("main");
+      if (main) {
+        if (!main.hasAttribute("tabindex")) main.setAttribute("tabindex", "-1");
+        try {
+          main.focus({ preventScroll: true });
+        } catch (e) {}
+      }
       setTimeout(function () {
         root.remove();
       }, 1100);
@@ -115,10 +126,12 @@ import { intro } from "../data/site";
           if (i === slides.length - 1) return finish();
           slide.classList.remove("vis");
           slide.classList.add("out");
-          setTimeout(function () {
+          // The next slide waits until this one has fully gone, and a beat
+          // more: two sets of words are never on the screen together.
+          timer = setTimeout(function () {
             slide.classList.remove("out");
-          }, 700);
-          run(i + 1);
+            run(i + 1);
+          }, OUT + GAP);
         },
         FADE + Number(slide.getAttribute("data-hold")),
       );
@@ -327,8 +340,8 @@ import { intro } from "../data/site";
     opacity: 0;
     visibility: visible;
     transition:
-      opacity 0.7s ease,
-      visibility 0s 0.7s;
+      opacity 0.6s ease,
+      visibility 0s 0.6s;
   }
 
   /* The words: the banner's serif, bold, white, with a soft violet light.
@@ -404,9 +417,16 @@ import { intro } from "../data/site";
       box-shadow 0.2s ease;
   }
 
-  .welcome .skip:hover {
-    background: rgb(255 255 255 / 0.14);
-    box-shadow: 0 0 0 max(1px, 0.09rem) rgb(226 214 255 / 0.85) inset;
+  @media (hover: hover) {
+    .welcome .skip:hover {
+      background: rgb(255 255 255 / 0.14);
+      box-shadow: 0 0 0 max(1px, 0.09rem) rgb(226 214 255 / 0.85) inset;
+    }
+  }
+
+  .welcome .skip:active {
+    background: rgb(255 255 255 / 0.2);
+    transition-duration: 60ms;
   }
 
   .welcome .skip:focus-visible {
@@ -414,12 +434,20 @@ import { intro } from "../data/site";
     outline-offset: 0.2rem;
   }
 
+  /* The content takes focus as the welcome leaves; it draws no ring for it. */
+  .js #main:focus {
+    outline: none;
+  }
+
+  /* Desktop: a wider measure, so a sentence breaks into two or three lines
+       rather than a phone's four. */
   @media (min-width: 56rem) {
     .welcome .line {
-      font-size: calc(var(--step-4) * 1.1);
+      font-size: calc(var(--step-4) * 1.05);
     }
 
     .welcome .stage {
+      max-width: 62rem;
       margin-bottom: 2vw;
     }
   }

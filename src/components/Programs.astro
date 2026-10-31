@@ -293,15 +293,19 @@ const applyHref = links.familyApplication ?? getHelp.action.href;
 
   /* The hover rim stays in the rule language at full strength — the same
      violet-rose gesture as the eyebrow rules, not a flat field border. */
-  .tile:hover::before {
-    background: linear-gradient(135deg, var(--purple), #d43a92);
+  @media (hover: hover) {
+    .tile:hover::before {
+      background: linear-gradient(135deg, var(--purple), #d43a92);
+    }
   }
 
-  .tile:hover {
-    box-shadow:
-      0 1rem 2.5rem rgb(27 15 46 / 0.1),
-      inset 0 1px 0 rgb(255 255 255 / 0.9);
-    transform: translateY(-2px);
+  @media (hover: hover) {
+    .tile:hover {
+      box-shadow:
+        0 1rem 2.5rem rgb(27 15 46 / 0.1),
+        inset 0 1px 0 rgb(255 255 255 / 0.9);
+      transform: translateY(-2px);
+    }
   }
 
   /* Pressed, the tile settles to a tight contact shadow and keeps its
@@ -560,9 +564,11 @@ const applyHref = links.familyApplication ?? getHelp.action.href;
   /* The row's two kinds of next step answer the pointer the same way:
      the summary underlines like the arrow links beside it, and a press
      deepens it. */
-  .checklist summary:hover {
-    text-decoration: underline;
-    text-underline-offset: 0.18em;
+  @media (hover: hover) {
+    .checklist summary:hover {
+      text-decoration: underline;
+      text-underline-offset: 0.18em;
+    }
   }
 
   .checklist summary:active {
@@ -704,7 +710,7 @@ const applyHref = links.familyApplication ?? getHelp.action.href;
 
   @media (min-width: 56rem) {
     /* Square on desktop too: a 5 by 4 crop of these portrait photos showed
-       three fifths of each and trimmed heads; square shows three quarters,
+         three fifths of each and trimmed heads; square shows three quarters,
        and the copy, with its chapter number, stands about as tall
        (decision 72). */
     .media {

@@ -127,13 +127,13 @@ const { cycle, hold, fade, keyframes } = crossfade(slides.length);
 <style>
   /*
     Phones and tablets: the same words, scaled by the screen width. Every size
-    below is a multiple of --rp, one pixel of the 393px-wide phone reference;
+      below is a multiple of --rp, one pixel of the 393px-wide phone reference;
     on tablets --rp is larger so the same column is 56% of the screen, with
     the photo beside it. Nothing here is sized by the screen height: on phones
     it changes as the address bar collapses. Desktop has its own block at the
     end.
 
-    On a phone the photo shows in a band above the words (40 reference px),
+      On a phone the photo shows in a band above the words (40 reference px),
     then the words and the doors, then the wave; the banner, the program
     strip and its proof line together fit an iPhone 15 Safari screen and an
     iPhone 12 mini's (decision 66; a test checks).
@@ -395,12 +395,16 @@ const { cycle, hold, fade, keyframes } = crossfade(slides.length);
     -webkit-tap-highlight-color: transparent;
   }
 
-  .door:hover .door-pill {
-    transform: translateY(-2px);
+  @media (hover: hover) {
+    .door:hover .door-pill {
+      transform: translateY(-2px);
+    }
   }
 
-  .door:hover .chev {
-    transform: translateX(3px);
+  @media (hover: hover) {
+    .door:hover .chev {
+      transform: translateX(3px);
+    }
   }
 
   .door:active .door-pill {
@@ -421,11 +425,13 @@ const { cycle, hold, fade, keyframes } = crossfade(slides.length);
       0 calc(2 * var(--rp)) calc(6 * var(--rp)) rgb(120 0 10 / 0.35);
   }
 
-  .door--help:hover .door-pill {
-    box-shadow:
-      0 0 0 max(1px, calc(1 * var(--rp))) rgb(255 255 255 / 0.3) inset,
-      0 calc(14 * var(--rp)) calc(36 * var(--rp)) rgb(226 32 44 / 0.55),
-      0 calc(2 * var(--rp)) calc(6 * var(--rp)) rgb(120 0 10 / 0.35);
+  @media (hover: hover) {
+    .door--help:hover .door-pill {
+      box-shadow:
+        0 0 0 max(1px, calc(1 * var(--rp))) rgb(255 255 255 / 0.3) inset,
+        0 calc(14 * var(--rp)) calc(36 * var(--rp)) rgb(226 32 44 / 0.55),
+        0 calc(2 * var(--rp)) calc(6 * var(--rp)) rgb(120 0 10 / 0.35);
+    }
   }
 
   /* The other door: a pale ring on the night, a whisper of glass. */
@@ -438,11 +444,13 @@ const { cycle, hold, fade, keyframes } = crossfade(slides.length);
     backdrop-filter: blur(calc(10 * var(--rp)));
   }
 
-  .door--give:hover .door-pill {
-    background: rgb(255 255 255 / 0.14);
-    box-shadow:
-      0 0 0 max(1px, calc(1.5 * var(--rp))) #fff inset,
-      0 0 calc(22 * var(--rp)) rgb(170 110 255 / 0.35);
+  @media (hover: hover) {
+    .door--give:hover .door-pill {
+      background: rgb(255 255 255 / 0.14);
+      box-shadow:
+        0 0 0 max(1px, calc(1.5 * var(--rp))) #fff inset,
+        0 0 calc(22 * var(--rp)) rgb(170 110 255 / 0.35);
+    }
   }
 
   /* The wave at the foot of the banner: it cuts the photo and lands on the
@@ -612,21 +620,25 @@ const { cycle, hold, fade, keyframes } = crossfade(slides.length);
         0 calc(10 * var(--u)) calc(30 * var(--u)) rgb(226 32 44 / 0.42),
         0 calc(2 * var(--u)) calc(6 * var(--u)) rgb(120 0 10 / 0.35);
     }
-    .door--help:hover .door-pill {
-      box-shadow:
-        0 0 0 max(1px, calc(1 * var(--u))) rgb(255 255 255 / 0.3) inset,
-        0 calc(14 * var(--u)) calc(36 * var(--u)) rgb(226 32 44 / 0.55),
-        0 calc(2 * var(--u)) calc(6 * var(--u)) rgb(120 0 10 / 0.35);
+    @media (hover: hover) {
+      .door--help:hover .door-pill {
+        box-shadow:
+          0 0 0 max(1px, calc(1 * var(--u))) rgb(255 255 255 / 0.3) inset,
+          0 calc(14 * var(--u)) calc(36 * var(--u)) rgb(226 32 44 / 0.55),
+          0 calc(2 * var(--u)) calc(6 * var(--u)) rgb(120 0 10 / 0.35);
+      }
     }
     .door--give .door-pill {
       box-shadow:
         0 0 0 max(1px, calc(1.5 * var(--u))) rgb(226 214 255 / 0.85) inset,
         0 0 calc(18 * var(--u)) rgb(170 110 255 / 0.2);
     }
-    .door--give:hover .door-pill {
-      box-shadow:
-        0 0 0 max(1px, calc(1.5 * var(--u))) #fff inset,
-        0 0 calc(22 * var(--u)) rgb(170 110 255 / 0.35);
+    @media (hover: hover) {
+      .door--give:hover .door-pill {
+        box-shadow:
+          0 0 0 max(1px, calc(1.5 * var(--u))) #fff inset,
+          0 0 calc(22 * var(--u)) rgb(170 110 255 / 0.35);
+      }
     }
   }
 

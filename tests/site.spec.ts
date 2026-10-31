@@ -2686,6 +2686,14 @@ test.describe("welcome", () => {
   test("plays on the first visit, ends on Skip, and never returns", async ({ page }) => {
     await page.goto("/");
     const welcome = page.locator("#intro");
+    // A public build (indexing on) has no welcome at all: it is Tamara's, not
+    // the public's (decision 88). The live check runs this against the site
+    // as deployed, so it reads the build's own answer.
+    const robots = await page.locator('meta[name="robots"]').getAttribute("content");
+    if (robots?.startsWith("index")) {
+      await expect(welcome).toHaveCount(0);
+      return;
+    }
     await expect(welcome).toBeVisible();
     await expect(welcome.locator(".slide")).toHaveCount(intro.slides.length);
     await expect(welcome.locator(".slide").first()).toHaveClass(/vis/, { timeout: 5000 });

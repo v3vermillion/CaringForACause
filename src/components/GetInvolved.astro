@@ -324,7 +324,13 @@ const mailto = (subject: string) =>
     --cut: var(--wedge);
     /* A link lands with the diagonal cut under the bar, on the lilac
        (decision 71). */
-    scroll-margin-top: calc(var(--header-h) - var(--scroll-pad) - var(--cut) - 0.25rem);
+    scroll-margin-top: calc(
+      var(--header-h) - var(--scroll-pad) - var(--cut) - (var(--space-xl) - var(--space-l)) -
+        0.25rem
+    );
+    /* The eyebrow lands a --space-l under the bar, as Programs' does: the
+         extra --space-xl of the section's own top space scrolls under the bar
+         with the cut (decision 88). */
     margin-top: calc(-1 * var(--cut));
     padding-top: calc(var(--space-xl) + var(--cut));
     /* The cut's shape reaches past the section's foot, so the clip's edge
@@ -487,6 +493,10 @@ const mailto = (subject: string) =>
     font: inherit;
     font-family: var(--font-display);
     font-weight: 700;
+    /* A step under the body size on phones: "Sponsor a family" then keeps
+         about 1.2rem clear of its chip's ends on a 320px phone, where the body
+         size left it 0.75rem (decision 88). The rail restores the body size. */
+    font-size: 1rem;
     /* 1.2 like .button, so the chip resolves to exactly its 3rem floor
        instead of overshooting it by the body line-height. */
     line-height: 1.2;
@@ -520,6 +530,7 @@ const mailto = (subject: string) =>
     [role="tab"],
     [role="tab"][aria-selected="true"] {
       padding-inline: 1.225rem;
+      font-size: var(--step-0);
       background: transparent;
       -webkit-backdrop-filter: none;
       backdrop-filter: none;
@@ -527,8 +538,10 @@ const mailto = (subject: string) =>
     }
 
     /* On the rail the pointer gets a quiet wash; the thumb stays the star. */
-    [role="tab"]:not([aria-selected="true"]):hover {
-      background: rgb(96 8 215 / 0.06);
+    @media (hover: hover) {
+      [role="tab"]:not([aria-selected="true"]):hover {
+        background: rgb(96 8 215 / 0.06);
+      }
     }
 
     [role="tab"]:not([aria-selected="true"]):active {
@@ -538,8 +551,10 @@ const mailto = (subject: string) =>
     }
   }
 
-  [role="tab"]:hover {
-    color: var(--purple);
+  @media (hover: hover) {
+    [role="tab"]:hover {
+      color: var(--purple);
+    }
   }
 
   [role="tab"]:not([aria-selected="true"]):active {
@@ -677,7 +692,7 @@ const mailto = (subject: string) =>
 
   /* The button holds its 44px floor where the scale would make it smaller;
      the extra hangs outside its paragraph (a negative block margin, as the
-     season strip's link does), so the panel, and the photo stretched to it,
+       season strip's link does), so the panel, and the photo stretched to it,
      stay the same picture at every desktop width. */
   .panel .action {
     margin-top: calc(var(--space-s) + (3rem - max(44px, 3rem)) / 2);
