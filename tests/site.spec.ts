@@ -2407,6 +2407,11 @@ test.describe("application page", () => {
     await page.locator("#firstName").fill("Jane");
     await page.locator("#lastName").fill("Doe");
     await page.locator("#phone").fill("3175550100");
+    // Filling the phone scrolled the steps' numbers off screen. Bring them
+    // back and let the page stop first: Firefox scrolls a forced tap's target
+    // in smoothly, and the tap could land on whatever was there mid-scroll.
+    await go.nth(3).evaluate((el) => el.scrollIntoView({ block: "center", behavior: "instant" }));
+    await atRest(page);
     await go.nth(3).click({ force: true });
     await atRest(page);
     await expect(page.locator("[data-step=household]")).toBeVisible();
@@ -2784,8 +2789,18 @@ test.describe("program tiles", () => {
     // On failure, say where the ring stopped and where the page went.
     const where = async () =>
       `${(await shown(page)).map((t) => `${t.id}@${Math.round(t.left)}`).join(" ")} (edge ${Math.round(edge)}, hash "${new URL(page.url()).hash}", ${await strip(page).getAttribute("class")})`;
+    // At rest, not just passing the edge: a throw can cross it mid-flight.
+    const restsAtEdge = async () => {
+      const before = await shown(page);
+      await page.waitForTimeout(150);
+      const after = await shown(page);
+      const still =
+        before.length === after.length &&
+        before.every((t, i) => t.id === after[i]!.id && Math.abs(t.left - after[i]!.left) < 0.5);
+      return still ? await atEdge() : undefined;
+    };
     try {
-      await expect.poll(atEdge, { timeout: 12000 }).toBeTruthy();
+      await expect.poll(restsAtEdge, { timeout: 12000 }).toBeTruthy();
     } catch {
       throw new Error(`the ring did not settle on a tile: ${await where()}`);
     }
