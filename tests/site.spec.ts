@@ -2776,7 +2776,14 @@ test.describe("program tiles", () => {
     await drag(page, -120);
     const edge = (await page.locator("#programs-title").boundingBox())!.x;
     const atEdge = async () => (await shown(page)).find((t) => Math.abs(t.left - edge) < 2)?.id;
-    await expect.poll(atEdge, { timeout: 6000 }).toBeTruthy();
+    // On failure, say where the ring stopped and where the page went.
+    const where = async () =>
+      `${(await shown(page)).map((t) => `${t.id}@${Math.round(t.left)}`).join(" ")} (edge ${Math.round(edge)}, hash "${new URL(page.url()).hash}", ${await strip(page).getAttribute("class")})`;
+    try {
+      await expect.poll(atEdge, { timeout: 6000 }).toBeTruthy();
+    } catch {
+      throw new Error(`the ring did not settle on a tile: ${await where()}`);
+    }
     expect(new URL(page.url()).hash).toBe("");
     const target = (await atEdge())!;
     await strip(page).locator(`a[href="#${target}"]`).click();

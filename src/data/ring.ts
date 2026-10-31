@@ -149,7 +149,9 @@ export function ring(list: HTMLElement, options: RingOptions): Ring {
         return;
       }
     } else if (mode === "settle") {
-      const t = Math.min(1, (now - settleStart) / SETTLE_MS);
+      // Clamped both ways: a frame's timestamp can be a hair before the
+      // settle began.
+      const t = Math.min(1, Math.max(0, (now - settleStart) / SETTLE_MS));
       x = settleFrom + (settleTo - settleFrom) * (1 - (1 - t) ** 3);
       if (t >= 1) {
         x = settleTo;
@@ -202,6 +204,7 @@ export function ring(list: HTMLElement, options: RingOptions): Ring {
   const onDown = (event: PointerEvent) => {
     if (event.button !== 0 || pointer !== -1) return;
     pointer = event.pointerId;
+    suppressClick = false; // a new press is a new gesture: its own click counts
     startX = event.clientX;
     startY = event.clientY;
     startRing = x;
@@ -237,8 +240,11 @@ export function ring(list: HTMLElement, options: RingOptions): Ring {
     if (!dragging) return;
     dragging = false;
     list.classList.remove("is-dragging");
-    suppressClick = true; // a drag that ends on a tile does not follow its link
-    window.setTimeout(() => (suppressClick = false), 0);
+    // A drag that ends on a tile does not follow its link. The click comes
+    // after the release, in the same task in Chromium and later in Safari,
+    // so the guard holds for a moment rather than one task.
+    suppressClick = true;
+    window.setTimeout(() => (suppressClick = false), 350);
     const [a, b] = [samples[0], samples[samples.length - 1]];
     velocity = a && b && b[0] - a[0] > 8 ? ((b[1] - a[1]) / (b[0] - a[0])) * 1000 : 0;
     // A phone caps a flick about so; past it, a ring spun for whole seconds
