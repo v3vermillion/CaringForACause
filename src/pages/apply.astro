@@ -1157,7 +1157,10 @@ const followUps = {
   .step > legend {
     display: grid;
     gap: 0.35rem;
-    padding: 0;
+    /* A floated legend escapes the fieldset's top padding, so the eyebrow
+       sat a bare 1.5rem under the card's edge while the Donate card's
+       header stands a section space in. The legend carries the room. */
+    padding: var(--space-s) 0 0;
     float: left;
     width: 100%;
     margin-bottom: var(--space-xs);

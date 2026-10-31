@@ -272,7 +272,9 @@ const year = new Date().getFullYear();
   .brand :global(.wordmark) {
     width: 22rem;
     max-width: 100%;
-    margin-top: -0.5rem;
+    /* The script's ascenders reach the heart's point; a small gap keeps the
+       lit mark's glow off the lettering (it overlapped by 8 to 14px). */
+    margin-top: 0.35rem;
     filter: drop-shadow(0 0 0.5rem rgb(170 110 255 / 0.45));
   }
 
@@ -695,7 +697,7 @@ const year = new Date().getFullYear();
 
     .brand :global(.wordmark) {
       width: 25rem;
-      margin-top: -0.7rem;
+      margin-top: 0.4rem;
     }
 
     .donate {
@@ -874,7 +876,9 @@ const year = new Date().getFullYear();
        reference has it. */
     .brand :global(.wordmark) {
       width: 27.2rem;
-      margin-top: -0.92rem;
+      /* The reference tucks the script under the heart's point, but the lit
+         mark's glow needs air: 0.3rem clear instead of 0.92rem of overlap. */
+      margin-top: 0.3rem;
     }
 
     .donate {
