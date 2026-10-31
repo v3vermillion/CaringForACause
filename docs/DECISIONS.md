@@ -832,6 +832,12 @@ The publish gate's viewport-unit scan read a hashed asset name (`…Zwy0VB.webp`
 
 **Why:** The owner saw the pan as choppy: start, stop, start. Measured, it was: a scroll position lands on whole CSS pixels in Chromium and WebKit at every pixel density, and the pan asks for about two thirds of a pixel per frame, so the strip moved one pixel and then held for two or three frames, 44 of 60 frames still on a 3× phone and 45 of 60 on a desktop. A transform takes fractional pixels and runs on the compositor, so every frame moves. The speed was the owner's call within 5 to 10 percent; 7.5 is the middle, and the eased turns keep it a drift rather than a conveyor.
 
+## 97. The gallery's opener drops its lede
+
+**Decision:** The gallery opens with its label and heading only. The lede ("Easter baskets, toy tables, the diaper pantry, and a holiday dinner, in our own photos") is gone, and the arrows for a mouse sit beside the heading instead of on the lede's baseline. The photos stand about 70px higher on a phone.
+
+**Why:** The owner asked whether it should stay. The heading already says what the section is, and the line only narrated photos directly under it; it named four of fourteen, so it would drift as photos change, and "in our own photos" read as defensive. What had made the heading look unfinished was the missing label and lit rule (decision 94), and those stay.
+
 ## 99. A preview names no address of its own
 
 **Decision:** Only a public build (indexing on) names the site's address. A preview build writes no canonical URL and no `og:url`, gives the link-preview image and the structured data's logo by path (`/og-image.jpg`, `/icon-512.png`), and leaves the structured data's `url` out. `astro.config.mjs` no longer knows the preview host: the site address is `PUBLIC_SITE_URL` or the production domain. The publish gate enforces it: in a preview a canonical URL, an `og:url`, an absolute preview image or a structured-data `url` fails the build, and any page that names a `workers.dev` address fails in every build. The browser tests check the same on the page as served. A public build is unchanged: absolute addresses on the production domain, checked as before.

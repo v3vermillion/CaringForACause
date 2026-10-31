@@ -17,7 +17,6 @@ const show = gallery.length >= 4;
         <header class="head">
           <span class="eyebrow">{gallerySection.eyebrow}</span>
           <h2 id="gallery-title">{gallerySection.heading}</h2>
-          <p class="lede">{gallerySection.lede}</p>
         </header>
         {/* For a mouse, which has no sideways scroll of its own: a photo back
             or forward. Shown where a pointer hovers; hidden without JavaScript,
@@ -281,7 +280,6 @@ const show = gallery.length >= 4;
     display: none;
     flex: none;
     gap: 0.5rem;
-    padding-bottom: 0.2rem; /* on the lede's baseline */
   }
 
   @media (hover: hover) and (min-width: 36rem) {
@@ -348,10 +346,6 @@ const show = gallery.length >= 4;
   .arrow:focus-visible {
     outline: max(2px, 0.1875rem) solid var(--focus);
     outline-offset: 0.125rem;
-  }
-
-  .head .lede {
-    margin-top: var(--space-s);
   }
 
   /* The strip bleeds to the screen's edges and dissolves there, as the
