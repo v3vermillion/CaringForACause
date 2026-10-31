@@ -102,7 +102,7 @@ Claude Code gets a headless Chromium of its own through `.mcp.json` (Playwright 
 
 ## Live site check
 
-`.github/workflows/live-check.yml` runs after every merge to `main`, every Monday, and on demand (Actions → Live site check → Run workflow). After a merge, it first waits until the live page's `version` tag matches the merged commit, which confirms Cloudflare published it. It runs the full browser suite against the live URL, checks status codes, security headers, caching, and compression (`scripts/check-live-headers.sh`), and records Lighthouse scores. Results are posted to an open issue labeled `live-check`. A failing run also opens an issue labeled `live-check-failing`, assigned to the repository's owner (later failures are added to it), and the next passing run closes it. To change the URL it checks, set a repository variable named `SITE_URL`.
+`.github/workflows/live-check.yml` runs after every merge to `main`, every Monday, and on demand (Actions → Live site check → Run workflow). After a merge, it first waits until the live page's `version` tag matches the merged commit, which confirms Cloudflare published it. It runs the full browser suite against the live URL, checks status codes, security headers, caching, and compression (`scripts/check-live-headers.sh`), and records Lighthouse scores. Results are posted to an open issue labeled `live-check`. A failing run also opens an issue labeled `live-check-failing`, assigned to the repository's owner (later failures are added to it), and the next passing run closes it. It checks `https://caringforacauseindy.org`, the only address the Worker answers on (decision 103); to check another, set a repository variable named `SITE_URL`.
 
 ## Project structure
 

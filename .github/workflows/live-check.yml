@@ -28,7 +28,7 @@ concurrency:
   cancel-in-progress: false
 
 env:
-  SITE_URL: ${{ inputs.url || vars.SITE_URL || 'https://caring-for-a-cause.forgetraining.workers.dev' }}
+  SITE_URL: ${{ inputs.url || vars.SITE_URL || 'https://caringforacauseindy.org' }}
 
 jobs:
   check:
