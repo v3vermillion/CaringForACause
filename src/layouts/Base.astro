@@ -53,8 +53,12 @@ const version = (process.env.GITHUB_SHA || process.env.WORKERS_CI_COMMIT_SHA || 
   0,
   7,
 );
-const canonical = new URL(Astro.url.pathname, Astro.site);
-const ogImage = new URL("/og-image.jpg", Astro.site);
+// Only a public build names the site's address (decision 99). A preview names
+// none: no canonical URL or og:url, and the preview image by its path, which
+// a link preview resolves against the link it was given.
+const named = allowIndexing;
+const canonical = named ? new URL(Astro.url.pathname, Astro.site).href : null;
+const ogImage = named ? new URL("/og-image.jpg", Astro.site).href : "/og-image.jpg";
 
 // Structured data so search engines recognize a registered nonprofit.
 const structuredData = {
@@ -62,8 +66,8 @@ const structuredData = {
   "@type": "NGO",
   name: claim(facts.legalName),
   alternateName: org.shortName,
-  url: Astro.site?.href,
-  logo: new URL("/icon-512.png", Astro.site).href,
+  url: named ? Astro.site?.href : undefined,
+  logo: named ? new URL("/icon-512.png", Astro.site).href : "/icon-512.png",
   description: org.mission,
   foundingDate: String(claim(facts.founded)),
   founder: { "@type": "Person", name: claim(facts.founder) },
@@ -120,7 +124,7 @@ const structuredData = {
       <link rel="preload" href={serifItalicFont} as="font" type="font/woff2" crossorigin />
     )}
     <link rel="preload" href={footerFont} as="font" type="font/woff2" crossorigin />
-    {!notFound && <link rel="canonical" href={canonical} />}
+    {!notFound && canonical && <link rel="canonical" href={canonical} />}
     <meta name="theme-color" content="#1b0f2e" />
     <meta name="version" content={version} />
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
@@ -131,7 +135,7 @@ const structuredData = {
     <meta property="og:site_name" content={org.name} />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
-    {!notFound && <meta property="og:url" content={canonical} />}
+    {!notFound && canonical && <meta property="og:url" content={canonical} />}
     <meta property="og:image" content={ogImage} />
     <meta property="og:image:type" content="image/jpeg" />
     <meta property="og:image:width" content="1200" />
