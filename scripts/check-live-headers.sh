@@ -50,7 +50,14 @@ echo; echo "#### Link preview"
 og=$(grep -oE '<meta property="og:image" content="[^"]+"' <<<"$html" | sed -E 's/.*content="([^"]+)"/\1/')
 if [ -z "$og" ]; then bad "og:image tag missing"
 else
-  [ "${og%%/og-image*}" = "$base" ] && pass "og:image points at this host: \`$og\`" || bad "og:image points elsewhere: \`$og\`"
+  # A preview gives the image by path, resolved against the link it was
+  # given; a public build names it on its own host (decision 99).
+  if [ "${og#/}" != "$og" ] && [ "${og#//}" = "$og" ]; then
+    pass "og:image is a path on this host: \`$og\`"
+    og="$base$og"
+  else
+    [ "${og%%/og-image*}" = "$base" ] && pass "og:image points at this host: \`$og\`" || bad "og:image points elsewhere: \`$og\`"
+  fi
   ogtype=$(curl -sI "$og" | tr -d '\r' | grep -i '^content-type:' | cut -d' ' -f2-)
   [ "$(curl -s -o /dev/null -w '%{http_code}' "$og")" = 200 ] && pass "preview image loads (\`$ogtype\`)" || bad "preview image does not load"
 fi
