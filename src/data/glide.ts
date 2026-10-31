@@ -6,11 +6,8 @@
  * stepped. The scroll position stays where the pan began and takes the pan's
  * place the moment anything else moves the strip.
  *
- * Two shapes:
- * - end to end and back (the gallery): easing into each end and resting there;
- * - a loop (the program tiles): the strip holds three copies of its items
- *   and runs one way for ever, and a reader's own swipe loops too, because a
- *   settled strip is moved, invisibly, back into its middle copy.
+ * It runs end to end and back, easing into each end and resting there (the
+ * gallery). The program tiles' loop is a ring of its own (src/data/ring.ts).
  *
  * A hand wins at once: a mouse resting on the strip or focus inside it holds
  * the pan; a wheel, a touch, a press, a key or any outside scroll hands the
@@ -30,8 +27,6 @@ export type GlideOptions = {
   turn?: number;
   /** Milliseconds a hand on the strip holds it after letting go. */
   hold?: number;
-  /** Loop: the width of one copy of the items, in pixels. */
-  period?: () => number;
   /** Told where the pan shows the strip, each frame it moves. */
   onPan?: (x: number) => void;
 };
@@ -49,8 +44,7 @@ const smooth = (t: number) => {
 };
 
 export function glide(strip: HTMLElement, options: GlideOptions): Glide {
-  const { speed, ramp = 260, turn = 1600, hold = 8000, period, onPan } = options;
-  const loop = Boolean(period);
+  const { speed, ramp = 260, turn = 1600, hold = 8000, onPan } = options;
   const still = !matchMedia("(prefers-reduced-motion: no-preference)").matches;
 
   let dir = 1;
@@ -72,19 +66,6 @@ export function glide(strip: HTMLElement, options: GlideOptions): Glide {
 
   const span = () => strip.scrollWidth - strip.clientWidth;
 
-  // A loop keeps its position inside the middle copy, where a copy of every
-  // item lies on both sides; the three copies look the same at every point.
-  // A pixel of give at each edge: the scroll position is whole pixels and
-  // the copy's width is not, so a strip resting exactly on the middle copy
-  // can read a fraction short of it.
-  const wrap = (x: number) => {
-    const p = period!();
-    if (p <= 0) return x;
-    while (x < p - 1) x += p;
-    while (x >= 2 * p - 1) x -= p;
-    return x;
-  };
-
   const tick = (now: number) => {
     if (!running) return;
     const dt = Math.min((now - last) / 1000, 0.1);
@@ -96,24 +77,17 @@ export function glide(strip: HTMLElement, options: GlideOptions): Glide {
     }
     if (now >= turnUntil) {
       const fromStart = Math.abs(pos - origin);
-      if (loop) {
-        const v = speed * Math.max(0.1, smooth((fromStart + ramp * 0.25) / ramp));
-        pos = wrap(pos + v * dt);
-        // Once wrapped, the run is under way: the ramp is not taken again.
-        if (Math.abs(pos - origin) < fromStart) origin = pos - ramp;
+      const end = span();
+      const toEnd = dir > 0 ? end - pos : pos;
+      const v = speed * Math.max(0.1, smooth(Math.min(toEnd, fromStart + ramp * 0.25) / ramp));
+      const next = pos + dir * v * dt;
+      if ((dir > 0 && next >= end - 0.5) || (dir < 0 && next <= 0.5)) {
+        pos = dir > 0 ? end : 0;
+        origin = pos;
+        dir = -dir;
+        turnUntil = now + turn;
       } else {
-        const end = span();
-        const toEnd = dir > 0 ? end - pos : pos;
-        const v = speed * Math.max(0.1, smooth(Math.min(toEnd, fromStart + ramp * 0.25) / ramp));
-        const next = pos + dir * v * dt;
-        if ((dir > 0 && next >= end - 0.5) || (dir < 0 && next <= 0.5)) {
-          pos = dir > 0 ? end : 0;
-          origin = pos;
-          dir = -dir;
-          turnUntil = now + turn;
-        } else {
-          pos = next;
-        }
+        pos = next;
       }
       strip.style.setProperty("--pan", String(pos - base));
       onPan?.(pos);
@@ -171,28 +145,7 @@ export function glide(strip: HTMLElement, options: GlideOptions): Glide {
     settle();
   };
 
-  // A loop's own swipes loop too: once a scroll has settled, the strip is
-  // moved into its middle copy, which looks the same, so the reader can keep
-  // going either way. Only when settled, so momentum is never cut short.
-  let loopTimer = 0;
-  const recentre = () => {
-    if (!loop || running) return;
-    const x = strip.scrollLeft;
-    const into = wrap(x);
-    if (Math.abs(into - x) > 1) {
-      // The snap would fight the jump; it is the same point in another copy.
-      const snapped = strip.classList.contains("is-panning");
-      strip.classList.add("is-panning");
-      strip.scrollLeft = into;
-      if (!snapped && !handed) strip.classList.remove("is-panning");
-    }
-  };
-  const onScroll = () => {
-    settle();
-    if (!loop) return;
-    clearTimeout(loopTimer);
-    loopTimer = window.setTimeout(recentre, 180);
-  };
+  const onScroll = () => settle();
 
   const onEnter = (event: PointerEvent) => {
     if (event.pointerType !== "mouse") return;
@@ -239,7 +192,6 @@ export function glide(strip: HTMLElement, options: GlideOptions): Glide {
       gone = true;
       clearTimeout(handTimer);
       clearTimeout(settleTimer);
-      clearTimeout(loopTimer);
       observer.disconnect();
       strip.removeEventListener("pointerenter", onEnter);
       strip.removeEventListener("pointerleave", onLeave);
