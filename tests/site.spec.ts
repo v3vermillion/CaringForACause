@@ -2088,6 +2088,9 @@ test.describe("honest buttons", () => {
       } else {
         await expect(button).toHaveAttribute("href", /^mailto:/);
         await expect(button).toHaveText(tab.action.fallbackLabel);
+        // The subject says what the sender wants, not the panel's heading.
+        const href = (await button.getAttribute("href"))!;
+        expect(new URL(href).searchParams.get("subject")).toBe(tab.action.emailSubject);
       }
     }
   });
