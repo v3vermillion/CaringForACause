@@ -49,7 +49,7 @@ Everything the site needs to carry for Caring for a Cause, where each piece live
 - Founder story and the "Do More" feature video (2023 Jiffy Lube award)
 - Local TV news segment on the diaper program
 - Toys for Tots partnership
-- Real event photos (9 today; more from her Facebook page pending)
+- Real event photos (9 today, every one she has published in public; more only from her own files or Facebook albums, decision 89)
 - Impact numbers (families served, diapers given): **only if she provides them**
 
 ### Contact and legal

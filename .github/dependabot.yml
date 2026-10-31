@@ -34,7 +34,8 @@ updates:
       # that version; a fixed release still comes through.
       - dependency-name: prettier-plugin-astro
         versions: ["1.0.1"]
-    labels: [dependencies]
+    # No label: the repository has none named for it, and Dependabot warned
+    # on every pull request that it could not add one (decision 88).
     commit-message:
       prefix: "chore(deps)"
 
@@ -47,6 +48,5 @@ updates:
     groups:
       github-actions:
         patterns: ["*"]
-    labels: [dependencies]
     commit-message:
       prefix: "chore(ci)"

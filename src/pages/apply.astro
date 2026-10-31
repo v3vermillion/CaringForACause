@@ -35,7 +35,6 @@ const followUps = {
  * The aside's heading asks the question, so its body is the home card's line
  * without the question it opens with.
  */
-const sideBody = getHelp.talk.body;
 ---
 
 <Base title={`Apply for help | ${org.shortName}`} description={description}>
@@ -484,7 +483,6 @@ const sideBody = getHelp.talk.body;
 
           <aside class="side surface surface--night on-dark" aria-labelledby="side-title">
             <h2 id="side-title">{getHelp.talk.heading}</h2>
-            <p>{sideBody}</p>
             <a class="button button--glass" href={phone.href}>
               Call {phone.display}
             </a>
@@ -994,7 +992,7 @@ const sideBody = getHelp.talk.body;
   }
 
   /* The form needs JavaScript. It is shown from the first paint when the
-     page's head has marked the document (html.js, src/layouts/Base.astro),
+       page's head has marked the document (html.js, src/layouts/Base.astro),
      rather than revealed by this page's script: that arrived after the
      first paint on a slow machine and moved the footer (a layout shift of
      0.21). Without JavaScript the noscript note above stands in for it. */
@@ -1063,8 +1061,10 @@ const sideBody = getHelp.talk.body;
     cursor: default;
   }
 
-  .progress-go:not([aria-disabled="true"]):hover .step-title {
-    text-decoration: underline;
+  @media (hover: hover) {
+    .progress-go:not([aria-disabled="true"]):hover .step-title {
+      text-decoration: underline;
+    }
   }
 
   /* The dots speak the chip language: ahead is paper with the boundary
@@ -1104,9 +1104,11 @@ const sideBody = getHelp.talk.body;
   }
 
   /* A tappable step answers the pointer and the press at its dot. */
-  .progress-go:not([aria-disabled="true"]):hover .num {
-    background-color: var(--purple-deep);
-    color: #fff;
+  @media (hover: hover) {
+    .progress-go:not([aria-disabled="true"]):hover .num {
+      background-color: var(--purple-deep);
+      color: #fff;
+    }
   }
 
   .progress-go:not([aria-disabled="true"]):active .num {
@@ -1325,8 +1327,16 @@ const sideBody = getHelp.talk.body;
       background-color 150ms ease;
   }
 
-  .need:has(.need-card:hover) {
-    box-shadow: inset 0 0 0 max(2px, 0.125rem) var(--purple);
+  @media (hover: hover) {
+    .need:has(.need-card:hover) {
+      box-shadow: inset 0 0 0 max(2px, 0.125rem) var(--purple);
+    }
+  }
+
+  /* A press answers on touch, where there is no hover: the ring deepens. */
+  .need:has(.need-card:active) {
+    box-shadow: inset 0 0 0 max(2px, 0.125rem) var(--purple-deep);
+    transition-duration: 60ms;
   }
 
   .need:has(input[name="need"]:checked) {
@@ -1454,8 +1464,14 @@ const sideBody = getHelp.talk.body;
     cursor: pointer;
   }
 
-  .review :global(.review-change:hover) {
+  .review :global(.review-change:active) {
     color: var(--purple-deep);
+  }
+
+  @media (hover: hover) {
+    .review :global(.review-change:hover) {
+      color: var(--purple-deep);
+    }
   }
 
   .review :global(.review-list) {

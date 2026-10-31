@@ -173,6 +173,45 @@ export const seasonalBanner = {
   action: { label: "Sponsor a family", href: "/#sponsor" },
 };
 
+/**
+ * The welcome shown once, on the first visit to the home page (decision 87).
+ * It is addressed to Tamara, so it is built only while the site is a private
+ * preview: a public build (PUBLIC_ALLOW_INDEXING=true) leaves it out
+ * (decision 88).
+ * The words are the owner's gift message, not claims about the organization;
+ * "thousands" agrees with the press-reported 5,000 families (decision 79).
+ * Each slide holds its lines on screen for `hold` milliseconds, counted after
+ * the slide has faded in: a short slide holds less than a long one. Lines
+ * within a slide arrive one after another. `accent` sets a line in the
+ * banner's lavender italic; `large` sets a one-line slide in the biggest size.
+ */
+export const intro = {
+  /** localStorage key; once set, the welcome never plays again in that browser. */
+  storageKey: "cfac-welcome-seen",
+  label: "A thank-you message",
+  skip: "Skip",
+  slides: [
+    { hold: 1400, large: true, lines: [{ text: "Tamara," }] },
+    {
+      hold: 3200,
+      lines: [
+        { text: "year after year," },
+        { text: "you\u2019ve shown up for thousands of people in need" },
+      ],
+    },
+    {
+      hold: 2600,
+      lines: [{ text: "So this time," }, { text: "we wanted to show up for you", accent: true }],
+    },
+    {
+      hold: 3200,
+      lines: [{ text: "On behalf of every family whose holiday you made brighter..." }],
+    },
+    { hold: 2000, large: true, lines: [{ text: "thank you!", accent: true }] },
+    { hold: 2400, lines: [{ text: "Enjoy your new site :)" }] },
+  ],
+};
+
 export const hero = {
   /** Her own tagline, from her website. Its one home is the banner's eyebrow, above the headline. */
   tagline: "Together we can.",
@@ -290,10 +329,13 @@ export const getHelp = {
     "Households with children and seniors are our focus, but anyone who is struggling right now can apply.",
   howToApply:
     "Prefer to talk to someone first? Call or email us, and we'll send you an application.",
-  /** The aside beside the application form on desktop: the same offer under its own heading. */
+  /**
+   * The aside beside the application form (under it on phones): the call
+   * and email buttons under a short heading. The offer itself is said once,
+   * in the opener's words above the form (decision 88).
+   */
   talk: {
     heading: "Prefer to talk?",
-    body: "Call or email us, and we'll send you an application.",
   },
   action: { label: "Start an application", href: "/apply/" },
 };
@@ -313,7 +355,7 @@ export const applyPage = {
   intro:
     "Four short steps. Your answers go straight to us by email, and we'll follow up from there.",
   privacy:
-    "This website stores nothing. Your application goes to us by email, and we use it only to arrange help for you.",
+    "Nothing you enter is stored on this website. Your application goes to us by email, and we use it only to arrange help for you.",
   /** Shown when JavaScript is off, since the form can't send without it. */
   noScript: "This form needs JavaScript to send.",
   steps: [
@@ -435,7 +477,9 @@ export const programs: Program[] = [
     photo: {
       file: "diaper-drive.jpg",
       alt: "A volunteer hands a large pack of diapers to a family with a young child",
-      focus: "center 34%",
+      /* High enough that the phone's wide crop (3 by 2) keeps the volunteer's
+         whole face; the square desktop crop loses floor, not people. */
+      focus: "center 20%",
     },
     link: { label: "Partner on the Diaper Drive", href: "/#partner" },
     active: true,
@@ -541,8 +585,8 @@ export const getInvolved = {
       label: "Sponsor a family",
       heading: "Sponsor a family for the holidays",
       body: [
-        "As a sponsor, you give a family gifts from their wish list, a holiday meal, or both.",
-        "Sponsor one family or several, for one holiday or all three.",
+        "Sponsors provide a family with gifts from their wish list, a holiday meal, or both.",
+        "You may sponsor one family or several, for a single holiday or for all three.",
       ],
       action: {
         label: "Sign up to sponsor",

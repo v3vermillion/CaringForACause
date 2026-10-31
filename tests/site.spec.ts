@@ -1,8 +1,9 @@
 import AxeBuilder from "@axe-core/playwright";
-import { expect, test } from "@playwright/test";
+import { expect, test as base } from "@playwright/test";
 import { claim } from "../src/data/facts";
 import {
   about,
+  intro,
   facts,
   getInvolved,
   hero,
@@ -12,6 +13,25 @@ import {
   programStrip,
   seasonalBanner,
 } from "../src/data/site";
+
+// Every test starts as a returning visitor: the welcome plays once per browser
+// (decision 87) and would cover the page. It is set by a script that runs
+// before the page's own, so it needs no storage state (which would have to run
+// script to be written, and hangs Firefox where JavaScript is off); the
+// welcome's own tests turn it off.
+const test = base.extend<{ returning: boolean }>({
+  returning: [true, { option: true }],
+  context: async ({ context, returning }, use) => {
+    if (returning) {
+      await context.addInitScript((key) => {
+        try {
+          localStorage.setItem(key, "1");
+        } catch {}
+      }, intro.storageKey);
+    }
+    await use(context);
+  },
+});
 
 // The content the tests expect comes from the content file, so a content
 // edit (a confirmed year, a renamed section) never needs a test edit. The
@@ -2656,5 +2676,36 @@ test.describe("search and sharing", () => {
       "href",
       hero.doors.getHelp.href,
     );
+  });
+});
+
+test.describe("welcome", () => {
+  // These start as a first-time visitor; every other test starts as a returning one.
+  test.use({ returning: false });
+
+  test("plays on the first visit, ends on Skip, and never returns", async ({ page }) => {
+    await page.goto("/");
+    const welcome = page.locator("#intro");
+    // A public build (indexing on) has no welcome at all: it is Tamara's, not
+    // the public's (decision 88). The live check runs this against the site
+    // as deployed, so it reads the build's own answer.
+    const robots = await page.locator('meta[name="robots"]').getAttribute("content");
+    if (robots?.startsWith("index")) {
+      await expect(welcome).toHaveCount(0);
+      return;
+    }
+    await expect(welcome).toBeVisible();
+    await expect(welcome.locator(".slide")).toHaveCount(intro.slides.length);
+    await expect(welcome.locator(".slide").first()).toHaveClass(/vis/, { timeout: 5000 });
+    await page.getByRole("button", { name: intro.skip }).click();
+    await expect(welcome).toHaveCount(0, { timeout: 3000 });
+    expect(await page.evaluate((k) => localStorage.getItem(k), intro.storageKey)).toBe("1");
+    await page.reload();
+    await expect(page.locator("#intro")).toHaveCount(0);
+  });
+
+  test("other pages never show it", async ({ page }) => {
+    await page.goto("/donate");
+    await expect(page.locator("#intro")).toHaveCount(0);
   });
 });

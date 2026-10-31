@@ -59,7 +59,7 @@ import { seasonalBanner } from "../data/site";
   /* Sized in the class's reference pixel (--sp) so every phone and every
      tablet shows the same strip; on desktop --sp is the 1280px reference's. */
   /* Phones and tablets stack the ask and its link, centred like the icons and
-     the proof line above them, so the band ends on the axis it began on;
+       the proof line above them, so the band ends on the axis it began on;
      desktop spreads them to the column's edges. */
   .inner {
     display: flex;
@@ -91,8 +91,10 @@ import { seasonalBanner } from "../data/site";
     color: #d9c8ff;
   }
 
-  .inner :global(.arrow-link:hover) {
-    color: #fff;
+  @media (hover: hover) {
+    .inner :global(.arrow-link:hover) {
+      color: #fff;
+    }
   }
 
   /* The dot leads the first line: inline where the ask is centred and may

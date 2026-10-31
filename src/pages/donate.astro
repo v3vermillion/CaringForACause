@@ -307,13 +307,17 @@ const mailtoAny = mailLink(
     transition-duration: 60ms;
   }
 
-  .program:hover .name {
-    text-decoration: underline;
-    text-underline-offset: 0.15em;
+  @media (hover: hover) {
+    .program:hover .name {
+      text-decoration: underline;
+      text-underline-offset: 0.15em;
+    }
   }
 
-  .program:hover .icon {
-    filter: brightness(1.15) drop-shadow(0 0 0.5rem rgb(160 108 255 / 0.6));
+  @media (hover: hover) {
+    .program:hover .icon {
+      filter: brightness(1.15) drop-shadow(0 0 0.5rem rgb(160 108 255 / 0.6));
+    }
   }
 
   /* One scale for the four icons, as the strip sizes them: the backpack (81

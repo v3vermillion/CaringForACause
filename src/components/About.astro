@@ -119,7 +119,13 @@ const nextGround = gallery.length >= 4 ? "lilac" : "footer";
   #about {
     /* A link lands with the wave that opens the section under the bar, on
        its night (decision 71). */
-    scroll-margin-top: calc(var(--header-h) - var(--scroll-pad) - var(--wave-h) - 0.25rem);
+    scroll-margin-top: calc(
+      var(--header-h) - var(--scroll-pad) - var(--wave-h) - (var(--space-xl) - var(--space-l)) -
+        0.25rem
+    );
+    /* The eyebrow lands a --space-l under the bar, as Programs' does: the
+       extra --space-xl of the section's top space scrolls under the bar with
+       the wave (decision 88). */
     /* The portrait's pool of light bleeds past the column. Hidden for
        browsers without clip (Safari 15), clip where it exists (see the
        banner's note). */

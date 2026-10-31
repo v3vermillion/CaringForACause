@@ -117,8 +117,12 @@ if (!poster) {
      the pale inner rim inside the white ring, the crimson glow. */
   .yt-play {
     position: absolute;
-    inset: 0;
-    margin: auto;
+    /* In the frame's bottom-left corner, not its centre: the centre of a
+         photo of people is a face (the stylist's on the haircut cover, hers on
+         the story's), and a disc over a face reads as a badge on the person.
+         The corner is clear on both covers at every width, since the frame
+         keeps its 16:9 (decision 88). */
+    inset: auto auto 1rem 1rem;
     width: 4.5rem;
     height: 4.5rem;
     border-radius: 50%;
@@ -143,8 +147,10 @@ if (!poster) {
     border-color: transparent transparent transparent #fff;
   }
 
-  .yt-link:hover .yt-play {
-    filter: brightness(1.08);
+  @media (hover: hover) {
+    .yt-link:hover .yt-play {
+      filter: brightness(1.08);
+    }
   }
 
   .yt-link:active .yt-play {
@@ -162,7 +168,7 @@ if (!poster) {
   }
 
   /* While the player loads: the play button becomes a ring that turns
-     above the frame (under reduced motion the global rule holds it still),
+       above the frame (under reduced motion the global rule holds it still),
      and the link under the frame takes no taps. */
   .yt.is-loading .yt-link {
     pointer-events: none;
