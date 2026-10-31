@@ -24,7 +24,7 @@ const show = gallery.length >= 4;
             which is what moves the strip. */}
         <div class="arrows" data-arrows hidden>
           <button type="button" class="arrow" data-arrow="-1" aria-label="Previous photos">
-            <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" focusable="false">
+            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
               <path
                 d="M15 5l-7 7 7 7"
                 fill="none"
@@ -36,7 +36,7 @@ const show = gallery.length >= 4;
             </svg>
           </button>
           <button type="button" class="arrow" data-arrow="1" aria-label="Next photos">
-            <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" focusable="false">
+            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
               <path
                 d="M9 5l7 7-7 7"
                 fill="none"
@@ -273,12 +273,17 @@ const show = gallery.length >= 4;
 
   /* A glass chip, as the tabs and the checklist pill: the ring token on
      the lilac, the purple chevron. */
+  /* Sized in rem, no pixel floor: the arrows show only to a pointer that
+     hovers, and the page-composition guard wants every box to scale with
+     its class. At the smallest desktop-class window they are 34px, over
+     the 24px a pointer target needs. */
   .arrow {
     display: grid;
     place-items: center;
-    width: max(44px, 2.75rem);
-    height: max(44px, 2.75rem);
+    width: 3rem;
+    height: 3rem;
     padding: 0;
+    font: inherit;
     border: 0;
     border-radius: 50%;
     background: rgb(255 255 255 / 0.72);
@@ -298,6 +303,11 @@ const show = gallery.length >= 4;
       background: var(--purple);
       color: #fff;
     }
+  }
+
+  .arrow svg {
+    width: 1.5rem;
+    height: 1.5rem;
   }
 
   .arrow:active {
