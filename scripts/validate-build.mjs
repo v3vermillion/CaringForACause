@@ -187,7 +187,7 @@ export function validateBuild(dist, { allowIndexing }) {
     const ogImage = meta('meta[property="og:image"]');
     let origin = "";
     if (/\.workers\.dev\b/.test(raw))
-      fail(`${name}: names a workers.dev address, which is the preview host, not the site's`);
+      fail(`${name}: names a workers.dev address, which is not the site's`);
     if (!allowIndexing) {
       if (canonical) fail(`${name}: a preview must not name a canonical URL ("${canonical}")`);
       if (meta('meta[property="og:url"]')) fail(`${name}: a preview must not name og:url`);

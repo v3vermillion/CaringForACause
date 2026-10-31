@@ -177,62 +177,26 @@ const applyHref = links.familyApplication ?? getHelp.action.href;
 </section>
 
 <script>
-  import { glide, type Glide } from "../data/glide.ts";
+  import { ring, type Ring } from "../data/ring.ts";
 
-  // Below desktop the tiles are a sideways strip, and it runs as a loop
-  // (decision 101): two copies of the four tiles, one either side, so the
-  // strip pans one way for ever at the gallery's pace and a reader's swipe
-  // never reaches an end. The copies are for the eye only: hidden from
-  // assistive technology, out of the tab order and inert, so the four real
-  // links are read and reached once. On desktop the four sit in a grid that
-  // fits, and nothing is copied or moved.
+  // Below desktop the four tiles are a ring (decision 102): after the last
+  // comes the first again, either way, with no end to reach; it pans on its
+  // own at the gallery's pace and turns under a finger with momentum. On
+  // desktop the four sit in a grid that fits and nothing moves. Without
+  // JavaScript the tiles are the plain sideways strip.
   const list = document.querySelector<HTMLElement>("[data-tiles]");
   if (list) {
     const strip = list;
-    const originals = Array.from(strip.children) as HTMLElement[];
-    const scrolls = matchMedia("(max-width: 55.99rem)");
-    let pan: Glide | null = null;
-    let copies: HTMLElement[] = [];
-
-    const copy = () =>
-      originals.map((li) => {
-        const clone = li.cloneNode(true) as HTMLElement;
-        clone.dataset.copy = "";
-        clone.setAttribute("aria-hidden", "true");
-        clone.inert = true;
-        clone.querySelectorAll("a").forEach((a) => a.setAttribute("tabindex", "-1"));
-        // The same files as the real tiles', so already fetched: loaded at
-        // once, a copy never slides into view still blank.
-        clone.querySelectorAll("img").forEach((img) => (img.loading = "eager"));
-        return clone;
-      });
-    // One copy's width: from the first tile of the copy before to the first
-    // real tile.
-    const period = () =>
-      originals[0]!.getBoundingClientRect().left - copies[0]!.getBoundingClientRect().left;
-
-    const setup = () => {
-      const before = copy();
-      const after = copy();
-      copies = [...before, ...after];
-      strip.prepend(...before);
-      strip.append(...after);
-      // The view the strip had at rest: the real tiles first.
-      strip.scrollLeft = period();
-      pan = glide(strip, { speed: 107.5, period });
+    const below = matchMedia("(max-width: 55.99rem)");
+    let current: Ring | null = null;
+    const build = () => {
+      current?.destroy();
+      current = below.matches ? ring(strip, { speed: 107.5 }) : null;
     };
-    const teardown = () => {
-      pan?.destroy();
-      pan = null;
-      copies.forEach((clone) => clone.remove());
-      copies = [];
-      strip.scrollLeft = 0;
-    };
-    if (scrolls.matches) setup();
-    scrolls.addEventListener("change", () => {
-      teardown();
-      if (scrolls.matches) setup();
-    });
+    build();
+    // Crossing into or out of desktop builds or takes down the ring; within
+    // it, the ring measures itself again whenever the strip changes size.
+    below.addEventListener("change", build);
   }
 </script>
 
@@ -339,9 +303,6 @@ const applyHref = links.familyApplication ?? getHelp.action.href;
     scroll-snap-type: x mandatory;
     scroll-padding-inline: var(--gutter);
     scrollbar-width: none;
-    /* The loop sets its own scroll position when it adds the copies; the
-       browser must not shift it again to keep a tile in place. */
-    overflow-anchor: none;
     -webkit-overflow-scrolling: touch;
     -webkit-mask-image: linear-gradient(
       90deg,
@@ -363,16 +324,33 @@ const applyHref = links.familyApplication ?? getHelp.action.href;
     display: none;
   }
 
-  /* The loop's glide (decision 101): while it drives the strip no snap pulls
-     at it, and every tile moves by the same transform, in fractions of a
-     pixel. */
-  .tiles ul.is-panning {
+  /* The ring (decision 102): the strip no longer scrolls; each tile is
+     placed on the ring by a transform. The page keeps its upright scroll
+     under a finger, and a sideways drag turns the ring. */
+  .tiles ul.is-ring {
+    position: relative;
+    overflow: hidden;
     scroll-snap-type: none;
+    touch-action: pan-y;
+    cursor: grab;
   }
 
-  .tiles ul.is-gliding > li {
-    transform: translate3d(calc(var(--pan, 0) * -1px), 0, 0);
+  .tiles ul.is-ring.is-dragging {
+    cursor: grabbing;
+  }
+
+  .tiles ul.is-ring > li {
     will-change: transform;
+  }
+
+  .tiles ul.is-ring .tile {
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-user-drag: none;
+  }
+
+  .tiles ul.is-ring :global(img) {
+    -webkit-user-drag: none;
   }
 
   .tiles li {
