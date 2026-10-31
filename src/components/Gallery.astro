@@ -72,20 +72,28 @@ const show = gallery.length >= 4;
   // wherever it was left eight seconds after the last touch. The strip's
   // snap is off only while the pan drives it, so a swipe still settles on a
   // photo. Readers who ask for less motion get the still strip.
+  //
+  // The pan moves the photos with a transform, not the scroll position: a
+  // scroll position lands on whole pixels, and at a walking pace a frame
+  // asks for well under one, so a scrolled pan stepped a pixel and held for
+  // two or three frames, which read as a stutter. A transform takes
+  // fractions of a pixel on the compositor. The scroll position stays where
+  // the pan began and takes the pan's place the moment anything else moves
+  // the strip (decision 96).
   const strip = document.querySelector<HTMLElement>("[data-moments]");
   /** Set by the pan below: the strip has been handed to a reader. */
   let handOver = () => {};
+  /** Told where the pan shows the strip, each frame it moves. */
+  let onPan = (_x: number) => {};
   if (strip && matchMedia("(prefers-reduced-motion: no-preference)").matches) {
-    const SPEED = 40; // px/s on the open run
+    const SPEED = 43; // px/s on the open run
     const RAMP = 260; // px over which a run eases in and out
     const TURN = 1600; // ms held at each end
     const HAND = 8000; // ms a hand on the strip holds it after letting go
     let dir = 1;
     let origin = 0; // where the current run began: the ramp is measured from it
-    // The pan's own position, carried between frames: at a walking pace a
-    // frame moves a fraction of a pixel, and scrollLeft gives back whole ones.
-    let pos = 0;
-    let placed = 0; // where the last frame left the strip, as the strip reports it
+    let pos = 0; // where the pan shows the strip, in the scroll's terms
+    let base = 0; // the scroll position the pan began from; the transform is pos - base
     let running = false;
     let frame = 0;
     let last = 0;
@@ -108,9 +116,9 @@ const show = gallery.length >= 4;
       if (!running) return;
       const dt = Math.min((now - last) / 1000, 0.1);
       last = now;
-      // Moved since the last frame by something other than the pan (a
-      // scrollbar, a script, find in page): that is a hand too.
-      if (Math.abs(strip.scrollLeft - placed) > 1) {
+      // Scrolled by something other than the pan (a scrollbar, a script,
+      // find in page): that is a hand too.
+      if (Math.abs(strip.scrollLeft - base) > 1) {
         hand();
         return;
       }
@@ -123,16 +131,14 @@ const show = gallery.length >= 4;
         const next = x + dir * v * dt;
         if ((dir > 0 && next >= end - 0.5) || (dir < 0 && next <= 0.5)) {
           pos = dir > 0 ? end : 0;
-          strip.scrollLeft = pos;
-          placed = strip.scrollLeft;
           origin = pos;
           dir = -dir;
           turnUntil = now + TURN;
         } else {
           pos = next;
-          strip.scrollLeft = pos;
-          placed = strip.scrollLeft;
         }
+        strip.style.setProperty("--pan", String(pos - base));
+        onPan(pos);
       }
       frame = requestAnimationFrame(tick);
     };
@@ -141,16 +147,27 @@ const show = gallery.length >= 4;
       if (performance.now() < handUntil) return;
       if (span() <= 0) return;
       running = true;
-      pos = strip.scrollLeft;
-      placed = pos;
+      base = strip.scrollLeft;
+      pos = base;
       origin = pos;
-      strip.classList.add("is-panning");
+      strip.style.setProperty("--pan", "0");
+      strip.classList.add("is-panning", "is-gliding");
       last = performance.now();
       frame = requestAnimationFrame(tick);
     };
+    // The pan hands its place to the scroll position. Whatever scrolled the
+    // strip meanwhile was aiming at the photos where the transform showed
+    // them, so its scroll is kept and the transform added to it: nothing on
+    // screen moves by more than the half pixel the scroll rounds to.
     const stop = () => {
+      if (!running) return;
       running = false;
       cancelAnimationFrame(frame);
+      const scrolled = strip.scrollLeft;
+      const offset = pos - base;
+      strip.classList.remove("is-gliding");
+      strip.style.removeProperty("--pan");
+      strip.scrollLeft = scrolled + offset;
     };
     // The strip is handed over: the pan stops, its snap comes back once the
     // gesture has settled (the snap would otherwise pull the strip to the
@@ -221,22 +238,24 @@ const show = gallery.length >= 4;
         ? first.getBoundingClientRect().width + parseFloat(getComputedStyle(strip).gap)
         : 320;
     };
-    const ends = () => {
+    const ends = (x = strip.scrollLeft) => {
       const end = strip.scrollWidth - strip.clientWidth;
       for (const button of buttons) {
         const dir = Number(button.dataset.arrow);
-        const at = dir < 0 ? strip.scrollLeft <= 1 : strip.scrollLeft >= end - 1;
-        button.setAttribute("aria-disabled", String(at));
+        const at = String(dir < 0 ? x <= 1 : x >= end - 1);
+        if (button.getAttribute("aria-disabled") !== at) button.setAttribute("aria-disabled", at);
       }
     };
+    onPan = ends;
     for (const button of buttons)
       button.addEventListener("click", () => {
-        if (button.getAttribute("aria-disabled") === "true") return;
         handOver();
+        ends();
+        if (button.getAttribute("aria-disabled") === "true") return;
         strip.scrollBy({ left: Number(button.dataset.arrow) * step(), behavior: "smooth" });
       });
-    strip.addEventListener("scroll", ends, { passive: true });
-    window.addEventListener("resize", ends);
+    strip.addEventListener("scroll", () => ends(), { passive: true });
+    window.addEventListener("resize", () => ends());
     ends();
   }
 </script>
@@ -367,6 +386,13 @@ const show = gallery.length >= 4;
   /* While the pan drives the strip, no snap pulls at it. */
   .moments.is-panning {
     scroll-snap-type: none;
+  }
+
+  /* The pan's glide: every photo moves by the same transform, on the
+     compositor, in fractions of a pixel (decision 96). */
+  .moments.is-gliding > li {
+    transform: translate3d(calc(var(--pan, 0) * -1px), 0, 0);
+    will-change: transform;
   }
 
   .moments::-webkit-scrollbar {

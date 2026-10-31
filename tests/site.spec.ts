@@ -2587,8 +2587,13 @@ test.describe("gallery", () => {
       .locator("[data-moments]")
       .evaluate((el) => el.scrollIntoView({ block: "center", behavior: "instant" }));
   };
+  // Where the strip shows its photos: the scroll position plus the pan's
+  // glide, which moves them by a transform (decision 96).
   const left = (page: import("@playwright/test").Page) =>
-    page.locator("[data-moments]").evaluate((el) => el.scrollLeft);
+    page.locator("[data-moments]").evaluate((el) => {
+      const first = el.querySelector("li")!.getBoundingClientRect().left;
+      return el.getBoundingClientRect().left + parseFloat(getComputedStyle(el).paddingLeft) - first;
+    });
 
   test("opens like every other section, a --space-l under the wave", async ({ page }) => {
     await page.goto("/");
@@ -2649,11 +2654,38 @@ test.describe("gallery", () => {
     await expect(page.locator("[data-arrows]")).toBeHidden();
   });
 
+  test("glides in fractions of a pixel, never stepping and holding", async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: "no-preference" });
+    await bring(page);
+    await expect.poll(() => left(page), { timeout: 8000 }).toBeGreaterThan(40);
+    // Sixty frames on the open run: the photos move on every one of them.
+    const moves = await page
+      .locator("[data-moments] li")
+      .first()
+      .evaluate(
+        (li) =>
+          new Promise<number[]>((resolve) => {
+            const xs: number[] = [];
+            const next = () => {
+              xs.push(li.getBoundingClientRect().left);
+              if (xs.length < 61) requestAnimationFrame(next);
+              else resolve(xs.slice(1).map((x, i) => xs[i]! - x));
+            };
+            requestAnimationFrame(next);
+          }),
+      );
+    const still = moves.filter((d) => Math.abs(d) < 0.01).length;
+    expect(still, `frames without movement: ${moves.join(" ")}`).toBeLessThan(4);
+  });
+
   test("stays still for a reader who asks for less motion", async ({ page }) => {
     await page.emulateMedia({ reducedMotion: "reduce" });
     await bring(page);
     await page.waitForTimeout(2500);
-    expect(await left(page)).toBe(0);
+    // At rest: no scroll, and no glide (box geometry rounds by a hair at
+    // fractional pixel densities).
+    expect(await page.locator("[data-moments]").evaluate((el) => el.scrollLeft)).toBe(0);
+    expect(Math.abs(await left(page))).toBeLessThan(0.5);
     await expect(page.locator("[data-moments]")).not.toHaveClass(/is-panning/);
   });
 });
