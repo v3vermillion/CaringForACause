@@ -495,10 +495,16 @@ export const programs: Program[] = [
     label: "Hygiene and school supplies",
     summary: "Hygiene items and school supplies for girls and boys in our community.",
     forWhom: "Students from families who need help getting ready for school.",
-    /* No photo of this program exists yet (decision 90): the basket that
-       stood here was an Easter food basket, now in the gallery. The strip's
-       backpack stands in until Tamara sends a care-package photo. */
-    icon: "school",
+    /* No photo of this program exists in any album (decision 90). The
+       basket is an Easter food basket, but a real basket being carried to a
+       family is nearer the row's subject than an icon, which read as a hole
+       beside three photos (the owner's call). A care-package photo from
+       Tamara replaces it. */
+    photo: {
+      file: "care-basket.jpg",
+      alt: "A woman carries a wrapped basket of food and care items to a family",
+      focus: "center 28%",
+    },
     checklist: {
       title: "See what we're collecting",
       groups: [
@@ -727,11 +733,6 @@ export const gallery: Photo[] = [
     file: "face-paint-tiger.jpg",
     alt: "A child with half his face painted as a tiger at a community event",
     focus: "center 30%",
-  },
-  {
-    file: "care-basket.jpg",
-    alt: "A woman carries a wrapped Easter food basket",
-    focus: "center 28%",
   },
   {
     file: "toy-tables-little-ones.jpg",
