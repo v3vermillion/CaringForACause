@@ -324,15 +324,14 @@ const mailto = (subject: string) =>
     --cut: var(--wedge);
     /* A link lands with the diagonal cut under the bar, on the lilac
        (decision 71). */
-    scroll-margin-top: calc(
-      var(--header-h) - var(--scroll-pad) - var(--cut) - (var(--space-xl) - var(--space-l)) -
-        0.25rem
-    );
-    /* The eyebrow lands a --space-l under the bar, as Programs' does: the
-         extra --space-xl of the section's own top space scrolls under the bar
-         with the cut (decision 88). */
+    scroll-margin-top: calc(var(--header-h) - var(--scroll-pad) - var(--cut) - 0.25rem);
+    /* The eyebrow sits a --space-l under the cut's low corner, as Programs'
+       sits under its wave: the shaped edge is the section's opening, so the
+       head takes the head-to-content distance, not the full section space
+       (decision 93). A link lands with the cut under the bar and the eyebrow
+       a --space-l below it (decision 71). */
     margin-top: calc(-1 * var(--cut));
-    padding-top: calc(var(--space-xl) + var(--cut));
+    padding-top: calc(var(--space-l) + var(--cut));
     /* The cut's shape reaches past the section's foot, so the clip's edge
        is not antialiased on the same fraction of a pixel as the section
        below, where the two edges met with a sliver of paper between them
@@ -342,7 +341,7 @@ const mailto = (subject: string) =>
        a seven-point delta on the lilac, invisible at arm's length), with
        the rose breath the other grounds carry at the opposite corner. */
     background:
-      radial-gradient(48rem 26rem at 100% 0, rgb(177 135 255 / 0.5), transparent 70%),
+      radial-gradient(48rem 26rem at 100% 0, rgb(177 135 255 / 0.62), transparent 70%),
       radial-gradient(30rem 18rem at 0 100%, rgb(255 90 134 / 0.1), transparent 70%), var(--lilac);
   }
 
