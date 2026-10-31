@@ -10,6 +10,9 @@ import { applyPage, facts, getHelp, links, org } from "../data/site";
 const phone = show(facts.phone);
 const email = show(facts.email);
 const mailto = `mailto:${email}?subject=${encodeURIComponent(applyPage.emailSubject)}`;
+// Asking for an application, not sending one: the subject the home page's
+// "Call or email us" uses too (decision 106).
+const requestMailto = `mailto:${email}?subject=${encodeURIComponent(getHelp.requestSubject)}`;
 const description = `Apply for holiday meals and gifts, monthly diapers, school supplies, or a free haircut in ${claim(facts.serviceArea)}. Anyone struggling right now can apply.`;
 
 const steps = applyPage.steps;
@@ -94,7 +97,7 @@ const followUps = {
             <noscript>
               <p class="noscript">
                 {applyPage.noScript} Call <a href={phone.href}>{phone.display}</a> or email{" "}
-                <a href={mailto}>{email}</a>, and we'll send you an application.
+                <a href={requestMailto}>{email}</a>, and we'll send you an application.
               </p>
             </noscript>
 

@@ -52,7 +52,7 @@ const mailto = (subject: string) =>
            nothing below the card moves. -->
       <div class="stage" data-stage>
         {tabs.map((tab) => {
-          const href = tab.action.href ?? mailto(tab.heading);
+          const href = tab.action.href ?? mailto(tab.action.emailSubject);
           const label = tab.action.href ? tab.action.label : tab.action.fallbackLabel;
           const external = href.startsWith("http");
           return (

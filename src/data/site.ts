@@ -83,8 +83,11 @@ export type InvolvementTab = {
    * When `href` is null, the button emails us and shows `fallbackLabel`. A
    * button says what it does: no label promises a form or payment page that
    * isn't there yet (decision 35). Setting the link in `links` flips the label.
+   * `emailSubject` is that email's subject, in the sender's words: what lands
+   * in her inbox says what the person wants, not the panel's heading
+   * ("Partner with us" read as an invitation from them; decision 106).
    */
-  action: { label: string; href: string | null; fallbackLabel: string };
+  action: { label: string; href: string | null; fallbackLabel: string; emailSubject: string };
   photo?: Photo;
 };
 
@@ -185,7 +188,8 @@ export const seasonalBanner = {
  * preview: a public build (PUBLIC_ALLOW_INDEXING=true) leaves it out
  * (decision 88).
  * The words are the owner's gift message, not claims about the organization;
- * "thousands" agrees with the press-reported 5,000 families (decision 79).
+ * "thousands" agrees with the press-reported count of over 5,000 families
+ * (decision 79), which About also says as "thousands" (decision 92).
  * Each slide holds its lines on screen for `hold` milliseconds, counted after
  * the slide has faded in: a short slide holds less than a long one. Lines
  * within a slide arrive one after another. `accent` sets a line in the
@@ -335,6 +339,8 @@ export const getHelp = {
     "Households with children and seniors are our focus, but anyone who is struggling right now can apply.",
   howToApply:
     "Prefer to talk to someone first? Call or email us, and we'll send you an application.",
+  /** The subject of an email that asks for an application. */
+  requestSubject: "Application request",
   /**
    * The aside beside the application form (under it on phones): the call
    * and email buttons under a short heading. The offer itself is said once,
@@ -573,7 +579,9 @@ export const programs: Program[] = [
       poster: "stylist-haircut.jpg",
       posterFocus: "center 27%",
     },
-    link: { label: "Volunteer at a haircut event", href: "/#partner" },
+    // To the Partner panel, which is where barbers, stylists, makeup artists
+    // and face painters are asked; "Volunteer" opened a panel named Partner.
+    link: { label: "Offer your skills at a haircut event", href: "/#partner" },
     active: true,
   },
   {
@@ -602,6 +610,7 @@ export const getInvolved = {
         label: "Sign up to sponsor",
         href: links.sponsorSignup,
         fallbackLabel: "Email us to sponsor",
+        emailSubject: "Sponsoring a family for the holidays",
       },
       photo: {
         file: "gift-boy.jpg",
@@ -613,12 +622,17 @@ export const getInvolved = {
     {
       id: "donate",
       label: "Donate",
-      heading: "Donate money or items",
+      heading: "Make a donation",
       /** The short version: /donate is the destination, so this says one thing and hands off. */
       body: [
         "Give once or monthly. Your donation helps provide holiday meals, gifts, diapers, and school supplies for local families.",
       ],
-      action: { label: "Donate", href: "/donate/", fallbackLabel: "Donate" },
+      action: {
+        label: "Donate",
+        href: "/donate/",
+        fallbackLabel: "Donate",
+        emailSubject: donatePage.emailSubject,
+      },
       /* What a gift turns into: a Thanksgiving basket in the cart, turkey and
          sides, no faces. The panel's copy names holiday meals first. */
       photo: {
@@ -639,6 +653,7 @@ export const getInvolved = {
         label: "Fill out the volunteer form",
         href: links.volunteerForm,
         fallbackLabel: "Email us to volunteer",
+        emailSubject: "Volunteering",
       },
       photo: {
         file: "volunteer-face-painting.jpg",
@@ -658,6 +673,7 @@ export const getInvolved = {
         label: "Contact us about partnering",
         href: null,
         fallbackLabel: "Email us to partner",
+        emailSubject: "Partnership inquiry",
       },
       photo: {
         file: "stylist-haircut.jpg",
@@ -672,12 +688,15 @@ export const about = {
   eyebrow: "About",
   heading: `Meet ${claim(facts.founder)}`,
   body: [
-    `${claim(facts.founder).split(" ")[0]} founded ${org.shortName} in ${claim(facts.founded)} to support families in ${claim(facts.serviceArea)} who are facing financial hardship. Year after year since then, she and her volunteers have helped more than ${claim(facts.familiesHelped).toLocaleString("en-US")} families.`,
-    // The count is the press-reported running total (decision 79); "she and
-    // her volunteers" is the organization, which is volunteer-run (decision 92).
-    // Her website's "Our Team" and "Our History": part-time volunteers
-    // committed to helping others; grown thanks to the community's helping hands.
-    "Her part-time volunteers are committed to helping others, and the organization has grown thanks to the helping hands of this community.",
+    `${claim(facts.founder).split(" ")[0]} founded ${org.shortName} in ${claim(facts.founded)} to support families in ${claim(facts.serviceArea)} who are facing financial hardship. Year after year since then, she and her volunteers have helped thousands of families.`,
+    // "Thousands", not the press-reported 5,000 (decision 79): that count is
+    // from 2023 and the owner believes the true one is well above it, so the
+    // page claims only what the record supports (decision 92). "She and her
+    // volunteers" is the organization, which is volunteer-run.
+    // Her website's "Our History": grown thanks to the community's helping
+    // hands. (Her volunteers, "committed to helping others", are the
+    // Volunteer panel's words; said here too, the page said it twice.)
+    "The organization has grown thanks to the helping hands of this community.",
   ],
   /** A still from her "Do More" feature, cropped to leave out the program's caption. */
   portrait: {

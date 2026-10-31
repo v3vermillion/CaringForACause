@@ -9,7 +9,7 @@ import YouTubeLite from "./YouTubeLite.astro";
 
 const active = programs.filter((p) => p.active);
 const phone = show(facts.phone);
-const applyEmail = `mailto:${show(facts.email)}?subject=${encodeURIComponent("Application request")}`;
+const applyEmail = `mailto:${show(facts.email)}?subject=${encodeURIComponent(getHelp.requestSubject)}`;
 const applyHref = links.familyApplication ?? getHelp.action.href;
 ---
 
