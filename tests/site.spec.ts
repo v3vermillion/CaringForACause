@@ -2235,6 +2235,53 @@ test.describe("application page", () => {
     await expect(page.locator("[data-step=you]")).toBeVisible();
   });
 
+  test("a county outside the list is named in a Please-specify box that opens under the picker", async ({
+    page,
+  }) => {
+    await page.goto("/apply");
+    await page.locator("#firstName").fill("Jane");
+    await page.locator("#lastName").fill("Doe");
+    await page.locator("#phone").fill("3175550100");
+    await pressAndSettle(page, "[data-next]");
+    await expect(page.locator("[data-step=household]")).toBeVisible();
+    const box = page.locator("#countyOther");
+    await expect(box).toBeHidden();
+    await page.locator("#street").fill("1 Main St");
+    await page.locator("#city").fill("Tipton");
+    await page.locator("#zip").fill("46072");
+    // The step, not the card: the card's button row changes with the way in.
+    const sheet = page.locator("[data-step=household]");
+    const closedHeight = (await sheet.boundingBox())!.height;
+    await page.locator("#county").selectOption("Other");
+    await expect(box).toBeVisible();
+    await expect(box).toBeFocused();
+    await expect(page.locator("label[for=countyOther]")).toHaveText("Please specify");
+    // The card grows for the box and no other field moves sideways.
+    expect((await sheet.boundingBox())!.height).toBeGreaterThan(closedHeight + 40);
+    // The name is required while the box is open.
+    await pressAndSettle(page, "[data-next]");
+    await expect(box).toHaveAttribute("aria-invalid", "true");
+    await expect(page.locator("[data-step=household]")).toBeVisible();
+    // Up to ten children can be counted.
+    await expect(page.locator("#childCount option")).toHaveCount(11);
+    await expect(page.locator("#childCount option").last()).toHaveText("10 or more");
+    await box.fill("Tipton County");
+    await pressAndSettle(page, "[data-next]");
+    await page.locator("input[name=need][data-toggle=haircut]").check();
+    await pressAndSettle(page, "[data-next]");
+    await expect(page.locator("[data-review]")).toContainText("Tipton County)");
+    await expect(page.locator("[data-review]")).not.toContainText("County County");
+    // Picking a listed county again closes the box, and what was typed is not sent.
+    await page.locator("[data-review] [data-goto='1']").click();
+    await page.locator("#county").selectOption("Hamilton");
+    await expect(box).toBeHidden();
+    // The card returns to the height it had before the box opened.
+    expect(Math.abs((await sheet.boundingBox())!.height - closedHeight)).toBeLessThan(1);
+    await pressAndSettle(page, "[data-next]");
+    await expect(page.locator("[data-review]")).toContainText("Hamilton County");
+    await expect(page.locator("[data-review]")).not.toContainText("Tipton County");
+  });
+
   test("walks through four steps, validates each, and sends by email", async ({ page }) => {
     // The longest test in the suite: four steps, every field, the review and
     // the send. Since the form redesign (decision 62) it takes 20 to 28 s on
@@ -2528,6 +2575,118 @@ test.describe("without JavaScript", () => {
     const bar = await centre(".site-header .brand");
     expect(Math.abs((await centre(".site-header .inline-nav")) - bar)).toBeLessThan(2);
     expect(Math.abs((await centre(".site-header .donate")) - bar)).toBeLessThan(2);
+  });
+});
+
+test.describe("gallery", () => {
+  // The strip pans on its own while it is on screen; a hand on it wins; a
+  // reader who asks for less motion gets the still strip (decision 94).
+  const bring = async (page: import("@playwright/test").Page) => {
+    await page.goto("/");
+    await page
+      .locator("[data-moments]")
+      .evaluate((el) => el.scrollIntoView({ block: "center", behavior: "instant" }));
+  };
+  // Where the strip shows its photos: the scroll position plus the pan's
+  // glide, which moves them by a transform (decision 96).
+  const left = (page: import("@playwright/test").Page) =>
+    page.locator("[data-moments]").evaluate((el) => {
+      const first = el.querySelector("li")!.getBoundingClientRect().left;
+      return el.getBoundingClientRect().left + parseFloat(getComputedStyle(el).paddingLeft) - first;
+    });
+
+  test("opens like every other section, a --space-l under the wave", async ({ page }) => {
+    await page.goto("/");
+    const section = page.locator("#gallery");
+    await expect(section.locator(".eyebrow")).toHaveText("Gallery");
+    await expect(section.locator(".lede")).toBeVisible();
+    const gap = await page.evaluate(() => {
+      const wave = document.querySelector("#about .wave-bottom")!.getBoundingClientRect();
+      const eyebrow = document.querySelector("#gallery .eyebrow")!.getBoundingClientRect();
+      const programs = document.querySelector("#programs .eyebrow")!.getBoundingClientRect();
+      const programsWave = document.querySelector("#programs .wave-in")!.getBoundingClientRect();
+      return [eyebrow.top - wave.bottom, programs.top - programsWave.bottom];
+    });
+    expect(Math.abs(gap[0]! - gap[1]!)).toBeLessThan(2);
+  });
+
+  test("pans on its own once on screen, and stops under a pointer", async ({ page, hasTouch }) => {
+    await page.emulateMedia({ reducedMotion: "no-preference" });
+    await bring(page);
+    const strip = page.locator("[data-moments]");
+    await expect.poll(() => left(page), { timeout: 8000 }).toBeGreaterThan(8);
+    await expect(strip).toHaveClass(/is-panning/);
+    test.skip(hasTouch, "a pointer resting on the strip is a mouse gesture");
+    await strip.hover();
+    const held = await left(page);
+    await page.waitForTimeout(700);
+    expect(Math.abs((await left(page)) - held)).toBeLessThan(1);
+    // Taking the wheel hands the strip over, and its snap comes back.
+    await page.mouse.wheel(0, 0);
+    await strip.dispatchEvent("wheel");
+    await expect(strip).not.toHaveClass(/is-panning/);
+  });
+
+  test("a mouse gets arrows that step the strip a photo at a time", async ({ page, hasTouch }) => {
+    test.skip(hasTouch, "a finger swipes the strip; the arrows are for a pointer that hovers");
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    await bring(page);
+    const arrows = page.locator("[data-arrows]");
+    await expect(arrows).toBeVisible();
+    const prev = page.locator("[data-arrow='-1']");
+    const next = page.locator("[data-arrow='1']");
+    await expect(prev).toHaveAttribute("aria-disabled", "true");
+    await expect(next).toHaveAttribute("aria-disabled", "false");
+    const step = await page
+      .locator("[data-moments] li")
+      .first()
+      .evaluate((el) => el.getBoundingClientRect().width + 16);
+    await next.click();
+    await expect.poll(() => left(page)).toBeGreaterThan(step - 2);
+    await expect(prev).toHaveAttribute("aria-disabled", "false");
+    await prev.click();
+    await expect.poll(() => left(page)).toBeLessThan(1);
+  });
+
+  test("a finger gets no arrows", async ({ page, hasTouch }) => {
+    test.skip(!hasTouch, "the arrows show for a pointer that hovers");
+    await bring(page);
+    await expect(page.locator("[data-arrows]")).toBeHidden();
+  });
+
+  test("glides in fractions of a pixel, never stepping and holding", async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: "no-preference" });
+    await bring(page);
+    await expect.poll(() => left(page), { timeout: 8000 }).toBeGreaterThan(40);
+    // Sixty frames on the open run: the photos move on every one of them.
+    const moves = await page
+      .locator("[data-moments] li")
+      .first()
+      .evaluate(
+        (li) =>
+          new Promise<number[]>((resolve) => {
+            const xs: number[] = [];
+            const next = () => {
+              xs.push(li.getBoundingClientRect().left);
+              if (xs.length < 61) requestAnimationFrame(next);
+              else resolve(xs.slice(1).map((x, i) => xs[i]! - x));
+            };
+            requestAnimationFrame(next);
+          }),
+      );
+    const still = moves.filter((d) => Math.abs(d) < 0.01).length;
+    expect(still, `frames without movement: ${moves.join(" ")}`).toBeLessThan(4);
+  });
+
+  test("stays still for a reader who asks for less motion", async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    await bring(page);
+    await page.waitForTimeout(2500);
+    // At rest: no scroll, and no glide (box geometry rounds by a hair at
+    // fractional pixel densities).
+    expect(await page.locator("[data-moments]").evaluate((el) => el.scrollLeft)).toBe(0);
+    expect(Math.abs(await left(page))).toBeLessThan(0.5);
+    await expect(page.locator("[data-moments]")).not.toHaveClass(/is-panning/);
   });
 });
 

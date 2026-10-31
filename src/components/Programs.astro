@@ -230,6 +230,17 @@ const applyHref = links.familyApplication ?? getHelp.action.href;
     fill: var(--purple);
   }
 
+  /* On a phone the 15rem mark, pinned 2rem past the edge, showed one lobe
+     and read as a cut-off circle; drawn smaller and inside the screen, both
+     lobes and the notch show, and it reads as her heart (decision 95). */
+  @media (max-width: 35.99rem) {
+    #programs :global(.watermark) {
+      top: -0.5rem;
+      right: 0.75rem;
+      width: 11.5rem;
+    }
+  }
+
   #programs :global(.wave-in) {
     position: absolute;
     top: 0;

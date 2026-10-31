@@ -117,12 +117,14 @@ if (!poster) {
      the pale inner rim inside the white ring, the crimson glow. */
   .yt-play {
     position: absolute;
-    /* In the frame's bottom-left corner, not its centre: the centre of a
+    /* In the frame's bottom-right corner, not its centre: the centre of a
          photo of people is a face (the stylist's on the haircut cover, hers on
-         the story's), and a disc over a face reads as a badge on the person.
-         The corner is clear on both covers at every width, since the frame
-         keeps its 16:9 (decision 88). */
-    inset: auto auto 1rem 1rem;
+         the story's), and a disc over a face reads as a badge on the person
+         (decision 88). Bottom-left, where it first went, is clear only on
+         desktop: in the phone and tablet frames it sat on the seated man's
+         face. Bottom-right is chairs and floor on the haircut cover and
+         wall on the story's, at every width (decision 95). */
+    inset: auto 1rem 1rem auto;
     width: 4.5rem;
     height: 4.5rem;
     border-radius: 50%;
